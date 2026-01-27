@@ -1,0 +1,60 @@
+services:
+  # Database Service
+  cafe-db:
+    image: postgres:16-alpine
+    container_name: cafe-db-dev
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: your_password_here
+      POSTGRES_DB: cafe_ordering_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - cafe-db-data:/var/lib/postgresql/data
+    networks:
+      - cafe-network
+
+  # Backend API
+  api:
+    container_name: coffee-api-dev
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - cafe-db
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=cafe-db;Port=5432;Database=cafe_ordering_db;Username=admin;Password=your_password_here
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api:/app # Thường Dockerfile WORKDIR là /app hoặc /src, khớp với Dockerfile của bạn
+    networks:
+      - cafe-network
+
+  # Frontend Client (Vue)
+  client:
+    container_name: coffee-client-dev
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules # Anonymous volume để tránh xung đột node_modules giữa máy host và container
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_API_URL=http://localhost:8080
+    networks:
+      - cafe-network
+
+# Khai báo các tài nguyên dùng chung
+volumes:
+  cafe-db-data:
+
+networks:
+  cafe-network:
+    driver: bridge

@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+# Cài đặt libc6-compat để hỗ trợ các thư viện phụ thuộc vào glibc (rất quan trọng cho Alpine)
+# Cài đặt python3 và build-base nếu có các thư viện cần compile native (như sass, canvas...)
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+# Enable corepack
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy lock file và package.json
+COPY package.json pnpm-lock.yaml ./
+
+# Bước quan trọng: Ép pnpm cài đặt các gói cho đúng nền tảng linux-musl
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+
+EXPOSE 5173
+
+CMD ["pnpm", "dev", "--host"]

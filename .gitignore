@@ -1,0 +1,54 @@
+# ==========================================
+# 1. IDE & Editors (Hệ điều hành và Công cụ)
+# ==========================================
+.idea/
+.vscode/
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# 2. .NET / C# (Backend API)
+# ==========================================
+# Các thư mục chứa file binary sau khi build
+[Aa]pi/bin/
+[Aa]pi/obj/
+
+# File cấu hình riêng tư (Chỉ giữ lại appsettings.json làm mẫu)
+[Aa]pi/appsettings.Development.json
+[Aa]pi/appsettings.Local.json
+
+# Các file publish/logs của .NET
+publish/
+*.log
+*.user
+*.suo
+
+# ==========================================
+# 3. Node.js / Frontend (Client)
+# ==========================================
+# Thư mục thư viện (Rất nặng, không nên push)
+node_modules/
+[Cc]lient/node_modules/
+
+# Thư mục chứa code sau khi build frontend
+[Cc]lient/dist/
+[Cc]lient/build/
+
+# Các file debug và log của package manager
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# File môi trường (Chứa API key, mật khẩu...)
+.env
+.env.local
+.env.*.local
+
+# ==========================================
+# 4. Docker (Tùy chọn)
+# ==========================================
+# Nếu bạn không muốn lưu các file dữ liệu database sinh ra bởi Docker
+.docker/data/
