@@ -3,8 +3,10 @@ import { computed, ref, watch } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
+import { useToast } from 'primevue/usetoast'
 import { checkUsername, register } from '@/services/auth.service'
 
+const toast = useToast()
 const submitError = ref('')
 let validateTimer
 let emailCheckTimer
@@ -68,14 +70,27 @@ const canSubmit = computed(() => meta.value.valid)
 const onSubmit = handleSubmit(async (formValues) => {
   submitError.value = ''
   try {
-    await register({
+   const response = await register({
       email: formValues.email.trim(),
       password: formValues.password,
       firstname: formValues.firstName.trim(),
       lastname: formValues.lastName.trim(),
     })
+    toast.add({
+      severity: 'success',
+      summary: 'Registration successful',
+      detail: response?.message ?? 'Your account has been created successfully.',
+      life: 3000,
+    })
   } catch (err) {
-    submitError.value = err?.response?.data?.message || 'Register failed. Please try again.'
+    const errorMessage = err?.response?.data?.message || 'Register failed. Please try again.'
+    submitError.value = errorMessage
+    toast.add({
+      severity: 'error',
+      summary: 'Registration failed',
+      detail: errorMessage,
+      life: 3000,
+    })
   }
 })
 
@@ -114,6 +129,7 @@ watch(email, (value) => {
 </script>
 
 <template>
+  <prime-toast />
   <section
     class="tw:relative tw:flex tw:min-h-screen tw:items-center tw:justify-center tw:overflow-hidden tw:bg-slate-950 tw:text-slate-100"
   >
@@ -127,7 +143,7 @@ watch(email, (value) => {
     <div class="tw:relative tw:z-10 tw:w-full tw:max-w-2xl tw:p-6 lg:tw:p-12">
       <prime-form
         class="auth-card tw:w-full tw:rounded-3xl tw:border tw:border-white/10 tw:bg-slate-900/80 tw:p-8 tw:text-slate-100 tw:shadow-2xl tw:backdrop-blur"
-        @submit.prevent="onSubmit"
+        @submit="onSubmit"
       >
         <div class="tw:space-y-3">
           <span class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-emerald-300"
@@ -140,11 +156,12 @@ watch(email, (value) => {
         </div>
 
         <div class="tw:mt-8 tw:grid tw:grid-cols-1 tw:gap-5 md:tw:grid-cols-2">
-          <label class="tw:block">
+          <label for="firstName" class="tw:block">
             <span class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-slate-400"
               >First name</span
             >
             <prime-input-text
+              id="firstName"
               type="text"
               placeholder="Ava"
               v-model="firstName"
@@ -162,11 +179,12 @@ watch(email, (value) => {
               {{ errors.firstName }}
             </prime-message>
           </label>
-          <label class="tw:block">
+          <label for="lastName" class="tw:block">
             <span class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-slate-400"
               >Last name</span
             >
             <prime-input-text
+              id="lastName"
               type="text"
               placeholder="Nguyen"
               v-model="lastName"
@@ -187,11 +205,12 @@ watch(email, (value) => {
         </div>
 
         <div class="tw:mt-5 tw:space-y-5">
-          <label class="tw:block">
+          <label for="email" class="tw:block">
             <span class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-slate-400"
               >Email</span
             >
             <prime-input-text
+              id="email"
               type="email"
               placeholder="team@cafe.com"
               v-model="email"
@@ -209,17 +228,32 @@ watch(email, (value) => {
               {{ errors.email }}
             </prime-message>
           </label>
-          <label class="tw:block">
+          <label for="password" class="tw:block">
             <span class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-slate-400"
               >Password</span
             >
-            <prime-input-text
+            <prime-password
+              id="password"
               type="password"
+
               placeholder="Create a strong password"
               v-model="password"
               v-bind="passwordAttrs"
               class="tw:mt-3 tw:w-full tw:rounded-xl tw:border tw:border-white/10 tw:bg-slate-950/60 tw:px-4 tw:py-3 tw:text-sm tw:text-slate-100 tw:placeholder-slate-500 tw:transition focus:tw:border-emerald-400 focus:tw:outline-none focus:tw:ring-2 focus:tw:ring-emerald-300/40"
-            />
+            >
+              <template #header>
+                <div class="font-semibold text-xm mb-4">Reset Password</div>
+              </template>
+              <template #footer>
+                <prime-divider  />
+                <ul class="pl-2 my-0 leading-normal text-sm">
+                  <li>At least one lowercase</li>
+                  <li>At least one uppercase</li>
+                  <li>At least one numeric</li>
+                  <li>Minimum 8 characters</li>
+                </ul>
+              </template>
+            </prime-password>
             <prime-message
               v-if="errors.password"
               severity="error"
@@ -251,11 +285,12 @@ watch(email, (value) => {
               </p>
             </div>
           </label>
-          <label class="tw:block">
+          <label for="confirmPassword" class="tw:block">
             <span class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-slate-400"
               >Confirm password</span
             >
             <prime-input-text
+              id="confirmPassword"
               type="password"
               placeholder="Re-enter your password"
               v-model="confirmPassword"
@@ -275,8 +310,9 @@ watch(email, (value) => {
           </label>
         </div>
 
-        <label class="tw:mt-6 tw:flex tw:items-start tw:gap-3 tw:text-sm tw:text-slate-300">
+        <label for="agree" class="tw:mt-6 tw:flex tw:items-start tw:gap-3 tw:text-sm tw:text-slate-300">
           <input
+            id="agree"
             v-model="agree"
             v-bind="agreeAttrs"
             type="checkbox"

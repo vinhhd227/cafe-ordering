@@ -42,6 +42,8 @@ import AccordionHeader from 'primevue/accordionheader'
 import AccordionContent from 'primevue/accordioncontent'
 import Textarea from 'primevue/textarea'
 import Toast from 'primevue/toast'
+import Password from 'primevue/password';
+import FloatLabel from 'primevue/floatlabel'
 import ToastService from 'primevue/toastservice'
 
 export default {
@@ -114,6 +116,8 @@ export default {
         app.component('prime-accordion-header', AccordionHeader)
         app.component('prime-accordion-content', AccordionContent)
         app.component('prime-textarea', Textarea)
+        app.component('prime-password', Password)
+        app.component('prime-float-label', FloatLabel)
         app.component('prime-toast', Toast)
     },
 }

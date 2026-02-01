@@ -52,10 +52,13 @@ public static class AuthEndpoints
             {
                 return Results.BadRequest("Invalid credentials.");
             }
-
+            
             if (!user.IsActive)
             {
-                return Results.Forbid();
+                return Results.Json(
+                    new { message = "Account is pending activation. Please contact admin." },
+                    statusCode: StatusCodes.Status403Forbidden
+                );
             }
 
             var validPassword = await userManager.CheckPasswordAsync(user, request.Password);
