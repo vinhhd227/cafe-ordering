@@ -1,0 +1,13 @@
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/bin/Debug/net10.0/Api.ServiceDefaults.deps.json
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/bin/Debug/net10.0/Api.ServiceDefaults.dll
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/bin/Debug/net10.0/Api.ServiceDefaults.pdb
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/Api.ServiceDefaults.csproj.AssemblyReference.cache
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/Api.ServiceDefaults.GeneratedMSBuildEditorConfig.editorconfig
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/Api.ServiceDefaults.AssemblyInfoInputs.cache
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/Api.ServiceDefaults.AssemblyInfo.cs
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/Api.ServiceDefaults.csproj.CoreCompileInputs.cache
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/Api.ServiceDefaults.sourcelink.json
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/Api.ServiceDefaults.dll
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/refint/Api.ServiceDefaults.dll
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/Api.ServiceDefaults.pdb
+/Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/ref/Api.ServiceDefaults.dll
