@@ -1,5 +1,6 @@
 import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
+import { definePreset } from '@primeuix/themes'
 // Directives
 import Ripple from 'primevue/ripple'
 import KeyFilter from 'primevue/keyfilter'
@@ -45,7 +46,42 @@ import Toast from 'primevue/toast'
 import Password from 'primevue/password';
 import FloatLabel from 'primevue/floatlabel'
 import ToastService from 'primevue/toastservice'
+import Checkbox from 'primevue/checkbox';
+import CheckboxGroup from 'primevue/checkboxgroup';
 
+// Theme
+const coffeePreset = definePreset(Aura, {
+    semantic: {
+        primary: {
+            50: '#f6ede6',
+            100: '#ecd8c9',
+            200: '#dec2a2',
+            300: '#cfa06b',
+            400: '#bd7b45',
+            500: '#af7341', // PRIMARY
+            600: '#9a6238',
+            700: '#7f512f',
+            800: '#654026',
+            900: '#4b301d',
+        },
+        surface: {
+            0: '#ffffff',
+            50: '#FAF7F2', // nền chính content
+            100: '#F2EDE6', // section xen kẽ
+            200: '#E6DED4', // border / divider
+        },
+        text: {
+            primary: '#2B1D14', // text chính
+            secondary: '#6B5A4D', // text phụ
+            muted: '#8B7A6C',
+            inverse: '#FAF7F2', // text trên nền tối
+        },
+        accent: {
+            500: '#E3A857', // vàng mật ong
+        },
+    },
+    //Your customizations, see the following sections for examples
+})
 export default {
     install(app) {
         app.use(ToastService)
@@ -55,23 +91,6 @@ export default {
                 options: {
                     darkModeSelector: '.app-dark',
                     cssLayer: false,
-                },
-
-                extend: {
-                    semantic: {
-                        primary: {
-                            50: '#f6ede6',
-                            100: '#ecd8c9',
-                            200: '#d9b08f',
-                            300: '#c78956',
-                            400: '#b56f3b',
-                            500: '#af7341', // ✅ PRIMARY
-                            600: '#9a6238',
-                            700: '#7f512f',
-                            800: '#654026',
-                            900: '#4b301d',
-                        },
-                    },
                 },
             },
             ripple: true,
@@ -119,5 +138,7 @@ export default {
         app.component('prime-password', Password)
         app.component('prime-float-label', FloatLabel)
         app.component('prime-toast', Toast)
+        app.component('prime-checkbox', Checkbox)
+        app.component('prime-checkbox-group', CheckboxGroup)
     },
 }

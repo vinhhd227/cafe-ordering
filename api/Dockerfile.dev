@@ -1,15 +1,7 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:10.0
+FROM mcr.microsoft.com/dotnet/sdk:10.0
 
 WORKDIR /src
-
-# copy csproj & restore
-COPY api.csproj ./
-RUN dotnet restore
-
-# copy source
 COPY . .
 
 EXPOSE 8080
-
-# hot reload
-CMD ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:8080"]
+CMD ["dotnet", "watch", "run", "--project", "src/Api.Web/Api.Web.csproj", "--urls", "http://0.0.0.0:8080"]
