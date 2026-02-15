@@ -1,4 +1,6 @@
-﻿using Api.Infrastructure.Data;
+﻿using Api.Core.Entities.Identity;
+using Api.Infrastructure.Data;
+using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 
 namespace Api.Web.Configurations;
@@ -73,7 +75,10 @@ public static class MiddlewareConfig
     {
       logger.LogInformation("Seeding database...");
       var context = services.GetRequiredService<AppDbContext>();
-      await SeedData.InitializeAsync(context);
+      var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+      var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+
+      await SeedData.InitializeAsync(context, userManager, roleManager, logger);
       logger.LogInformation("Database seeded successfully");
     }
     catch (Exception ex)

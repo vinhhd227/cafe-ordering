@@ -1,4 +1,6 @@
-﻿using Api.Infrastructure.Services;
+﻿using Api.Core.Entities.Identity;
+using Api.Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
 
 namespace Api.Infrastructure;
 
@@ -23,6 +25,28 @@ public static class DependencyInjection
       options.UseNpgsql(connectionString);
       options.AddInterceptors(interceptor);
     });
+
+    // === Identity Services ===
+    services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+      {
+        // Password settings
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequiredLength = 8;
+
+        // Lockout settings
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.AllowedForNewUsers = true;
+
+        // User settings
+        options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedEmail = false; // Set true in production
+      })
+      .AddEntityFrameworkStores<AppDbContext>()
+      .AddDefaultTokenProviders();
 
     // === Repositories ===
     services.AddScoped(typeof(IRepositoryBase<>), typeof(EfRepository<>));

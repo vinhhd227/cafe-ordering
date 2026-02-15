@@ -1,9 +1,20 @@
 ﻿using Api.Core.Aggregates.CategoryAggregate;
 using Api.Core.Aggregates.ProductAggregate;
+using Api.Core.Entities.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Api.Infrastructure.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<
+  ApplicationUser,
+  ApplicationRole,
+  int,
+  IdentityUserClaim<int>,
+  ApplicationUserRole,
+  IdentityUserLogin<int>,
+  IdentityRoleClaim<int>,
+  IdentityUserToken<int>>
 {
   private readonly ICurrentUserService? _currentUserService;
 
@@ -14,8 +25,13 @@ public class AppDbContext : DbContext
     _currentUserService = currentUserService;
   }
 
+  // Domain Entities
   public DbSet<Product> Products => Set<Product>();
   public DbSet<Category> Categories => Set<Category>();
+
+  // Identity Entities (exposed for querying)
+  public DbSet<ApplicationUser> ApplicationUsers => Set<ApplicationUser>();
+  public DbSet<ApplicationRole> ApplicationRoles => Set<ApplicationRole>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
