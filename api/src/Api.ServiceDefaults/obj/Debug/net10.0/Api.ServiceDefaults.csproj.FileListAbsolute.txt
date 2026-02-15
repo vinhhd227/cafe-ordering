@@ -11,3 +11,16 @@
 /Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/refint/Api.ServiceDefaults.dll
 /Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/Api.ServiceDefaults.pdb
 /Users/vinhhd227/Source/cafe-ordering/api/src/Api.ServiceDefaults/obj/Debug/net10.0/ref/Api.ServiceDefaults.dll
+D:\cafe-ordering\api\src\Api.ServiceDefaults\bin\Debug\net10.0\Api.ServiceDefaults.deps.json
+D:\cafe-ordering\api\src\Api.ServiceDefaults\bin\Debug\net10.0\Api.ServiceDefaults.dll
+D:\cafe-ordering\api\src\Api.ServiceDefaults\bin\Debug\net10.0\Api.ServiceDefaults.pdb
+D:\cafe-ordering\api\src\Api.ServiceDefaults\obj\Debug\net10.0\Api.ServiceDefaults.csproj.AssemblyReference.cache
+D:\cafe-ordering\api\src\Api.ServiceDefaults\obj\Debug\net10.0\Api.ServiceDefaults.GeneratedMSBuildEditorConfig.editorconfig
+D:\cafe-ordering\api\src\Api.ServiceDefaults\obj\Debug\net10.0\Api.ServiceDefaults.AssemblyInfoInputs.cache
+D:\cafe-ordering\api\src\Api.ServiceDefaults\obj\Debug\net10.0\Api.ServiceDefaults.AssemblyInfo.cs
+D:\cafe-ordering\api\src\Api.ServiceDefaults\obj\Debug\net10.0\Api.ServiceDefaults.csproj.CoreCompileInputs.cache
+D:\cafe-ordering\api\src\Api.ServiceDefaults\obj\Debug\net10.0\Api.ServiceDefaults.sourcelink.json
+D:\cafe-ordering\api\src\Api.ServiceDefaults\obj\Debug\net10.0\Api.ServiceDefaults.dll
+D:\cafe-ordering\api\src\Api.ServiceDefaults\obj\Debug\net10.0\refint\Api.ServiceDefaults.dll
+D:\cafe-ordering\api\src\Api.ServiceDefaults\obj\Debug\net10.0\Api.ServiceDefaults.pdb
+D:\cafe-ordering\api\src\Api.ServiceDefaults\obj\Debug\net10.0\ref\Api.ServiceDefaults.dll

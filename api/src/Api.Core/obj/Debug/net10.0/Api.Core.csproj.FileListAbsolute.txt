@@ -11,3 +11,16 @@
 /Users/vinhhd227/Source/cafe-ordering/api/src/Api.Core/obj/Debug/net10.0/refint/Api.Core.dll
 /Users/vinhhd227/Source/cafe-ordering/api/src/Api.Core/obj/Debug/net10.0/Api.Core.pdb
 /Users/vinhhd227/Source/cafe-ordering/api/src/Api.Core/obj/Debug/net10.0/ref/Api.Core.dll
+D:\cafe-ordering\api\src\Api.Core\bin\Debug\net10.0\Api.Core.deps.json
+D:\cafe-ordering\api\src\Api.Core\bin\Debug\net10.0\Api.Core.dll
+D:\cafe-ordering\api\src\Api.Core\bin\Debug\net10.0\Api.Core.pdb
+D:\cafe-ordering\api\src\Api.Core\obj\Debug\net10.0\Api.Core.csproj.AssemblyReference.cache
+D:\cafe-ordering\api\src\Api.Core\obj\Debug\net10.0\Api.Core.GeneratedMSBuildEditorConfig.editorconfig
+D:\cafe-ordering\api\src\Api.Core\obj\Debug\net10.0\Api.Core.AssemblyInfoInputs.cache
+D:\cafe-ordering\api\src\Api.Core\obj\Debug\net10.0\Api.Core.AssemblyInfo.cs
+D:\cafe-ordering\api\src\Api.Core\obj\Debug\net10.0\Api.Core.csproj.CoreCompileInputs.cache
+D:\cafe-ordering\api\src\Api.Core\obj\Debug\net10.0\Api.Core.sourcelink.json
+D:\cafe-ordering\api\src\Api.Core\obj\Debug\net10.0\Api.Core.dll
+D:\cafe-ordering\api\src\Api.Core\obj\Debug\net10.0\refint\Api.Core.dll
+D:\cafe-ordering\api\src\Api.Core\obj\Debug\net10.0\Api.Core.pdb
+D:\cafe-ordering\api\src\Api.Core\obj\Debug\net10.0\ref\Api.Core.dll

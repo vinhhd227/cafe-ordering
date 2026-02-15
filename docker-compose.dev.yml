@@ -33,7 +33,22 @@ services:
       - ./api:/app # Thường Dockerfile WORKDIR là /app hoặc /src, khớp với Dockerfile của bạn
     networks:
       - cafe-network
-
+ # Frontend Admin (Vue)
+  admin:
+    container_name: coffee-admin-dev
+    build:
+      context: ./admin
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./admin:/app
+      - /app/node_modules # Anonymous volume để tránh xung đột node_modules giữa máy host và container
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_API_URL=http://localhost:8080
+    networks:
+      - cafe-network
   # Frontend Client (Vue)
   client:
     container_name: coffee-client-dev
@@ -41,7 +56,7 @@ services:
       context: ./client
       dockerfile: Dockerfile.dev
     ports:
-      - "5173:5173"
+      - "5174:5174"
     volumes:
       - ./client:/app
       - /app/node_modules # Anonymous volume để tránh xung đột node_modules giữa máy host và container

@@ -1,17 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "bRnIldAL/8o=",
+  "dgSpecHash": "dcSqblK9EGA=",
   "success": true,
-  "projectFilePath": "/Users/vinhhd227/Source/cafe-ordering/api/src/Api.Core/Api.Core.csproj",
+  "projectFilePath": "D:\\cafe-ordering\\api\\src\\Api.Core\\Api.Core.csproj",
   "expectedPackageFiles": [
-    "/Users/vinhhd227/.nuget/packages/ardalis.guardclauses/5.0.0/ardalis.guardclauses.5.0.0.nupkg.sha512",
-    "/Users/vinhhd227/.nuget/packages/ardalis.result/10.1.0/ardalis.result.10.1.0.nupkg.sha512",
-    "/Users/vinhhd227/.nuget/packages/ardalis.sharedkernel/5.0.0/ardalis.sharedkernel.5.0.0.nupkg.sha512",
-    "/Users/vinhhd227/.nuget/packages/ardalis.smartenum/8.2.0/ardalis.smartenum.8.2.0.nupkg.sha512",
-    "/Users/vinhhd227/.nuget/packages/ardalis.specification/9.3.1/ardalis.specification.9.3.1.nupkg.sha512",
-    "/Users/vinhhd227/.nuget/packages/mediator.abstractions/3.0.1/mediator.abstractions.3.0.1.nupkg.sha512",
-    "/Users/vinhhd227/.nuget/packages/mediator.sourcegenerator/3.0.1/mediator.sourcegenerator.3.0.1.nupkg.sha512",
-    "/Users/vinhhd227/.nuget/packages/scriban/6.2.0/scriban.6.2.0.nupkg.sha512"
+    "C:\\Users\\vinhh\\.nuget\\packages\\ardalis.guardclauses\\5.0.0\\ardalis.guardclauses.5.0.0.nupkg.sha512",
+    "C:\\Users\\vinhh\\.nuget\\packages\\ardalis.result\\10.1.0\\ardalis.result.10.1.0.nupkg.sha512",
+    "C:\\Users\\vinhh\\.nuget\\packages\\ardalis.sharedkernel\\5.0.0\\ardalis.sharedkernel.5.0.0.nupkg.sha512",
+    "C:\\Users\\vinhh\\.nuget\\packages\\ardalis.smartenum\\8.2.0\\ardalis.smartenum.8.2.0.nupkg.sha512",
+    "C:\\Users\\vinhh\\.nuget\\packages\\ardalis.specification\\9.3.1\\ardalis.specification.9.3.1.nupkg.sha512",
+    "C:\\Users\\vinhh\\.nuget\\packages\\mediator.abstractions\\3.0.1\\mediator.abstractions.3.0.1.nupkg.sha512"
   ],
   "logs": []
 }

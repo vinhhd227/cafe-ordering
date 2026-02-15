@@ -11,19 +11,97 @@ Thumbs.db
 # ==========================================
 # 2. .NET / C# (Backend API)
 # ==========================================
-# Các thư mục chứa file binary sau khi build
-[Aa]pi/bin/
-[Aa]pi/obj/
 
-# File cấu hình riêng tư (Chỉ giữ lại appsettings.json làm mẫu)
-[Aa]pi/appsettings.Development.json
-[Aa]pi/appsettings.Local.json
+# Build results - Match bin/obj anywhere in project tree
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Ll]og/
+[Ll]ogs/
 
-# Các file publish/logs của .NET
-publish/
-*.log
-*.user
+# Visual Studio cache/options
+.vs/
 *.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+*.dll
+*.exe
+*.pdb
+*.cache
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# .NET Core
+project.assets.json
+project.packagespec.json
+
+# Configuration files (Keep template, ignore local overrides)
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.*.local.json
+
+# Publish profiles and outputs
+**/PublishProfiles/
+publish/
+*.pubxml
+*.publishproj
+
+# Files built by Visual Studio
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+
+# .NET CLI tools
+.dotnet/
+.tools/
 
 # ==========================================
 # 3. Node.js / Frontend (Client)
