@@ -10,7 +10,7 @@ public static class MediatorConfiguration
     // Mediator (source generator - tự scan assembly)
     services.AddMediator(options =>
     {
-      options.ServiceLifetime = ServiceLifetime.Singleton;
+      options.ServiceLifetime = ServiceLifetime.Scoped;
     });
 
     // FluentValidation — scan validators từ UseCases assembly

@@ -26,6 +26,7 @@ public static class DependencyInjection
 
     // === Repositories ===
     services.AddScoped(typeof(IRepositoryBase<>), typeof(EfRepository<>));
+    services.AddScoped(typeof(IReadRepositoryBase<>), typeof(EfReadRepository<>));
     services.AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>));
 
     // === Current User ===
