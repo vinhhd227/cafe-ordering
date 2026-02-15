@@ -8,7 +8,7 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
   public void Configure(EntityTypeBuilder<ApplicationUser> builder)
   {
     // Map to Identity table name
-    builder.ToTable("AspNetUsers");
+    builder.ToTable("Users");
 
     // Primary Key (inherited from AuditableEntity<int>)
     builder.HasKey(u => u.Id);

@@ -6,7 +6,7 @@ public class IdentityUserClaimConfiguration : IEntityTypeConfiguration<IdentityU
 {
   public void Configure(EntityTypeBuilder<IdentityUserClaim<int>> builder)
   {
-    builder.ToTable("AspNetUserClaims");
+    builder.ToTable("UserClaims");
     builder.HasKey(uc => uc.Id);
   }
 }
@@ -15,7 +15,7 @@ public class IdentityUserLoginConfiguration : IEntityTypeConfiguration<IdentityU
 {
   public void Configure(EntityTypeBuilder<IdentityUserLogin<int>> builder)
   {
-    builder.ToTable("AspNetUserLogins");
+    builder.ToTable("UserLogins");
     builder.HasKey(ul => new { ul.LoginProvider, ul.ProviderKey });
   }
 }
@@ -24,7 +24,7 @@ public class IdentityRoleClaimConfiguration : IEntityTypeConfiguration<IdentityR
 {
   public void Configure(EntityTypeBuilder<IdentityRoleClaim<int>> builder)
   {
-    builder.ToTable("AspNetRoleClaims");
+    builder.ToTable("RoleClaims");
     builder.HasKey(rc => rc.Id);
   }
 }
@@ -33,7 +33,7 @@ public class IdentityUserTokenConfiguration : IEntityTypeConfiguration<IdentityU
 {
   public void Configure(EntityTypeBuilder<IdentityUserToken<int>> builder)
   {
-    builder.ToTable("AspNetUserTokens");
+    builder.ToTable("UserTokens");
     builder.HasKey(ut => new { ut.UserId, ut.LoginProvider, ut.Name });
   }
 }

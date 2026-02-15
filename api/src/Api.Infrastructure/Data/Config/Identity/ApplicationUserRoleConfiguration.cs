@@ -6,7 +6,7 @@ public class ApplicationUserRoleConfiguration : IEntityTypeConfiguration<Applica
 {
   public void Configure(EntityTypeBuilder<ApplicationUserRole> builder)
   {
-    builder.ToTable("AspNetUserRoles");
+    builder.ToTable("UserRoles");
 
     builder.HasKey(ur => new { ur.UserId, ur.RoleId });
 
