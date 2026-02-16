@@ -84,7 +84,8 @@
           "Ardalis.Result": "10.1.0",
           "Ardalis.SharedKernel": "5.0.0",
           "Ardalis.SmartEnum": "8.2.0",
-          "Ardalis.Specification": "9.3.1"
+          "Ardalis.Specification": "9.3.1",
+          "Mediator.Abstractions": "3.0.1"
         },
         "runtime": {
           "Api.Core.dll": {

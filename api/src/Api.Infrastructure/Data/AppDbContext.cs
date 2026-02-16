@@ -1,4 +1,5 @@
 ﻿using Api.Core.Aggregates.CategoryAggregate;
+using Api.Core.Aggregates.CustomerAggregate;
 using Api.Core.Aggregates.ProductAggregate;
 using Api.Core.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -28,6 +29,7 @@ public class AppDbContext : IdentityDbContext<
   // Domain Entities
   public DbSet<Product> Products => Set<Product>();
   public DbSet<Category> Categories => Set<Category>();
+  public DbSet<Customer> Customers => Set<Customer>();  // Added - Customer aggregate
 
   // Identity Entities (exposed for querying)
   public DbSet<ApplicationUser> ApplicationUsers => Set<ApplicationUser>();
@@ -57,6 +59,7 @@ public class AppDbContext : IdentityDbContext<
     var now = DateTime.UtcNow;
     var userName = _currentUserService?.UserName;
 
+    // Handle AuditableEntity<int> (existing entities like Product, Category, Order)
     foreach (var entry in ChangeTracker.Entries<AuditableEntity<int>>())
     {
       switch (entry.State)
@@ -71,6 +74,25 @@ public class AppDbContext : IdentityDbContext<
         case EntityState.Modified:
           entry.Property(nameof(AuditableEntity<int>.UpdatedAt)).CurrentValue = now;
           entry.Property(nameof(AuditableEntity<int>.UpdatedBy)).CurrentValue = userName;
+          break;
+      }
+    }
+
+    // Handle AuditableEntity<string> (Customer with string ID)
+    foreach (var entry in ChangeTracker.Entries<AuditableEntity<string>>())
+    {
+      switch (entry.State)
+      {
+        case EntityState.Added:
+          entry.Property(nameof(AuditableEntity<string>.CreatedAt)).CurrentValue = now;
+          entry.Property(nameof(AuditableEntity<string>.CreatedBy)).CurrentValue = userName;
+          entry.Property(nameof(AuditableEntity<string>.UpdatedAt)).CurrentValue = now;
+          entry.Property(nameof(AuditableEntity<string>.UpdatedBy)).CurrentValue = userName;
+          break;
+
+        case EntityState.Modified:
+          entry.Property(nameof(AuditableEntity<string>.UpdatedAt)).CurrentValue = now;
+          entry.Property(nameof(AuditableEntity<string>.UpdatedBy)).CurrentValue = userName;
           break;
       }
     }

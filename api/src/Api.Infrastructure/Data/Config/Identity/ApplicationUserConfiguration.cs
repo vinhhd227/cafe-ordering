@@ -29,15 +29,12 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
     builder.Property(u => u.NormalizedUserName).HasMaxLength(256).IsRequired();
     builder.Property(u => u.Email).HasMaxLength(256).IsRequired();
     builder.Property(u => u.NormalizedEmail).HasMaxLength(256);
-    builder.Property(u => u.FirstName).HasMaxLength(100).IsRequired();
-    builder.Property(u => u.LastName).HasMaxLength(100).IsRequired();
+    // FirstName, LastName removed - now in Customer aggregate
     builder.Property(u => u.PhoneNumber).HasMaxLength(20);
     builder.Property(u => u.PasswordHash).HasMaxLength(500);
     builder.Property(u => u.SecurityStamp).HasMaxLength(100);
     builder.Property(u => u.ConcurrencyStamp).HasMaxLength(100);
-
-    // Concurrency token (RowVersion from AuditableEntity)
-    builder.Property(u => u.RowVersion).IsRowVersion();
+    // RowVersion removed - redundant with ConcurrencyStamp from Identity
 
     // Relationships
     builder.HasMany(u => u.UserRoles)

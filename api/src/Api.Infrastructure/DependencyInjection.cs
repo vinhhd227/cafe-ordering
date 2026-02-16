@@ -1,5 +1,7 @@
 ﻿using Api.Core.Entities.Identity;
+using Api.Infrastructure.Identity;
 using Api.Infrastructure.Services;
+using Api.UseCases.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace Api.Infrastructure;
@@ -47,6 +49,10 @@ public static class DependencyInjection
       })
       .AddEntityFrameworkStores<AppDbContext>()
       .AddDefaultTokenProviders();
+
+    // === Identity Abstraction Services ===
+    services.AddScoped<IIdentityService, IdentityService>();
+    services.AddScoped<IJwtService, JwtService>();
 
     // === Repositories ===
     services.AddScoped(typeof(IRepositoryBase<>), typeof(EfRepository<>));

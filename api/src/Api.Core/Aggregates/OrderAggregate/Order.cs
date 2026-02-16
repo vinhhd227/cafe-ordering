@@ -17,7 +17,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
 
   // Properties
   public string OrderNumber { get; private set; } = string.Empty;
-  public int CustomerId { get; private set; }
+  public string CustomerId { get; private set; } = string.Empty;  // FK to Customer.Id (string)
   public OrderStatus Status { get; private set; }
   public DateTime OrderDate { get; private set; }
   public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
@@ -28,12 +28,15 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   /// <summary>
   ///   Factory method
   /// </summary>
-  public static Order Create(int customerId, string orderNumber)
+  public static Order Create(string customerId, string orderNumber)
   {
+    Guard.Against.NullOrEmpty(customerId, nameof(customerId));
+    Guard.Against.NullOrEmpty(orderNumber, nameof(orderNumber));
+
     var order = new Order
     {
-      CustomerId = Guard.Against.NegativeOrZero(customerId),
-      OrderNumber = Guard.Against.NullOrEmpty(orderNumber),
+      CustomerId = customerId,
+      OrderNumber = orderNumber,
       Status = OrderStatus.Pending,
       OrderDate = DateTime.UtcNow
     };
