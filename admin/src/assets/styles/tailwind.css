@@ -1,0 +1,98 @@
+@import "tailwindcss" prefix(tw);
+@import "tailwindcss-primeui";
+
+html {
+    font-size: 14px;
+    font-family: "Figtree", sans-serif;
+}
+
+:root {
+    --app-bg: #f4f2ee;
+    --app-surface: #fbfaf8;
+    --app-surface-muted: #f2eeea;
+    --app-panel-bg: rgba(251, 250, 248, 0.92);
+    --app-card-bg: rgba(251, 250, 248, 0.88);
+    --app-header-bg: rgba(251, 250, 248, 0.8);
+    --app-sidebar-bg: rgba(248, 244, 238, 0.94);
+    --app-text: #0f172a;
+    --app-text-muted: #64748b;
+    --app-text-subtle: #94a3b8;
+    --app-border: rgba(15, 23, 42, 0.12);
+    --app-glow-emerald: rgba(16, 185, 129, 0.15);
+    --app-glow-amber: rgba(251, 146, 60, 0.18);
+}
+
+.app-dark {
+    --app-bg: #0b1119;
+    --app-surface: #0f1622;
+    --app-surface-muted: #0c141f;
+    --app-panel-bg: rgba(15, 22, 34, 0.85);
+    --app-card-bg: rgba(15, 22, 34, 0.78);
+    --app-header-bg: rgba(15, 22, 34, 0.65);
+    --app-sidebar-bg: rgba(12, 18, 28, 0.88);
+    --app-text: #e2e8f0;
+    --app-text-muted: #94a3b8;
+    --app-text-subtle: #64748b;
+    --app-border: rgba(255, 255, 255, 0.12);
+    --app-glow-emerald: rgba(16, 185, 129, 0.25);
+    --app-glow-amber: rgba(251, 146, 60, 0.2);
+}
+
+.app-shell {
+    background: var(--app-bg);
+    color: var(--app-text);
+}
+
+.app-panel {
+    background: var(--app-panel-bg);
+    border-color: var(--app-border);
+}
+
+.app-card {
+    background: var(--app-card-bg);
+    border-color: var(--app-border);
+}
+
+.app-header {
+    background: var(--app-header-bg);
+    border-color: var(--app-border);
+}
+
+.app-sidebar {
+    background: var(--app-sidebar-bg);
+    border-color: var(--app-border);
+}
+
+.app-border {
+    border-color: var(--app-border);
+}
+
+.app-text-muted {
+    color: var(--app-text-muted);
+}
+
+.app-text-subtle {
+    color: var(--app-text-subtle);
+}
+
+.app-label {
+    color: var(--app-text-subtle);
+}
+
+.app-input {
+    background: var(--app-surface-muted);
+    color: var(--app-text);
+    border-color: var(--app-border);
+}
+
+.app-input::placeholder {
+    color: var(--app-text-subtle);
+}
+
+.app-glow-emerald {
+    background: var(--app-glow-emerald);
+}
+
+.app-glow-amber {
+    background: var(--app-glow-amber);
+}

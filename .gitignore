@@ -9,43 +9,89 @@
 Thumbs.db
 
 # ==========================================
+
 # 2. .NET / C# (Backend API)
 # ==========================================
-# Các thư mục chứa file binary sau khi build
-[Aa]pi/bin/
-[Aa]pi/obj/
-
-# File cấu hình riêng tư (Chỉ giữ lại appsettings.json làm mẫu)
-[Aa]pi/appsettings.Development.json
-[Aa]pi/appsettings.Local.json
-
-# Các file publish/logs của .NET
-publish/
-*.log
+ 
+## Build artifacts - Ignore bin/obj anywhere
+[Bb]in/
+[Oo]bj/
+ 
+## Build configurations
+[Dd]ebug/
+[Rr]elease/
+[Ll]og/
+[Ll]ogs/
+ 
+## IDE files
+.vs/
 *.user
 *.suo
+*.userosscache
+ 
+## NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+ 
+## .NET outputs
+*.dll
+*.exe
+*.pdb
+!**/wwwroot/lib/**/*.dll
+ 
+## Configuration overrides (Keep appsettings.json as template)
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.*.local.json
+ 
+## Publish outputs
+publish/
+PublishProfiles/
 
 # ==========================================
-# 3. Node.js / Frontend (Client)
+# 3. Node.js / Frontend (Client & Admin)
 # ==========================================
-# Thư mục thư viện (Rất nặng, không nên push)
+
+# Root node_modules
 node_modules/
-[Cc]lient/node_modules/
 
-# Thư mục chứa code sau khi build frontend
-[Cc]lient/dist/
-[Cc]lient/build/
+# Client app
+client/node_modules/
+client/dist/
+client/build/
 
-# Các file debug và log của package manager
+# Admin dashboard
+admin/node_modules/
+admin/dist/
+admin/build/
+
+# Generated TypeScript declarations
+admin/src/auto-imports.d.ts
+client/src/auto-imports.d.ts
+
+# Package manager logs
 pnpm-debug.log*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-lock.yaml.bak
 
-# File môi trường (Chứa API key, mật khẩu...)
+# Environment
 .env
 .env.local
 .env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
+
+# Build cache
+.pnpm-debug.log
 
 # ==========================================
 # 4. Docker (Tùy chọn)

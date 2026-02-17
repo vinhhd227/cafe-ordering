@@ -1,0 +1,11 @@
+﻿global using Ardalis.Result;
+global using FastEndpoints;
+global using FastEndpoints.Swagger;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.EntityFrameworkCore.Design;
+global using Serilog;
+global using Serilog.Extensions.Logging;
+global using Api.Core.Interfaces;
+global using Mediator;
