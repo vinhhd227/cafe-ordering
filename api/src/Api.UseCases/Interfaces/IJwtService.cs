@@ -8,13 +8,13 @@ namespace Api.UseCases.Interfaces;
 public interface IJwtService
 {
   /// <summary>
-  /// Generate JWT access token with user claims
+  /// Generate JWT access token with user claims.
   /// </summary>
-  /// <param name="userId">ApplicationUser ID (int)</param>
-  /// <param name="customerId">Customer ID (string, nullable for non-customers)</param>
+  /// <param name="userId">ApplicationUser ID (int, from Identity DB)</param>
+  /// <param name="identityGuid">Same as userId.ToString() — used by business layer to lookup Customer</param>
   /// <param name="email">User email</param>
   /// <param name="roles">User roles</param>
-  string GenerateAccessToken(int userId, string? customerId, string email, IList<string> roles);
+  string GenerateAccessToken(int userId, string? identityGuid, string email, IList<string> roles);
 
   /// <summary>
   /// Generate refresh token

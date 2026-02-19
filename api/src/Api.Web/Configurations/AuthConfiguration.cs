@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Text;
-using Api.Web.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -10,7 +9,8 @@ public static class AuthConfiguration
 {
   public static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
   {
-    // JWT Authentication
+    // JWT Authentication — uses same config keys as JwtService (Infrastructure):
+    // Jwt:Key, Jwt:Issuer, Jwt:Audience
     services.AddAuthentication(options =>
       {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -25,11 +25,10 @@ public static class AuthConfiguration
           ValidateLifetime = true,
           ValidateIssuerSigningKey = true,
           ValidIssuer = configuration["Jwt:Issuer"],
-          ValidAudience = configuration["Jwt:Audience"],
+          ValidAudience = configuration["Jwt:Audience"] ?? configuration["Jwt:Issuer"],
           IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
           ClockSkew = TimeSpan.Zero,
-          // Map Identity claims to standard claims
           NameClaimType = ClaimTypes.NameIdentifier,
           RoleClaimType = ClaimTypes.Role
         };
@@ -45,9 +44,6 @@ public static class AuthConfiguration
       options.AddPolicy("StaffOnly", policy =>
         policy.RequireRole("Barista", "Manager", "Admin"));
     });
-
-    // Token Service for JWT generation
-    services.AddScoped<ITokenService, TokenService>();
 
     return services;
   }

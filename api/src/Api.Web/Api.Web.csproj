@@ -31,7 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Api.ServiceDefaults\Api.ServiceDefaults.csproj"/>
     <ProjectReference Include="..\\Api.Core\\Api.Core.csproj"/>
     <ProjectReference Include="..\\Api.UseCases\\Api.UseCases.csproj"/>
     <ProjectReference Include="..\\Api.Infrastructure\\Api.Infrastructure.csproj"/>

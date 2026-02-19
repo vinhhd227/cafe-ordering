@@ -1,20 +1,16 @@
-﻿using Api.Core.Aggregates.CategoryAggregate;
-using Api.Core.Entities.Identity;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
+using Api.Core.Aggregates.CategoryAggregate;
 using Microsoft.Extensions.Logging;
 
 namespace Api.Infrastructure.Data;
 
+/// <summary>
+/// Seeds business data into AppDbContext.
+/// Identity seeding (users/roles) is handled by IdentitySeedData in the Identity folder.
+/// </summary>
 public static class SeedData
 {
-  public static async Task InitializeAsync(
-    AppDbContext context,
-    UserManager<ApplicationUser>? userManager = null,
-    RoleManager<ApplicationRole>? roleManager = null,
-    ILogger? logger = null)
+  public static async Task InitializeAsync(AppDbContext context, ILogger? logger = null)
   {
-    // Seed categories
     if (!context.Categories.Any())
     {
       var categories = new[]
@@ -30,12 +26,6 @@ public static class SeedData
       await context.SaveChangesAsync();
 
       logger?.LogInformation("Seeded {Count} categories", categories.Length);
-    }
-
-    // Seed Identity (roles and admin user)
-    if (userManager != null && roleManager != null && logger != null)
-    {
-      await IdentitySeedData.SeedIdentityAsync(userManager, roleManager, logger);
     }
   }
 }

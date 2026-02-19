@@ -1,5 +1,5 @@
 services:
-  # Database Service
+  # Database Service — 1 database, 2 schema (business + identity)
   cafe-db:
     image: postgres:16-alpine
     container_name: cafe-db-dev

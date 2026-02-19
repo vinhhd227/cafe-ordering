@@ -3,32 +3,39 @@ using Api.Core.Aggregates.CustomerAggregate.Events;
 namespace Api.Core.Aggregates.CustomerAggregate;
 
 /// <summary>
-///   Customer Aggregate Root - sử dụng string Id (từ external system)
+/// Customer Aggregate Root.
+/// Linked to Identity system via IdentityGuid (no FK constraint).
 /// </summary>
 public class Customer : AuditableEntity<string>, IAggregateRoot
 {
-  // Private constructor
   private Customer() { }
 
-  // Personal data - OWNED BY CUSTOMER
   public string FirstName { get; private set; } = string.Empty;
   public string LastName { get; private set; } = string.Empty;
   public string Email { get; private set; } = string.Empty;
   public string? PhoneNumber { get; private set; }
 
-  // Business data
+  /// <summary>
+  /// Links to ApplicationUser.Id in Identity DB. No FK — string value only.
+  /// </summary>
+  public string? IdentityGuid { get; private set; }
+
+  // Soft delete
+  public bool IsDeleted { get; private set; }
+  public DateTime? DeletedAt { get; private set; }
+
   public CustomerTier Tier { get; private set; }
 
   public string FullName => $"{FirstName} {LastName}";
 
   /// <summary>
-  ///   Factory method - Id từ external system
+  /// Factory method. Id is a new Guid generated internally.
   /// </summary>
-  public static Customer Create(string externalId, string firstName, string lastName, string email)
+  public static Customer Create(string firstName, string lastName, string email)
   {
     var customer = new Customer
     {
-      Id = externalId, // External system Id
+      Id = Guid.NewGuid().ToString(),
       FirstName = firstName,
       LastName = lastName,
       Email = email,
@@ -38,6 +45,15 @@ public class Customer : AuditableEntity<string>, IAggregateRoot
     customer.RegisterDomainEvent(new CustomerCreatedEvent(customer));
 
     return customer;
+  }
+
+  /// <summary>
+  /// Links this customer to an Identity user after successful registration.
+  /// </summary>
+  public void LinkToIdentity(string identityGuid)
+  {
+    Guard.Against.NullOrEmpty(identityGuid, nameof(identityGuid));
+    IdentityGuid = identityGuid;
   }
 
   /// <summary>
@@ -77,5 +93,24 @@ public class Customer : AuditableEntity<string>, IAggregateRoot
     Tier = newTier;
 
     RegisterDomainEvent(new CustomerTierUpgradedEvent(this, oldTier, newTier));
+  }
+
+  /// <summary>
+  /// Soft delete — preserves order history. Use instead of hard delete.
+  /// </summary>
+  public void SoftDelete()
+  {
+    if (IsDeleted) throw new InvalidOperationException("Customer is already deleted");
+
+    IsDeleted = true;
+    DeletedAt = DateTime.UtcNow;
+  }
+
+  public void Restore()
+  {
+    if (!IsDeleted) throw new InvalidOperationException("Customer is not deleted");
+
+    IsDeleted = false;
+    DeletedAt = null;
   }
 }

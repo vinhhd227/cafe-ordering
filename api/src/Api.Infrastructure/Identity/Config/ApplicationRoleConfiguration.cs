@@ -1,6 +1,7 @@
-using Api.Core.Entities.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Api.Infrastructure.Data.Config.Identity;
+namespace Api.Infrastructure.Identity.Config;
 
 public class ApplicationRoleConfiguration : IEntityTypeConfiguration<ApplicationRole>
 {

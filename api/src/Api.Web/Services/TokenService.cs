@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Api.Core.Entities.Identity;
+using Api.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -24,14 +24,10 @@ public class TokenService : ITokenService
     var claims = new List<Claim>
     {
       new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-      new(ClaimTypes.Name, user.UserName),
-      new(ClaimTypes.Email, user.Email),
-      new("firstName", user.FirstName),
-      new("lastName", user.LastName),
+      new(ClaimTypes.Email, user.Email!),
       new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
     };
 
-    // Add roles to claims
     var roles = await _userManager.GetRolesAsync(user);
     claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
@@ -66,7 +62,7 @@ public class TokenService : ITokenService
     {
       ValidateIssuer = true,
       ValidateAudience = true,
-      ValidateLifetime = false, // Don't validate lifetime for refresh
+      ValidateLifetime = false,
       ValidateIssuerSigningKey = true,
       ValidIssuer = _configuration["Jwt:Issuer"],
       ValidAudience = _configuration["Jwt:Audience"],

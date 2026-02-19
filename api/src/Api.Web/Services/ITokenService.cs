@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Api.Core.Entities.Identity;
+using Api.Infrastructure.Identity;
 
 namespace Api.Web.Services;
 

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Api.Core.Entities.Identity;
+namespace Api.Infrastructure.Identity;
 
 /// <summary>
-/// Many-to-many relationship between Users and Roles
+/// Many-to-many relationship between Users and Roles.
 /// </summary>
 public class ApplicationUserRole : IdentityUserRole<int>
 {

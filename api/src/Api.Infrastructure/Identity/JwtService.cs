@@ -10,43 +10,46 @@ namespace Api.Infrastructure.Identity;
 
 /// <summary>
 /// Implementation of IJwtService for JWT token generation and validation.
+/// Config keys: Jwt:Key, Jwt:Issuer, Jwt:Audience, Jwt:ExpiresMinutes
 /// </summary>
 public class JwtService : IJwtService
 {
-  private readonly string _secret;
+  private readonly string _key;
   private readonly string _issuer;
+  private readonly string _audience;
   private readonly int _expiryMinutes;
 
   public JwtService(IConfiguration configuration)
   {
-    _secret = configuration["Jwt:Secret"]
-      ?? throw new InvalidOperationException("JWT Secret not configured");
+    _key = configuration["Jwt:Key"]
+      ?? throw new InvalidOperationException("JWT Key not configured (Jwt:Key)");
     _issuer = configuration["Jwt:Issuer"]
-      ?? throw new InvalidOperationException("JWT Issuer not configured");
-    _expiryMinutes = int.Parse(configuration["Jwt:ExpiryMinutes"] ?? "60");
+      ?? throw new InvalidOperationException("JWT Issuer not configured (Jwt:Issuer)");
+    _audience = configuration["Jwt:Audience"] ?? _issuer;
+    _expiryMinutes = int.Parse(configuration["Jwt:ExpiresMinutes"] ?? "60");
   }
 
-  public string GenerateAccessToken(int userId, string? customerId, string email, IList<string> roles)
+  public string GenerateAccessToken(int userId, string? identityGuid, string email, IList<string> roles)
   {
     var claims = new List<Claim>
     {
       new("userId", userId.ToString()),
+      new(ClaimTypes.NameIdentifier, userId.ToString()),
       new(ClaimTypes.Email, email)
     };
 
-    // customerId only for Customer role users (string type)
-    if (!string.IsNullOrEmpty(customerId))
-      claims.Add(new Claim("customerId", customerId));
+    // identityGuid allows business layer to find Customer without querying Identity DB
+    if (!string.IsNullOrEmpty(identityGuid))
+      claims.Add(new Claim("identityGuid", identityGuid));
 
-    // Add roles
     claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
-    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
-    var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
+    var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
     var token = new JwtSecurityToken(
       issuer: _issuer,
-      audience: _issuer,
+      audience: _audience,
       claims: claims,
       expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
       signingCredentials: credentials);
@@ -65,19 +68,19 @@ public class JwtService : IJwtService
   public ClaimsPrincipal? ValidateToken(string token)
   {
     var tokenHandler = new JwtSecurityTokenHandler();
-    var key = Encoding.UTF8.GetBytes(_secret);
+    var signingKey = Encoding.UTF8.GetBytes(_key);
 
     try
     {
       var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
       {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
+        IssuerSigningKey = new SymmetricSecurityKey(signingKey),
         ValidateIssuer = true,
         ValidIssuer = _issuer,
         ValidateAudience = true,
-        ValidAudience = _issuer,
-        ValidateLifetime = false // Don't validate expiry for refresh
+        ValidAudience = _audience,
+        ValidateLifetime = false // Don't validate expiry — used for refresh flow
       }, out _);
 
       return principal;

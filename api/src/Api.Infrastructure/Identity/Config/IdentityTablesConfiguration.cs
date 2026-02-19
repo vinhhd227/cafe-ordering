@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Api.Infrastructure.Data.Config.Identity;
+namespace Api.Infrastructure.Identity.Config;
 
 public class IdentityUserClaimConfiguration : IEntityTypeConfiguration<IdentityUserClaim<int>>
 {

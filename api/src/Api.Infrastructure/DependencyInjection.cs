@@ -1,5 +1,4 @@
-﻿using Api.Core.Entities.Identity;
-using Api.Infrastructure.Identity;
+﻿using Api.Infrastructure.Identity;
 using Api.Infrastructure.Services;
 using Api.UseCases.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -19,35 +18,41 @@ public static class DependencyInjection
     services.AddScoped<EventDispatchInterceptor>();
     services.AddScoped<IDomainEventDispatcher, MediatorDomainEventDispatcher>();
 
-    // === Database ===
+    // === Business Database — schema "business" ===
+    // Products, Categories, Customers, Orders
     services.AddDbContext<AppDbContext>((provider, options) =>
     {
       var interceptor = provider.GetRequiredService<EventDispatchInterceptor>();
-
-      options.UseNpgsql(connectionString);
+      options.UseNpgsql(connectionString, o =>
+        o.MigrationsHistoryTable("__EFMigrationsHistory", "business"));
       options.AddInterceptors(interceptor);
+    });
+
+    // === Identity Database — schema "identity" (cùng DB, khác schema) ===
+    // Users, Roles, Claims, Tokens
+    services.AddDbContext<AppIdentityDbContext>(options =>
+    {
+      options.UseNpgsql(connectionString, o =>
+        o.MigrationsHistoryTable("__EFMigrationsHistory", "identity"));
     });
 
     // === Identity Services ===
     services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
       {
-        // Password settings
         options.Password.RequireDigit = true;
         options.Password.RequireLowercase = true;
         options.Password.RequireUppercase = true;
         options.Password.RequireNonAlphanumeric = true;
         options.Password.RequiredLength = 8;
 
-        // Lockout settings
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
         options.Lockout.MaxFailedAccessAttempts = 5;
         options.Lockout.AllowedForNewUsers = true;
 
-        // User settings
         options.User.RequireUniqueEmail = true;
-        options.SignIn.RequireConfirmedEmail = false; // Set true in production
+        options.SignIn.RequireConfirmedEmail = false;
       })
-      .AddEntityFrameworkStores<AppDbContext>()
+      .AddEntityFrameworkStores<AppIdentityDbContext>()
       .AddDefaultTokenProviders();
 
     // === Identity Abstraction Services ===
@@ -55,9 +60,10 @@ public static class DependencyInjection
     services.AddScoped<IJwtService, JwtService>();
 
     // === Repositories ===
+    services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
     services.AddScoped(typeof(IRepositoryBase<>), typeof(EfRepository<>));
-    services.AddScoped(typeof(IReadRepositoryBase<>), typeof(EfReadRepository<>));
     services.AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>));
+    services.AddScoped(typeof(IReadRepositoryBase<>), typeof(EfReadRepository<>));
 
     // === Current User ===
     services.AddHttpContextAccessor();

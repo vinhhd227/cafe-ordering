@@ -1,5 +1,5 @@
-﻿using Api.Core.Entities.Identity;
 using Api.Infrastructure.Data;
+using Api.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 
@@ -15,7 +15,7 @@ public static class MiddlewareConfig
     }
     else
     {
-      app.UseDefaultExceptionHandler(); // from FastEndpoints
+      app.UseDefaultExceptionHandler();
       app.UseHsts();
     }
 
@@ -32,20 +32,19 @@ public static class MiddlewareConfig
 
     app.UseHttpsRedirection();
 
-    // Run migrations and seed in Development or when explicitly requested
     var shouldMigrate = app.Environment.IsDevelopment() ||
                         app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup");
 
     if (shouldMigrate)
     {
-      await MigrateDatabaseAsync(app);
+      await MigrateDatabasesAsync(app);
       await SeedDatabaseAsync(app);
     }
 
     return app;
   }
 
-  private static async Task MigrateDatabaseAsync(WebApplication app)
+  private static async Task MigrateDatabasesAsync(WebApplication app)
   {
     using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
@@ -53,9 +52,14 @@ public static class MiddlewareConfig
 
     try
     {
-      logger.LogInformation("Applying database migrations...");
+      logger.LogInformation("Applying business DB migrations...");
       var context = services.GetRequiredService<AppDbContext>();
       await context.Database.MigrateAsync();
+
+      logger.LogInformation("Applying identity DB migrations...");
+      var identityContext = services.GetRequiredService<AppIdentityDbContext>();
+      await identityContext.Database.MigrateAsync();
+
       logger.LogInformation("Database migrations applied successfully");
     }
     catch (Exception ex)
@@ -74,11 +78,16 @@ public static class MiddlewareConfig
     try
     {
       logger.LogInformation("Seeding database...");
+
+      // Seed business data
       var context = services.GetRequiredService<AppDbContext>();
+      await SeedData.InitializeAsync(context, logger);
+
+      // Seed identity data (roles, admin user)
       var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
       var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+      await IdentitySeedData.SeedAsync(userManager, roleManager, logger);
 
-      await SeedData.InitializeAsync(context, userManager, roleManager, logger);
       logger.LogInformation("Database seeded successfully");
     }
     catch (Exception ex)

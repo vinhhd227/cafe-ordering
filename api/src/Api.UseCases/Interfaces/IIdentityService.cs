@@ -7,19 +7,32 @@ namespace Api.UseCases.Interfaces;
 public interface IIdentityService
 {
   /// <summary>
-  /// Create a new application user linked to a customer
+  /// Create a new application user. Returns the identity user ID (used as IdentityGuid in Customer).
   /// </summary>
-  Task<Result> CreateUserAsync(string email, string password, string customerId);
+  Task<Result<string>> CreateUserAsync(string email, string password);
 
   /// <summary>
-  /// Authenticate user and generate JWT tokens
+  /// Authenticate user and generate JWT tokens.
+  /// deviceInfo is optional — used to label the session (e.g., "Chrome/Windows", "iOS App").
   /// </summary>
-  Task<Result<TokenResponse>> LoginAsync(string email, string password);
+  Task<Result<TokenResponse>> LoginAsync(string email, string password, string? deviceInfo = null);
 
   /// <summary>
-  /// Refresh access token using refresh token
+  /// Refresh access token using refresh token.
+  /// Rotates the token (old is revoked, new is issued — same device slot).
   /// </summary>
   Task<Result<TokenResponse>> RefreshTokenAsync(string accessToken, string refreshToken);
+
+  /// <summary>
+  /// Revoke a single refresh token (logout from one device).
+  /// </summary>
+  Task<Result> RevokeTokenAsync(string refreshToken, string reason = "Logout");
+
+  /// <summary>
+  /// Revoke all refresh tokens for a user (logout from all devices).
+  /// Use after password change, account deactivation, or security breach.
+  /// </summary>
+  Task<Result> RevokeAllTokensAsync(string identityGuid, string reason = "Logout all devices");
 
   /// <summary>
   /// Change user password
@@ -27,14 +40,14 @@ public interface IIdentityService
   Task<Result> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
 
   /// <summary>
-  /// Update user email (synced from Customer aggregate)
+  /// Update user email (synced from Customer aggregate via IdentityGuid).
   /// </summary>
-  Task<Result> UpdateEmailAsync(string customerId, string newEmail);
+  Task<Result> UpdateEmailAsync(string identityGuid, string newEmail);
 
   /// <summary>
-  /// Deactivate user account
+  /// Deactivate user account (soft delete in Identity DB).
   /// </summary>
-  Task<Result> DeactivateUserAsync(string customerId);
+  Task<Result> DeactivateUserAsync(string identityGuid);
 
   /// <summary>
   /// Generate password reset token
