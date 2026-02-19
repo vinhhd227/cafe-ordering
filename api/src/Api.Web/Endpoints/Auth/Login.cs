@@ -1,123 +1,90 @@
-using Api.Core.Entities.Identity;
-using Api.Web.Services;
-using Microsoft.AspNetCore.Identity;
+using Api.UseCases.Interfaces;
 
 namespace Api.Web.Endpoints.Auth;
 
-public class LoginRequest
+/// <summary>
+/// Request payload for authenticating a user.
+/// </summary>
+public sealed class LoginRequest
 {
+  /// <summary>Registered email address.</summary>
   public string Email { get; set; } = string.Empty;
+
+  /// <summary>Account password.</summary>
   public string Password { get; set; } = string.Empty;
+
+  /// <summary>
+  /// Optional label identifying the calling device or browser session
+  /// (e.g. "Chrome/Windows", "iPhone Safari", "Android App").
+  /// Used to distinguish active sessions in the multi-device refresh-token store.
+  /// </summary>
+  public string? DeviceInfo { get; set; }
 }
 
-public class LoginResponse
+/// <summary>
+/// Token pair returned after a successful login.
+/// </summary>
+public sealed class LoginResponse
 {
+  /// <summary>Indicates whether the login attempt succeeded.</summary>
   public bool Success { get; init; }
+
+  /// <summary>Human-readable status message.</summary>
   public string Message { get; init; } = string.Empty;
+
+  /// <summary>
+  /// Short-lived JWT access token. Include in the <c>Authorization: Bearer &lt;token&gt;</c> header
+  /// for all authenticated requests. Expires after the configured <c>Jwt:ExpiresMinutes</c>.
+  /// </summary>
   public string? AccessToken { get; init; }
+
+  /// <summary>
+  /// Long-lived opaque refresh token (30-day TTL). Used exclusively with
+  /// <c>POST /api/auth/refresh-token</c> to obtain a new access token.
+  /// Each token is bound to one device session and is rotated on every refresh.
+  /// </summary>
   public string? RefreshToken { get; init; }
+
+  /// <summary>Access token lifetime in seconds.</summary>
   public int ExpiresIn { get; init; }
+
+  /// <summary>Basic profile of the authenticated user.</summary>
   public UserDto? User { get; init; }
 }
 
-public class LoginEndpoint : Endpoint<LoginRequest, LoginResponse>
+public class LoginEndpoint(IIdentityService identityService) : Ep.Req<LoginRequest>.Res<LoginResponse> 
 {
-  private readonly UserManager<ApplicationUser> _userManager;
-  private readonly ITokenService _tokenService;
-
-  public LoginEndpoint(UserManager<ApplicationUser> userManager, ITokenService tokenService)
-  {
-    _userManager = userManager;
-    _tokenService = tokenService;
-  }
-
   public override void Configure()
   {
     Post("/api/auth/login");
     AllowAnonymous();
-    Description(b => b
-      .WithTags("Auth")
-      .WithSummary("Login user")
-      .WithDescription("Authenticate user and receive access and refresh tokens"));
+    DontAutoTag();
+    Description(b => b.WithTags("Authentication"));
   }
 
   public override async Task HandleAsync(LoginRequest req, CancellationToken ct)
   {
-    // Validate input
     if (string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Password))
     {
-      await SendAsync(new LoginResponse
-      {
-        Success = false,
-        Message = "Email and password are required"
-      }, 400, ct);
+      await SendAsync(new LoginResponse { Success = false, Message = "Email and password are required" }, 400, ct);
       return;
     }
 
-    // Find user
-    var user = await _userManager.FindByEmailAsync(req.Email);
+    var result = await identityService.LoginAsync(req.Email, req.Password, req.DeviceInfo);
 
-    if (user == null || !user.IsActive)
+    if (!result.IsSuccess)
     {
-      await SendAsync(new LoginResponse
-      {
-        Success = false,
-        Message = "Invalid credentials"
-      }, 401, ct);
+      await SendAsync(new LoginResponse { Success = false, Message = "Invalid credentials" }, 401, ct);
       return;
     }
-
-    // Check password
-    var passwordValid = await _userManager.CheckPasswordAsync(user, req.Password);
-
-    if (!passwordValid)
-    {
-      await _userManager.AccessFailedAsync(user);
-      await SendAsync(new LoginResponse
-      {
-        Success = false,
-        Message = "Invalid credentials"
-      }, 401, ct);
-      return;
-    }
-
-    // Check lockout
-    if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow)
-    {
-      await SendAsync(new LoginResponse
-      {
-        Success = false,
-        Message = "Account is locked. Try again later."
-      }, 403, ct);
-      return;
-    }
-
-    // Reset access failed count on successful login
-    await _userManager.ResetAccessFailedCountAsync(user);
-
-    // Generate tokens
-    var accessToken = await _tokenService.GenerateAccessTokenAsync(user);
-    var refreshToken = _tokenService.GenerateRefreshToken();
-
-    // Store refresh token
-    user.SetRefreshToken(refreshToken, DateTime.UtcNow.AddDays(7));
-    await _userManager.UpdateAsync(user);
 
     await SendOkAsync(new LoginResponse
     {
       Success = true,
       Message = "Login successful",
-      AccessToken = accessToken,
-      RefreshToken = refreshToken,
-      ExpiresIn = 3600,
-      User = new UserDto
-      {
-        Id = user.Id,
-        Email = user.Email,
-        FirstName = user.FirstName,
-        LastName = user.LastName,
-        FullName = user.FullName
-      }
+      AccessToken = result.Value.AccessToken,
+      RefreshToken = result.Value.RefreshToken,
+      ExpiresIn = result.Value.ExpiresIn
     }, ct);
   }
 }
