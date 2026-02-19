@@ -1,11 +1,15 @@
-﻿using Api.UseCases.Categories.DTOs;
+using Api.UseCases.Categories.DTOs;
 using Api.UseCases.Categories.Get;
 using Api.Web.Extensions;
 
 namespace Api.Web.Endpoints.Categories;
 
-public class GetCategoryRequest
+/// <summary>
+/// Route parameters for retrieving a single category.
+/// </summary>
+public sealed class GetCategoryRequest
 {
+  /// <summary>The unique integer identifier of the category.</summary>
   public int CategoryId { get; set; }
 }
 
@@ -23,7 +27,7 @@ public class Get : Endpoint<GetCategoryRequest, CategoryDto>
     Get("/api/categories/{CategoryId}");
     AllowAnonymous();
     DontAutoTag();
-    Summary(s => s.Summary = "Lấy chi tiết category theo Id");
+    Description(b => b.WithTags("Categories"));
   }
 
   public override async Task HandleAsync(GetCategoryRequest req, CancellationToken ct)

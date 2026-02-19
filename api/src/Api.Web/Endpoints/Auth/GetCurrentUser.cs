@@ -1,36 +1,38 @@
-using Api.Core.Entities.Identity;
+using Api.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace Api.Web.Endpoints.Auth;
 
-public class GetCurrentUserResponse
+/// <summary>
+/// Profile and role information for the currently authenticated user.
+/// </summary>
+public sealed class GetCurrentUserResponse
 {
+  /// <summary>Always <c>true</c> when the request succeeds.</summary>
   public bool Success { get; init; }
+
+  /// <summary>Basic identity information of the authenticated user.</summary>
   public UserDto? User { get; init; }
+
+  /// <summary>
+  /// List of role names assigned to this user (e.g. "Customer", "Admin", "Manager").
+  /// Clients may use this list to conditionally show or hide UI features.
+  /// </summary>
   public List<string> Roles { get; init; } = new();
 }
 
-public class GetCurrentUserEndpoint : EndpointWithoutRequest<GetCurrentUserResponse>
+public class GetCurrentUserEndpoint(UserManager<ApplicationUser> userManager)
+  : Ep.NoReq.Res<GetCurrentUserResponse>
 {
-  private readonly UserManager<ApplicationUser> _userManager;
-
-  public GetCurrentUserEndpoint(UserManager<ApplicationUser> userManager)
-  {
-    _userManager = userManager;
-  }
-
   public override void Configure()
   {
     Get("/api/auth/me");
-    Description(b => b
-      .WithTags("Auth")
-      .WithSummary("Get current user")
-      .WithDescription("Get current authenticated user information"));
+    DontAutoTag();
+    Description(b => b.WithTags("Authentication"));
   }
 
   public override async Task HandleAsync(CancellationToken ct)
   {
-    // Get user ID from claims
     var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
     if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
     {
@@ -38,28 +40,19 @@ public class GetCurrentUserEndpoint : EndpointWithoutRequest<GetCurrentUserRespo
       return;
     }
 
-    // Find user
-    var user = await _userManager.FindByIdAsync(userId.ToString());
+    var user = await userManager.FindByIdAsync(userId.ToString());
     if (user == null || !user.IsActive)
     {
       await SendUnauthorizedAsync(ct);
       return;
     }
 
-    // Get roles
-    var roles = await _userManager.GetRolesAsync(user);
+    var roles = await userManager.GetRolesAsync(user);
 
     await SendOkAsync(new GetCurrentUserResponse
     {
       Success = true,
-      User = new UserDto
-      {
-        Id = user.Id,
-        Email = user.Email,
-        FirstName = user.FirstName,
-        LastName = user.LastName,
-        FullName = user.FullName
-      },
+      User = new UserDto { Id = user.Id, Email = user.Email },
       Roles = roles.ToList()
     }, ct);
   }
