@@ -29,8 +29,15 @@ builder.Services.SwaggerDocument(o =>
 {
   o.DocumentSettings = s =>
   {
-    s.Title = "API";
+    s.Title = "Cafe Ordering API";
     s.Version = "v1";
+  };
+  o.TagDescriptions = t =>
+  {
+    t["Authentication"] = "🔒 Register, login, and token management";
+    t["Products"]       = "☕ Menu item management";
+    t["Categories"]     = "🗂️ Product category management";
+    t["System"]         = "⚙️ Health and infrastructure endpoints";
   };
 });
 

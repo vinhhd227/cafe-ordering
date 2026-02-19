@@ -1,11 +1,20 @@
-﻿using Api.UseCases.Categories.Update;
+using Api.UseCases.Categories.Update;
 using Api.Web.Extensions;
 
 namespace Api.Web.Endpoints.Categories;
 
-public class UpdateCategoryRequest
+/// <summary>
+/// Request payload for renaming a category.
+/// </summary>
+public sealed class UpdateCategoryRequest
 {
+  /// <summary>
+  /// ID of the category to update. Provided as a route parameter
+  /// (<c>/api/categories/{CategoryId}</c>), not in the request body.
+  /// </summary>
   public int CategoryId { get; set; }
+
+  /// <summary>New display name for the category. Must be unique and non-empty.</summary>
   public string Name { get; set; } = string.Empty;
 }
 
@@ -22,7 +31,8 @@ public class Update : Endpoint<UpdateCategoryRequest>
   {
     Put("/api/categories/{CategoryId}");
     AllowAnonymous();
-    Summary(s => s.Summary = "Cập nhật tên category");
+    DontAutoTag();
+    Description(b => b.WithTags("Categories"));
   }
 
   public override async Task HandleAsync(UpdateCategoryRequest req, CancellationToken ct)

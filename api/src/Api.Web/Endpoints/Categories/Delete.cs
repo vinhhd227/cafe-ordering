@@ -1,11 +1,15 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Api.UseCases.Categories.Delete;
 using Api.Web.Extensions;
 
 namespace Api.Web.Endpoints.Categories;
 
-public class DeleteCategoryRequest
+/// <summary>
+/// Route parameters for soft-deleting a category.
+/// </summary>
+public sealed class DeleteCategoryRequest
 {
+  /// <summary>The integer ID of the category to delete.</summary>
   public int CategoryId { get; set; }
 }
 
@@ -22,7 +26,8 @@ public class Delete : Endpoint<DeleteCategoryRequest>
   {
     Delete("/api/categories/{CategoryId}");
     AllowAnonymous();
-    Summary(s => s.Summary = "Soft delete category");
+    DontAutoTag();
+    Description(b => b.WithTags("Categories"));
   }
 
   public override async Task HandleAsync(DeleteCategoryRequest req, CancellationToken ct)
