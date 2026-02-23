@@ -35,6 +35,8 @@ builder.Services.SwaggerDocument(o =>
   o.TagDescriptions = t =>
   {
     t["Authentication"] = "🔒 Register, login, and token management";
+    t["Menu"]           = "🍽️ Public menu for ordering";
+    t["Orders"]         = "🧾 Order placement and management";
     t["Products"]       = "☕ Menu item management";
     t["Categories"]     = "🗂️ Product category management";
     t["System"]         = "⚙️ Health and infrastructure endpoints";

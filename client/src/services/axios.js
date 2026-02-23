@@ -4,35 +4,32 @@ import { useAuthStore } from '@/stores/auth'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 })
 
+// Attach Bearer token
 api.interceptors.request.use((config) => {
-  const auth = useAuthStore()
-  if (auth.accessToken) {
-    config.headers = config.headers ?? {}
-    config.headers.Authorization = `Bearer ${auth.accessToken}`
+  const { accessToken } = useAuthStore()
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`
   }
   return config
 })
 
+// Unwrap data; handle 401 refresh; throw on error
 api.interceptors.response.use(
-    res => res,
-    async error => {
-      const auth = useAuthStore()
-      const original = error.config
+  (res) => res.data,
+  async (error) => {
+    const original = error.config
 
-      if (error.response?.status === 401 && !original._retry) {
-        original._retry = true
-        await auth.refreshToken()
-        return api(original)
-      }
-
-      return Promise.reject(error)
+    if (error.response?.status === 401 && !original._retry) {
+      original._retry = true
+      await useAuthStore().refreshToken()
+      return api(original)
     }
-)
 
+    throw error.response?.data ?? error
+  }
+)
 
 export default api
