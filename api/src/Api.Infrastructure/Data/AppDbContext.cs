@@ -1,6 +1,9 @@
-﻿using Api.Core.Aggregates.CategoryAggregate;
+using Api.Core.Aggregates.CategoryAggregate;
 using Api.Core.Aggregates.CustomerAggregate;
+using Api.Core.Aggregates.GuestSessionAggregate;
+using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.ProductAggregate;
+using Api.Core.Aggregates.TableAggregate;
 
 namespace Api.Infrastructure.Data;
 
@@ -22,6 +25,9 @@ public class AppDbContext : DbContext
   public DbSet<Product> Products => Set<Product>();
   public DbSet<Category> Categories => Set<Category>();
   public DbSet<Customer> Customers => Set<Customer>();
+  public DbSet<Table> Tables => Set<Table>();
+  public DbSet<GuestSession> GuestSessions => Set<GuestSession>();
+  public DbSet<Order> Orders => Set<Order>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -79,6 +85,24 @@ public class AppDbContext : DbContext
         case EntityState.Modified:
           entry.Property(nameof(AuditableEntity<string>.UpdatedAt)).CurrentValue = now;
           entry.Property(nameof(AuditableEntity<string>.UpdatedBy)).CurrentValue = userName;
+          break;
+      }
+    }
+
+    foreach (var entry in ChangeTracker.Entries<AuditableEntity<Guid>>())
+    {
+      switch (entry.State)
+      {
+        case EntityState.Added:
+          entry.Property(nameof(AuditableEntity<Guid>.CreatedAt)).CurrentValue = now;
+          entry.Property(nameof(AuditableEntity<Guid>.CreatedBy)).CurrentValue = userName;
+          entry.Property(nameof(AuditableEntity<Guid>.UpdatedAt)).CurrentValue = now;
+          entry.Property(nameof(AuditableEntity<Guid>.UpdatedBy)).CurrentValue = userName;
+          break;
+
+        case EntityState.Modified:
+          entry.Property(nameof(AuditableEntity<Guid>.UpdatedAt)).CurrentValue = now;
+          entry.Property(nameof(AuditableEntity<Guid>.UpdatedBy)).CurrentValue = userName;
           break;
       }
     }

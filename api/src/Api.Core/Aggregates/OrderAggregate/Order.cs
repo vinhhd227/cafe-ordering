@@ -17,7 +17,9 @@ public class Order : AuditableEntity<int>, IAggregateRoot
 
   // Properties
   public string OrderNumber { get; private set; } = string.Empty;
-  public string CustomerId { get; private set; } = string.Empty;  // FK to Customer.Id (string)
+  public string? CustomerId { get; private set; }  // FK to Customer.Id (nullable — guest orders have no customer)
+  public Guid SessionId { get; private set; }       // FK to GuestSession.Id (required)
+  public string? DeviceToken { get; private set; }  // Anonymous device token from client
   public OrderStatus Status { get; private set; }
   public DateTime OrderDate { get; private set; }
   public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
@@ -26,17 +28,19 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   public decimal TotalAmount => _items.Sum(i => i.TotalPrice);
 
   /// <summary>
-  ///   Factory method
+  ///   Factory method for session-based orders (guest or authenticated).
   /// </summary>
-  public static Order Create(string customerId, string orderNumber)
+  public static Order Create(Guid sessionId, string orderNumber, string? deviceToken = null, string? customerId = null)
   {
-    Guard.Against.NullOrEmpty(customerId, nameof(customerId));
+    Guard.Against.Default(sessionId, nameof(sessionId));
     Guard.Against.NullOrEmpty(orderNumber, nameof(orderNumber));
 
     var order = new Order
     {
-      CustomerId = customerId,
+      SessionId = sessionId,
       OrderNumber = orderNumber,
+      DeviceToken = deviceToken,
+      CustomerId = customerId,
       Status = OrderStatus.Pending,
       OrderDate = DateTime.UtcNow
     };
