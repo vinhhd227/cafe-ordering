@@ -1,0 +1,40 @@
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Information",
+        "Microsoft.AspNetCore": "Warning",
+        "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+      }
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=cafe_ordering_db;Username=admin;Password=CHANGE_ME"
+  },
+  "Jwt": {
+    "Issuer": "cafe-ordering-api",
+    "Audience": "cafe-ordering-api",
+    "Key": "CHANGE_ME_use_at_least_32_characters_long_random_string",
+    "ExpiresMinutes": "60"
+  },
+  "SmtpSettings": {
+    "Host": "smtp.gmail.com",
+    "Port": 587,
+    "From": "dev@yourdomain.com",
+    "Username": "CHANGE_ME",
+    "Password": "CHANGE_ME",
+    "UseSsl": true
+  },
+  "FileStorage": {
+    "BasePath": "uploads",
+    "BaseUrl": "/uploads"
+  },
+  "Cors": {
+    "AllowedOrigins": [
+      "http://localhost:5173",
+      "http://localhost:5174"
+    ]
+  },
+  "AllowedHosts": "*"
+}

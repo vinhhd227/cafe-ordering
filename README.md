@@ -17,6 +17,47 @@ The project is organized into two main services:
 
 ---
 
+## ⚙️ Developer Setup
+
+Sau khi clone repo, tạo các file cấu hình local **trước khi chạy** (những file này bị git ignore để tránh commit credentials).
+
+### 1. API — `appsettings.Development.json`
+
+```bash
+cp api/src/Api.Web/appsettings.Development.json.example \
+   api/src/Api.Web/appsettings.Development.json
+```
+
+Mở file vừa tạo và thay tất cả giá trị `CHANGE_ME`:
+
+| Key | Mô tả |
+|---|---|
+| `ConnectionStrings:DefaultConnection` | Password PostgreSQL local |
+| `Jwt:Key` | Chuỗi ngẫu nhiên ≥ 32 ký tự |
+| `SmtpSettings:Username/Password` | Tài khoản email gửi (có thể bỏ qua khi dev) |
+
+> **Tip:** Chạy `grep -r "CHANGE_ME" .` để kiểm tra còn sót giá trị nào không.
+
+### 2. Docker — `docker-compose.dev.override.yml`
+
+```bash
+cp docker-compose.dev.override.yml.example docker-compose.dev.override.yml
+```
+
+Điền credentials thực vào file, sau đó chạy:
+
+```bash
+docker-compose -f docker-compose.dev.yml -f docker-compose.dev.override.yml up --build
+```
+
+### 3. Vue Client — `.env.local`
+
+```bash
+cp client/.env.local.example client/.env.local
+```
+
+---
+
 ## 🚀 Quick Start (Using Docker)
 
 The fastest way to get the entire ecosystem (Database, API, and Client) up and running without manual local setup.
@@ -31,12 +72,14 @@ The fastest way to get the entire ecosystem (Database, API, and Client) up and r
     cd cafe-ordering
     ```
 
-2.  **Launch with Docker Compose:**
+2.  **Tạo file cấu hình local** (xem phần [Developer Setup](#️-developer-setup) ở trên).
+
+3.  **Launch with Docker Compose:**
     ```bash
-    docker-compose -f docker-compose.dev.yml up --build
+    docker-compose -f docker-compose.dev.yml -f docker-compose.dev.override.yml up --build
     ```
 
-3.  **Access the applications:**
+4.  **Access the applications:**
     * **Frontend (Client):** `http://localhost:5173`
     * **Backend (API):** `http://localhost:8080`
     * **OpenAPI (Development):** `http://localhost:8080/openapi/v1.json`
@@ -83,7 +126,7 @@ Currently, the API exposes a sample endpoint (`/weatherforecast`) and the Vue cl
 ---
 ## 📝 Important Notes
 
-* **Environment Variables**: Ensure you have configured your `.env` (for client) and `appsettings.Development.json` (for api) before running.
+* **Environment Variables**: Tạo file local từ các file `.example` như hướng dẫn trong phần [Developer Setup](#️-developer-setup) ở trên.
 * **Architecture Mismatch**: If you encounter errors related to `rollup-linux-arm64-musl`, ensure your `.dockerignore` correctly excludes `node_modules`. This prevents host-machine binaries from leaking into the Alpine-based Docker container.
 * **Database Migrations**: On the first run, the API may wait for the Database container to be healthy before applying migrations (once migrations are added).
 * **IDE Configuration**: The `.idea` folder contains project-specific settings for JetBrains IDEs. It is recommended to keep this excluded from Git unless sharing specific Run Configurations.

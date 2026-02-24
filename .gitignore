@@ -98,3 +98,6 @@ Thumbs.db
 # ==========================================
 # Nếu bạn không muốn lưu các file dữ liệu database sinh ra bởi Docker
 .docker/data/
+
+# Local credential overrides — không bao giờ commit
+docker-compose.dev.override.yml

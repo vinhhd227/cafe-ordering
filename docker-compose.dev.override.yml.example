@@ -1,0 +1,18 @@
+# Copy file này thành docker-compose.dev.override.yml rồi điền giá trị thực.
+# File docker-compose.dev.override.yml bị git ignore — không bao giờ commit lên git.
+#
+# Cách chạy với override:
+#   docker-compose -f docker-compose.dev.yml -f docker-compose.dev.override.yml up --build
+
+services:
+  cafe-db:
+    environment:
+      POSTGRES_PASSWORD: CHANGE_ME
+
+  api:
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=cafe-db;Port=5432;Database=cafe_ordering_db;Username=admin;Password=CHANGE_ME
+      - Jwt__Key=CHANGE_ME_use_at_least_32_characters_long_random_string
+      - SmtpSettings__Username=CHANGE_ME
+      - SmtpSettings__Password=CHANGE_ME
+      - Cors__AllowedOrigins__0=http://localhost:5173
