@@ -24,7 +24,19 @@ public class GetSessionSummaryHandler(
     var orders = await orderRepository.ListAsync(ordersSpec, ct);
 
     var orderLines = orders
-      .Select(o => new OrderLineDto(o.Id, o.OrderNumber, o.TotalAmount, o.Status.Name))
+      .Select(o => new OrderLineDto(
+        o.Id,
+        o.OrderNumber,
+        o.TotalAmount,
+        o.Status.Name,
+        o.Items
+          .Select(i => new OrderItemLineDto(
+            i.ProductId,
+            i.ProductName,
+            i.UnitPrice,
+            i.Quantity,
+            i.TotalPrice))
+          .ToList()))
       .ToList();
 
     var grandTotal = orderLines.Sum(o => o.TotalAmount);

@@ -48,6 +48,7 @@ import FloatLabel from 'primevue/floatlabel'
 import ToastService from 'primevue/toastservice'
 import Checkbox from 'primevue/checkbox';
 import CheckboxGroup from 'primevue/checkboxgroup';
+import Dialog from 'primevue/dialog';
 
 // Theme
 const coffeePreset = definePreset(Aura, {
@@ -140,5 +141,6 @@ export default {
         app.component('prime-toast', Toast)
         app.component('prime-checkbox', Checkbox)
         app.component('prime-checkbox-group', CheckboxGroup)
+        app.component('prime-dialog', Dialog)
     },
 }

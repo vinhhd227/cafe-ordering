@@ -7,5 +7,6 @@ public class OrdersBySessionIdSpec : Specification<Order>
   public OrdersBySessionIdSpec(Guid sessionId)
   {
     Query.Where(o => o.SessionId == sessionId);
+    Query.Include(o => o.Items);
   }
 }

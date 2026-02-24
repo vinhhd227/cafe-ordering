@@ -31,7 +31,7 @@ public class OrderItem : BaseEntity
       OrderId = Guard.Against.NegativeOrZero(orderId),
       ProductId = Guard.Against.NegativeOrZero(productId),
       ProductName = Guard.Against.NullOrEmpty(productName),
-      UnitPrice = Guard.Against.Negative(unitPrice),
+      UnitPrice = Guard.Against.NegativeOrZero(unitPrice),
       Quantity = Guard.Against.NegativeOrZero(quantity),
       Discount = 0
     };

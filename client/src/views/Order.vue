@@ -4,6 +4,9 @@ import { useRoute } from 'vue-router';
 import { getMenu } from '../services/product.service.js';
 import { getOrCreateSession, getSessionSummary } from '../services/session.service.js';
 import { placeOrder as placeOrderApi } from '../services/order.service.js';
+import { useCartStore } from '../stores/cart.js';
+
+const cartStore = useCartStore();
 
 const route   = useRoute();
 const tableId = computed(() => Number(route.params.tableId));
@@ -17,15 +20,10 @@ const loadError = ref('');
 const session      = ref(null);
 const sessionError = ref('');
 
-/* ─── Cart ─────────────────────────────────────────────── */
-const cart  = ref([]);
-const total = computed(() =>
-  cart.value.reduce((acc, item) => acc + item.price * item.quantity, 0)
-);
-
 /* ─── Options dialog ───────────────────────────────────── */
 const showOptionsDialog = ref(false);
 const selectedProduct   = ref(null);
+const pendingQuantity   = ref(1);
 const pendingOptions    = ref({
   temperature: 'Lạnh',
   iceLevel:    'Bình thường',
@@ -111,48 +109,23 @@ const fetchProducts = async () => {
 };
 
 /* ─── Cart ─────────────────────────────────────────────── */
+// Luôn mở popup để khách chọn số lượng và tùy chọn (đường/đá nếu có)
 const handleAddToCart = (product) => {
-  if (product.hasTemperatureOption || product.hasIceLevelOption || product.hasSugarLevelOption) {
-    selectedProduct.value = product;
-    pendingOptions.value  = { temperature: 'Lạnh', iceLevel: 'Bình thường', sugarLevel: 'Bình thường' };
-    showOptionsDialog.value = true;
-  } else {
-    addToCart(product, null);
-  }
+  selectedProduct.value   = product;
+  pendingOptions.value    = { temperature: 'Lạnh', iceLevel: 'Bình thường', sugarLevel: 'Bình thường' };
+  pendingQuantity.value   = 1;
+  showOptionsDialog.value = true;
 };
 
 const confirmAddToCart = () => {
-  addToCart(selectedProduct.value, { ...pendingOptions.value });
+  cartStore.addItem(selectedProduct.value, { ...pendingOptions.value }, pendingQuantity.value);
   showOptionsDialog.value = false;
   selectedProduct.value   = null;
 };
 
-const addToCart = (item, options) => {
-  const key      = JSON.stringify(options);
-  const existing = cart.value.find((i) => i.id === item.id && JSON.stringify(i.options) === key);
-  if (existing) { existing.quantity++; return; }
-  cart.value.push({ ...item, quantity: 1, options });
-};
-
-const removeFromCart = (cartItem) => {
-  const idx = cart.value.findIndex(
-    (i) => i.id === cartItem.id && JSON.stringify(i.options) === JSON.stringify(cartItem.options)
-  );
-  if (idx === -1) return;
-  cart.value[idx].quantity--;
-  if (cart.value[idx].quantity === 0) cart.value.splice(idx, 1);
-};
-
-const addOneMore = (cartItem) => {
-  const idx = cart.value.findIndex(
-    (i) => i.id === cartItem.id && JSON.stringify(i.options) === JSON.stringify(cartItem.options)
-  );
-  if (idx !== -1) cart.value[idx].quantity++;
-};
-
 /* ─── Order ────────────────────────────────────────────── */
 const submitOrder = async () => {
-  if (!cart.value.length || !session.value) return;
+  if (!cartStore.items.length || !session.value) return;
   isOrdering.value   = true;
   orderSuccess.value = '';
   orderError.value   = '';
@@ -160,15 +133,15 @@ const submitOrder = async () => {
     const sessionId = session.value.sessionId ?? session.value.id;
     const payload   = {
       sessionId,
-      items: cart.value.map((item) => ({
+      items: cartStore.items.map((item) => ({
         productId:   item.id,
         productName: item.name,
         unitPrice:   item.price,
         quantity:    item.quantity,
       })),
     };
-    const result     = await placeOrderApi(payload);
-    cart.value       = [];
+    const result = await placeOrderApi(payload);
+    cartStore.clear();
     orderSuccess.value = `Đặt hàng thành công! Mã đơn: ${result.orderNumber ?? result.OrderNumber}`;
   } catch (e) {
     orderError.value = e?.detail ?? e?.message ?? 'Đặt hàng thất bại. Vui lòng thử lại.';
@@ -344,17 +317,17 @@ onMounted(async () => {
             <div class="tw:flex tw:items-center tw:justify-between">
               <h2 class="tw:text-xl tw:font-semibold tw:text-slate-900">Giỏ hàng</h2>
               <span class="tw:rounded-full tw:bg-orange-50 tw:px-3 tw:py-1 tw:text-xs tw:font-semibold tw:text-orange-600">
-                {{ cart.length }} món
+                {{ cartStore.count }} món
               </span>
             </div>
 
-            <div v-if="cart.length === 0" class="tw:mt-6 tw:rounded-xl tw:border tw:border-dashed tw:border-orange-200 tw:p-4 tw:text-center tw:text-slate-500">
+            <div v-if="cartStore.count === 0" class="tw:mt-6 tw:rounded-xl tw:border tw:border-dashed tw:border-orange-200 tw:p-4 tw:text-center tw:text-slate-500">
               Chưa có món nào trong giỏ. Hãy chọn một món bên trái nhé!
             </div>
 
             <div v-else class="tw:mt-4 tw:space-y-4">
               <div
-                v-for="(item, idx) in cart"
+                v-for="(item, idx) in cartStore.items"
                 :key="idx"
                 class="tw:flex tw:items-start tw:justify-between tw:gap-3"
               >
@@ -366,11 +339,11 @@ onMounted(async () => {
                   </p>
                 </div>
                 <div class="tw:flex tw:shrink-0 tw:items-center tw:gap-2">
-                  <prime-button class="p-button-sm p-button-rounded" @click="removeFromCart(item)">
+                  <prime-button class="p-button-sm p-button-rounded" @click="cartStore.removeItem(item)">
                     <iconify icon="heroicons-outline:minus"></iconify>
                   </prime-button>
                   <span class="tw:min-w-6 tw:text-center tw:text-sm tw:font-semibold">{{ item.quantity }}</span>
-                  <prime-button class="p-button-sm p-button-rounded" @click="addOneMore(item)">
+                  <prime-button class="p-button-sm p-button-rounded" @click="cartStore.increaseItem(item)">
                     <iconify icon="heroicons-outline:plus"></iconify>
                   </prime-button>
                 </div>
@@ -379,7 +352,7 @@ onMounted(async () => {
               <div class="tw:rounded-xl tw:bg-orange-50 tw:p-4">
                 <div class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:text-slate-600">
                   <span>Tạm tính</span>
-                  <span class="tw:font-semibold tw:text-slate-900">{{ formatPrice(total) }}</span>
+                  <span class="tw:font-semibold tw:text-slate-900">{{ formatPrice(cartStore.total) }}</span>
                 </div>
                 <div class="tw:mt-2 tw:flex tw:items-center tw:justify-between tw:text-xs tw:text-slate-500">
                   <span>Phí phục vụ</span>
@@ -387,7 +360,7 @@ onMounted(async () => {
                 </div>
                 <div class="tw:mt-4 tw:flex tw:items-center tw:justify-between tw:text-lg tw:font-semibold tw:text-slate-900">
                   <span>Tổng cộng</span>
-                  <span>{{ formatPrice(total) }}</span>
+                  <span>{{ formatPrice(cartStore.total) }}</span>
                 </div>
               </div>
 
@@ -395,11 +368,11 @@ onMounted(async () => {
                 label="Đặt hàng"
                 icon="pi pi-check"
                 class="tw:w-full"
-                :disabled="cart.length === 0 || !session"
+                :disabled="cartStore.count === 0 || !session"
                 :loading="isOrdering"
                 @click="submitOrder"
               />
-              <p v-if="!session && cart.length > 0" class="tw:text-center tw:text-xs tw:text-rose-500">
+              <p v-if="!session && cartStore.count > 0" class="tw:text-center tw:text-xs tw:text-rose-500">
                 Chưa kết nối bàn — không thể đặt hàng.
               </p>
             </div>
@@ -418,6 +391,28 @@ onMounted(async () => {
     @hide="selectedProduct = null"
   >
     <div class="tw:space-y-5">
+      <!-- Số lượng -->
+      <div>
+        <p class="tw:mb-2 tw:text-sm tw:font-medium tw:text-slate-700">Số lượng</p>
+        <div class="tw:flex tw:items-center tw:gap-3">
+          <button
+            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-slate-200 tw:text-slate-600 tw:transition hover:tw:border-orange-300"
+            @click="pendingQuantity = Math.max(1, pendingQuantity - 1)"
+          >
+            <iconify icon="heroicons-outline:minus" class="tw:h-4 tw:w-4" />
+          </button>
+          <span class="tw:min-w-8 tw:text-center tw:text-lg tw:font-semibold tw:text-slate-900">
+            {{ pendingQuantity }}
+          </span>
+          <button
+            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-slate-200 tw:text-slate-600 tw:transition hover:tw:border-orange-300"
+            @click="pendingQuantity++"
+          >
+            <iconify icon="heroicons-outline:plus" class="tw:h-4 tw:w-4" />
+          </button>
+        </div>
+      </div>
+
       <!-- Temperature -->
       <div v-if="selectedProduct?.hasTemperatureOption">
         <p class="tw:mb-2 tw:text-sm tw:font-medium tw:text-slate-700">Nhiệt độ</p>
@@ -429,13 +424,13 @@ onMounted(async () => {
             :class="pendingOptions.temperature === opt
               ? 'tw:border-orange-400 tw:bg-orange-50 tw:text-orange-700'
               : 'tw:border-slate-200 tw:text-slate-600 hover:tw:border-orange-300'"
-            @click="pendingOptions.temperature = opt"
+            @click="pendingOptions.temperature = opt; if (opt === 'Nóng') { pendingOptions.iceLevel = 'Không đá'; pendingOptions.sugarLevel = 'Bình thường' }"
           >{{ opt }}</button>
         </div>
       </div>
 
-      <!-- Ice level -->
-      <div v-if="selectedProduct?.hasIceLevelOption">
+      <!-- Ice level — chỉ hiện khi chọn Lạnh -->
+      <div v-if="selectedProduct?.hasIceLevelOption && pendingOptions.temperature !== 'Nóng'">
         <p class="tw:mb-2 tw:text-sm tw:font-medium tw:text-slate-700">Mức đá</p>
         <div class="tw:grid tw:grid-cols-2 tw:gap-2">
           <button
@@ -450,8 +445,8 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- Sugar level -->
-      <div v-if="selectedProduct?.hasSugarLevelOption">
+      <!-- Sugar level — chỉ hiện khi chọn Lạnh -->
+      <div v-if="selectedProduct?.hasSugarLevelOption && pendingOptions.temperature !== 'Nóng'">
         <p class="tw:mb-2 tw:text-sm tw:font-medium tw:text-slate-700">Mức đường</p>
         <div class="tw:grid tw:grid-cols-2 tw:gap-2">
           <button
