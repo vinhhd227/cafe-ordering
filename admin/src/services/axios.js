@@ -33,7 +33,7 @@ api.interceptors.response.use(
       ) {
         original._retry = true
         try {
-          await auth.refreshToken()
+          await auth.doRefreshToken()
           return api(original)
         } catch (refreshError) {
           return Promise.reject(refreshError)

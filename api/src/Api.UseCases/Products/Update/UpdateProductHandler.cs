@@ -23,11 +23,23 @@ public class UpdateProductHandler : ICommandHandler<UpdateProductCommand, Result
       return Result.NotFound($"Product {request.ProductId} not found");
     }
 
+    product.ChangeCategory(request.CategoryId);
+
     product.UpdateDetails(
       request.Name,
       request.Price,
       request.Description,
       request.ImageUrl);
+
+    product.UpdateOptions(
+      request.HasTemperatureOption,
+      request.HasIceLevelOption,
+      request.HasSugarLevelOption);
+
+    if (request.IsActive)
+      product.Activate();
+    else
+      product.Deactivate();
 
     await _repository.UpdateAsync(product, ct);
 

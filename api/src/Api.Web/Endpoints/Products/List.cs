@@ -20,9 +20,24 @@ public sealed class ListProductsRequest
   /// Case-insensitive partial match. Omit or leave empty to return all products.
   /// </summary>
   [QueryParam] public string? SearchTerm { get; set; }
+
+  /// <summary>
+  /// Optional filter by active status.
+  /// <c>true</c> = only active, <c>false</c> = only inactive, omit = all.
+  /// </summary>
+  [QueryParam] public bool? IsActive { get; set; }
+
+  /// <summary>Optional filter by category ID.</summary>
+  [QueryParam] public int? CategoryId { get; set; }
+
+  /// <summary>Optional minimum price filter (inclusive).</summary>
+  [QueryParam] public decimal? MinPrice { get; set; }
+
+  /// <summary>Optional maximum price filter (inclusive).</summary>
+  [QueryParam] public decimal? MaxPrice { get; set; }
 }
 
-public class List(IMediator mediator) : Ep.Req<ListProductsRequest>.Res<PagedResult<ProductSummaryDto>> 
+public class List(IMediator mediator) : Ep.Req<ListProductsRequest>.Res<PagedResult<ProductSummaryDto>>
 {
   public override void Configure()
   {
@@ -34,7 +49,12 @@ public class List(IMediator mediator) : Ep.Req<ListProductsRequest>.Res<PagedRes
 
   public override async Task HandleAsync(ListProductsRequest req, CancellationToken ct)
   {
-    var result = await mediator.Send(new ListProductsQuery(req.Page, req.PageSize, req.SearchTerm), ct);
+    var result = await mediator.Send(
+      new ListProductsQuery(
+        req.Page, req.PageSize,
+        req.SearchTerm, req.IsActive,
+        req.CategoryId, req.MinPrice, req.MaxPrice),
+      ct);
 
     await this.SendResultAsync(result, ct);
   }

@@ -14,6 +14,9 @@ public sealed class UpdateProductRequest
   /// </summary>
   public int ProductId { get; set; }
 
+  /// <summary>Category the product belongs to.</summary>
+  public int CategoryId { get; set; }
+
   /// <summary>New display name for the product.</summary>
   public string Name { get; set; } = string.Empty;
 
@@ -25,6 +28,18 @@ public sealed class UpdateProductRequest
 
   /// <summary>Updated image URL. Pass <c>null</c> to clear.</summary>
   public string? ImageUrl { get; set; }
+
+  /// <summary>Whether the product is active (visible on menu).</summary>
+  public bool IsActive { get; set; } = true;
+
+  /// <summary>Allow customers to choose temperature (hot/cold).</summary>
+  public bool HasTemperatureOption { get; set; }
+
+  /// <summary>Allow customers to choose ice level.</summary>
+  public bool HasIceLevelOption { get; set; }
+
+  /// <summary>Allow customers to choose sugar level.</summary>
+  public bool HasSugarLevelOption { get; set; }
 }
 
 public class Update : Endpoint<UpdateProductRequest>
@@ -47,7 +62,17 @@ public class Update : Endpoint<UpdateProductRequest>
   public override async Task HandleAsync(UpdateProductRequest req, CancellationToken ct)
   {
     var result = await _mediator.Send(
-      new UpdateProductCommand(req.ProductId, req.Name, req.Price, req.Description, req.ImageUrl), ct);
+      new UpdateProductCommand(
+        req.ProductId,
+        req.CategoryId,
+        req.Name,
+        req.Price,
+        req.IsActive,
+        req.HasTemperatureOption,
+        req.HasIceLevelOption,
+        req.HasSugarLevelOption,
+        req.Description,
+        req.ImageUrl), ct);
 
     await this.SendResultAsync(result, ct);
   }

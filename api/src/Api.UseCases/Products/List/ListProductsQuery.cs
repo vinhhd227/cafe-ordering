@@ -8,5 +8,9 @@ namespace Api.UseCases.Products.List;
 public record ListProductsQuery(
   int Page = 1,
   int PageSize = 10,
-  string? SearchTerm = null
+  string? SearchTerm = null,
+  bool? IsActive = null,
+  int? CategoryId = null,
+  decimal? MinPrice = null,
+  decimal? MaxPrice = null
 ) : IQuery<Result<PagedResult<List<ProductSummaryDto>>>>;

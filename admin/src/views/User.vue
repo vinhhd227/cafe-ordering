@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import {
   getUsers,
@@ -9,6 +10,10 @@ import {
   deactivateUser,
   changeUserRole,
 } from '@/services/user.service'
+import AppTable from '@/components/AppTable.vue'
+import { useTableCache } from '@/composables/useTableCache'
+
+const cache = useTableCache('users')
 
 // --- Auth / Permissions ---
 const auth = useAuthStore()
@@ -141,8 +146,30 @@ const loadStats = async () => {
 }
 
 onMounted(() => {
-  loadUsers()
+  const cached = cache.restore()
+  if (cached) {
+    search.value      = cached.search      ?? ''
+    rows.value        = cached.rows        ?? 20
+    first.value       = cached.first       ?? 0
+    roleFilter.value   = cached.roleFilter   ?? null
+    statusFilter.value = cached.statusFilter ?? null
+    const page = rows.value > 0 ? Math.floor(first.value / rows.value) + 1 : 1
+    loadUsers(page)
+  } else {
+    loadUsers()
+  }
   loadStats()
+})
+
+// Lưu trạng thái khi rời khỏi trang
+onBeforeRouteLeave(() => {
+  cache.save({
+    search:       search.value,
+    rows:         rows.value,
+    first:        first.value,
+    roleFilter:   roleFilter.value,
+    statusFilter: statusFilter.value,
+  })
 })
 
 watch([search, roleFilter, statusFilter], () => {
@@ -273,7 +300,8 @@ const submitChangeRole = async () => {
 
 <template>
   <section class="tw:space-y-6">
-    <!-- Page Header -->
+
+    <!-- ── Page Header ───────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
         <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">Users</p>
@@ -292,7 +320,7 @@ const submitChangeRole = async () => {
       />
     </div>
 
-    <!-- Summary Stats -->
+    <!-- ── Summary Stats ─────────────────────────────────────────── -->
     <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:md:grid-cols-4">
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
@@ -320,7 +348,7 @@ const submitChangeRole = async () => {
       </prime-card>
     </div>
 
-    <!-- Error Banner -->
+    <!-- ── Error Banner ──────────────────────────────────────────── -->
     <prime-message
       v-if="errorMessage"
       severity="error"
@@ -332,135 +360,126 @@ const submitChangeRole = async () => {
       {{ errorMessage }}
     </prime-message>
 
-    <!-- Main Table Card -->
-    <prime-card class="app-card tw:rounded-2xl tw:border">
-      <template #content>
-        <!-- Toolbar -->
-        <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-3">
-          <prime-input-text
-            v-model="search"
-            placeholder="Search users..."
-            class="app-input tw:w-64"
-          />
-          <prime-select
-            v-model="roleFilter"
-            :options="roleFilterOptions"
-            optionLabel="label"
-            optionValue="value"
-            class="app-input tw:w-36"
-          />
-          <prime-select
-            v-model="statusFilter"
-            :options="statusFilterOptions"
-            optionLabel="label"
-            optionValue="value"
-            class="app-input tw:w-40"
-          />
-        </div>
-
-        <!-- Data Table -->
-        <prime-data-table
-          class="tw:mt-6"
-          :value="users"
-          :loading="loading"
-          :paginator="true"
-          :rows="rows"
-          :first="first"
-          :totalRecords="totalRecords"
-          :rowsPerPageOptions="[10, 20, 50]"
-          @page="(e) => { first = e.first; rows = e.rows; loadUsers(e.page + 1) }"
-          responsiveLayout="scroll"
-        >
-          <!-- User column: avatar + username + fullName -->
-          <prime-column header="User" style="min-width: 14rem">
-            <template #body="{ data }">
-              <div class="tw:flex tw:items-center tw:gap-3">
-                <div
-                  class="tw:h-9 tw:w-9 tw:rounded-full tw:flex tw:items-center tw:justify-center
-                         tw:bg-emerald-500/20 tw:text-emerald-300 tw:text-xs tw:font-bold tw:flex-shrink-0"
-                >
-                  {{ initials(data.fullName) }}
-                </div>
-                <div>
-                  <p class="tw:text-sm tw:font-medium">{{ data.username }}</p>
-                  <p class="tw:text-xs app-text-muted">{{ data.fullName }}</p>
-                </div>
-              </div>
-            </template>
-          </prime-column>
-
-          <!-- Email -->
-          <prime-column header="Email">
-            <template #body="{ data }">
-              <span class="tw:text-sm app-text-muted">{{ data.email || '—' }}</span>
-            </template>
-          </prime-column>
-
-          <!-- Role -->
-          <prime-column header="Role" style="min-width: 8rem">
-            <template #body="{ data }">
-              <prime-tag
-                v-for="role in data.roles"
-                :key="role"
-                :value="role"
-                :severity="roleSeverity(role)"
-                class="tw:mr-1"
-              />
-              <span v-if="!data.roles?.length" class="app-text-muted tw:text-xs">—</span>
-            </template>
-          </prime-column>
-
-          <!-- Status -->
-          <prime-column header="Status">
-            <template #body="{ data }">
-              <prime-tag
-                :value="data.isActive ? 'Active' : 'Inactive'"
-                :severity="data.isActive ? 'success' : 'danger'"
-              />
-            </template>
-          </prime-column>
-
-          <!-- Created date -->
-          <prime-column header="Created">
-            <template #body="{ data }">
-              <span class="tw:text-xs app-text-muted">{{ formatDate(data.createdAt) }}</span>
-            </template>
-          </prime-column>
-
-          <!-- Actions (Admin only) -->
-          <prime-column v-if="canManage" header="Actions" style="min-width: 11rem">
-            <template #body="{ data }">
-              <div class="tw:flex tw:gap-2">
-                <prime-button
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  outlined
-                  size="small"
-                  v-tooltip.top="'Edit'"
-                  @click="openEditDialog(data)"
-                />
-                <prime-button
-                  :icon="data.isActive ? 'pi pi-ban' : 'pi pi-check-circle'"
-                  :severity="data.isActive ? 'danger' : 'success'"
-                  outlined
-                  size="small"
-                  v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
-                  @click="handleToggleActive(data)"
-                />
-                <prime-button
-                  icon="pi pi-shield"
-                  severity="secondary"
-                  outlined
-                  size="small"
-                  v-tooltip.top="'Change role'"
-                  @click="openRoleDialog(data)"
-                />
-              </div>
-            </template>
-          </prime-column>
-        </prime-data-table>
+    <!-- ── Table ──────────────────────────────────────────────────── -->
+    <AppTable
+      v-model:first="first"
+      v-model:rows="rows"
+      :value="users"
+      :loading="loading"
+      :totalRecords="totalRecords"
+      :rowsPerPageOptions="[10, 20, 50]"
+      @page="(e) => loadUsers(e.page + 1)"
+    >
+      <template #toolbar-left>
+        <prime-input-text
+          v-model="search"
+          placeholder="Search users..."
+          class="app-input tw:w-64"
+        />
+        <prime-select
+          v-model="roleFilter"
+          :options="roleFilterOptions"
+          optionLabel="label"
+          optionValue="value"
+          class="app-input tw:w-36"
+        />
+        <prime-select
+          v-model="statusFilter"
+          :options="statusFilterOptions"
+          optionLabel="label"
+          optionValue="value"
+          class="app-input tw:w-40"
+        />
       </template>
-    </prime-card>
+
+      <!-- User: avatar + username + fullName -->
+      <prime-column header="User" style="min-width: 14rem">
+        <template #body="{ data }">
+          <div class="tw:flex tw:items-center tw:gap-3">
+            <div
+              class="tw:h-9 tw:w-9 tw:rounded-full tw:flex tw:items-center tw:justify-center
+                     tw:bg-emerald-500/20 tw:text-emerald-300 tw:text-xs tw:font-bold tw:flex-shrink-0"
+            >
+              {{ initials(data.fullName) }}
+            </div>
+            <div>
+              <p class="tw:text-sm tw:font-medium">{{ data.username }}</p>
+              <p class="tw:text-xs app-text-muted">{{ data.fullName }}</p>
+            </div>
+          </div>
+        </template>
+      </prime-column>
+
+      <!-- Email -->
+      <prime-column header="Email">
+        <template #body="{ data }">
+          <span class="tw:text-sm app-text-muted">{{ data.email || '—' }}</span>
+        </template>
+      </prime-column>
+
+      <!-- Role -->
+      <prime-column header="Role" style="min-width: 8rem">
+        <template #body="{ data }">
+          <prime-tag
+            v-for="role in data.roles"
+            :key="role"
+            :value="role"
+            :severity="roleSeverity(role)"
+            class="tw:mr-1"
+          />
+          <span v-if="!data.roles?.length" class="app-text-muted tw:text-xs">—</span>
+        </template>
+      </prime-column>
+
+      <!-- Status -->
+      <prime-column header="Status">
+        <template #body="{ data }">
+          <prime-tag
+            :value="data.isActive ? 'Active' : 'Inactive'"
+            :severity="data.isActive ? 'success' : 'danger'"
+          />
+        </template>
+      </prime-column>
+
+      <!-- Created date -->
+      <prime-column header="Created">
+        <template #body="{ data }">
+          <span class="tw:text-xs app-text-muted">{{ formatDate(data.createdAt) }}</span>
+        </template>
+      </prime-column>
+
+      <!-- Actions (Admin only) -->
+      <prime-column v-if="canManage" header="Actions" style="min-width: 11rem">
+        <template #body="{ data }">
+          <div class="tw:flex tw:gap-2">
+            <prime-button
+              icon="pi pi-pencil"
+              severity="secondary"
+              outlined
+              size="small"
+              v-tooltip.top="'Edit'"
+              @click="openEditDialog(data)"
+            />
+            <prime-button
+              :icon="data.isActive ? 'pi pi-ban' : 'pi pi-check-circle'"
+              :severity="data.isActive ? 'danger' : 'success'"
+              outlined
+              size="small"
+              v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
+              @click="handleToggleActive(data)"
+            />
+            <prime-button
+              icon="pi pi-shield"
+              severity="secondary"
+              outlined
+              size="small"
+              v-tooltip.top="'Change role'"
+              @click="openRoleDialog(data)"
+            />
+          </div>
+        </template>
+      </prime-column>
+    </AppTable>
 
     <!-- ===== Add User Dialog ===== -->
     <prime-dialog
@@ -595,13 +614,12 @@ const submitChangeRole = async () => {
         </div>
         <div class="tw:space-y-1">
           <label class="tw:text-sm tw:font-medium">Full name</label>
-          <prime-input-text
-            v-model="editForm.fullName"
-            class="app-input tw:w-full"
-          />
+          <prime-input-text v-model="editForm.fullName" class="app-input tw:w-full" />
         </div>
         <div class="tw:space-y-1">
-          <label class="tw:text-sm tw:font-medium">Email <span class="app-text-muted tw:font-normal">(optional)</span></label>
+          <label class="tw:text-sm tw:font-medium">
+            Email <span class="app-text-muted tw:font-normal">(optional)</span>
+          </label>
           <prime-input-text
             v-model="editForm.email"
             class="app-input tw:w-full"
@@ -709,5 +727,6 @@ const submitChangeRole = async () => {
         />
       </template>
     </prime-dialog>
+
   </section>
 </template>

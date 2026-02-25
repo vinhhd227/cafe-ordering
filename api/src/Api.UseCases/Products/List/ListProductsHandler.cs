@@ -14,10 +14,15 @@ public class ListProductsHandler(IReadRepositoryBase<Product> repository)
     ListProductsQuery request,
     CancellationToken ct)
   {
-    var spec = new ProductsPagedSpec(request.Page, request.PageSize, request.SearchTerm);
+    var spec = new ProductsPagedSpec(
+      request.Page, request.PageSize,
+      request.SearchTerm, request.IsActive,
+      request.CategoryId, request.MinPrice, request.MaxPrice);
     var products = await repository.ListAsync(spec, ct);
 
-    var countSpec = new ProductsCountSpec(request.SearchTerm);
+    var countSpec = new ProductsCountSpec(
+      request.SearchTerm, request.IsActive,
+      request.CategoryId, request.MinPrice, request.MaxPrice);
     var totalCount = await repository.CountAsync(countSpec, ct);
 
     var dtos = products

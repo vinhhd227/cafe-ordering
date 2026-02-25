@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
 import { getOrders, updateOrderStatus } from "@/services/order.service";
 
 const orders = ref([]);
@@ -11,6 +12,7 @@ const draggingOrder = ref(null);
 const dragOverCol = ref(null);
 const pendingMoves = ref(new Map()); // orderId → { timeoutId, originalStatus }
 const toast = useToast();
+const confirm = useConfirm();
 let refreshTimer = null;
 
 const STATUSES = [
@@ -228,11 +230,13 @@ onUnmounted(() => clearInterval(refreshTimer));
 </script>
 
 <template>
+  <prime-confirm-popup />
+
   <!-- Undo toast for drag-and-drop moves -->
   <prime-toast group="order-move" position="bottom-right">
     <template #message="{ message }">
       <div class="tw:flex tw:items-center tw:gap-3 tw:w-full">
-        <Icon
+        <iconify
           icon="ph:arrows-left-right-bold"
           class="tw:text-lg tw:shrink-0 tw:text-blue-400"
         />
@@ -275,7 +279,7 @@ onUnmounted(() => clearInterval(refreshTimer));
         @click="loadOrders"
       >
         <template #icon>
-          <Icon icon="ph:arrows-clockwise-bold" class="tw:mr-1" />
+          <iconify icon="ph:arrows-clockwise-bold" class="tw:mr-1" />
         </template>
       </prime-button>
     </div>
@@ -359,7 +363,7 @@ onUnmounted(() => clearInterval(refreshTimer));
           :class="col.bg"
         >
           <span
-            class="tw:inline-block tw:h-2 tw:w-2 tw:rounded-full tw:flex-shrink-0"
+            class="tw:inline-block tw:h-2 tw:w-2 tw:rounded-full tw:shrink-0"
             :class="col.dot"
           />
           <span class="tw:font-semibold tw:text-sm" :class="col.color">{{
@@ -375,7 +379,7 @@ onUnmounted(() => clearInterval(refreshTimer));
 
         <!-- Cards -->
         <div
-          class="tw:flex tw:flex-col tw:gap-3 tw:min-h-[320px] tw:rounded-xl tw:transition-colors tw:p-3"
+          class="tw:flex tw:flex-col tw:gap-3 tw:min-h-80 tw:rounded-xl tw:transition-colors tw:p-3"
           :class="dragOverCol === col.key ? col.bg : ''"
           @dragover="handleDragOver($event, col.key)"
           @dragleave="handleDragleave"
@@ -399,7 +403,7 @@ onUnmounted(() => clearInterval(refreshTimer));
             v-else-if="!loading && ordersByStatus[col.key].length === 0"
             class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-dashed tw:py-10 app-text-muted tw:text-sm tw:text-center tw:opacity-50"
           >
-            <Icon icon="ph:tray-bold" class="tw:text-2xl tw:mb-2" />
+            <iconify icon="ph:tray-bold" class="tw:text-2xl tw:mb-2" />
             No orders
           </div>
 
@@ -454,33 +458,50 @@ onUnmounted(() => clearInterval(refreshTimer));
             </ul>
 
             <!-- Actions -->
-              <div class="tw:flex tw:gap-2 tw:pt-1">
-                <!-- Move to next status -->
-                <prime-button
-                  v-if="NEXT_STATUS[col.key]"
-                  :label="NEXT_LABEL[col.key]"
-                  severity="success"
-                  size="small"
-                  class="tw:w-full"
-                  :loading="updatingId === order.id"
-                  @click="moveOrder(order, NEXT_STATUS[col.key])"
-                />
-                <!-- Cancel -->
-                <prime-button
-                  v-if="col.key === 'Pending' || col.key === 'Processing'"
-                  severity="danger"
-                  size="small"
-                  outlined
-                  class="tw:w-full"
-                  :loading="updatingId === order.id"
-                  @click="cancelOrder(order)"
-                >
-                  <template #icon>
-                    <iconify icon="ph:x-circle" />Cancel
-                  </template>
-                  
-                </prime-button>
-              </div>
+            <div class="tw:flex tw:gap-2 tw:pt-1">
+              <!-- Move to next status -->
+              <prime-button
+                v-if="NEXT_STATUS[col.key]"
+                :label="NEXT_LABEL[col.key]"
+                severity="success"
+                size="small"
+                class="tw:w-full"
+                :loading="updatingId === order.id"
+                @click="moveOrder(order, NEXT_STATUS[col.key])"
+              />
+              <!-- Cancel -->
+              <prime-button
+                v-if="col.key === 'Pending' || col.key === 'Processing'"
+                severity="danger"
+                size="small"
+                outlined
+                  class="tw:w-1/4"
+                :loading="updatingId === order.id"
+                @click="
+                  (e) =>
+                    confirm.require({
+                      target: e.currentTarget,
+                      message: `Cancel order ${order.orderNumber}?`,
+                      icon: 'ph:warning-bold',
+                      rejectProps: {
+                        label: 'Keep',
+                        severity: 'secondary',
+                        outlined: true,
+                        size: 'small',
+                      },
+                      acceptProps: {
+                        label: 'Yes, cancel',
+                        severity: 'danger',
+                        size: 'small',
+                      },
+                      accept: () => cancelOrder(order),
+                    })
+                "
+              >
+                <iconify icon="ph:x-circle" />
+                <span>Cancel</span>
+              </prime-button>
+            </div>
           </div>
         </div>
       </div>

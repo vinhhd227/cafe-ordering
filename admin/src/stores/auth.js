@@ -36,7 +36,7 @@ export const useAuthStore = defineStore('auth', {
             return res
         },
 
-        async refreshToken() {
+        async doRefreshToken() {
             if (this.refreshing && this._refreshPromise) {
                 return this._refreshPromise
             }
@@ -86,7 +86,7 @@ export const useAuthStore = defineStore('auth', {
             this.hydrating = true
             this._hydratePromise = (async () => {
                 try {
-                    await this.refreshToken()
+                    await this.doRefreshToken()
                 } catch (err) {
                     this.accessToken = null
                 } finally {
@@ -111,7 +111,7 @@ export const useAuthStore = defineStore('auth', {
             const refreshAtMs = Math.max(expiresAtMs - 30_000, Date.now() + 1_000)
             const delay = refreshAtMs - Date.now()
             this.refreshTimer = setTimeout(() => {
-                this.refreshToken()
+                this.doRefreshToken()
             }, delay)
         },
 

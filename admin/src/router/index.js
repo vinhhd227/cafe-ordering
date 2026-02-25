@@ -58,11 +58,24 @@ const routes = [
       },
       {
         path: "products",
-        name: "products",
-        component: () => import("@/views/Products.vue"),
-        meta: {
-          requiresAuth: true,
-        },
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: "",
+            name: "products",
+            component: () => import("@/views/products/List.vue"),
+          },
+          {
+            path: "create",
+            name: "productsCreate",
+            component: () => import("@/views/products/Create.vue"),
+          },
+          {
+            path: ":id",
+            name: "productsDetail",
+            component: () => import("@/views/products/Detail.vue"),
+          },
+        ],
       },
       {
         path: "staff",
