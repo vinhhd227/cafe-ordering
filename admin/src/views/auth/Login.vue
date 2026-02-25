@@ -19,7 +19,7 @@ const isDark = computed(() => themeStore.isDark);
 
 const schema = toTypedSchema(
   z.object({
-    email: z.string().min(1, "Email is required.").email("Email is invalid."),
+    username: z.string().min(1, "Username is required."),
     password: z.string().min(1, "Password is required."),
     rememberMe: z.boolean(),
   }),
@@ -36,13 +36,13 @@ const {
 } = useForm({
   validationSchema: schema,
   initialValues: {
-    email: "",
+    username: "",
     password: "",
     rememberMe: false,
   },
 });
 
-const [email, emailAttrs] = defineField("email");
+const [username, usernameAttrs] = defineField("username");
 const [password, passwordAttrs] = defineField("password");
 const [rememberMe, rememberMeAttrs] = defineField("rememberMe");
 
@@ -139,25 +139,25 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="tw:mt-8 tw:space-y-5">
-          <label for="email" :class="labelCustom"> Email </label>
+          <label for="username" :class="labelCustom"> Username </label>
           <prime-input-text
-            id="email"
-            type="email"
+            id="username"
+            type="text"
             fluid
-            placeholder="you@cafe.com"
-            v-model="email"
-            v-bind="emailAttrs"
+            placeholder="your-username"
+            v-model="username"
+            v-bind="usernameAttrs"
             :class="inputCustom"
           />
           <prime-message
-            v-if="errors.email"
+            v-if="errors.username"
             severity="error"
             size="small"
             variant="simple"
             :closable="false"
             class="tw:mb-1"
           >
-            {{ errors.email }}
+            {{ errors.username }}
           </prime-message>
           <label for="password" :class="labelCustom"> Password </label>
           <prime-password
