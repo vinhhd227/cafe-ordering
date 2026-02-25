@@ -6,6 +6,7 @@ import api from '@/services/axios'
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         accessToken: null,
+        refreshToken: null,
         user: null,
         expiresAt: null,
         refreshTimer: null,
@@ -22,11 +23,14 @@ export const useAuthStore = defineStore('auth', {
         async login(payload) {
             const res = await login(payload)
             this.accessToken = res.data.accessToken
+            this.refreshToken = res.data.refreshToken
+            localStorage.setItem('refreshToken', res.data.refreshToken)
             this.user = {
                 firstName: res.data.firstName,
                 lastName: res.data.lastName,
                 roles: res.data.roles,
             }
+            localStorage.setItem('user', JSON.stringify(this.user))
             this.expiresAt = res.data.expiresAt
             this.scheduleTokenRefresh()
             return res
@@ -42,18 +46,21 @@ export const useAuthStore = defineStore('auth', {
                 throw new Error('Refresh attempt exceeded')
             }
 
+            // Recover refresh token from localStorage on page reload
+            if (!this.refreshToken) {
+                this.refreshToken = localStorage.getItem('refreshToken')
+            }
+
             this.refreshing = true
             this._refreshPromise = (async () => {
-                const res = await refresh()
-                this.accessToken = res.data.access_token
-                this.expiresAt = res.data.expires_at
-                if (res.data.first_name || res.data.last_name || res.data.roles) {
-                    this.user = {
-                        firstName: res.data.first_name,
-                        lastName: res.data.last_name,
-                        roles: res.data.roles ?? this.user?.roles,
-                    }
-                }
+                const res = await refresh(this.refreshToken)
+                this.accessToken = res.data.accessToken
+                this.refreshToken = res.data.refreshToken
+                localStorage.setItem('refreshToken', res.data.refreshToken)
+                this.expiresAt = res.data.expiresAt
+                // Restore user from localStorage (refresh response has no user fields)
+                const storedUser = localStorage.getItem('user')
+                if (storedUser) this.user = JSON.parse(storedUser)
                 this.scheduleTokenRefresh()
                 this.refreshAttempts = 0
                 return res
@@ -75,6 +82,7 @@ export const useAuthStore = defineStore('auth', {
             if (this.hydrating && this._hydratePromise) {
                 return this._hydratePromise
             }
+            this.refreshAttempts = 0  // clean slate on every page load
             this.hydrating = true
             this._hydratePromise = (async () => {
                 try {
@@ -109,6 +117,9 @@ export const useAuthStore = defineStore('auth', {
 
         logout() {
             this.accessToken = null
+            this.refreshToken = null
+            localStorage.removeItem('refreshToken')
+            localStorage.removeItem('user')
             this.user = null
             this.expiresAt = null
             this.clearTokenRefresh()

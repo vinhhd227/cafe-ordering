@@ -237,6 +237,100 @@ public class IdentityService : IIdentityService
     return Result.Success();
   }
 
+  public async Task<Result<PagedUsersDto>> GetUsersAsync(
+    int page,
+    int pageSize,
+    string? search,
+    string? role,
+    bool? isActive)
+  {
+    var query = _userManager.Users
+      .Include(u => u.UserRoles)
+        .ThenInclude(ur => ur.Role)
+      .AsQueryable();
+
+    if (!string.IsNullOrWhiteSpace(search))
+      query = query.Where(u =>
+        u.UserName!.Contains(search) ||
+        u.FullName.Contains(search));
+
+    if (!string.IsNullOrWhiteSpace(role))
+      query = query.Where(u =>
+        u.UserRoles.Any(ur => ur.Role!.Name == role));
+
+    if (isActive.HasValue)
+      query = query.Where(u => u.IsActive == isActive.Value);
+
+    var total = await query.CountAsync();
+
+    var users = await query
+      .OrderByDescending(u => u.CreatedAt)
+      .Skip((page - 1) * pageSize)
+      .Take(pageSize)
+      .ToListAsync();
+
+    var items = users.Select(u => new UserDto(
+      u.Id,
+      u.UserName!,
+      u.FullName,
+      u.Email,
+      u.UserRoles.Select(ur => ur.Role!.Name!).ToList(),
+      u.IsActive,
+      u.CreatedAt
+    )).ToList();
+
+    return Result<PagedUsersDto>.Success(new PagedUsersDto(items, total, page, pageSize));
+  }
+
+  public async Task<Result> UpdateUserAsync(Guid userId, string fullName, string? email)
+  {
+    var user = await _userManager.FindByIdAsync(userId.ToString());
+    if (user is null)
+      return Result.NotFound();
+
+    user.FullName = fullName;
+    user.Email = email;
+    user.UpdatedAt = DateTime.UtcNow;
+
+    var result = await _userManager.UpdateAsync(user);
+    if (!result.Succeeded)
+      return Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
+
+    _logger.LogInformation("User {UserId} profile updated", userId);
+    return Result.Success();
+  }
+
+  public async Task<Result> ActivateUserAsync(Guid userId)
+  {
+    var user = await _userManager.FindByIdAsync(userId.ToString());
+    if (user is null)
+      return Result.NotFound();
+
+    user.Activate();
+    user.UpdatedAt = DateTime.UtcNow;
+    await _userManager.UpdateAsync(user);
+
+    _logger.LogInformation("User {UserId} activated", userId);
+    return Result.Success();
+  }
+
+  public async Task<Result> ChangeUserRoleAsync(Guid userId, string newRole)
+  {
+    var user = await _userManager.FindByIdAsync(userId.ToString());
+    if (user is null)
+      return Result.NotFound();
+
+    var currentRoles = await _userManager.GetRolesAsync(user);
+    await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+    var addResult = await _userManager.AddToRoleAsync(user, newRole);
+    if (!addResult.Succeeded)
+      return Result.Error(string.Join("; ", addResult.Errors.Select(e => e.Description)));
+
+    _logger.LogInformation("User {UserId} role changed to {Role}", userId, newRole);
+    return Result.Success();
+  }
+
   // ===== Private Helpers =====
 
   private async Task<RefreshToken> IssueRefreshTokenAsync(Guid userId)

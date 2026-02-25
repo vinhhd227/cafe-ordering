@@ -52,6 +52,26 @@ public interface IIdentityService
   /// Used for real-time availability check during registration.
   /// </summary>
   Task<bool> IsUsernameAvailableAsync(string username);
+
+  /// <summary>
+  /// Get a paged, filterable list of all users for admin management.
+  /// </summary>
+  Task<Result<PagedUsersDto>> GetUsersAsync(int page, int pageSize, string? search, string? role, bool? isActive);
+
+  /// <summary>
+  /// Update a user's FullName and Email.
+  /// </summary>
+  Task<Result> UpdateUserAsync(Guid userId, string fullName, string? email);
+
+  /// <summary>
+  /// Re-activate a previously deactivated user account.
+  /// </summary>
+  Task<Result> ActivateUserAsync(Guid userId);
+
+  /// <summary>
+  /// Replace all current roles of a user with a single new role.
+  /// </summary>
+  Task<Result> ChangeUserRoleAsync(Guid userId, string newRole);
 }
 
 /// <summary>Response returned after a successful login or token refresh.</summary>
@@ -59,3 +79,16 @@ public record AuthResponseDto(string AccessToken, string RefreshToken, DateTime 
 
 /// <summary>Response returned after creating a staff account.</summary>
 public record TemporaryPasswordDto(string Username, string TemporaryPassword);
+
+/// <summary>Represents a user record in admin user management.</summary>
+public record UserDto(
+  Guid Id,
+  string Username,
+  string FullName,
+  string? Email,
+  List<string> Roles,
+  bool IsActive,
+  DateTime CreatedAt);
+
+/// <summary>Paged result for user list queries.</summary>
+public record PagedUsersDto(List<UserDto> Items, int Total, int Page, int PageSize);

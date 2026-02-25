@@ -50,6 +50,8 @@ import Checkbox from 'primevue/checkbox';
 import CheckboxGroup from 'primevue/checkboxgroup';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
+import Dialog from 'primevue/dialog'
+import Tooltip from 'primevue/tooltip'
 
 // Theme
 const coffeePreset = definePreset(Aura, {
@@ -144,5 +146,7 @@ export default {
         app.component('prime-checkbox-group', CheckboxGroup)
         app.component('prime-tab-view', TabView)
         app.component('prime-tab-panel', TabPanel)
+        app.component('prime-dialog', Dialog)
+        app.directive('tooltip', Tooltip)
     },
 }

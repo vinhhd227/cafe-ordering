@@ -18,8 +18,10 @@ registerPlugins(app)
 app.use(router)
 
 const authStore = useAuthStore(pinia)
-authStore.hydrateFromRefresh()
-const themeStore = useThemeStore(pinia)
-themeStore.init()
 
-app.mount('#app')
+;(async () => {
+    await authStore.hydrateFromRefresh()
+    const themeStore = useThemeStore(pinia)
+    themeStore.init()
+    app.mount('#app')
+})()

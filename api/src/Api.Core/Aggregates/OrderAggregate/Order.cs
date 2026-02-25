@@ -64,12 +64,26 @@ public class Order : AuditableEntity<int>, IAggregateRoot
     RegisterDomainEvent(new OrderItemAddedEvent(this, productId, quantity));
   }
 
+  public void Process()
+  {
+    if (!Status.CanTransitionTo(OrderStatus.Processing))
+      throw new InvalidOperationException($"Cannot process order in {Status} status");
+
+    Status = OrderStatus.Processing;
+  }
+
+  public void Cancel()
+  {
+    if (!Status.CanTransitionTo(OrderStatus.Cancelled))
+      throw new InvalidOperationException($"Cannot cancel order in {Status} status");
+
+    Status = OrderStatus.Cancelled;
+  }
+
   public void Complete()
   {
-    if (Status != OrderStatus.Processing)
-    {
+    if (!Status.CanTransitionTo(OrderStatus.Completed))
       throw new InvalidOperationException($"Cannot complete order in {Status} status");
-    }
 
     Status = OrderStatus.Completed;
 
