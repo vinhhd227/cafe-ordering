@@ -22,12 +22,17 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
 
     builder.Property(u => u.UserName).HasMaxLength(256).IsRequired();
     builder.Property(u => u.NormalizedUserName).HasMaxLength(256).IsRequired();
-    builder.Property(u => u.Email).HasMaxLength(256).IsRequired();
+    builder.Property(u => u.Email).HasMaxLength(256);
     builder.Property(u => u.NormalizedEmail).HasMaxLength(256);
     builder.Property(u => u.PhoneNumber).HasMaxLength(20);
     builder.Property(u => u.PasswordHash).HasMaxLength(500);
     builder.Property(u => u.SecurityStamp).HasMaxLength(100);
     builder.Property(u => u.ConcurrencyStamp).HasMaxLength(100);
+
+    // New fields
+    builder.Property(u => u.FullName).HasMaxLength(200).IsRequired();
+    builder.Property(u => u.StaffId);
+    builder.Property(u => u.CustomerId);
 
     builder.HasMany(u => u.UserRoles)
       .WithOne(ur => ur.User)
@@ -35,7 +40,7 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
       .IsRequired()
       .OnDelete(DeleteBehavior.Cascade);
 
-    // RefreshTokens navigation — actual FK config lives in UserRefreshTokenConfiguration
+    // RefreshTokens navigation — actual FK config lives in RefreshTokenConfiguration
     builder.HasMany(u => u.RefreshTokens)
       .WithOne(t => t.User)
       .HasForeignKey(t => t.UserId)

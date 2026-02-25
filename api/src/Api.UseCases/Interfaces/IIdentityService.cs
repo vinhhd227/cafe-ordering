@@ -2,60 +2,60 @@ namespace Api.UseCases.Interfaces;
 
 /// <summary>
 /// Service interface for Identity/Authentication operations.
-/// Abstracts UserManager and Identity Framework from the Use Cases layer.
+/// Abstracts UserManager, SignInManager and Identity Framework from the Use Cases layer.
 /// </summary>
 public interface IIdentityService
 {
   /// <summary>
-  /// Create a new application user. Returns the identity user ID (used as IdentityGuid in Customer).
+  /// Create a new application user and assign the given role.
+  /// Returns the new ApplicationUser.Id (Guid) as string for linking to domain aggregates.
   /// </summary>
-  Task<Result<string>> CreateUserAsync(string email, string password);
+  Task<Result<string>> CreateUserAsync(
+    string username,
+    string? email,
+    string password,
+    string fullName,
+    string role);
 
   /// <summary>
-  /// Authenticate user and generate JWT tokens.
-  /// deviceInfo is optional — used to label the session (e.g., "Chrome/Windows", "iOS App").
+  /// Authenticate user by username and generate JWT + refresh token.
   /// </summary>
-  Task<Result<TokenResponse>> LoginAsync(string email, string password, string? deviceInfo = null);
+  Task<Result<AuthResponseDto>> LoginAsync(string username, string password);
 
   /// <summary>
-  /// Refresh access token using refresh token.
-  /// Rotates the token (old is revoked, new is issued — same device slot).
+  /// Refresh access token using a refresh token.
+  /// Rotates the token (old is revoked, new is issued).
+  /// On suspicious usage (token not found or revoked), all user tokens are revoked.
   /// </summary>
-  Task<Result<TokenResponse>> RefreshTokenAsync(string accessToken, string refreshToken);
+  Task<Result<AuthResponseDto>> RefreshTokenAsync(string refreshToken);
 
   /// <summary>
-  /// Revoke a single refresh token (logout from one device).
+  /// Create a staff account with an auto-generated temporary password.
   /// </summary>
-  Task<Result> RevokeTokenAsync(string refreshToken, string reason = "Logout");
+  Task<Result<TemporaryPasswordDto>> CreateStaffAccountAsync(
+    string username,
+    string fullName,
+    string role);
 
   /// <summary>
-  /// Revoke all refresh tokens for a user (logout from all devices).
-  /// Use after password change, account deactivation, or security breach.
+  /// Change user password. Revokes all refresh tokens after a successful change.
   /// </summary>
-  Task<Result> RevokeAllTokensAsync(string identityGuid, string reason = "Logout all devices");
+  Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
 
   /// <summary>
-  /// Change user password
+  /// Deactivate user account (prevents login) and revoke all refresh tokens.
   /// </summary>
-  Task<Result> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
+  Task<Result> DeactivateUserAsync(Guid userId);
 
   /// <summary>
-  /// Update user email (synced from Customer aggregate via IdentityGuid).
+  /// Check whether a username is available (not yet taken).
+  /// Used for real-time availability check during registration.
   /// </summary>
-  Task<Result> UpdateEmailAsync(string identityGuid, string newEmail);
-
-  /// <summary>
-  /// Deactivate user account (soft delete in Identity DB).
-  /// </summary>
-  Task<Result> DeactivateUserAsync(string identityGuid);
-
-  /// <summary>
-  /// Generate password reset token
-  /// </summary>
-  Task<Result> ResetPasswordAsync(string email);
+  Task<bool> IsUsernameAvailableAsync(string username);
 }
 
-/// <summary>
-/// JWT token response
-/// </summary>
-public record TokenResponse(string AccessToken, string RefreshToken, int ExpiresIn);
+/// <summary>Response returned after a successful login or token refresh.</summary>
+public record AuthResponseDto(string AccessToken, string RefreshToken, DateTime ExpiresAt);
+
+/// <summary>Response returned after creating a staff account.</summary>
+public record TemporaryPasswordDto(string Username, string TemporaryPassword);

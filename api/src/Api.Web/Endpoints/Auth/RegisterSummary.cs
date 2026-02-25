@@ -12,10 +12,10 @@ public class RegisterSummary : Summary<RegisterEndpoint>
 
     ExampleRequest = new RegisterRequest
     {
+      Username = "john.doe",
       Email = "john.doe@example.com",
       Password = "Secret@123",
-      FirstName = "John",
-      LastName = "Doe"
+      FullName = "John Doe"
     };
 
     ResponseExamples[200] = new RegisterResponse

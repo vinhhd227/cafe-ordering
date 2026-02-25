@@ -8,21 +8,26 @@ namespace Api.UseCases.Interfaces;
 public interface IJwtService
 {
   /// <summary>
-  /// Generate JWT access token with user claims.
+  /// Generate JWT access token (15 minutes) with user claims.
+  /// Claims: sub, NameIdentifier, username, fullName, roles, permissions, staffId?, customerId?
   /// </summary>
-  /// <param name="userId">ApplicationUser ID (int, from Identity DB)</param>
-  /// <param name="identityGuid">Same as userId.ToString() — used by business layer to lookup Customer</param>
-  /// <param name="email">User email</param>
-  /// <param name="roles">User roles</param>
-  string GenerateAccessToken(int userId, string? identityGuid, string email, IList<string> roles);
+  string GenerateAccessToken(
+    Guid userId,
+    string username,
+    string fullName,
+    IList<string> roles,
+    IList<string> permissions,
+    Guid? staffId = null,
+    Guid? customerId = null);
 
   /// <summary>
-  /// Generate refresh token
+  /// Generate a cryptographically-random refresh token string (64-byte Base64).
   /// </summary>
   string GenerateRefreshToken();
 
   /// <summary>
-  /// Validate JWT token and return claims principal
+  /// Validate JWT token signature/issuer/audience (does NOT validate lifetime — used for refresh flow).
+  /// Returns null if token is invalid.
   /// </summary>
   ClaimsPrincipal? ValidateToken(string token);
 }

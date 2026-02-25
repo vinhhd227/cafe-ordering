@@ -12,7 +12,7 @@ public class GetCurrentUserSummary : Summary<GetCurrentUserEndpoint>
     ResponseExamples[200] = new GetCurrentUserResponse
     {
       Success = true,
-      User = new UserDto { Id = 1, Email = "john.doe@example.com" },
+      User = new UserDto { Id = Guid.NewGuid(), Username = "john.doe", Email = "john.doe@example.com", FullName = "John Doe" },
       Roles = ["Customer"]
     };
 

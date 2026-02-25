@@ -8,7 +8,10 @@ namespace Api.Web.Endpoints.Auth;
 /// </summary>
 public sealed class RegisterRequest
 {
-  /// <summary>Valid email address. Used as the login identifier and must be unique.</summary>
+  /// <summary>Chosen username. Used as the login identifier and must be unique.</summary>
+  public string Username { get; set; } = string.Empty;
+
+  /// <summary>Valid email address for contact purposes.</summary>
   public string Email { get; set; } = string.Empty;
 
   /// <summary>
@@ -17,11 +20,8 @@ public sealed class RegisterRequest
   /// </summary>
   public string Password { get; set; } = string.Empty;
 
-  /// <summary>Customer's first name.</summary>
-  public string FirstName { get; set; } = string.Empty;
-
-  /// <summary>Customer's last name.</summary>
-  public string LastName { get; set; } = string.Empty;
+  /// <summary>Customer's full name (e.g. "Ava Nguyen").</summary>
+  public string FullName { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -49,10 +49,10 @@ public class RegisterEndpoint(IMediator mediator) : Ep.Req<RegisterRequest>.Res<
   public override async Task HandleAsync(RegisterRequest req, CancellationToken ct)
   {
     var command = new RegisterCommand(
+      req.Username,
       req.Email,
       req.Password,
-      req.FirstName,
-      req.LastName);
+      req.FullName);
 
     var result = await mediator.Send(command, ct);
 

@@ -10,14 +10,16 @@ namespace Api.Infrastructure.Identity;
 
 /// <summary>
 /// Implementation of IJwtService for JWT token generation and validation.
-/// Config keys: Jwt:Key, Jwt:Issuer, Jwt:Audience, Jwt:ExpiresMinutes
+/// Config keys: Jwt:Key, Jwt:Issuer, Jwt:Audience
+/// Access token: 15 minutes (fixed)
 /// </summary>
 public class JwtService : IJwtService
 {
+  private const int AccessTokenExpiryMinutes = 15;
+
   private readonly string _key;
   private readonly string _issuer;
   private readonly string _audience;
-  private readonly int _expiryMinutes;
 
   public JwtService(IConfiguration configuration)
   {
@@ -26,23 +28,36 @@ public class JwtService : IJwtService
     _issuer = configuration["Jwt:Issuer"]
       ?? throw new InvalidOperationException("JWT Issuer not configured (Jwt:Issuer)");
     _audience = configuration["Jwt:Audience"] ?? _issuer;
-    _expiryMinutes = int.Parse(configuration["Jwt:ExpiresMinutes"] ?? "60");
   }
 
-  public string GenerateAccessToken(int userId, string? identityGuid, string email, IList<string> roles)
+  public string GenerateAccessToken(
+    Guid userId,
+    string username,
+    string fullName,
+    IList<string> roles,
+    IList<string> permissions,
+    Guid? staffId = null,
+    Guid? customerId = null)
   {
     var claims = new List<Claim>
     {
-      new("userId", userId.ToString()),
+      new(JwtRegisteredClaimNames.Sub, userId.ToString()),
       new(ClaimTypes.NameIdentifier, userId.ToString()),
-      new(ClaimTypes.Email, email)
+      new("username", username),
+      new("fullName", fullName)
     };
 
-    // identityGuid allows business layer to find Customer without querying Identity DB
-    if (!string.IsNullOrEmpty(identityGuid))
-      claims.Add(new Claim("identityGuid", identityGuid));
+    foreach (var role in roles)
+      claims.Add(new Claim(ClaimTypes.Role, role));
 
-    claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+    foreach (var permission in permissions)
+      claims.Add(new Claim("permission", permission));
+
+    if (staffId.HasValue)
+      claims.Add(new Claim("staffId", staffId.Value.ToString()));
+
+    if (customerId.HasValue)
+      claims.Add(new Claim("customerId", customerId.Value.ToString()));
 
     var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
     var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
@@ -51,7 +66,7 @@ public class JwtService : IJwtService
       issuer: _issuer,
       audience: _audience,
       claims: claims,
-      expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
+      expires: DateTime.UtcNow.AddMinutes(AccessTokenExpiryMinutes),
       signingCredentials: credentials);
 
     return new JwtSecurityTokenHandler().WriteToken(token);

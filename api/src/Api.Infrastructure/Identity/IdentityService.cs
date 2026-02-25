@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Api.UseCases.Interfaces;
 using Ardalis.Result;
 using Microsoft.AspNetCore.Identity;
@@ -9,43 +11,50 @@ namespace Api.Infrastructure.Identity;
 /// <summary>
 /// Implementation of IIdentityService using ASP.NET Core Identity.
 /// Identity DB is separate from business DB — no cross-DB FK.
-/// Supports multi-device login via UserRefreshTokens table.
 /// </summary>
 public class IdentityService : IIdentityService
 {
+  private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(7);
+
   private readonly UserManager<ApplicationUser> _userManager;
+  private readonly SignInManager<ApplicationUser> _signInManager;
+  private readonly RoleManager<ApplicationRole> _roleManager;
   private readonly IJwtService _jwtService;
   private readonly AppIdentityDbContext _identityDb;
   private readonly ILogger<IdentityService> _logger;
 
-  // How long refresh tokens live
-  private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(30);
-
-  // Max concurrent sessions per user (prevents token accumulation)
-  private const int MaxActiveSessions = 5;
-
   public IdentityService(
     UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager,
+    RoleManager<ApplicationRole> roleManager,
     IJwtService jwtService,
     AppIdentityDbContext identityDb,
     ILogger<IdentityService> logger)
   {
     _userManager = userManager;
+    _signInManager = signInManager;
+    _roleManager = roleManager;
     _jwtService = jwtService;
     _identityDb = identityDb;
     _logger = logger;
   }
 
   /// <summary>
-  /// Creates a new user. Returns the identity user ID string (stored as Customer.IdentityGuid).
+  /// Creates a new application user and assigns a role.
+  /// Returns the identity user ID (Guid.ToString()) for linking to domain aggregates.
   /// </summary>
-  public async Task<Result<string>> CreateUserAsync(string email, string password)
+  public async Task<Result<string>> CreateUserAsync(
+    string username,
+    string? email,
+    string password,
+    string fullName,
+    string role)
   {
     var user = new ApplicationUser
     {
-      UserName = email,
+      UserName = username,
       Email = email,
-      EmailConfirmed = false,
+      FullName = fullName,
       IsActive = true,
       CreatedAt = DateTime.UtcNow,
       UpdatedAt = DateTime.UtcNow
@@ -58,134 +67,135 @@ public class IdentityService : IIdentityService
       return Result<string>.Error(errorMsg);
     }
 
-    await _userManager.AddToRoleAsync(user, "Customer");
+    await _userManager.AddToRoleAsync(user, role);
 
-    _logger.LogInformation("Identity user created: {Email}", email);
+    _logger.LogInformation("Identity user created: {Username} with role {Role}", username, role);
 
-    // Return identity user ID — caller stores this as Customer.IdentityGuid
     return Result<string>.Success(user.Id.ToString());
   }
 
-  public async Task<Result<TokenResponse>> LoginAsync(string email, string password, string? deviceInfo = null)
+  public async Task<Result<AuthResponseDto>> LoginAsync(string username, string password)
   {
-    var user = await _userManager.FindByEmailAsync(email);
+    var user = await _userManager.FindByNameAsync(username);
     if (user is null || !user.IsActive)
-      return Result<TokenResponse>.Unauthorized();
+      return Result<AuthResponseDto>.Unauthorized();
 
-    if (!await _userManager.CheckPasswordAsync(user, password))
-    {
-      await _userManager.AccessFailedAsync(user);
-      return Result<TokenResponse>.Unauthorized();
-    }
+    // Check lockout before attempting sign-in
+    if (await _userManager.IsLockedOutAsync(user))
+      return Result<AuthResponseDto>.Unauthorized();
 
-    await _userManager.ResetAccessFailedCountAsync(user);
+    var signInResult = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
+    if (!signInResult.Succeeded)
+      return Result<AuthResponseDto>.Unauthorized();
 
     var roles = await _userManager.GetRolesAsync(user);
-
-    // identityGuid = userId.ToString() — business layer uses this to lookup Customer
-    var identityGuid = user.Id.ToString();
+    var permissions = await GetUserPermissionsAsync(roles);
 
     var accessToken = _jwtService.GenerateAccessToken(
       userId: user.Id,
-      identityGuid: identityGuid,
-      email: user.Email!,
-      roles: roles);
+      username: user.UserName!,
+      fullName: user.FullName,
+      roles: roles,
+      permissions: permissions,
+      staffId: user.StaffId,
+      customerId: user.CustomerId);
 
-    // Issue new refresh token (supports multi-device)
-    var refreshToken = await IssueRefreshTokenAsync(user.Id, deviceInfo);
+    var refreshToken = await IssueRefreshTokenAsync(user.Id);
 
     user.UpdatedAt = DateTime.UtcNow;
     await _userManager.UpdateAsync(user);
 
-    return Result<TokenResponse>.Success(new TokenResponse(
-      accessToken,
-      refreshToken.Token,
-      ExpiresIn: 3600));
+    var expiresAt = DateTime.UtcNow.AddDays(7);
+
+    return Result<AuthResponseDto>.Success(new AuthResponseDto(accessToken, refreshToken.Token, expiresAt));
   }
 
-  public async Task<Result<TokenResponse>> RefreshTokenAsync(string accessToken, string refreshToken)
+  public async Task<Result<AuthResponseDto>> RefreshTokenAsync(string refreshToken)
   {
-    var principal = _jwtService.ValidateToken(accessToken);
-    if (principal is null)
-      return Result<TokenResponse>.Unauthorized();
+    var storedToken = await _identityDb.RefreshTokens
+      .FirstOrDefaultAsync(t => t.Token == refreshToken);
 
-    var userIdClaim = principal.FindFirst("userId")?.Value;
-    if (userIdClaim is null || !int.TryParse(userIdClaim, out var userId))
-      return Result<TokenResponse>.Unauthorized();
-
-    var user = await _userManager.FindByIdAsync(userId.ToString());
-    if (user is null || !user.IsActive)
-      return Result<TokenResponse>.Unauthorized();
-
-    // Look up token in dedicated table (not on User entity)
-    var storedToken = await _identityDb.UserRefreshTokens
-      .FirstOrDefaultAsync(t => t.UserId == userId && t.Token == refreshToken);
-
-    if (storedToken is null || !storedToken.IsActive)
+    if (storedToken is null || storedToken.IsRevoked)
     {
       // Token not found or already revoked → possible token theft
-      // Security: revoke ALL tokens for this user
-      _logger.LogWarning(
-        "Suspicious refresh attempt for user {UserId}: token not active. Revoking all tokens.",
-        userId);
-      await RevokeAllUserTokensAsync(userId, "Suspicious refresh attempt — possible token theft");
-      return Result<TokenResponse>.Unauthorized();
+      if (storedToken is not null)
+      {
+        _logger.LogWarning(
+          "Suspicious refresh attempt for user {UserId}: token already revoked. Revoking all tokens.",
+          storedToken.UserId);
+        await RevokeAllUserTokensAsync(storedToken.UserId);
+      }
+      return Result<AuthResponseDto>.Unauthorized();
     }
 
-    // Token rotation: revoke old, issue new (same device info carries over)
-    var deviceInfo = storedToken.DeviceInfo;
-    storedToken.Revoke("Token rotation on refresh");
+    if (storedToken.ExpiresAt <= DateTime.UtcNow)
+      return Result<AuthResponseDto>.Unauthorized();
+
+    var user = await _userManager.FindByIdAsync(storedToken.UserId.ToString());
+    if (user is null || !user.IsActive)
+      return Result<AuthResponseDto>.Unauthorized();
+
+    // Token rotation: revoke old, issue new
+    storedToken.Revoke();
     await _identityDb.SaveChangesAsync();
 
     var roles = await _userManager.GetRolesAsync(user);
+    var permissions = await GetUserPermissionsAsync(roles);
+
     var newAccessToken = _jwtService.GenerateAccessToken(
       userId: user.Id,
-      identityGuid: user.Id.ToString(),
-      email: user.Email!,
-      roles: roles);
+      username: user.UserName!,
+      fullName: user.FullName,
+      roles: roles,
+      permissions: permissions,
+      staffId: user.StaffId,
+      customerId: user.CustomerId);
 
-    var newRefreshToken = await IssueRefreshTokenAsync(user.Id, deviceInfo);
+    var newRefreshToken = await IssueRefreshTokenAsync(user.Id);
 
     user.UpdatedAt = DateTime.UtcNow;
     await _userManager.UpdateAsync(user);
 
-    return Result<TokenResponse>.Success(new TokenResponse(
-      newAccessToken,
-      newRefreshToken.Token,
-      ExpiresIn: 3600));
+    var expiresAt = DateTime.UtcNow.AddDays(7);
+
+    return Result<AuthResponseDto>.Success(new AuthResponseDto(newAccessToken, newRefreshToken.Token, expiresAt));
   }
 
-  public async Task<Result> RevokeTokenAsync(string refreshToken, string reason = "Logout")
+  public async Task<Result<TemporaryPasswordDto>> CreateStaffAccountAsync(
+    string username,
+    string fullName,
+    string role)
   {
-    var token = await _identityDb.UserRefreshTokens
-      .FirstOrDefaultAsync(t => t.Token == refreshToken);
+    var existing = await _userManager.FindByNameAsync(username);
+    if (existing is not null)
+      return Result<TemporaryPasswordDto>.Conflict($"Username '{username}' is already taken.");
 
-    if (token is null)
-      return Result.NotFound("Refresh token not found");
+    var tempPassword = GenerateTemporaryPassword();
 
-    if (token.IsRevoked)
-      return Result.Success(); // Already revoked — idempotent
+    var user = new ApplicationUser
+    {
+      UserName = username,
+      FullName = fullName,
+      IsActive = true,
+      CreatedAt = DateTime.UtcNow,
+      UpdatedAt = DateTime.UtcNow
+    };
 
-    token.Revoke(reason);
-    await _identityDb.SaveChangesAsync();
+    var result = await _userManager.CreateAsync(user, tempPassword);
+    if (!result.Succeeded)
+    {
+      var errorMsg = string.Join("; ", result.Errors.Select(e => e.Description));
+      return Result<TemporaryPasswordDto>.Error(errorMsg);
+    }
 
-    _logger.LogInformation(
-      "Refresh token revoked for user {UserId}. Reason: {Reason}",
-      token.UserId, reason);
+    await _userManager.AddToRoleAsync(user, role);
 
-    return Result.Success();
+    _logger.LogInformation("Staff account created: {Username} with role {Role}", username, role);
+
+    return Result<TemporaryPasswordDto>.Success(new TemporaryPasswordDto(username, tempPassword));
   }
 
-  public async Task<Result> RevokeAllTokensAsync(string identityGuid, string reason = "Logout all devices")
-  {
-    if (!int.TryParse(identityGuid, out var userId))
-      return Result.NotFound("Invalid identity guid");
-
-    await RevokeAllUserTokensAsync(userId, reason);
-    return Result.Success();
-  }
-
-  public async Task<Result> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+  public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
   {
     var user = await _userManager.FindByIdAsync(userId.ToString());
     if (user is null)
@@ -196,44 +206,21 @@ public class IdentityService : IIdentityService
       return Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
 
     // Security best practice: revoke all sessions after password change
-    await RevokeAllUserTokensAsync(userId, "Password changed");
+    await RevokeAllUserTokensAsync(userId);
+
+    _logger.LogInformation("Password changed for user {UserId}", userId);
 
     return Result.Success();
   }
 
-  /// <summary>
-  /// Update email in Identity DB. Call after Customer.UpdateEmail() in business DB.
-  /// identityGuid = ApplicationUser.Id.ToString()
-  /// </summary>
-  public async Task<Result> UpdateEmailAsync(string identityGuid, string newEmail)
+  public async Task<bool> IsUsernameAvailableAsync(string username)
   {
-    if (!int.TryParse(identityGuid, out var userId))
-      return Result.NotFound("Invalid identity guid");
-
-    var user = await _userManager.FindByIdAsync(userId.ToString());
-    if (user is null)
-      return Result.NotFound("User not found");
-
-    user.Email = newEmail;
-    user.UserName = newEmail;
-    user.EmailConfirmed = false;
-    user.UpdatedAt = DateTime.UtcNow;
-
-    var result = await _userManager.UpdateAsync(user);
-    return result.Succeeded
-      ? Result.Success()
-      : Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
+    var user = await _userManager.FindByNameAsync(username);
+    return user is null;
   }
 
-  /// <summary>
-  /// Deactivate user in Identity DB (prevents login).
-  /// identityGuid = ApplicationUser.Id.ToString()
-  /// </summary>
-  public async Task<Result> DeactivateUserAsync(string identityGuid)
+  public async Task<Result> DeactivateUserAsync(Guid userId)
   {
-    if (!int.TryParse(identityGuid, out var userId))
-      return Result.NotFound("Invalid identity guid");
-
     var user = await _userManager.FindByIdAsync(userId.ToString());
     if (user is null)
       return Result.NotFound();
@@ -243,85 +230,96 @@ public class IdentityService : IIdentityService
     await _userManager.UpdateAsync(user);
 
     // Kick all devices when deactivating
-    await RevokeAllUserTokensAsync(userId, "Account deactivated");
+    await RevokeAllUserTokensAsync(userId);
 
-    return Result.Success();
-  }
-
-  public async Task<Result> ResetPasswordAsync(string email)
-  {
-    var user = await _userManager.FindByEmailAsync(email);
-    if (user is null)
-      return Result.Success(); // Don't reveal user existence
-
-    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-    // TODO: Send email with token via IEmailSender
-    _logger.LogInformation("Password reset token generated for {Email}", email);
+    _logger.LogInformation("User {UserId} deactivated", userId);
 
     return Result.Success();
   }
 
   // ===== Private Helpers =====
 
-  /// <summary>
-  /// Issues a new refresh token for the given user/device.
-  /// Enforces MaxActiveSessions by revoking the oldest if the limit is reached.
-  /// </summary>
-  private async Task<UserRefreshToken> IssueRefreshTokenAsync(int userId, string? deviceInfo)
+  private async Task<RefreshToken> IssueRefreshTokenAsync(Guid userId)
   {
-    // Housekeeping: remove physically expired tokens
-    var expiredTokens = await _identityDb.UserRefreshTokens
+    // Clean up expired tokens for this user
+    var expiredTokens = await _identityDb.RefreshTokens
       .Where(t => t.UserId == userId && t.ExpiresAt <= DateTime.UtcNow)
       .ToListAsync();
-    _identityDb.UserRefreshTokens.RemoveRange(expiredTokens);
+    _identityDb.RefreshTokens.RemoveRange(expiredTokens);
 
-    // Enforce session cap — revoke oldest if already at limit
-    var activeTokens = await _identityDb.UserRefreshTokens
-      .Where(t => t.UserId == userId && t.RevokedAt == null && t.ExpiresAt > DateTime.UtcNow)
-      .OrderBy(t => t.CreatedAt)
-      .ToListAsync();
-
-    if (activeTokens.Count >= MaxActiveSessions)
+    var token = new RefreshToken
     {
-      var oldest = activeTokens.First();
-      oldest.Revoke("Session limit reached — oldest session evicted");
-      _logger.LogInformation(
-        "User {UserId} hit max sessions ({Max}). Oldest session evicted.",
-        userId, MaxActiveSessions);
-    }
-
-    // Issue the new token
-    var token = new UserRefreshToken
-    {
+      Id = Guid.NewGuid(),
       UserId = userId,
       Token = _jwtService.GenerateRefreshToken(),
-      DeviceInfo = deviceInfo,
       CreatedAt = DateTime.UtcNow,
-      ExpiresAt = DateTime.UtcNow.Add(RefreshTokenLifetime)
+      ExpiresAt = DateTime.UtcNow.Add(RefreshTokenLifetime),
+      IsRevoked = false
     };
 
-    _identityDb.UserRefreshTokens.Add(token);
+    _identityDb.RefreshTokens.Add(token);
     await _identityDb.SaveChangesAsync();
 
     return token;
   }
 
-  /// <summary>
-  /// Revokes all active (non-expired, non-revoked) refresh tokens for a user.
-  /// </summary>
-  private async Task RevokeAllUserTokensAsync(int userId, string reason)
+  private async Task RevokeAllUserTokensAsync(Guid userId)
   {
-    var activeTokens = await _identityDb.UserRefreshTokens
-      .Where(t => t.UserId == userId && t.RevokedAt == null)
+    var activeTokens = await _identityDb.RefreshTokens
+      .Where(t => t.UserId == userId && !t.IsRevoked)
       .ToListAsync();
 
     foreach (var token in activeTokens)
-      token.Revoke(reason);
+      token.Revoke();
 
     await _identityDb.SaveChangesAsync();
 
-    _logger.LogInformation(
-      "Revoked {Count} refresh tokens for user {UserId}. Reason: {Reason}",
-      activeTokens.Count, userId, reason);
+    _logger.LogInformation("Revoked {Count} refresh tokens for user {UserId}", activeTokens.Count, userId);
+  }
+
+  private async Task<IList<string>> GetUserPermissionsAsync(IList<string> roles)
+  {
+    var permissions = new List<string>();
+
+    foreach (var roleName in roles)
+    {
+      var role = await _roleManager.FindByNameAsync(roleName);
+      if (role is null) continue;
+
+      var claims = await _roleManager.GetClaimsAsync(role);
+      permissions.AddRange(
+        claims
+          .Where(c => c.Type == "permission")
+          .Select(c => c.Value));
+    }
+
+    return permissions.Distinct().ToList();
+  }
+
+  private static string GenerateTemporaryPassword()
+  {
+    const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const string lower = "abcdefghijklmnopqrstuvwxyz";
+    const string digits = "0123456789";
+    const string all = upper + lower + digits;
+
+    var bytes = new byte[8];
+    using var rng = RandomNumberGenerator.Create();
+    rng.GetBytes(bytes);
+
+    // Ensure at least one uppercase, one lowercase, one digit
+    var result = new StringBuilder();
+    result.Append(upper[bytes[0] % upper.Length]);
+    result.Append(lower[bytes[1] % lower.Length]);
+    result.Append(digits[bytes[2] % digits.Length]);
+
+    for (int i = 3; i < 8; i++)
+      result.Append(all[bytes[i] % all.Length]);
+
+    // Shuffle
+    var chars = result.ToString().ToCharArray();
+    var shuffleBytes = new byte[chars.Length];
+    rng.GetBytes(shuffleBytes);
+    return new string(chars.OrderBy(_ => shuffleBytes[Array.IndexOf(chars, _)]).ToArray());
   }
 }

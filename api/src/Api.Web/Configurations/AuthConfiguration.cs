@@ -39,10 +39,8 @@ public static class AuthConfiguration
     {
       options.AddPolicy("AdminOnly", policy =>
         policy.RequireRole("Admin"));
-      options.AddPolicy("ManagerOrAdmin", policy =>
-        policy.RequireRole("Manager", "Admin"));
-      options.AddPolicy("StaffOnly", policy =>
-        policy.RequireRole("Barista", "Manager", "Admin"));
+      options.AddPolicy("StaffOrAdmin", policy =>
+        policy.RequireRole("Staff", "Admin"));
     });
 
     return services;

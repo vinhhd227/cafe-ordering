@@ -86,7 +86,8 @@ public static class MiddlewareConfig
       // Seed identity data (roles, admin user)
       var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
       var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-      await IdentitySeedData.SeedAsync(userManager, roleManager, logger);
+      var config = services.GetRequiredService<IConfiguration>();
+      await IdentitySeedData.SeedAsync(userManager, roleManager, config, logger);
 
       logger.LogInformation("Database seeded successfully");
     }

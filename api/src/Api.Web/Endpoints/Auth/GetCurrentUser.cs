@@ -34,7 +34,7 @@ public class GetCurrentUserEndpoint(UserManager<ApplicationUser> userManager)
   public override async Task HandleAsync(CancellationToken ct)
   {
     var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+    if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
     {
       await SendUnauthorizedAsync(ct);
       return;
@@ -52,7 +52,13 @@ public class GetCurrentUserEndpoint(UserManager<ApplicationUser> userManager)
     await SendOkAsync(new GetCurrentUserResponse
     {
       Success = true,
-      User = new UserDto { Id = user.Id, Email = user.Email },
+      User = new UserDto
+      {
+        Id = user.Id,
+        Username = user.UserName,
+        Email = user.Email,
+        FullName = user.FullName
+      },
       Roles = roles.ToList()
     }, ct);
   }

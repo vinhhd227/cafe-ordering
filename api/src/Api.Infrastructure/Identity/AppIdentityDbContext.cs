@@ -11,21 +11,21 @@ namespace Api.Infrastructure.Identity;
 public class AppIdentityDbContext : IdentityDbContext<
   ApplicationUser,
   ApplicationRole,
-  int,
-  IdentityUserClaim<int>,
+  Guid,
+  IdentityUserClaim<Guid>,
   ApplicationUserRole,
-  IdentityUserLogin<int>,
-  IdentityRoleClaim<int>,
-  IdentityUserToken<int>>
+  IdentityUserLogin<Guid>,
+  IdentityRoleClaim<Guid>,
+  IdentityUserToken<Guid>>
 {
   public AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> options) : base(options)
   {
   }
 
   /// <summary>
-  /// One row per active session. Supports multi-device login.
+  /// One row per user session. Simple revocable refresh tokens.
   /// </summary>
-  public DbSet<UserRefreshToken> UserRefreshTokens => Set<UserRefreshToken>();
+  public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
   protected override void OnModelCreating(ModelBuilder builder)
   {

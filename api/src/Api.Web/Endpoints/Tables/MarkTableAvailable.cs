@@ -14,7 +14,7 @@ public class MarkTableAvailable(IMediator mediator) : Endpoint<MarkTableAvailabl
   public override void Configure()
   {
     Put("/api/tables/{TableId}/available");
-    Roles("Barista", "Manager", "Admin");
+    Roles("Staff", "Admin");
     DontAutoTag();
     Description(b => b.WithTags("Tables"));
   }

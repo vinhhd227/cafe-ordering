@@ -5,9 +5,8 @@ namespace Api.Web.Endpoints.Auth;
 /// </summary>
 public sealed class UserDto
 {
-  /// <summary>The internal integer identifier of the user.</summary>
-  public int Id { get; init; }
-
-  /// <summary>The email address associated with the user account.</summary>
+  public Guid Id { get; init; }
+  public string? Username { get; init; }
   public string? Email { get; init; }
+  public string? FullName { get; init; }
 }

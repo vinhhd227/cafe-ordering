@@ -5,10 +5,10 @@ namespace Api.UseCases.Auth.Register;
 /// Creates both Customer aggregate and ApplicationUser.
 /// </summary>
 public record RegisterCommand(
+  string Username,
   string Email,
   string Password,
-  string FirstName,
-  string LastName) : ICommand<Result<RegisterResponse>>;
+  string FullName) : ICommand<Result<RegisterResponse>>;
 
 /// <summary>
 /// Response after successful registration.

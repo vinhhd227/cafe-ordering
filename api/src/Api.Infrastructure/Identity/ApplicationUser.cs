@@ -4,11 +4,22 @@ namespace Api.Infrastructure.Identity;
 
 /// <summary>
 /// Application user entity for authentication and authorization.
-/// Handles ONLY auth concerns — domain data belongs to Customer aggregate in Core.
-/// Linked to Customer via IdentityGuid (string, no FK constraint).
+/// Handles ONLY auth concerns — domain data belongs to Customer/Staff aggregates in Core.
+/// Linked to Customer via CustomerId (Guid?, no FK constraint across DBs).
 /// </summary>
-public class ApplicationUser : IdentityUser<int>
+public class ApplicationUser : IdentityUser<Guid>
 {
+  // === Profile Properties ===
+
+  /// <summary>Full display name (required).</summary>
+  public string FullName { get; set; } = string.Empty;
+
+  /// <summary>Links to Staff aggregate (if this user is a staff member).</summary>
+  public Guid? StaffId { get; set; }
+
+  /// <summary>Links to Customer aggregate (if this user is a customer).</summary>
+  public Guid? CustomerId { get; set; }
+
   // === Audit Properties ===
 
   public DateTime CreatedAt { get; set; }
@@ -25,10 +36,9 @@ public class ApplicationUser : IdentityUser<int>
   public ICollection<ApplicationUserRole> UserRoles { get; set; } = new List<ApplicationUserRole>();
 
   /// <summary>
-  /// All refresh tokens for this user (one per device/session).
-  /// Use <see cref="UserRefreshToken.IsActive"/> to filter active ones.
+  /// All refresh tokens for this user. Use <see cref="RefreshToken.IsRevoked"/> to filter active ones.
   /// </summary>
-  public ICollection<UserRefreshToken> RefreshTokens { get; set; } = new List<UserRefreshToken>();
+  public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
   // === Authentication Methods ===
 

@@ -42,14 +42,16 @@ public static class DependencyInjection
         options.Password.RequireDigit = true;
         options.Password.RequireLowercase = true;
         options.Password.RequireUppercase = true;
-        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireNonAlphanumeric = false;
         options.Password.RequiredLength = 8;
 
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
         options.Lockout.MaxFailedAccessAttempts = 5;
         options.Lockout.AllowedForNewUsers = true;
 
-        options.User.RequireUniqueEmail = true;
+        options.User.RequireUniqueEmail = false;
+        options.User.AllowedUserNameCharacters =
+          "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.";
         options.SignIn.RequireConfirmedEmail = false;
       })
       .AddEntityFrameworkStores<AppIdentityDbContext>()

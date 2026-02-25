@@ -6,7 +6,7 @@ namespace Api.Infrastructure.Identity;
 /// <summary>
 /// Application role entity extending IdentityRole.
 /// </summary>
-public class ApplicationRole : IdentityRole<int>
+public class ApplicationRole : IdentityRole<Guid>
 {
   public string? Description { get; set; }
   public bool IsActive { get; set; } = true;

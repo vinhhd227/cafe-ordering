@@ -14,7 +14,7 @@ public class CloseSession(IMediator mediator) : Endpoint<CloseSessionRequest>
   public override void Configure()
   {
     Put("/api/sessions/{SessionId}/close");
-    Roles("Barista", "Manager", "Admin");
+    Roles("Staff", "Admin");
     DontAutoTag();
     Description(b => b.WithTags("Sessions"));
   }
