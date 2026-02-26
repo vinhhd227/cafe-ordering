@@ -262,14 +262,13 @@ watch([categoryFilter, statusFilter], () => {
     </div>
 
     <!-- ── Error ─────────────────────────────────────────────────── -->
-    <prime-message
+    <prime-alert
       v-if="errorMessage"
       severity="error"
-      size="small"
-      :closable="true"
+      variant="accent"
+      closable
       @close="errorMessage = ''"
-      >{{ errorMessage }}
-      </prime-message>
+    >{{ errorMessage }}</prime-alert>
 
     <!-- ── Table ──────────────────────────────────────────────────── -->
     <AppTable

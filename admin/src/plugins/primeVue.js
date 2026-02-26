@@ -1,3 +1,4 @@
+import AppAlert from '@/components/AppAlert.vue'
 import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
 import { definePreset } from '@primeuix/themes'
@@ -155,5 +156,6 @@ export default {
         app.directive('tooltip', Tooltip)
         app.component('prime-confirm-popup', ConfirmPopup)
         app.component('prime-popover', Popover)
+        app.component('prime-alert', AppAlert)
     },
 }
