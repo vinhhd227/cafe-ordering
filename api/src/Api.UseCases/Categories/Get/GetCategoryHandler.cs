@@ -23,6 +23,7 @@ public class GetCategoryHandler(IReadRepositoryBase<Category> repository)
     return new CategoryDto(
       category.Id,
       category.Name,
+      category.Description,
       category.IsActive,
       category.CreatedAt,
       category.UpdatedAt);

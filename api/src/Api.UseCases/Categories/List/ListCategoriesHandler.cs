@@ -20,6 +20,7 @@ public class ListCategoriesHandler(IReadRepositoryBase<Category> repository)
       .Select(c => new CategoryDto(
         c.Id,
         c.Name,
+        c.Description,
         c.IsActive,
         c.CreatedAt,
         c.UpdatedAt))

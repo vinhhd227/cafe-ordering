@@ -10,7 +10,8 @@ export const navGroups = [
     items: [
       { label: "Orders",   icon: "ph:receipt-bold",     to: { name: "orders"   } },
       { label: "Menu",     icon: "ph:fork-knife-bold",  to: { name: "menu"     } },
-      { label: "Products", icon: "ph:package-bold",     to: { name: "products" } },
+      { label: "Products",   icon: "ph:package-bold",     to: { name: "products"   } },
+      { label: "Categories", icon: "ph:tag-bold",         to: { name: "categories" } },
     ],
   },
   {

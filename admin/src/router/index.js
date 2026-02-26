@@ -78,6 +78,27 @@ const routes = [
         ],
       },
       {
+        path: "categories",
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: "",
+            name: "categories",
+            component: () => import("@/views/categories/List.vue"),
+          },
+          {
+            path: "create",
+            name: "categoriesCreate",
+            component: () => import("@/views/categories/Create.vue"),
+          },
+          {
+            path: ":id",
+            name: "categoriesDetail",
+            component: () => import("@/views/categories/Detail.vue"),
+          },
+        ],
+      },
+      {
         path: "staff",
         name: "staff",
         component: () => import("@/views/Staff.vue"),

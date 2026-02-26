@@ -17,6 +17,7 @@ public class GetSummary : Summary<Get>
     ResponseExamples[200] = new CategoryDto(
       Id: 1,
       Name: "Coffee",
+      Description: "Espresso-based and filter coffee drinks",
       IsActive: true,
       CreatedAt: new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
       UpdatedAt: null);

@@ -16,6 +16,12 @@ public sealed class UpdateCategoryRequest
 
   /// <summary>New display name for the category. Must be unique and non-empty.</summary>
   public string Name { get; set; } = string.Empty;
+
+  /// <summary>Optional description for the category.</summary>
+  public string? Description { get; set; }
+
+  /// <summary>Whether the category is active (visible on the menu).</summary>
+  public bool IsActive { get; set; } = true;
 }
 
 public class Update : Endpoint<UpdateCategoryRequest>
@@ -38,7 +44,7 @@ public class Update : Endpoint<UpdateCategoryRequest>
   public override async Task HandleAsync(UpdateCategoryRequest req, CancellationToken ct)
   {
     var result = await _mediator.Send(
-      new UpdateCategoryCommand(req.CategoryId, req.Name), ct);
+      new UpdateCategoryCommand(req.CategoryId, req.Name, req.Description, req.IsActive), ct);
 
     await this.SendResultAsync(result, ct);
   }

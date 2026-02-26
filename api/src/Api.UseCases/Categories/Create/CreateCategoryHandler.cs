@@ -20,7 +20,7 @@ public class CreateCategoryHandler(IRepositoryBase<Category> repository)
       return Result.Conflict($"Category \'{request.Name}\' đã tồn tại");
     }
 
-    var category = Category.Create(request.Name);
+    var category = Category.Create(request.Name, request.Description);
 
     await repository.AddAsync(category, ct);
 

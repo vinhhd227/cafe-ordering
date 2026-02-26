@@ -14,6 +14,10 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
       .HasMaxLength(100)
       .IsRequired();
 
+    builder.Property(c => c.Description)
+      .HasMaxLength(500)
+      .IsRequired(false);
+
     // Unique name chỉ cho records chưa bị xóa (PostgreSQL syntax)
     builder.HasIndex(c => c.Name)
       .IsUnique()
