@@ -79,6 +79,9 @@ public static class DependencyInjection
     services.Configure<FileStorageSettings>(configuration.GetSection("FileStorage"));
     services.AddScoped<IFileStorageService, FileStorageService>();
 
+    // === Memory Cache ===
+    services.AddMemoryCache();
+
     logger.LogInformation("{Project} services registered", "Infrastructure");
 
     return services;
