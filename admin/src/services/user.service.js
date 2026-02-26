@@ -3,6 +3,9 @@ import api from './axios'
 export const getUsers = (params) =>
   api.get('/admin/users', { params })
 
+export const getUserById = (id) =>
+  api.get(`/admin/users/${id}`)
+
 // Delegates to existing POST /api/staff/accounts
 export const createUser = (payload) =>
   api.post('/staff/accounts', payload)

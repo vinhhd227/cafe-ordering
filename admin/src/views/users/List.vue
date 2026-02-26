@@ -1,77 +1,70 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { onBeforeRouteLeave } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import {
   getUsers,
   createUser,
-  updateUser,
   activateUser,
   deactivateUser,
-  changeUserRole,
 } from '@/services/user.service'
 import AppTable from '@/components/AppTable.vue'
 import { useTableCache } from '@/composables/useTableCache'
 
-const cache = useTableCache('users')
-
-// --- Auth / Permissions ---
-const auth = useAuthStore()
-const canManage = computed(() => (auth.user?.roles ?? []).includes('Admin'))
+const cache  = useTableCache('users')
+const router = useRouter()
 
 // --- Table state ---
-const users = ref([])
-const loading = ref(false)
+const users        = ref([])
+const loading      = ref(false)
 const errorMessage = ref('')
-const rows = ref(20)
-const first = ref(0)
+const rows         = ref(20)
+const first        = ref(0)
 const totalRecords = ref(0)
-const searchTimer = ref(null)
+const searchTimer  = ref(null)
 
 // --- Filters ---
-const search = ref('')
-const roleFilter = ref(null)
+const search       = ref('')
+const roleFilter   = ref(null)
 const statusFilter = ref(null)
+
+const filterPanel       = ref(null)
+const activeFilterCount = computed(() =>
+  [roleFilter.value, statusFilter.value].filter(v => v !== null).length
+)
+const hasActiveFilters  = computed(() => activeFilterCount.value > 0)
+
+const clearFilters = () => {
+  roleFilter.value   = null
+  statusFilter.value = null
+  first.value        = 0
+  loadUsers(1)
+}
 
 // --- Summary stats ---
 const stats = ref({ total: 0, active: 0, admins: 0, staff: 0 })
 
 // --- Dialog: Add User ---
 const showAddDialog = ref(false)
-const addForm = ref({ username: '', fullName: '', role: 'Staff' })
-const addLoading = ref(false)
-const addError = ref('')
+const addForm       = ref({ username: '', fullName: '', role: 'Staff' })
+const addLoading    = ref(false)
+const addError      = ref('')
 
 // --- Dialog: Temp Password (after create) ---
 const showTempPasswordDialog = ref(false)
-const tempPasswordData = ref({ username: '', temporaryPassword: '' })
-
-// --- Dialog: Edit User ---
-const showEditDialog = ref(false)
-const editForm = ref({ id: null, username: '', fullName: '', email: '' })
-const editLoading = ref(false)
-const editError = ref('')
-
-// --- Dialog: Change Role ---
-const showRoleDialog = ref(false)
-const roleForm = ref({ id: null, username: '', role: 'Staff' })
-const roleLoading = ref(false)
-const roleError = ref('')
+const tempPasswordData       = ref({ username: '', temporaryPassword: '' })
 
 // --- Dialog: Deactivate Confirm ---
 const confirmDeactivateUser = ref(null)
-const deactivateLoading = ref(false)
+const deactivateLoading     = ref(false)
 
 // --- Constants ---
 const roleFilterOptions = [
-  { label: 'All roles', value: null },
   { label: 'Admin', value: 'Admin' },
   { label: 'Staff', value: 'Staff' },
 ]
 
 const statusFilterOptions = [
-  { label: 'All statuses', value: null },
-  { label: 'Active', value: true },
+  { label: 'Active',   value: true  },
   { label: 'Inactive', value: false },
 ]
 
@@ -106,19 +99,19 @@ const extractError = (err) =>
 
 // --- Data Loading ---
 const loadUsers = async (page = 1) => {
-  loading.value = true
+  loading.value      = true
   errorMessage.value = ''
   try {
-    const res = await getUsers({
+    const res      = await getUsers({
       page,
       pageSize: rows.value,
-      search: search.value.trim() || undefined,
-      role: roleFilter.value ?? undefined,
-      isActive: statusFilter.value ?? undefined,
+      search:   search.value.trim() || undefined,
+      role:     roleFilter.value    ?? undefined,
+      isActive: statusFilter.value  ?? undefined,
     })
-    const data = res?.data ?? {}
-    users.value = data.items ?? []
-    totalRecords.value = data.total ?? 0
+    const data         = res?.data ?? {}
+    users.value        = data.items ?? []
+    totalRecords.value = data.total  ?? 0
   } catch (err) {
     errorMessage.value = extractError(err)
   } finally {
@@ -135,22 +128,22 @@ const loadStats = async () => {
       getUsers({ page: 1, pageSize: 1, role: 'Staff' }),
     ])
     stats.value = {
-      total: totalRes?.data?.total ?? 0,
+      total:  totalRes?.data?.total  ?? 0,
       active: activeRes?.data?.total ?? 0,
-      admins: adminRes?.data?.total ?? 0,
-      staff: staffRes?.data?.total ?? 0,
+      admins: adminRes?.data?.total  ?? 0,
+      staff:  staffRes?.data?.total  ?? 0,
     }
   } catch {
-    // stats are non-critical
+    // non-critical
   }
 }
 
 onMounted(() => {
   const cached = cache.restore()
   if (cached) {
-    search.value      = cached.search      ?? ''
-    rows.value        = cached.rows        ?? 20
-    first.value       = cached.first       ?? 0
+    search.value       = cached.search       ?? ''
+    rows.value         = cached.rows         ?? 20
+    first.value        = cached.first        ?? 0
     roleFilter.value   = cached.roleFilter   ?? null
     statusFilter.value = cached.statusFilter ?? null
     const page = rows.value > 0 ? Math.floor(first.value / rows.value) + 1 : 1
@@ -161,7 +154,6 @@ onMounted(() => {
   loadStats()
 })
 
-// Lưu trạng thái khi rời khỏi trang
 onBeforeRouteLeave(() => {
   cache.save({
     search:       search.value,
@@ -172,7 +164,7 @@ onBeforeRouteLeave(() => {
   })
 })
 
-watch([search, roleFilter, statusFilter], () => {
+watch([search], () => {
   clearTimeout(searchTimer.value)
   searchTimer.value = setTimeout(() => {
     first.value = 0
@@ -180,20 +172,25 @@ watch([search, roleFilter, statusFilter], () => {
   }, 400)
 })
 
+watch([roleFilter, statusFilter], () => {
+  first.value = 0
+  loadUsers(1)
+})
+
 // --- Add User ---
 const openAddDialog = () => {
-  addForm.value = { username: '', fullName: '', role: 'Staff' }
+  addForm.value  = { username: '', fullName: '', role: 'Staff' }
   addError.value = ''
   showAddDialog.value = true
 }
 
 const submitAddUser = async () => {
   addLoading.value = true
-  addError.value = ''
+  addError.value   = ''
   try {
     const res = await createUser(addForm.value)
-    tempPasswordData.value = res.data
-    showAddDialog.value = false
+    tempPasswordData.value       = res.data
+    showAddDialog.value          = false
     showTempPasswordDialog.value = true
     loadUsers(1)
     loadStats()
@@ -206,35 +203,6 @@ const submitAddUser = async () => {
 
 const copyTempPassword = () => {
   navigator.clipboard?.writeText(tempPasswordData.value.temporaryPassword)
-}
-
-// --- Edit User ---
-const openEditDialog = (user) => {
-  editForm.value = {
-    id: user.id,
-    username: user.username,
-    fullName: user.fullName,
-    email: user.email ?? '',
-  }
-  editError.value = ''
-  showEditDialog.value = true
-}
-
-const submitEditUser = async () => {
-  editLoading.value = true
-  editError.value = ''
-  try {
-    await updateUser(editForm.value.id, {
-      fullName: editForm.value.fullName,
-      email: editForm.value.email || null,
-    })
-    showEditDialog.value = false
-    loadUsers()
-  } catch (err) {
-    editError.value = extractError(err)
-  } finally {
-    editLoading.value = false
-  }
 }
 
 // --- Activate / Deactivate ---
@@ -270,32 +238,6 @@ const confirmAndDeactivate = async () => {
     deactivateLoading.value = false
   }
 }
-
-// --- Change Role ---
-const openRoleDialog = (user) => {
-  roleForm.value = {
-    id: user.id,
-    username: user.username,
-    role: user.roles?.[0] ?? 'Staff',
-  }
-  roleError.value = ''
-  showRoleDialog.value = true
-}
-
-const submitChangeRole = async () => {
-  roleLoading.value = true
-  roleError.value = ''
-  try {
-    await changeUserRole(roleForm.value.id, roleForm.value.role)
-    showRoleDialog.value = false
-    loadUsers()
-    loadStats()
-  } catch (err) {
-    roleError.value = extractError(err)
-  } finally {
-    roleLoading.value = false
-  }
-}
 </script>
 
 <template>
@@ -311,13 +253,13 @@ const submitChangeRole = async () => {
         </p>
       </div>
       <prime-button
-        v-if="canManage"
-        label="Add user"
-        icon="pi pi-user-plus"
         severity="success"
         size="small"
         @click="openAddDialog"
-      />
+      >
+        <iconify icon="ph:user-plus-bold" />
+        <span>Add user</span>
+      </prime-button>
     </div>
 
     <!-- ── Summary Stats ─────────────────────────────────────────── -->
@@ -349,16 +291,13 @@ const submitChangeRole = async () => {
     </div>
 
     <!-- ── Error Banner ──────────────────────────────────────────── -->
-    <prime-message
+    <prime-alert
       v-if="errorMessage"
       severity="error"
-      size="small"
-      variant="simple"
-      :closable="true"
+      variant="accent"
+      closable
       @close="errorMessage = ''"
-    >
-      {{ errorMessage }}
-    </prime-message>
+    >{{ errorMessage }}</prime-alert>
 
     <!-- ── Table ──────────────────────────────────────────────────── -->
     <AppTable
@@ -371,25 +310,74 @@ const submitChangeRole = async () => {
       @page="(e) => loadUsers(e.page + 1)"
     >
       <template #toolbar-left>
-        <prime-input-text
-          v-model="search"
-          placeholder="Search users..."
-          class="app-input tw:w-64"
-        />
-        <prime-select
-          v-model="roleFilter"
-          :options="roleFilterOptions"
-          optionLabel="label"
-          optionValue="value"
-          class="app-input tw:w-36"
-        />
-        <prime-select
-          v-model="statusFilter"
-          :options="statusFilterOptions"
-          optionLabel="label"
-          optionValue="value"
-          class="app-input tw:w-40"
-        />
+        <div class="tw:flex tw:items-center tw:gap-2">
+          <!-- Search -->
+          <prime-input-text
+            v-model="search"
+            placeholder="Search users…"
+            class="app-input tw:w-64"
+          />
+
+          <!-- Filter toggle button -->
+          <prime-button
+            :severity="hasActiveFilters ? 'success' : 'secondary'"
+            :outlined="!hasActiveFilters"
+            v-tooltip.top="'Filters'"
+            @click="filterPanel.toggle($event)"
+          >
+            <iconify icon="ph:funnel-bold" />
+            <prime-badge
+              v-if="activeFilterCount > 0"
+              :value="activeFilterCount"
+              severity="danger"
+              class="tw:ml-1 tw:scale-90"
+            />
+          </prime-button>
+
+          <!-- Filter popover -->
+          <prime-popover ref="filterPanel">
+            <div class="tw:flex tw:flex-col tw:gap-4">
+              <p class="tw:text-sm tw:font-semibold">Filter users</p>
+
+              <div class="tw:space-y-1.5">
+                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Role</label>
+                <prime-select
+                  v-model="roleFilter"
+                  :options="roleFilterOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="All roles"
+                  show-clear
+                  class="app-input tw:w-full"
+                />
+              </div>
+
+              <div class="tw:space-y-1.5">
+                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Status</label>
+                <prime-select
+                  v-model="statusFilter"
+                  :options="statusFilterOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="All statuses"
+                  show-clear
+                  class="app-input tw:w-full"
+                />
+              </div>
+
+              <prime-button
+                v-if="hasActiveFilters"
+                severity="danger"
+                outlined
+                size="small"
+                @click="clearFilters"
+              >
+                <iconify icon="ph:x-bold" />
+                <span>Clear filters</span>
+              </prime-button>
+            </div>
+          </prime-popover>
+        </div>
       </template>
 
       <!-- User: avatar + username + fullName -->
@@ -448,34 +436,32 @@ const submitChangeRole = async () => {
         </template>
       </prime-column>
 
-      <!-- Actions (Admin only) -->
-      <prime-column v-if="canManage" header="Actions" style="min-width: 11rem">
+      <!-- Actions -->
+      <prime-column header="Actions" style="min-width: 8rem">
         <template #body="{ data }">
           <div class="tw:flex tw:gap-2">
+            <!-- View / Edit detail -->
             <prime-button
-              icon="pi pi-pencil"
               severity="secondary"
               outlined
               size="small"
-              v-tooltip.top="'Edit'"
-              @click="openEditDialog(data)"
-            />
+              v-tooltip.top="'View / Edit'"
+              @click="router.push({ name: 'userDetail', params: { id: data.id } })"
+            >
+              <iconify icon="ph:arrow-right-bold" />
+              <span>View</span>
+            </prime-button>
+
+            <!-- Quick toggle active -->
             <prime-button
-              :icon="data.isActive ? 'pi pi-ban' : 'pi pi-check-circle'"
               :severity="data.isActive ? 'danger' : 'success'"
               outlined
               size="small"
               v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
               @click="handleToggleActive(data)"
-            />
-            <prime-button
-              icon="pi pi-shield"
-              severity="secondary"
-              outlined
-              size="small"
-              v-tooltip.top="'Change role'"
-              @click="openRoleDialog(data)"
-            />
+            >
+              <iconify :icon="data.isActive ? 'ph:prohibit-bold' : 'ph:check-circle-bold'" />
+            </prime-button>
           </div>
         </template>
       </prime-column>
@@ -489,13 +475,12 @@ const submitChangeRole = async () => {
       style="width: 28rem"
     >
       <div class="tw:space-y-4 tw:pt-2">
-        <prime-message
+        <prime-alert
           v-if="addError"
           severity="error"
-          size="small"
-          variant="simple"
+          variant="accent"
           :closable="false"
-        >{{ addError }}</prime-message>
+        >{{ addError }}</prime-alert>
 
         <div class="tw:space-y-1">
           <label class="tw:text-sm tw:font-medium">Username</label>
@@ -527,19 +512,23 @@ const submitChangeRole = async () => {
 
       <template #footer>
         <prime-button
-          label="Cancel"
           severity="secondary"
           outlined
           size="small"
           @click="showAddDialog = false"
-        />
+        >
+          <iconify icon="ph:x-bold" />
+          <span>Cancel</span>
+        </prime-button>
         <prime-button
-          label="Create"
           severity="success"
           size="small"
           :loading="addLoading"
           @click="submitAddUser"
-        />
+        >
+          <iconify icon="ph:user-plus-bold" />
+          <span>Create</span>
+        </prime-button>
       </template>
     </prime-dialog>
 
@@ -566,13 +555,14 @@ const submitChangeRole = async () => {
                 {{ tempPasswordData.temporaryPassword }}
               </p>
               <prime-button
-                icon="pi pi-copy"
                 severity="secondary"
                 outlined
                 size="small"
                 v-tooltip.top="'Copy'"
                 @click="copyTempPassword"
-              />
+              >
+                <iconify icon="ph:copy-bold" />
+              </prime-button>
             </div>
           </div>
         </div>
@@ -580,118 +570,13 @@ const submitChangeRole = async () => {
 
       <template #footer>
         <prime-button
-          label="Done"
           severity="success"
           size="small"
           @click="showTempPasswordDialog = false"
-        />
-      </template>
-    </prime-dialog>
-
-    <!-- ===== Edit User Dialog ===== -->
-    <prime-dialog
-      v-model:visible="showEditDialog"
-      header="Edit user"
-      :modal="true"
-      style="width: 28rem"
-    >
-      <div class="tw:space-y-4 tw:pt-2">
-        <prime-message
-          v-if="editError"
-          severity="error"
-          size="small"
-          variant="simple"
-          :closable="false"
-        >{{ editError }}</prime-message>
-
-        <div class="tw:space-y-1">
-          <label class="tw:text-sm tw:font-medium">Username</label>
-          <prime-input-text
-            :model-value="editForm.username"
-            class="app-input tw:w-full tw:opacity-50 tw:cursor-not-allowed"
-            readonly
-          />
-        </div>
-        <div class="tw:space-y-1">
-          <label class="tw:text-sm tw:font-medium">Full name</label>
-          <prime-input-text v-model="editForm.fullName" class="app-input tw:w-full" />
-        </div>
-        <div class="tw:space-y-1">
-          <label class="tw:text-sm tw:font-medium">
-            Email <span class="app-text-muted tw:font-normal">(optional)</span>
-          </label>
-          <prime-input-text
-            v-model="editForm.email"
-            class="app-input tw:w-full"
-            placeholder="user@example.com"
-          />
-        </div>
-      </div>
-
-      <template #footer>
-        <prime-button
-          label="Cancel"
-          severity="secondary"
-          outlined
-          size="small"
-          @click="showEditDialog = false"
-        />
-        <prime-button
-          label="Save"
-          severity="success"
-          size="small"
-          :loading="editLoading"
-          @click="submitEditUser"
-        />
-      </template>
-    </prime-dialog>
-
-    <!-- ===== Change Role Dialog ===== -->
-    <prime-dialog
-      v-model:visible="showRoleDialog"
-      header="Change role"
-      :modal="true"
-      style="width: 24rem"
-    >
-      <div class="tw:space-y-4 tw:pt-2">
-        <prime-message
-          v-if="roleError"
-          severity="error"
-          size="small"
-          variant="simple"
-          :closable="false"
-        >{{ roleError }}</prime-message>
-
-        <p class="tw:text-sm app-text-muted">
-          Changing role for <strong class="tw:font-semibold">{{ roleForm.username }}</strong>.
-        </p>
-        <div class="tw:space-y-1">
-          <label class="tw:text-sm tw:font-medium">New role</label>
-          <prime-select
-            v-model="roleForm.role"
-            :options="roleSelectOptions"
-            optionLabel="label"
-            optionValue="value"
-            class="app-input tw:w-full"
-          />
-        </div>
-      </div>
-
-      <template #footer>
-        <prime-button
-          label="Cancel"
-          severity="secondary"
-          outlined
-          size="small"
-          @click="showRoleDialog = false"
-        />
-        <prime-button
-          label="Confirm"
-          severity="warning"
-          size="small"
-          :loading="roleLoading"
-          @click="submitChangeRole"
-        />
+        >
+          <iconify icon="ph:check-bold" />
+          <span>Done</span>
+        </prime-button>
       </template>
     </prime-dialog>
 
@@ -712,19 +597,23 @@ const submitChangeRole = async () => {
 
       <template #footer>
         <prime-button
-          label="Cancel"
           severity="secondary"
           outlined
           size="small"
           @click="confirmDeactivateUser = null"
-        />
+        >
+          <iconify icon="ph:x-bold" />
+          <span>Cancel</span>
+        </prime-button>
         <prime-button
-          label="Deactivate"
           severity="danger"
           size="small"
           :loading="deactivateLoading"
           @click="confirmAndDeactivate"
-        />
+        >
+          <iconify icon="ph:prohibit-bold" />
+          <span>Deactivate</span>
+        </prime-button>
       </template>
     </prime-dialog>
 

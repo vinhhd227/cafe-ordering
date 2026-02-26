@@ -117,7 +117,15 @@ const routes = [
       {
         path: "user",
         name: "user",
-        component: () => import("@/views/User.vue"),
+        component: () => import("@/views/users/List.vue"),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        path: "user/:id",
+        name: "userDetail",
+        component: () => import("@/views/users/Detail.vue"),
         meta: {
           requiresAuth: true,
         },

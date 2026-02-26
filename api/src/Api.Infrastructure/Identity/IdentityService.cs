@@ -331,6 +331,26 @@ public class IdentityService : IIdentityService
     return Result.Success();
   }
 
+  public async Task<Result<UserDto>> GetUserByIdAsync(Guid userId)
+  {
+    var user = await _userManager.Users
+      .Include(u => u.UserRoles)
+        .ThenInclude(ur => ur.Role)
+      .FirstOrDefaultAsync(u => u.Id == userId);
+
+    if (user is null)
+      return Result<UserDto>.NotFound();
+
+    return Result<UserDto>.Success(new UserDto(
+      user.Id,
+      user.UserName!,
+      user.FullName,
+      user.Email,
+      user.UserRoles.Select(ur => ur.Role!.Name!).ToList(),
+      user.IsActive,
+      user.CreatedAt));
+  }
+
   // ===== Private Helpers =====
 
   private async Task<RefreshToken> IssueRefreshTokenAsync(Guid userId)

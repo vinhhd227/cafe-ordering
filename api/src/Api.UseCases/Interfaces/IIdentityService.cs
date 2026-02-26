@@ -72,6 +72,11 @@ public interface IIdentityService
   /// Replace all current roles of a user with a single new role.
   /// </summary>
   Task<Result> ChangeUserRoleAsync(Guid userId, string newRole);
+
+  /// <summary>
+  /// Get a single user by ID for the admin detail view.
+  /// </summary>
+  Task<Result<UserDto>> GetUserByIdAsync(Guid userId);
 }
 
 /// <summary>Response returned after a successful login or token refresh.</summary>
