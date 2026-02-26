@@ -3,6 +3,27 @@ import { defineStore } from 'pinia'
 import { login, refresh, register, logout as logoutRequest } from '@/services/auth.service.js'
 import api from '@/services/axios'
 
+const ROLE_CLAIM = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+
+const parseJwt = (token) => {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    return JSON.parse(decodeURIComponent(escape(atob(base64))))
+  } catch {
+    return {}
+  }
+}
+
+const userFromToken = (token) => {
+  const p = parseJwt(token)
+  const raw = p[ROLE_CLAIM]
+  return {
+    username: p.username ?? '',
+    fullName: p.fullName ?? '',
+    roles: Array.isArray(raw) ? raw : raw ? [raw] : [],
+  }
+}
+
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         accessToken: null,
@@ -25,11 +46,7 @@ export const useAuthStore = defineStore('auth', {
             this.accessToken = res.data.accessToken
             this.refreshToken = res.data.refreshToken
             localStorage.setItem('refreshToken', res.data.refreshToken)
-            this.user = {
-                firstName: res.data.firstName,
-                lastName: res.data.lastName,
-                roles: res.data.roles,
-            }
+            this.user = userFromToken(res.data.accessToken)
             localStorage.setItem('user', JSON.stringify(this.user))
             this.expiresAt = res.data.expiresAt
             this.scheduleTokenRefresh()
@@ -58,9 +75,8 @@ export const useAuthStore = defineStore('auth', {
                 this.refreshToken = res.data.refreshToken
                 localStorage.setItem('refreshToken', res.data.refreshToken)
                 this.expiresAt = res.data.expiresAt
-                // Restore user from localStorage (refresh response has no user fields)
-                const storedUser = localStorage.getItem('user')
-                if (storedUser) this.user = JSON.parse(storedUser)
+                this.user = userFromToken(res.data.accessToken)
+                localStorage.setItem('user', JSON.stringify(this.user))
                 this.scheduleTokenRefresh()
                 this.refreshAttempts = 0
                 return res
