@@ -351,6 +351,169 @@ public class IdentityService : IIdentityService
       user.CreatedAt));
   }
 
+  // ===== Role Management =====
+
+  public async Task<Result<PagedRolesDto>> GetRolesAsync(int page, int pageSize, string? search)
+  {
+    var query = _roleManager.Roles
+      .Include(r => r.UserRoles)
+      .AsQueryable();
+
+    if (!string.IsNullOrWhiteSpace(search))
+      query = query.Where(r =>
+        r.Name!.Contains(search) ||
+        (r.Description != null && r.Description.Contains(search)));
+
+    var total = await query.CountAsync();
+
+    var roles = await query
+      .OrderBy(r => r.Name)
+      .Skip((page - 1) * pageSize)
+      .Take(pageSize)
+      .ToListAsync();
+
+    var items = roles.Select(r => new RoleDto(
+      r.Id,
+      r.Name!,
+      r.Description,
+      r.IsActive,
+      r.UserRoles.Count
+    )).ToList();
+
+    return Result<PagedRolesDto>.Success(new PagedRolesDto(items, total, page, pageSize));
+  }
+
+  public async Task<Result<RoleDto>> GetRoleByIdAsync(Guid roleId)
+  {
+    var role = await _roleManager.Roles
+      .Include(r => r.UserRoles)
+      .FirstOrDefaultAsync(r => r.Id == roleId);
+
+    if (role is null)
+      return Result<RoleDto>.NotFound();
+
+    return Result<RoleDto>.Success(new RoleDto(
+      role.Id, role.Name!, role.Description, role.IsActive, role.UserRoles.Count));
+  }
+
+  public async Task<Result> CreateRoleAsync(string name, string? description)
+  {
+    var existing = await _roleManager.FindByNameAsync(name);
+    if (existing is not null)
+      return Result.Conflict($"Role '{name}' already exists.");
+
+    var role = ApplicationRole.Create(name, description);
+    var result = await _roleManager.CreateAsync(role);
+    if (!result.Succeeded)
+      return Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
+
+    _logger.LogInformation("Role created: {RoleName}", name);
+    return Result.Success();
+  }
+
+  public async Task<Result> UpdateRoleAsync(Guid roleId, string name, string? description)
+  {
+    var role = await _roleManager.FindByIdAsync(roleId.ToString());
+    if (role is null)
+      return Result.NotFound();
+
+    if (!string.Equals(role.Name, name, StringComparison.OrdinalIgnoreCase))
+    {
+      var existing = await _roleManager.FindByNameAsync(name);
+      if (existing is not null)
+        return Result.Conflict($"Role '{name}' already exists.");
+    }
+
+    role.Name = name;
+    role.NormalizedName = name.ToUpperInvariant();
+    role.UpdateDescription(description);
+
+    var result = await _roleManager.UpdateAsync(role);
+    if (!result.Succeeded)
+      return Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
+
+    _logger.LogInformation("Role updated: {RoleId} → {RoleName}", roleId, name);
+    return Result.Success();
+  }
+
+  public async Task<Result> DeleteRoleAsync(Guid roleId)
+  {
+    var role = await _roleManager.Roles
+      .Include(r => r.UserRoles)
+      .FirstOrDefaultAsync(r => r.Id == roleId);
+
+    if (role is null)
+      return Result.NotFound();
+
+    if (role.UserRoles.Count > 0)
+      return Result.Conflict(
+        $"Cannot delete role '{role.Name}': {role.UserRoles.Count} user(s) are still assigned to it.");
+
+    var result = await _roleManager.DeleteAsync(role);
+    if (!result.Succeeded)
+      return Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
+
+    _logger.LogInformation("Role deleted: {RoleName}", role.Name);
+    return Result.Success();
+  }
+
+  // ===== Role Permissions =====
+
+  public async Task<Result<List<RolePermissionDto>>> GetRolePermissionsAsync(Guid roleId)
+  {
+    var role = await _roleManager.FindByIdAsync(roleId.ToString());
+    if (role is null)
+      return Result<List<RolePermissionDto>>.NotFound();
+
+    var assigned = await _identityDb.RoleClaims
+      .Where(rc => rc.RoleId == roleId && rc.ClaimType == "permission")
+      .Select(rc => rc.ClaimValue!)
+      .ToHashSetAsync();
+
+    var result = PermissionRegistry.All
+      .Select(kv => new RolePermissionDto(kv.Key, kv.Value, assigned.Contains(kv.Key)))
+      .OrderBy(p => p.Value)
+      .ToList();
+
+    return Result<List<RolePermissionDto>>.Success(result);
+  }
+
+  public async Task<Result> SetRolePermissionsAsync(Guid roleId, IList<string> permissions)
+  {
+    var role = await _roleManager.FindByIdAsync(roleId.ToString());
+    if (role is null)
+      return Result.NotFound();
+
+    var unknown = permissions.Where(p => !PermissionRegistry.All.ContainsKey(p)).ToList();
+    if (unknown.Count > 0)
+      return Result.Invalid(new ValidationError("permissions",
+        $"Unknown permissions: {string.Join(", ", unknown)}"));
+
+    // Remove all existing permission claims
+    var existing = await _identityDb.RoleClaims
+      .Where(rc => rc.RoleId == roleId && rc.ClaimType == "permission")
+      .ToListAsync();
+    _identityDb.RoleClaims.RemoveRange(existing);
+
+    // Add new permission claims with description from registry
+    foreach (var perm in permissions.Distinct())
+    {
+      _identityDb.RoleClaims.Add(new ApplicationRoleClaim
+      {
+        RoleId      = roleId,
+        ClaimType   = "permission",
+        ClaimValue  = perm,
+        Description = PermissionRegistry.GetDescription(perm)
+      });
+    }
+
+    await _identityDb.SaveChangesAsync();
+    _logger.LogInformation("Permissions updated for role {RoleId}: [{Permissions}]",
+      roleId, string.Join(", ", permissions));
+
+    return Result.Success();
+  }
+
   // ===== Private Helpers =====
 
   private async Task<RefreshToken> IssueRefreshTokenAsync(Guid userId)

@@ -3,8 +3,10 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { createProduct } from "@/services/product.service";
 import { getCategory } from "@/services/category.service";
+import { usePermission } from "@/composables/usePermission";
 
 const router = useRouter();
+const { can } = usePermission();
 
 const categories = ref([]);
 const loading = ref(false);
@@ -243,6 +245,7 @@ onMounted(loadCategories);
             @click="router.push({ name: 'products' })"
           />
           <prime-button
+            v-if="can('product.create')"
             label="Create product"
             icon="pi pi-check"
             severity="success"

@@ -15,7 +15,7 @@ public class AppIdentityDbContext : IdentityDbContext<
   IdentityUserClaim<Guid>,
   ApplicationUserRole,
   IdentityUserLogin<Guid>,
-  IdentityRoleClaim<Guid>,
+  ApplicationRoleClaim,
   IdentityUserToken<Guid>>
 {
   public AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> options) : base(options)

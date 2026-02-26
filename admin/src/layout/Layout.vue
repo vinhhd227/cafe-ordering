@@ -5,6 +5,7 @@ import AdminHeader from "@/layout/Header.vue";
 
 <template>
   <div class="app-shell tw:min-h-screen">
+    <prime-toast position="top-right" />
     <div class="tw:flex tw:min-h-screen">
       <admin-navbar />
 

@@ -19,7 +19,7 @@ public class ListUsersEndpoint(IMediator mediator)
   public override void Configure()
   {
     Get("/api/admin/users");
-    Policies("StaffOrAdmin");
+    Policies("user.read");
     DontAutoTag();
     Description(b => b.WithTags("Users"));
   }

@@ -16,7 +16,7 @@ public class GetUserEndpoint(IMediator mediator)
   public override void Configure()
   {
     Get("/api/admin/users/{id}");
-    Policies("AdminOnly");
+    Policies("user.read");
     DontAutoTag();
     Description(b => b.WithTags("Users"));
   }

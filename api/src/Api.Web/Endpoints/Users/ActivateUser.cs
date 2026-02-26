@@ -15,7 +15,7 @@ public class ActivateUserEndpoint(IMediator mediator)
   public override void Configure()
   {
     Put("/api/admin/users/{id}/activate");
-    Policies("AdminOnly");
+    Policies("user.deactivate");
     DontAutoTag();
     Description(b => b.WithTags("Users"));
   }

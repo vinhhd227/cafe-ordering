@@ -19,3 +19,5 @@ export const passwordCustom = {
     }
 
 }
+
+export const btnIcon = 'tw:w-8! tw:h-8! tw:p-0! tw:flex tw:items-center tw:justify-center'

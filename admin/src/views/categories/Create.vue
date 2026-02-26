@@ -2,8 +2,10 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { createCategory } from "@/services/category.service";
+import { usePermission } from "@/composables/usePermission";
 
 const router = useRouter();
+const { can } = usePermission();
 
 const loading      = ref(false);
 const errorMessage = ref("");
@@ -115,6 +117,7 @@ const submit = async () => {
             @click="router.push({ name: 'categories' })"
           />
           <prime-button
+            v-if="can('product.create')"
             severity="success"
             size="small"
             :loading="loading"

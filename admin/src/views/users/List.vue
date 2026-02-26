@@ -9,9 +9,11 @@ import {
 } from '@/services/user.service'
 import AppTable from '@/components/AppTable.vue'
 import { useTableCache } from '@/composables/useTableCache'
+import { usePermission } from '@/composables/usePermission'
 
 const cache  = useTableCache('users')
 const router = useRouter()
+const { can } = usePermission()
 
 // --- Table state ---
 const users        = ref([])
@@ -253,6 +255,7 @@ const confirmAndDeactivate = async () => {
         </p>
       </div>
       <prime-button
+        v-if="can('user.create')"
         severity="success"
         size="small"
         @click="openAddDialog"
@@ -454,6 +457,7 @@ const confirmAndDeactivate = async () => {
 
             <!-- Quick toggle active -->
             <prime-button
+              v-if="can('user.deactivate')"
               :severity="data.isActive ? 'danger' : 'success'"
               outlined
               size="small"

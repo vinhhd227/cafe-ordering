@@ -9,6 +9,21 @@ const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const themeStore = useThemeStore();
+
+const canAccess = (item) => {
+  const user = auth.user
+  if (!user) return false
+  const isAdmin = user.roles?.includes('Admin')
+  if (item.adminOnly) return isAdmin
+  if (!item.requiredClaim) return true
+  return isAdmin || user.permissions?.includes(item.requiredClaim)
+}
+
+const visibleNavGroups = computed(() =>
+  navGroups
+    .map(group => ({ ...group, items: group.items.filter(canAccess) }))
+    .filter(group => group.items.length > 0)
+)
 const profileMenu = ref();
 
 const isActive = (to) => route.name === to.name;
@@ -89,7 +104,7 @@ const toggleProfileMenu = (event) => {
     <!-- Navigation groups -->
     <nav class="tw:flex-1 tw:overflow-y-auto tw:px-3 tw:py-4">
       <div
-        v-for="group in navGroups"
+        v-for="group in visibleNavGroups"
         :key="group.label"
         class="tw:mb-5 last:tw:mb-0"
       >

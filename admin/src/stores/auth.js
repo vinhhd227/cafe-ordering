@@ -17,10 +17,13 @@ const parseJwt = (token) => {
 const userFromToken = (token) => {
   const p = parseJwt(token)
   const raw = p[ROLE_CLAIM]
+  const perms = p.permission
   return {
+    id: p.sub ?? '',
     username: p.username ?? '',
     fullName: p.fullName ?? '',
     roles: Array.isArray(raw) ? raw : raw ? [raw] : [],
+    permissions: Array.isArray(perms) ? perms : perms ? [perms] : [],
   }
 }
 

@@ -14,7 +14,7 @@ public class DeactivateUserEndpoint(IMediator mediator) : Ep.Req<DeactivateUserR
   public override void Configure()
   {
     Put("/api/staff/accounts/{id}/deactivate");
-    Policies("AdminOnly");
+    Policies("user.deactivate");
     DontAutoTag();
     Description(b => b.WithTags("Staff"));
   }

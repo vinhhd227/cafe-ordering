@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text;
+using Api.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -41,6 +42,16 @@ public static class AuthConfiguration
         policy.RequireRole("Admin"));
       options.AddPolicy("StaffOrAdmin", policy =>
         policy.RequireRole("Staff", "Admin"));
+
+      // Claim-based policies: Admin role bypasses all, others need exact claim
+      foreach (var permissionKey in PermissionRegistry.All.Keys)
+      {
+        var key = permissionKey;
+        options.AddPolicy(key, policy =>
+          policy.RequireAssertion(ctx =>
+            ctx.User.IsInRole("Admin") ||
+            ctx.User.HasClaim("permission", key)));
+      }
     });
 
     return services;

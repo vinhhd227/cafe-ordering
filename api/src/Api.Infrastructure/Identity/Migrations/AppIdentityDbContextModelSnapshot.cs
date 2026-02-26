@@ -209,7 +209,7 @@ namespace Api.Infrastructure.Identity.Migrations
                     b.ToTable("RefreshTokens", "identity");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            modelBuilder.Entity("Api.Infrastructure.Identity.ApplicationRoleClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -222,6 +222,10 @@ namespace Api.Infrastructure.Identity.Migrations
 
                     b.Property<string>("ClaimValue")
                         .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uuid");
@@ -327,7 +331,7 @@ namespace Api.Infrastructure.Identity.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            modelBuilder.Entity("Api.Infrastructure.Identity.ApplicationRoleClaim", b =>
                 {
                     b.HasOne("Api.Infrastructure.Identity.ApplicationRole", null)
                         .WithMany()

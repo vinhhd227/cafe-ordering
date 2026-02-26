@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useToast } from "primevue/usetoast";
 import {
   getUserById,
   updateUser,
@@ -8,10 +9,16 @@ import {
   activateUser,
   deactivateUser,
 } from "@/services/user.service";
+import { getRoles } from "@/services/role.service";
+import { useAuthStore } from "@/stores/auth";
+import { usePermission } from "@/composables/usePermission";
 
 const route  = useRoute();
 const router = useRouter();
 const userId = route.params.id;
+const toast  = useToast();
+const auth   = useAuthStore();
+const { can } = usePermission();
 
 // ── State ──────────────────────────────────────────────────────────
 const user         = ref(null);
@@ -19,24 +26,20 @@ const loading      = ref(false);
 const errorMessage = ref("");
 
 // Profile form
-const profileForm    = ref({ fullName: "", email: "" });
-const saving         = ref(false);
-const saveSuccess    = ref(false);
+const profileForm = ref({ fullName: "", email: "" });
+const saving      = ref(false);
 
 // Role form
-const selectedRole = ref("Staff");
+const selectedRole = ref("");
 const roleLoading  = ref(false);
-const roleSuccess  = ref(false);
+const roleOptions  = ref([]);
+
+// Shared feedback
+const successMessage = ref("");
 
 // Activate / Deactivate
 const toggleLoading          = ref(false);
 const showDeactivateConfirm  = ref(false);
-
-// ── Constants ──────────────────────────────────────────────────────
-const roleOptions = [
-  { label: "Admin", value: "Admin" },
-  { label: "Staff", value: "Staff" },
-];
 
 // ── Helpers ────────────────────────────────────────────────────────
 const initials = (fullName) =>
@@ -78,21 +81,36 @@ const loadUser = async () => {
   }
 };
 
-onMounted(loadUser);
+const loadRoleOptions = async () => {
+  try {
+    const res = await getRoles({ page: 1, pageSize: 100 });
+    roleOptions.value = (res.data.items ?? []).map((r) => ({
+      label: r.name,
+      value: r.name,
+    }));
+  } catch {
+    // fallback: giữ rỗng, dropdown vẫn hiển thị được
+  }
+};
+
+onMounted(() => {
+  loadUser();
+  loadRoleOptions();
+});
 
 // ── Save profile ──────────────────────────────────────────────────
 const saveProfile = async () => {
-  saving.value       = true;
-  errorMessage.value = "";
-  saveSuccess.value  = false;
+  saving.value         = true;
+  errorMessage.value   = "";
+  successMessage.value = "";
   try {
     await updateUser(userId, {
       fullName: profileForm.value.fullName.trim(),
       email:    profileForm.value.email.trim() || null,
     });
     await loadUser();
-    saveSuccess.value = true;
-    setTimeout(() => (saveSuccess.value = false), 3000);
+    successMessage.value = "Profile updated successfully.";
+    setTimeout(() => (successMessage.value = ""), 3000);
   } catch (err) {
     errorMessage.value = extractError(err);
   } finally {
@@ -102,14 +120,22 @@ const saveProfile = async () => {
 
 // ── Change role ───────────────────────────────────────────────────
 const saveRole = async () => {
-  roleLoading.value  = true;
-  errorMessage.value = "";
-  roleSuccess.value  = false;
+  roleLoading.value    = true;
+  errorMessage.value   = "";
+  successMessage.value = "";
   try {
     await changeUserRole(userId, selectedRole.value);
     await loadUser();
-    roleSuccess.value = true;
-    setTimeout(() => (roleSuccess.value = false), 3000);
+    successMessage.value = "Role updated successfully.";
+    setTimeout(() => (successMessage.value = ""), 3000);
+    if (userId === auth.user?.id) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Role updated',
+        detail: 'Your role was changed. Please log in again for it to take effect.',
+        life: 8000,
+      });
+    }
   } catch (err) {
     errorMessage.value = extractError(err);
   } finally {
@@ -180,7 +206,13 @@ const confirmDeactivate = async () => {
       </prime-button>
     </div>
 
-    <!-- ── Error ──────────────────────────────────────────────────── -->
+    <!-- ── Feedback ──────────────────────────────────────────────── -->
+    <prime-alert
+      v-if="successMessage"
+      severity="success"
+      variant="accent"
+      :closable="false"
+    >{{ successMessage }}</prime-alert>
     <prime-alert
       v-if="errorMessage"
       severity="error"
@@ -269,7 +301,7 @@ const confirmDeactivate = async () => {
             </div>
 
             <!-- Activate / Deactivate -->
-            <div class="tw:mt-6 tw:pt-5 tw:border-t">
+            <div v-if="can('user.deactivate')" class="tw:mt-6 tw:pt-5 tw:border-t">
               <prime-button
                 v-if="user.isActive"
                 severity="danger"
@@ -305,15 +337,6 @@ const confirmDeactivate = async () => {
 
             <!-- ── Profile section ───────────────────────────── -->
             <p class="tw:text-sm tw:font-semibold tw:mb-5">Profile</p>
-
-            <!-- Success banner -->
-            <prime-alert
-              v-if="saveSuccess"
-              severity="success"
-              variant="accent"
-              :closable="false"
-              class="tw:mb-4"
-            >Profile updated successfully.</prime-alert>
 
             <div class="tw:space-y-5">
               <!-- Username (readonly) -->
@@ -352,7 +375,10 @@ const confirmDeactivate = async () => {
               </div>
             </div>
 
-            <div class="tw:flex tw:justify-end tw:gap-3 tw:mt-5 tw:pt-5 tw:border-t">
+            <div
+              v-if="can('user.update')"
+              class="tw:flex tw:justify-end tw:gap-3 tw:mt-5 tw:pt-5 tw:border-t"
+            >
               <prime-button
                 severity="secondary"
                 outlined
@@ -377,15 +403,6 @@ const confirmDeactivate = async () => {
             <div class="tw:mt-8 tw:pt-6 tw:border-t">
               <p class="tw:text-sm tw:font-semibold tw:mb-4">Role</p>
 
-              <!-- Success banner -->
-              <prime-alert
-                v-if="roleSuccess"
-                severity="success"
-                variant="accent"
-                :closable="false"
-                class="tw:mb-4"
-              >Role updated successfully.</prime-alert>
-
               <div class="tw:flex tw:items-end tw:gap-3">
                 <div class="tw:space-y-1.5 tw:flex-1">
                   <label class="tw:text-sm tw:font-medium">Assign role</label>
@@ -398,6 +415,7 @@ const confirmDeactivate = async () => {
                   />
                 </div>
                 <prime-button
+                  v-if="can('user.update')"
                   severity="warning"
                   size="small"
                   :loading="roleLoading"

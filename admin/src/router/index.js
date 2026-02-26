@@ -35,30 +35,23 @@ const routes = [
         path: "dashboard",
         name: "dashboard",
         component: () => import("@/views/Dashboard.vue"),
-        meta: {
-          requiresAuth: true,
-          role: "admin",
-        },
+        meta: { requiresAuth: true },
       },
       {
         path: "orders",
         name: "orders",
         component: () => import("@/views/Orders.vue"),
-        meta: {
-          requiresAuth: true,
-        },
+        meta: { requiresAuth: true, requiredClaim: "order.read" },
       },
       {
         path: "menu",
         name: "menu",
         component: () => import("@/views/Menu.vue"),
-        meta: {
-          requiresAuth: true,
-        },
+        meta: { requiresAuth: true, requiredClaim: "menu.read" },
       },
       {
         path: "products",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, requiredClaim: "product.read" },
         children: [
           {
             path: "",
@@ -79,7 +72,7 @@ const routes = [
       },
       {
         path: "categories",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, requiredClaim: "product.read" },
         children: [
           {
             path: "",
@@ -102,41 +95,37 @@ const routes = [
         path: "staff",
         name: "staff",
         component: () => import("@/views/Staff.vue"),
-        meta: {
-          requiresAuth: true,
-        },
+        meta: { requiresAuth: true, requiredClaim: "staff.read" },
       },
       {
         path: "customer",
         name: "customer",
         component: () => import("@/views/Customer.vue"),
-        meta: {
-          requiresAuth: true,
-        },
+        meta: { requiresAuth: true },
       },
       {
         path: "user",
         name: "user",
         component: () => import("@/views/users/List.vue"),
-        meta: {
-          requiresAuth: true,
-        },
+        meta: { requiresAuth: true, requiredClaim: "user.read" },
       },
       {
         path: "user/:id",
         name: "userDetail",
         component: () => import("@/views/users/Detail.vue"),
-        meta: {
-          requiresAuth: true,
-        },
+        meta: { requiresAuth: true, requiredClaim: "user.read" },
+      },
+      {
+        path: "roles",
+        name: "roles",
+        component: () => import("@/views/roles/List.vue"),
+        meta: { requiresAuth: true, adminOnly: true },
       },
       {
         path: "profile",
         name: "profile",
         component: () => import("@/views/Profile.vue"),
-        meta: {
-          requiresAuth: true,
-        },
+        meta: { requiresAuth: true },
       },
     ],
   },
@@ -161,15 +150,19 @@ const routes = [
     path: "/:pathMatch(.*)*",
     redirect: { name: "error404" },
   },
-];
-
-
+]
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes,
     scrollBehavior: () => ({top: 0}),
 })
+
+const userCan = (user, claim) => {
+  if (!user) return false
+  if (user.roles.includes('Admin')) return true
+  return user.permissions.includes(claim)
+}
 
 router.beforeEach(async (to) => {
     const auth = useAuthStore()
@@ -188,10 +181,21 @@ router.beforeEach(async (to) => {
         return { name: 'login' }
     }
 
-    // check role
-    // if (to.meta.role && auth.user?.role !== to.meta.role) {
-    //     return { name: 'error403' }
-    // }
+    if (auth.isAuthenticated) {
+        // admin only route
+        if (to.meta.adminOnly && !auth.user?.roles?.includes('Admin')) {
+            return { name: 'error403' }
+        }
+
+        // required claim (inherit từ parent route qua matched)
+        const requiredClaim = to.matched
+            .map(r => r.meta?.requiredClaim)
+            .find(c => !!c)
+
+        if (requiredClaim && !userCan(auth.user, requiredClaim)) {
+            return { name: 'error403' }
+        }
+    }
 })
 
-export default router;
+export default router

@@ -3,10 +3,12 @@ import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getProduct, updateProduct } from "@/services/product.service";
 import { getCategory } from "@/services/category.service";
+import { usePermission } from "@/composables/usePermission";
 
 const route = useRoute();
 const router = useRouter();
 const productId = Number(route.params.id);
+const { can } = usePermission();
 
 // ── State ──────────────────────────────────────────────────────────
 const product = ref(null);
@@ -381,8 +383,9 @@ onMounted(() => {
               </div>
             </div>
 
+            <prime-divider class="tw:my-5" />
             <!-- Customisation options -->
-            <div class="tw:mt-6 tw:pt-5 tw:border-t tw:space-y-4">
+            <div class="tw:space-y-4">
               <p class="tw:text-sm tw:font-semibold">Customisation options</p>
 
               <!-- Temperature -->
@@ -418,9 +421,9 @@ onMounted(() => {
                 <prime-toggle-switch v-model="form.hasSugarLevelOption" />
               </div>
             </div>
-
+            <prime-divider class="tw:my-5" />
             <!-- Active status -->
-            <div class="tw:mt-4 tw:pt-5 tw:border-t">
+            <div>
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
                   <p class="tw:text-sm tw:font-semibold">Active</p>
@@ -431,10 +434,11 @@ onMounted(() => {
                 <prime-toggle-switch v-model="form.isActive" />
               </div>
             </div>
-
+            <prime-divider class="tw:my-5" />
             <!-- Actions -->
             <div
-              class="tw:flex tw:justify-end tw:gap-3 tw:mt-6 tw:pt-6 tw:border-t"
+              v-if="can('product.update')"
+              class="tw:flex tw:justify-end tw:gap-3"
             >
               <prime-button
                 label="Reset"

@@ -17,7 +17,7 @@ public class ChangeUserRoleEndpoint(IMediator mediator)
   public override void Configure()
   {
     Put("/api/admin/users/{id}/roles");
-    Policies("AdminOnly");
+    Policies("user.update");
     DontAutoTag();
     Description(b => b.WithTags("Users"));
   }

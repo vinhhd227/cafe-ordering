@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
+import { usePermission } from "@/composables/usePermission";
 import { getProducts } from "@/services/product.service";
 import { getCategory } from "@/services/category.service";
 import AppTable from "@/components/AppTable.vue";
@@ -9,6 +10,7 @@ import { useTableCache } from "@/composables/useTableCache";
 const cache = useTableCache("products");
 
 const router = useRouter();
+const { can } = usePermission();
 
 // ── Table state ─────────────────────────────────────────────────────
 const loading      = ref(false);
@@ -202,6 +204,7 @@ watch([categoryFilter, statusFilter], () => {
         </p>
       </div>
       <prime-button
+        v-if="can('product.create')"
         severity="success"
         size="small"
         @click="router.push({ name: 'productsCreate' })"

@@ -18,7 +18,7 @@ public class UpdateUserEndpoint(IMediator mediator)
   public override void Configure()
   {
     Put("/api/admin/users/{id}");
-    Policies("AdminOnly");
+    Policies("user.update");
     DontAutoTag();
     Description(b => b.WithTags("Users"));
   }

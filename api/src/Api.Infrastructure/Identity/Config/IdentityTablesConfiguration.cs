@@ -22,12 +22,13 @@ public class IdentityUserLoginConfiguration : IEntityTypeConfiguration<IdentityU
   }
 }
 
-public class IdentityRoleClaimConfiguration : IEntityTypeConfiguration<IdentityRoleClaim<Guid>>
+public class IdentityRoleClaimConfiguration : IEntityTypeConfiguration<ApplicationRoleClaim>
 {
-  public void Configure(EntityTypeBuilder<IdentityRoleClaim<Guid>> builder)
+  public void Configure(EntityTypeBuilder<ApplicationRoleClaim> builder)
   {
     builder.ToTable("RoleClaims");
     builder.HasKey(rc => rc.Id);
+    builder.Property(rc => rc.Description).HasMaxLength(300);
   }
 }
 

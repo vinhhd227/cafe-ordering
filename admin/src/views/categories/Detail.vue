@@ -2,10 +2,12 @@
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getCategoryById, updateCategory } from "@/services/category.service";
+import { usePermission } from "@/composables/usePermission";
 
 const route  = useRoute();
 const router = useRouter();
 const categoryId = Number(route.params.id);
+const { can } = usePermission();
 
 // ── State ──────────────────────────────────────────────────────────
 const category    = ref(null);
@@ -237,7 +239,10 @@ onMounted(loadCategory);
             </div>
 
             <!-- Actions -->
-            <div class="tw:flex tw:justify-end tw:gap-3 tw:mt-6 tw:pt-6 tw:border-t">
+            <div
+              v-if="can('product.update')"
+              class="tw:flex tw:justify-end tw:gap-3 tw:mt-6 tw:pt-6 tw:border-t"
+            >
               <prime-button
                 label="Reset"
                 severity="secondary"

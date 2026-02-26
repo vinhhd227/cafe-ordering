@@ -4,10 +4,12 @@ import { useRouter, onBeforeRouteLeave } from "vue-router";
 import { getCategory } from "@/services/category.service";
 import AppTable from "@/components/AppTable.vue";
 import { useTableCache } from "@/composables/useTableCache";
+import { usePermission } from "@/composables/usePermission";
 
 const cache = useTableCache("categories");
 
 const router = useRouter();
+const { can } = usePermission();
 
 // ── Raw data from API ─────────────────────────────────────────────
 const allCategories  = ref([]);
@@ -143,6 +145,7 @@ watch([search, statusFilter], () => {
         </p>
       </div>
       <prime-button
+        v-if="can('product.create')"
         severity="success"
         size="small"
         @click="router.push({ name: 'categoriesCreate' })"
