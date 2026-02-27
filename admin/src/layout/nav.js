@@ -9,6 +9,7 @@ export const navGroups = [
     label: "Operations",
     items: [
       { label: "Orders",     icon: "ph:receipt-bold",     to: { name: "orders"     }, requiredClaim: "order.read"   },
+      { label: "Tables",     icon: "ph:table-bold",       to: { name: "tables"     }, requiredClaim: "table.read"   },
       { label: "Menu",       icon: "ph:fork-knife-bold",  to: { name: "menu"       }, requiredClaim: "menu.read"    },
       { label: "Products",   icon: "ph:package-bold",     to: { name: "products"   }, requiredClaim: "product.read" },
       { label: "Categories", icon: "ph:tag-bold",         to: { name: "categories" }, requiredClaim: "product.read" },

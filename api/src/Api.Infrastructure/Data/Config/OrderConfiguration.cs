@@ -1,5 +1,6 @@
 using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.OrderAggregate;
+using Api.Core.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -29,6 +30,17 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
       .HasConversion(
         v => v.Value,
         v => OrderStatus.FromValue(v));
+
+    builder.Property(o => o.PaymentStatus)
+      .IsRequired()
+      .HasDefaultValue(PaymentStatus.Unpaid);
+
+    builder.Property(o => o.PaymentMethod)
+      .IsRequired()
+      .HasDefaultValue(PaymentMethod.Unknown);
+
+    builder.Property(o => o.AmountReceived);
+    builder.Property(o => o.TipAmount).IsRequired().HasDefaultValue(0m);
 
     builder.Property(o => o.OrderDate).IsRequired();
 

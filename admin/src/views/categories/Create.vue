@@ -7,11 +7,11 @@ import { usePermission } from "@/composables/usePermission";
 const router = useRouter();
 const { can } = usePermission();
 
-const loading      = ref(false);
+const loading = ref(false);
 const errorMessage = ref("");
 
 const form = ref({
-  name:        "",
+  name: "",
   description: "",
 });
 
@@ -25,7 +25,7 @@ const submit = async () => {
   errorMessage.value = "";
   try {
     const res = await createCategory({
-      name:        form.value.name.trim(),
+      name: form.value.name.trim(),
       description: form.value.description.trim() || null,
     });
     const newId = res?.data?.id ?? res?.data?.Id;
@@ -44,13 +44,18 @@ const submit = async () => {
 
 <template>
   <section class="tw:space-y-6">
-
     <!-- ── Header ───────────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">Categories</p>
+        <p
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+        >
+          Categories
+        </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Add category</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">Create a new category to group your menu items.</p>
+        <p class="tw:mt-2 tw:text-sm app-text-muted">
+          Create a new category to group your menu items.
+        </p>
       </div>
       <prime-button
         severity="secondary"
@@ -71,19 +76,20 @@ const submit = async () => {
       variant="simple"
       :closable="true"
       @close="errorMessage = ''"
-    >{{ errorMessage }}</prime-message>
+      >{{ errorMessage }}</prime-message
+    >
 
     <!-- ── Form ──────────────────────────────────────────────────── -->
     <prime-card class="app-card tw:rounded-2xl tw:border">
       <template #content>
         <div class="tw:max-w-lg tw:space-y-5">
-
           <!-- Name -->
           <div class="tw:space-y-1.5">
-            <label class="tw:text-sm tw:font-medium">
+            <label for="name" class="tw:text-sm tw:font-medium">
               Name <span class="tw:text-red-400">*</span>
             </label>
             <prime-input-text
+              id="name"
               v-model="form.name"
               placeholder="e.g. Hot Beverages"
               class="app-input tw:w-full"
@@ -92,11 +98,12 @@ const submit = async () => {
 
           <!-- Description -->
           <div class="tw:space-y-1.5">
-            <label class="tw:text-sm tw:font-medium">
+            <label for="description" class="tw:text-sm tw:font-medium">
               Description
               <span class="app-text-muted tw:font-normal">(optional)</span>
             </label>
             <prime-textarea
+              id="description"
               v-model="form.description"
               rows="3"
               placeholder="Short description of this category…"
@@ -104,11 +111,10 @@ const submit = async () => {
               auto-resize
             />
           </div>
-
         </div>
-
+        <prime-divider />
         <!-- ── Footer actions ── -->
-        <div class="tw:flex tw:justify-end tw:gap-3 tw:mt-8 tw:pt-6 tw:border-t">
+        <div class="tw:flex tw:justify-end tw:gap-3">
           <prime-button
             label="Cancel"
             severity="secondary"
@@ -129,6 +135,5 @@ const submit = async () => {
         </div>
       </template>
     </prime-card>
-
   </section>
 </template>

@@ -1,6 +1,7 @@
 // Core/Aggregates/OrderAggregate/Order.cs
 
 using Api.Core.Aggregates.OrderAggregate.Events;
+using Api.Core.Domain.Enums;
 
 namespace Api.Core.Aggregates.OrderAggregate;
 
@@ -21,6 +22,10 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   public Guid SessionId { get; private set; }       // FK to GuestSession.Id (required)
   public string? DeviceToken { get; private set; }  // Anonymous device token from client
   public OrderStatus Status { get; private set; }
+  public PaymentStatus PaymentStatus { get; private set; } = PaymentStatus.Unpaid;
+  public PaymentMethod PaymentMethod { get; private set; } = PaymentMethod.Unknown;
+  public decimal? AmountReceived { get; private set; }
+  public decimal TipAmount { get; private set; }
   public DateTime OrderDate { get; private set; }
   public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
 
@@ -88,5 +93,76 @@ public class Order : AuditableEntity<int>, IAggregateRoot
     Status = OrderStatus.Completed;
 
     RegisterDomainEvent(new OrderCompletedEvent(this));
+  }
+
+  public void UpdatePayment(PaymentStatus status, PaymentMethod method,
+    decimal? amountReceived = null, decimal tipAmount = 0)
+  {
+    if (status == PaymentStatus.Paid && method == PaymentMethod.Unknown)
+      throw new InvalidOperationException("PaymentMethod is required when marking as Paid.");
+
+    PaymentStatus = status;
+    PaymentMethod = method;
+    AmountReceived = amountReceived;
+    TipAmount = tipAmount;
+  }
+
+  /// <summary>
+  ///   Merge: thêm item bất kể status (bypass CanAddItems guard).
+  ///   Nếu cùng productId → cộng dồn quantity.
+  /// </summary>
+  public void AddItemForMerge(int productId, string productName, decimal unitPrice, int quantity)
+  {
+    var existing = _items.FirstOrDefault(i => i.ProductId == productId);
+    if (existing != null)
+      existing.UpdateQuantity(existing.Quantity + quantity);
+    else
+      _items.Add(OrderItem.Create(Id, productId, productName, unitPrice, quantity));
+  }
+
+  /// <summary>
+  ///   Split: xoá hoặc giảm quantity của một item.
+  /// </summary>
+  public void RemoveItem(int productId, int quantity)
+  {
+    var item = _items.FirstOrDefault(i => i.ProductId == productId);
+    if (item is null)
+      throw new InvalidOperationException($"Product {productId} not found in order.");
+    if (quantity >= item.Quantity)
+      _items.Remove(item);
+    else
+      item.UpdateQuantity(item.Quantity - quantity);
+  }
+
+  /// <summary>
+  ///   Merge: cancel secondary order bất kể status.CanCancel.
+  /// </summary>
+  public void CancelAsMerged()
+  {
+    Status = OrderStatus.Cancelled;
+  }
+
+  /// <summary>
+  ///   Set the quantity of an item. quantity = 0 removes the item.
+  ///   Adds a new item if productId not found in the order.
+  ///   Only allowed on Pending orders.
+  /// </summary>
+  public void SetItemQuantity(int productId, string productName, decimal unitPrice, int quantity)
+  {
+    if (!Status.CanAddItems)
+      throw new InvalidOperationException("Can only edit items on Pending orders.");
+
+    var existing = _items.FirstOrDefault(i => i.ProductId == productId);
+
+    if (quantity <= 0)
+    {
+      if (existing is not null) _items.Remove(existing);
+      return;
+    }
+
+    if (existing is not null)
+      existing.UpdateQuantity(quantity);
+    else
+      _items.Add(OrderItem.Create(Id, productId, productName, unitPrice, quantity));
   }
 }

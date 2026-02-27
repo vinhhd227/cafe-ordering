@@ -55,6 +55,9 @@ import Dialog from 'primevue/dialog'
 import Tooltip from 'primevue/tooltip'
 import ConfirmPopup from 'primevue/confirmpopup';
 import Popover from 'primevue/popover';
+import SelectButton from 'primevue/selectbutton';
+import DatePicker from 'primevue/datepicker';
+
 
 import ConfirmationService from 'primevue/confirmationservice';
 
@@ -157,5 +160,7 @@ export default {
         app.component('prime-confirm-popup', ConfirmPopup)
         app.component('prime-popover', Popover)
         app.component('prime-alert', AppAlert)
+        app.component('prime-select-button', SelectButton)
+        app.component('prime-date-picker', DatePicker)
     },
 }

@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { getMenu } from '../services/product.service.js';
 import { getOrCreateSession, getSessionSummary } from '../services/session.service.js';
-import { placeOrder as placeOrderApi } from '../services/order.service.js';
+import { placeOrder as placeOrderApi, updateOrderItem } from '../services/order.service.js';
 import { useCartStore } from '../stores/cart.js';
 
 const cartStore = useCartStore();
@@ -39,6 +39,7 @@ const orderError   = ref('');
 const showSummary      = ref(false);
 const summary          = ref(null);
 const isSummaryLoading = ref(false);
+const itemUpdating     = ref(null);   // tracks "orderId-productId" being updated
 
 /* ─── Helpers ──────────────────────────────────────────── */
 const formatPrice = (value) => `${Number(value).toLocaleString()}đ`;
@@ -163,6 +164,35 @@ const fetchSummary = async () => {
   } finally {
     isSummaryLoading.value = false;
   }
+};
+
+/* ─── Item editing (summary) ────────────────────────────── */
+const setClientItemQty = async (orderId, productId, newQty) => {
+  if (!session.value) return;
+  itemUpdating.value = `${orderId}-${productId}`;
+  try {
+    const sessionId = session.value.sessionId ?? session.value.id;
+    await updateOrderItem(orderId, productId, newQty, sessionId);
+    summary.value = await getSessionSummary(sessionId);
+  } catch (e) {
+    orderError.value = e?.detail ?? e?.message ?? 'Cập nhật thất bại.';
+  } finally {
+    itemUpdating.value = null;
+  }
+};
+
+const decrementClientItem = (orderId, productId, currentQty) => {
+  if (currentQty <= 1) {
+    if (!confirm('Xoá món này khỏi đơn?')) return;
+    setClientItemQty(orderId, productId, 0);
+  } else {
+    setClientItemQty(orderId, productId, currentQty - 1);
+  }
+};
+
+const removeClientItem = (orderId, productId) => {
+  if (!confirm('Xoá món này khỏi đơn?')) return;
+  setClientItemQty(orderId, productId, 0);
 };
 
 onMounted(async () => {
@@ -482,21 +512,45 @@ onMounted(async () => {
         class="tw:mb-4 tw:rounded-xl tw:border tw:border-orange-100 tw:p-4"
       >
         <div class="tw:flex tw:items-center tw:justify-between">
-          <span class="tw:text-sm tw:font-semibold tw:text-slate-700">
-            {{ order.orderNumber ?? order.OrderNumber }}
-          </span>
+          <div class="tw:flex tw:items-center tw:gap-2">
+            <span class="tw:text-sm tw:font-semibold tw:text-slate-700">
+              {{ order.orderNumber ?? order.OrderNumber }}
+            </span>
+            <span
+              v-if="(order.status ?? order.Status) === 'Pending'"
+              class="tw:rounded-full tw:bg-amber-100 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-amber-700"
+            >Đang chờ</span>
+          </div>
           <span class="tw:text-sm tw:font-semibold tw:text-orange-600">
             {{ formatPrice(order.totalAmount ?? order.TotalAmount) }}
           </span>
         </div>
-        <ul class="tw:mt-2 tw:space-y-1">
+        <ul class="tw:mt-2 tw:space-y-1.5">
           <li
             v-for="item in order.items ?? order.Items ?? []"
             :key="(item.productId ?? item.ProductId) + String(item.productName ?? item.ProductName)"
-            class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:text-slate-600"
+            class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:text-sm tw:text-slate-600"
+            :class="{ 'tw:opacity-50 tw:pointer-events-none': itemUpdating === `${order.orderId ?? order.OrderId}-${item.productId ?? item.ProductId}` }"
           >
-            <span>{{ item.productName ?? item.ProductName }} × {{ item.quantity ?? item.Quantity }}</span>
-            <span>{{ formatPrice((item.unitPrice ?? item.UnitPrice) * (item.quantity ?? item.Quantity)) }}</span>
+            <span class="tw:flex-1">{{ item.productName ?? item.ProductName }}</span>
+            <!-- Edit controls — Pending orders only -->
+            <div v-if="(order.status ?? order.Status) === 'Pending'" class="tw:flex tw:items-center tw:gap-1">
+              <button
+                class="tw:flex tw:h-6 tw:w-6 tw:items-center tw:justify-center tw:rounded tw:border tw:border-slate-200 tw:text-slate-500 tw:transition hover:tw:border-orange-300 hover:tw:text-orange-600"
+                @click="decrementClientItem(order.orderId ?? order.OrderId, item.productId ?? item.ProductId, item.quantity ?? item.Quantity)"
+              ><iconify icon="heroicons-outline:minus" class="tw:h-3 tw:w-3" /></button>
+              <span class="tw:min-w-5 tw:text-center tw:font-semibold">{{ item.quantity ?? item.Quantity }}</span>
+              <button
+                class="tw:flex tw:h-6 tw:w-6 tw:items-center tw:justify-center tw:rounded tw:border tw:border-slate-200 tw:text-slate-500 tw:transition hover:tw:border-orange-300 hover:tw:text-orange-600"
+                @click="setClientItemQty(order.orderId ?? order.OrderId, item.productId ?? item.ProductId, (item.quantity ?? item.Quantity) + 1)"
+              ><iconify icon="heroicons-outline:plus" class="tw:h-3 tw:w-3" /></button>
+              <button
+                class="tw:ml-1 tw:flex tw:h-6 tw:w-6 tw:items-center tw:justify-center tw:rounded tw:border tw:border-rose-200 tw:text-rose-400 tw:transition hover:tw:border-rose-400 hover:tw:text-rose-600"
+                @click="removeClientItem(order.orderId ?? order.OrderId, item.productId ?? item.ProductId)"
+              ><iconify icon="heroicons-outline:trash" class="tw:h-3 tw:w-3" /></button>
+            </div>
+            <span v-else class="tw:font-medium">× {{ item.quantity ?? item.Quantity }}</span>
+            <span class="tw:shrink-0">{{ formatPrice((item.unitPrice ?? item.UnitPrice) * (item.quantity ?? item.Quantity)) }}</span>
           </li>
         </ul>
       </div>

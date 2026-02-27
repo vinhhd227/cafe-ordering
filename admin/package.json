@@ -15,6 +15,7 @@
     "axios": "^1.13.4",
     "pinia": "^3.0.4",
     "primevue": "^4.5.4",
+    "qrcode": "^1.5.4",
     "tailwindcss-primeui": "^0.6.1",
     "unplugin-auto-import": "^21.0.0",
     "vee-validate": "^4.15.1",

@@ -12,8 +12,13 @@ public record OrderDto(
   int Id,
   string OrderNumber,
   string Status,
+  string PaymentStatus,
+  string PaymentMethod,
+  decimal? AmountReceived,
+  decimal TipAmount,
   decimal TotalAmount,
   DateTime OrderDate,
   Guid SessionId,
+  string? TableCode,
   List<OrderItemDto> Items
 );

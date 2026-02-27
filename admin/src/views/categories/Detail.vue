@@ -4,28 +4,27 @@ import { useRoute, useRouter } from "vue-router";
 import { getCategoryById, updateCategory } from "@/services/category.service";
 import { usePermission } from "@/composables/usePermission";
 
-const route  = useRoute();
+const route = useRoute();
 const router = useRouter();
 const categoryId = Number(route.params.id);
 const { can } = usePermission();
 
 // ── State ──────────────────────────────────────────────────────────
-const category    = ref(null);
-const loading     = ref(false);
-const saving      = ref(false);
+const category = ref(null);
+const loading = ref(false);
+const saving = ref(false);
 const errorMessage = ref("");
-const saveSuccess  = ref(false);
+const saveSuccess = ref(false);
 
 // Edit form
 const form = ref({
-  name:        "",
+  name: "",
   description: "",
-  isActive:    true,
+  isActive: true,
 });
 
 // ── Helpers ────────────────────────────────────────────────────────
-const formatDate = (d) =>
-  d ? new Date(d).toLocaleString("vi-VN") : "—";
+const formatDate = (d) => (d ? new Date(d).toLocaleString("vi-VN") : "—");
 
 const extractError = (err) =>
   err?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
@@ -40,9 +39,9 @@ const loadCategory = async () => {
     const res = await getCategoryById(categoryId);
     category.value = res?.data;
     form.value = {
-      name:        category.value.name,
+      name: category.value.name,
       description: category.value.description ?? "",
-      isActive:    category.value.isActive,
+      isActive: category.value.isActive,
     };
   } catch (err) {
     errorMessage.value =
@@ -58,9 +57,9 @@ const save = async () => {
   saveSuccess.value = false;
   try {
     await updateCategory(categoryId, {
-      name:        form.value.name.trim(),
+      name: form.value.name.trim(),
       description: form.value.description.trim() || null,
-      isActive:    form.value.isActive,
+      isActive: form.value.isActive,
     });
     await loadCategory();
     saveSuccess.value = true;
@@ -77,12 +76,17 @@ onMounted(loadCategory);
 
 <template>
   <section class="tw:space-y-6">
-
     <!-- ── Header ───────────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">Categories</p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold tw:flex tw:items-center tw:gap-3">
+        <p
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+        >
+          Categories
+        </p>
+        <h1
+          class="tw:mt-2 tw:text-3xl tw:font-semibold tw:flex tw:items-center tw:gap-3"
+        >
           <span v-if="category">{{ category.name }}</span>
           <prime-skeleton v-else width="14rem" height="2rem" />
           <prime-tag
@@ -113,7 +117,10 @@ onMounted(loadCategory);
     </div>
 
     <!-- ── Loading skeleton ──────────────────────────────────────── -->
-    <div v-if="loading" class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3">
+    <div
+      v-if="loading"
+      class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3"
+    >
       <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-1">
         <template #content>
           <prime-skeleton height="6rem" class="tw:rounded-xl" />
@@ -123,13 +130,17 @@ onMounted(loadCategory);
       </prime-card>
       <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-2">
         <template #content>
-          <prime-skeleton v-for="i in 3" :key="i" height="2.5rem" class="tw:mb-4" />
+          <prime-skeleton
+            v-for="i in 3"
+            :key="i"
+            height="2.5rem"
+            class="tw:mb-4"
+          />
         </template>
       </prime-card>
     </div>
 
     <template v-else-if="category">
-
       <!-- ── Messages ───────────────────────────────────────────── -->
       <prime-message
         v-if="errorMessage"
@@ -138,7 +149,8 @@ onMounted(loadCategory);
         variant="simple"
         :closable="true"
         @close="errorMessage = ''"
-      >{{ errorMessage }}</prime-message>
+        >{{ errorMessage }}</prime-message
+      >
 
       <prime-message
         v-if="saveSuccess"
@@ -146,18 +158,22 @@ onMounted(loadCategory);
         size="small"
         variant="simple"
         :closable="false"
-      >Category updated successfully.</prime-message>
+        >Category updated successfully.</prime-message
+      >
 
       <div class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3">
-
         <!-- ── Left: readonly info ─────────────────────────────── -->
         <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-1">
           <template #content>
-
             <!-- Icon placeholder -->
             <div class="tw:flex tw:justify-center tw:mb-5">
-              <div class="tw:h-24 tw:w-24 tw:rounded-2xl tw:bg-emerald-500/10 tw:flex tw:items-center tw:justify-center">
-                <iconify icon="ph:tag-bold" class="tw:text-4xl tw:text-emerald-400" />
+              <div
+                class="tw:h-24 tw:w-24 tw:rounded-2xl tw:bg-emerald-500/10 tw:flex tw:items-center tw:justify-center"
+              >
+                <iconify
+                  icon="ph:tag-bold"
+                  class="tw:text-4xl tw:text-emerald-400"
+                />
               </div>
             </div>
 
@@ -172,24 +188,32 @@ onMounted(loadCategory);
               </div>
               <div class="tw:flex tw:justify-between tw:text-sm">
                 <span class="app-text-muted">Created</span>
-                <span class="tw:font-medium tw:text-right">{{ formatDate(category.createdAt) }}</span>
+                <span class="tw:font-medium tw:text-right">{{
+                  formatDate(category.createdAt)
+                }}</span>
               </div>
-              <div v-if="category.updatedAt" class="tw:flex tw:justify-between tw:text-sm">
+              <div
+                v-if="category.updatedAt"
+                class="tw:flex tw:justify-between tw:text-sm"
+              >
                 <span class="app-text-muted">Updated</span>
-                <span class="tw:font-medium tw:text-right">{{ formatDate(category.updatedAt) }}</span>
+                <span class="tw:font-medium tw:text-right">{{
+                  formatDate(category.updatedAt)
+                }}</span>
               </div>
             </div>
 
             <!-- Description preview -->
             <div v-if="category.description" class="tw:mt-5">
-              <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-subtle tw:mb-1">
+              <p
+                class="tw:text-xs tw:uppercase tw:tracking-widest app-text-subtle tw:mb-1"
+              >
                 Description
               </p>
               <p class="tw:text-sm app-text-muted tw:leading-relaxed">
                 {{ category.description }}
               </p>
             </div>
-
           </template>
         </prime-card>
 
@@ -199,13 +223,13 @@ onMounted(loadCategory);
             <p class="tw:text-sm tw:font-semibold tw:mb-5">Edit details</p>
 
             <div class="tw:space-y-5">
-
               <!-- Name -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-sm tw:font-medium">
+                <label for="name" class="tw:text-sm tw:font-medium">
                   Name <span class="tw:text-red-400">*</span>
                 </label>
                 <prime-input-text
+                  id="name"
                   v-model="form.name"
                   class="app-input tw:w-full"
                 />
@@ -213,35 +237,39 @@ onMounted(loadCategory);
 
               <!-- Description -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-sm tw:font-medium">
+                <label for="description" class="tw:text-sm tw:font-medium">
                   Description
                   <span class="app-text-muted tw:font-normal">(optional)</span>
                 </label>
                 <prime-textarea
+                  id="description"
                   v-model="form.description"
                   rows="3"
                   class="app-input tw:w-full tw:resize-none"
                   auto-resize
                 />
               </div>
-
             </div>
 
+             <prime-divider />
             <!-- Active status -->
-            <div class="tw:mt-6 tw:pt-5 tw:border-t">
+            <div>
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
                   <p class="tw:text-sm tw:font-semibold">Active</p>
-                  <p class="tw:text-xs app-text-muted">Hiển thị category trên menu</p>
+                  <p class="tw:text-xs app-text-muted">
+                    Hiển thị category trên menu
+                  </p>
                 </div>
                 <prime-toggle-switch v-model="form.isActive" />
               </div>
             </div>
 
+            <prime-divider />
             <!-- Actions -->
             <div
               v-if="can('product.update')"
-              class="tw:flex tw:justify-end tw:gap-3 tw:mt-6 tw:pt-6 tw:border-t"
+              class="tw:flex tw:justify-end tw:gap-3"
             >
               <prime-button
                 label="Reset"
@@ -260,22 +288,21 @@ onMounted(loadCategory);
                 <span>Save changes</span>
               </prime-button>
             </div>
-
           </template>
         </prime-card>
-
       </div>
     </template>
 
     <!-- ── Not found ──────────────────────────────────────────────── -->
     <prime-card v-else class="app-card tw:rounded-2xl tw:border">
       <template #content>
-        <div class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted">
+        <div
+          class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted"
+        >
           <iconify icon="ph:warning-bold" class="tw:text-3xl tw:mb-2" />
           <p class="tw:text-sm">Category not found.</p>
         </div>
       </template>
     </prime-card>
-
   </section>
 </template>

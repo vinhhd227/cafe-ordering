@@ -76,7 +76,7 @@ public static class SeedData
     if (!context.Tables.Any())
     {
       var tables = Enumerable.Range(1, 5)
-        .Select(n => Table.Create(n))
+        .Select(n => Table.Create(n, $"T{n:D2}"))
         .ToArray();
 
       context.Tables.AddRange(tables);

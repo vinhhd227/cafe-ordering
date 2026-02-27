@@ -14,6 +14,8 @@ public class TableConfiguration : IEntityTypeConfiguration<Table>
 
     builder.Property(t => t.Number).IsRequired();
 
+    builder.Property(t => t.Code).IsRequired().HasMaxLength(20);
+
     builder.Property(t => t.Status)
       .IsRequired()
       .HasDefaultValue(TableStatus.Available);
@@ -25,6 +27,12 @@ public class TableConfiguration : IEntityTypeConfiguration<Table>
       .IsUnique()
       .HasFilter(@"""IsDeleted"" = false")
       .HasDatabaseName("IX_Tables_Number");
+
+    // Unique table code among non-deleted tables
+    builder.HasIndex(t => t.Code)
+      .IsUnique()
+      .HasFilter(@"""IsDeleted"" = false")
+      .HasDatabaseName("IX_Tables_Code");
 
     builder.HasIndex(t => t.Status)
       .HasDatabaseName("IX_Tables_Status");

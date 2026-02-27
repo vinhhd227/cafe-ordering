@@ -5,15 +5,15 @@ import { updateCategory } from "@/services/category.service";
 import { updateProduct } from "@/services/product.service";
 
 // ── State ──────────────────────────────────────────────────────────
-const menuData     = ref([]);
-const loading      = ref(false);
+const menuData = ref([]);
+const loading = ref(false);
 const errorMessage = ref("");
-const toggling     = ref(new Set()); // key = "cat-{id}" | "prod-{id}"
-const openPanels   = ref([]);
+const toggling = ref(new Set()); // key = "cat-{id}" | "prod-{id}"
+const openPanels = ref([]);
 
 // ── Computed stats ─────────────────────────────────────────────────
 const stats = computed(() => {
-  let activeProducts   = 0;
+  let activeProducts = 0;
   let inactiveProducts = 0;
   for (const cat of menuData.value) {
     for (const p of cat.products) {
@@ -31,8 +31,8 @@ const stats = computed(() => {
 // ── Helpers ────────────────────────────────────────────────────────
 const formatVnd = (value) =>
   new Intl.NumberFormat("vi-VN", {
-    style:                 "currency",
-    currency:              "VND",
+    style: "currency",
+    currency: "VND",
     maximumFractionDigits: 0,
   }).format(value ?? 0);
 
@@ -42,10 +42,10 @@ const extractError = (err) =>
 
 // ── Load ──────────────────────────────────────────────────────────
 const loadMenu = async () => {
-  loading.value      = true;
+  loading.value = true;
   errorMessage.value = "";
   try {
-    const res      = await getAdminMenu();
+    const res = await getAdminMenu();
     menuData.value = res?.data ?? [];
     // Open all panels by default
     openPanels.value = menuData.value.map((c) => String(c.id));
@@ -69,9 +69,9 @@ const toggleCategory = async (cat) => {
 
   try {
     await updateCategory(cat.id, {
-      name:        cat.name,
+      name: cat.name,
       description: cat.description ?? null,
-      isActive:    cat.isActive,
+      isActive: cat.isActive,
     });
   } catch (err) {
     cat.isActive = oldActive; // revert
@@ -88,21 +88,21 @@ const toggleProduct = async (product) => {
   const key = `prod-${product.id}`;
   if (toggling.value.has(key)) return;
 
-  const oldActive  = product.isActive;
+  const oldActive = product.isActive;
   product.isActive = !oldActive; // optimistic
-  toggling.value   = new Set([...toggling.value, key]);
+  toggling.value = new Set([...toggling.value, key]);
 
   try {
     await updateProduct(product.id, {
-      categoryId:           product.categoryId,
-      name:                 product.name,
-      price:                product.price,
-      description:          product.description          ?? null,
-      imageUrl:             product.imageUrl             ?? null,
-      isActive:             product.isActive,
+      categoryId: product.categoryId,
+      name: product.name,
+      price: product.price,
+      description: product.description ?? null,
+      imageUrl: product.imageUrl ?? null,
+      isActive: product.isActive,
       hasTemperatureOption: product.hasTemperatureOption,
-      hasIceLevelOption:    product.hasIceLevelOption,
-      hasSugarLevelOption:  product.hasSugarLevelOption,
+      hasIceLevelOption: product.hasIceLevelOption,
+      hasSugarLevelOption: product.hasSugarLevelOption,
     });
   } catch (err) {
     product.isActive = oldActive; // revert
@@ -117,11 +117,14 @@ const toggleProduct = async (product) => {
 
 <template>
   <section class="tw:space-y-6">
-
     <!-- ── Header ─────────────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">Menu</p>
+        <p
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+        >
+          Menu
+        </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Menu builder</h1>
         <p class="tw:mt-2 tw:text-sm app-text-muted">
           Activate or deactivate categories and products at a glance.
@@ -143,7 +146,9 @@ const toggleProduct = async (product) => {
     <div class="tw:grid tw:grid-cols-3 tw:gap-3">
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle">
+          <p
+            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle"
+          >
             Categories
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
@@ -153,7 +158,9 @@ const toggleProduct = async (product) => {
       </prime-card>
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400">
+          <p
+            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400"
+          >
             Active products
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
@@ -163,7 +170,9 @@ const toggleProduct = async (product) => {
       </prime-card>
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-red-400">
+          <p
+            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-red-400"
+          >
             Inactive products
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
@@ -180,7 +189,8 @@ const toggleProduct = async (product) => {
       variant="accent"
       closable
       @close="errorMessage = ''"
-    >{{ errorMessage }}</prime-alert>
+      >{{ errorMessage }}</prime-alert
+    >
 
     <!-- ── Loading skeleton ────────────────────────────────────────── -->
     <div v-if="loading" class="tw:space-y-4">
@@ -195,7 +205,9 @@ const toggleProduct = async (product) => {
             <prime-skeleton width="10rem" height="1.25rem" />
             <prime-skeleton width="3rem" height="1.25rem" />
           </div>
-          <div class="tw:mt-4 tw:grid tw:grid-cols-2 tw:gap-3 tw:sm:grid-cols-3 tw:lg:grid-cols-4">
+          <div
+            class="tw:mt-4 tw:grid tw:grid-cols-2 tw:gap-3 tw:sm:grid-cols-3 tw:lg:grid-cols-4"
+          >
             <prime-skeleton
               v-for="j in 4"
               :key="j"
@@ -221,11 +233,11 @@ const toggleProduct = async (product) => {
           class="app-card tw:rounded-2xl tw:border tw:overflow-hidden tw:transition-opacity"
           :class="{ 'tw:opacity-60': !cat.isActive }"
         >
-
           <!-- ── Category header ─────────────────────────────────── -->
           <prime-accordion-header>
-            <div class="tw:flex tw:w-full tw:items-center tw:gap-3 tw:min-w-0 tw:py-0.5">
-
+            <div
+              class="tw:flex tw:w-full tw:items-center tw:gap-3 tw:min-w-0 tw:py-0.5"
+            >
               <!-- Toggle (stop propagation → won't collapse accordion) -->
               <div @click.stop class="tw:shrink-0">
                 <prime-toggle-switch
@@ -269,20 +281,19 @@ const toggleProduct = async (product) => {
               >
                 {{ cat.description }}
               </span>
-
             </div>
           </prime-accordion-header>
 
           <!-- ── Product grid ────────────────────────────────────── -->
           <prime-accordion-content>
             <div class="tw:px-4 tw:pb-4 tw:pt-2">
-
               <!-- Empty state -->
               <div
                 v-if="cat.products.length === 0"
                 class="tw:flex tw:flex-col tw:items-center tw:py-8 app-text-muted"
               >
                 <iconify icon="ph:coffee-bold" class="tw:text-2xl tw:mb-2" />
+
                 <p class="tw:text-sm">No products in this category.</p>
               </div>
 
@@ -298,11 +309,13 @@ const toggleProduct = async (product) => {
                   :class="[
                     product.isActive
                       ? 'tw:border-white/10 tw:bg-white/5'
-                      : 'tw:border-white/5 tw:bg-white/[0.02] tw:opacity-50',
+                      : 'tw:border-white/5 tw:bg-white/2 tw:opacity-50',
                   ]"
                 >
                   <!-- Image row + toggle -->
-                  <div class="tw:flex tw:items-start tw:justify-between tw:gap-2">
+                  <div
+                    class="tw:flex tw:items-start tw:justify-between tw:gap-2"
+                  >
                     <img
                       v-if="product.imageUrl"
                       :src="product.imageUrl"
@@ -311,9 +324,12 @@ const toggleProduct = async (product) => {
                     />
                     <div
                       v-else
-                      class="tw:h-12 tw:w-12 tw:rounded-lg tw:bg-white/10 tw:shrink-0 tw:flex tw:items-center tw:justify-center"
+                      class="tw:h-12 tw:w-12 tw:rounded-lg tw:bg-primary/20 tw:shrink-0 tw:flex tw:items-center tw:justify-center"
                     >
-                      <iconify icon="ph:coffee-bold" class="tw:text-lg app-text-muted" />
+                      <iconify
+                        icon="ph:coffee-bold"
+                        class="tw:text-lg app-text-muted"
+                      />
                     </div>
 
                     <!-- Toggle + busy indicator -->
@@ -333,12 +349,16 @@ const toggleProduct = async (product) => {
                   </div>
 
                   <!-- Product name -->
-                  <p class="tw:text-sm tw:font-medium tw:leading-snug tw:line-clamp-2">
+                  <p
+                    class="tw:text-sm tw:font-medium tw:leading-snug tw:line-clamp-2"
+                  >
                     {{ product.name }}
                   </p>
 
                   <!-- Price + inactive tag -->
-                  <div class="tw:flex tw:items-center tw:justify-between tw:gap-1 tw:mt-auto">
+                  <div
+                    class="tw:flex tw:items-center tw:justify-between tw:gap-1 tw:mt-auto"
+                  >
                     <span class="tw:text-xs tw:font-semibold tw:tabular-nums">
                       {{ formatVnd(product.price) }}
                     </span>
@@ -349,11 +369,9 @@ const toggleProduct = async (product) => {
                     />
                   </div>
                 </div>
-
               </div>
             </div>
           </prime-accordion-content>
-
         </prime-accordion-panel>
       </prime-accordion>
     </template>
@@ -361,12 +379,13 @@ const toggleProduct = async (product) => {
     <!-- ── Empty state ────────────────────────────────────────────── -->
     <prime-card v-else class="app-card tw:rounded-2xl tw:border">
       <template #content>
-        <div class="tw:flex tw:flex-col tw:items-center tw:py-12 app-text-muted">
+        <div
+          class="tw:flex tw:flex-col tw:items-center tw:py-12 app-text-muted"
+        >
           <iconify icon="ph:list-bold" class="tw:text-3xl tw:mb-2" />
           <p class="tw:text-sm">No categories found.</p>
         </div>
       </template>
     </prime-card>
-
   </section>
 </template>

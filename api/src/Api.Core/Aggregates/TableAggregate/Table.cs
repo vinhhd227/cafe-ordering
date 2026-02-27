@@ -7,15 +7,17 @@ public class Table : SoftDeletableEntity<int>, IAggregateRoot
   private Table() { }
 
   public int Number { get; private set; }
+  public string Code { get; private set; } = string.Empty;
   public bool IsActive { get; private set; } = true;
   public TableStatus Status { get; private set; } = TableStatus.Available;
   public Guid? ActiveSessionId { get; private set; }
 
-  public static Table Create(int number)
+  public static Table Create(int number, string code)
   {
     var table = new Table
     {
       Number = Guard.Against.NegativeOrZero(number),
+      Code   = Guard.Against.NullOrWhiteSpace(code),
       IsActive = true,
       Status = TableStatus.Available
     };
@@ -26,6 +28,11 @@ public class Table : SoftDeletableEntity<int>, IAggregateRoot
   public void UpdateNumber(int number)
   {
     Number = Guard.Against.NegativeOrZero(number);
+  }
+
+  public void UpdateCode(string code)
+  {
+    Code = Guard.Against.NullOrWhiteSpace(code);
   }
 
   public void Activate()

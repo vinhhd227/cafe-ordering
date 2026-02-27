@@ -39,9 +39,35 @@ const routes = [
       },
       {
         path: "orders",
-        name: "orders",
-        component: () => import("@/views/Orders.vue"),
         meta: { requiresAuth: true, requiredClaim: "order.read" },
+        children: [
+          {
+            path: "",
+            name: "orders",
+            component: () => import("@/views/orders/Kanban.vue"),
+          },
+          {
+            path: "list",
+            name: "ordersList",
+            component: () => import("@/views/orders/List.vue"),
+          },
+          {
+            path: ":id",
+            name: "ordersDetail",
+            component: () => import("@/views/orders/Detail.vue"),
+          },
+        ],
+      },
+      {
+        path: "tables",
+        meta: { requiresAuth: true, requiredClaim: "table.read" },
+        children: [
+          {
+            path: "",
+            name: "tables",
+            component: () => import("@/views/tables/List.vue"),
+          },
+        ],
       },
       {
         path: "menu",
