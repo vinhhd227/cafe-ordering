@@ -423,7 +423,7 @@ const savePermissions = async () => {
       <!-- Actions -->
       <prime-column header="Actions" style="min-width: 13rem">
         <template #body="{ data }">
-          <div class="tw:flex tw:gap-2">
+          <div class="tw:flex tw:justify-end tw:gap-2">
             <prime-button
               severity="secondary"
               outlined

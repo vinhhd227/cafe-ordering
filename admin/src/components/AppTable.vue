@@ -290,3 +290,10 @@ watch(
     </template>
   </prime-card>
 </template>
+
+<style scoped>
+/* Right-align the header label of the last column (Actions) */
+:deep(th:last-child .p-datatable-column-header-content) {
+  justify-content: flex-end;
+}
+</style>
