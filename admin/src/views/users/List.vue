@@ -10,6 +10,7 @@ import {
 import AppTable from '@/components/AppTable.vue'
 import { useTableCache } from '@/composables/useTableCache'
 import { usePermission } from '@/composables/usePermission'
+import { btnIcon } from "@/layout/ui";
 
 const cache  = useTableCache('users')
 const router = useRouter()
@@ -564,6 +565,7 @@ const confirmAndDeactivate = async () => {
                 size="small"
                 v-tooltip.top="'Copy'"
                 @click="copyTempPassword"
+                :class="btnIcon"
               >
                 <iconify icon="ph:copy-bold" />
               </prime-button>

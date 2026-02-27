@@ -8,10 +8,12 @@ import {
   changeUserRole,
   activateUser,
   deactivateUser,
+  resetUserPassword,
 } from "@/services/user.service";
 import { getRoles } from "@/services/role.service";
 import { useAuthStore } from "@/stores/auth";
 import { usePermission } from "@/composables/usePermission";
+import { btnIcon } from "@/layout/ui";
 
 const route  = useRoute();
 const router = useRouter();
@@ -40,6 +42,11 @@ const successMessage = ref("");
 // Activate / Deactivate
 const toggleLoading          = ref(false);
 const showDeactivateConfirm  = ref(false);
+
+// Reset password
+const resetLoading      = ref(false);
+const showResetResult   = ref(false);
+const resetPasswordData = ref({ username: "", temporaryPassword: "" });
 
 // ── Helpers ────────────────────────────────────────────────────────
 const initials = (fullName) =>
@@ -168,6 +175,27 @@ const confirmDeactivate = async () => {
     errorMessage.value = extractError(err);
   } finally {
     toggleLoading.value = false;
+  }
+};
+
+const copyResetPassword = () => {
+  navigator.clipboard?.writeText(resetPasswordData.value.temporaryPassword);
+};
+
+const doResetPassword = async () => {
+  resetLoading.value = true;
+  errorMessage.value = "";
+  try {
+    const res = await resetUserPassword(userId);
+    resetPasswordData.value = {
+      username: res.data.username,
+      temporaryPassword: res.data.temporaryPassword,
+    };
+    showResetResult.value = true;
+  } catch (err) {
+    errorMessage.value = extractError(err);
+  } finally {
+    resetLoading.value = false;
   }
 };
 </script>
@@ -328,6 +356,21 @@ const confirmDeactivate = async () => {
               </prime-button>
             </div>
 
+            <!-- Reset Password -->
+            <div v-if="can('user.resetPassword') && userId !== auth.user?.id" class="tw:mt-4 tw:pt-4 tw:border-t">
+              <prime-button
+                severity="warning"
+                outlined
+                size="small"
+                class="tw:w-full"
+                :loading="resetLoading"
+                @click="doResetPassword"
+              >
+                <iconify icon="ph:key-bold" />
+                <span>Reset password</span>
+              </prime-button>
+            </div>
+
           </template>
         </prime-card>
 
@@ -477,6 +520,52 @@ const confirmDeactivate = async () => {
         >
           <iconify icon="ph:prohibit-bold" />
           <span>Deactivate</span>
+        </prime-button>
+      </template>
+    </prime-dialog>
+
+    <!-- ── Reset Password Result Dialog ──────────────────────────── -->
+    <prime-dialog
+      v-model:visible="showResetResult"
+      header="Password reset"
+      :modal="true"
+      style="width: 26rem"
+    >
+      <div class="tw:space-y-4 tw:pt-2">
+        <prime-message severity="warn">Save this password now - it will not be show again.</prime-message>
+        <div class="tw:rounded-xl tw:border tw:p-4 tw:space-y-3 app-card">
+          <div class="tw:space-y-0.5">
+            <p class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle">Username</p>
+            <p class="tw:font-mono tw:font-semibold">{{ resetPasswordData.username }}</p>
+          </div>
+          <div class="tw:space-y-0.5">
+            <p class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle">Temporary password</p>
+            <div class="tw:flex tw:items-center tw:gap-2">
+              <p class="tw:font-mono tw:font-bold tw:text-xl tw:tracking-widest tw:text-emerald-300">
+                {{ resetPasswordData.temporaryPassword }}
+              </p>
+              <prime-button
+                severity="secondary"
+                outlined
+                size="small"
+                v-tooltip.top="'Copy'"
+                @click="copyResetPassword"
+                :class="btnIcon"
+              >
+                <iconify icon="ph:copy-bold" />
+              </prime-button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <prime-button
+          severity="success"
+          size="small"
+          @click="showResetResult = false"
+        >
+          <iconify icon="ph:check-bold" />
+          <span>Done</span>
         </prime-button>
       </template>
     </prime-dialog>

@@ -22,3 +22,6 @@ export const deactivateUser = (id) =>
 
 export const changeUserRole = (id, role) =>
   api.put(`/admin/users/${id}/roles`, { role })
+
+export const resetUserPassword = (id) =>
+  api.post(`/admin/users/${id}/reset-password`, {})
