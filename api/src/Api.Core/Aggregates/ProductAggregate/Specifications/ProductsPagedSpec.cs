@@ -34,7 +34,7 @@ public class ProductsPagedSpec : Specification<Product>
       Query.Where(p => p.Price <= maxPrice.Value);
 
     Query
-      .OrderByDescending(p => p.CreatedAt)
+      .OrderBy(p => p.Id)
       .Skip((page - 1) * pageSize)
       .Take(pageSize);
   }

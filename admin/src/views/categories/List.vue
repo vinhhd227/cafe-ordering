@@ -1,10 +1,11 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
-import { getCategory } from "@/services/category.service";
+import { getCategory, toggleCategoryActive } from "@/services/category.service";
 import AppTable from "@/components/AppTable.vue";
 import { useTableCache } from "@/composables/useTableCache";
 import { usePermission } from "@/composables/usePermission";
+import { btnIcon } from "@/layout/ui";
 
 const cache = useTableCache("categories");
 
@@ -78,6 +79,17 @@ const statusTag = (isActive) =>
   isActive
     ? { label: "Active", severity: "success" }
     : { label: "Inactive", severity: "danger" };
+
+// ── Actions ───────────────────────────────────────────────────────
+const handleToggleActive = async (row) => {
+  try {
+    await toggleCategoryActive(row.id);
+    await loadCategories();
+  } catch (err) {
+    errorMessage.value =
+      err?.response?.data?.message ?? `Failed to update category "${row.name}".`;
+  }
+};
 
 // ── Load data ─────────────────────────────────────────────────────
 const loadCategories = async () => {
@@ -279,18 +291,34 @@ watch([search, statusFilter], () => {
           />
         </template>
       </prime-column>
-      <prime-column header="Actions" style="min-width: 8rem">
+      <prime-column header="Actions" style="min-width: 12rem">
         <template #body="{ data }">
-          <prime-button
-            iconPos="right"
-            severity="secondary"
-            outlined
-            size="small"
-            @click="router.push({ name: 'categoriesDetail', params: { id: data.id } })"
-          >
-            <iconify icon="ph:arrow-right-bold" />
-            <span>View</span>
-          </prime-button>
+          <div class="tw:flex tw:justify-end tw:gap-2">
+            <!-- Toggle active -->
+            <prime-button
+              :severity="data.isActive ? 'success' : 'danger'"
+              outlined
+              size="small"
+              :class="btnIcon"
+              :v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
+              @click="handleToggleActive(data)"
+            >
+              <iconify
+                :icon="data.isActive ? 'ph:toggle-right-bold' : 'ph:toggle-left-bold'"
+              />
+            </prime-button>
+            <!-- View detail -->
+            <prime-button
+              severity="secondary"
+              outlined
+              size="small"
+              v-tooltip.top="'View detail'"
+              @click="router.push({ name: 'categoriesDetail', params: { id: data.id } })"
+            >
+              <iconify icon="ph:arrow-right-bold" />
+              <span>View</span>
+            </prime-button>
+          </div>
         </template>
       </prime-column>
     </AppTable>

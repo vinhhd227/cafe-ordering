@@ -19,6 +19,12 @@ public static class PermissionRegistry
       ["order.update"]       = "Update order status",
       ["order.delete"]       = "Delete orders",
 
+      // Categories
+      ["category.create"]    = "Create new categories",
+      ["category.read"]      = "View category list",
+      ["category.update"]    = "Edit category information",
+      ["category.delete"]    = "Delete categories",
+
       // Products
       ["product.create"]     = "Create new products",
       ["product.read"]       = "View product list",
@@ -36,6 +42,7 @@ public static class PermissionRegistry
       ["user.create"]        = "Create user accounts",
       ["user.update"]        = "Edit user information",
       ["user.deactivate"]    = "Deactivate user accounts",
+      ["user.resetPassword"] = "Reset user password",
 
       // Tables
       ["table.create"]       = "Create tables",

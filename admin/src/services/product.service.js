@@ -11,3 +11,6 @@ export const createProduct = (payload) => api.post('/products', payload)
 
 // PUT /api/products/:id  → 204 No Content
 export const updateProduct = (id, payload) => api.put(`/products/${id}`, payload)
+
+// PATCH /api/products/:id/toggle-active  → 204 No Content
+export const toggleProductActive = (id) => api.patch(`/products/${id}/toggle-active`, {})

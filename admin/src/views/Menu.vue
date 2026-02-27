@@ -1,8 +1,8 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { getAdminMenu } from "@/services/menu.service";
-import { updateCategory } from "@/services/category.service";
-import { updateProduct } from "@/services/product.service";
+import { toggleCategoryActive } from "@/services/category.service";
+import { toggleProductActive } from "@/services/product.service";
 
 // ── State ──────────────────────────────────────────────────────────
 const menuData = ref([]);
@@ -68,11 +68,7 @@ const toggleCategory = async (cat) => {
   toggling.value = new Set([...toggling.value, key]);
 
   try {
-    await updateCategory(cat.id, {
-      name: cat.name,
-      description: cat.description ?? null,
-      isActive: cat.isActive,
-    });
+    await toggleCategoryActive(cat.id);
   } catch (err) {
     cat.isActive = oldActive; // revert
     errorMessage.value = extractError(err) || "Failed to update category.";
@@ -93,17 +89,7 @@ const toggleProduct = async (product) => {
   toggling.value = new Set([...toggling.value, key]);
 
   try {
-    await updateProduct(product.id, {
-      categoryId: product.categoryId,
-      name: product.name,
-      price: product.price,
-      description: product.description ?? null,
-      imageUrl: product.imageUrl ?? null,
-      isActive: product.isActive,
-      hasTemperatureOption: product.hasTemperatureOption,
-      hasIceLevelOption: product.hasIceLevelOption,
-      hasSugarLevelOption: product.hasSugarLevelOption,
-    });
+    await toggleProductActive(product.id);
   } catch (err) {
     product.isActive = oldActive; // revert
     errorMessage.value = extractError(err) || "Failed to update product.";

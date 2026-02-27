@@ -2,10 +2,11 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
 import { usePermission } from "@/composables/usePermission";
-import { getProducts } from "@/services/product.service";
+import { getProducts, toggleProductActive } from "@/services/product.service";
 import { getCategory } from "@/services/category.service";
 import AppTable from "@/components/AppTable.vue";
 import { useTableCache } from "@/composables/useTableCache";
+import { btnIcon } from "@/layout/ui";
 
 const cache = useTableCache("products");
 
@@ -13,35 +14,36 @@ const router = useRouter();
 const { can } = usePermission();
 
 // ── Table state ─────────────────────────────────────────────────────
-const loading      = ref(false);
+const loading = ref(false);
 const errorMessage = ref("");
-const products     = ref([]);
-const rows         = ref(10);
-const first        = ref(0);
+const products = ref([]);
+const rows = ref(10);
+const first = ref(0);
 
 // ── Column visibility ────────────────────────────────────────────────
 const colDefs = ref([
-  { field: "id",       header: "ID",       visible: true },
-  { field: "product",  header: "Product",  visible: true },
+  { field: "id", header: "ID", visible: true },
+  { field: "product", header: "Product", visible: true },
   { field: "category", header: "Category", visible: true },
-  { field: "price",    header: "Price",    visible: true },
-  { field: "status",   header: "Status",   visible: true },
+  { field: "price", header: "Price", visible: true },
+  { field: "status", header: "Status", visible: true },
 ]);
-const colVisible = (field) => colDefs.value.find((c) => c.field === field)?.visible !== false;
+const colVisible = (field) =>
+  colDefs.value.find((c) => c.field === field)?.visible !== false;
 const totalRecords = ref(0);
-const summary      = ref({ total: 0, active: 0, low: 0, inactive: 0 });
-const searchTimer  = ref(null);
+const summary = ref({ total: 0, active: 0, low: 0, inactive: 0 });
+const searchTimer = ref(null);
 
 // ── Filters ─────────────────────────────────────────────────────────
-const search         = ref("");
+const search = ref("");
 const categoryFilter = ref(null);
-const statusFilter   = ref(null);
-const minPrice       = ref(null);
-const maxPrice       = ref(null);
-const categories     = ref([]);
+const statusFilter = ref(null);
+const minPrice = ref(null);
+const maxPrice = ref(null);
+const categories = ref([]);
 
 const statusOptions = [
-  { label: "Active",   value: true  },
+  { label: "Active", value: true },
   { label: "Inactive", value: false },
 ];
 
@@ -50,9 +52,9 @@ const filterPanel = ref(null);
 const activeFilterCount = computed(() => {
   let n = 0;
   if (categoryFilter.value !== null) n++;
-  if (statusFilter.value   !== null) n++;
-  if (minPrice.value       !== null) n++;
-  if (maxPrice.value       !== null) n++;
+  if (statusFilter.value !== null) n++;
+  if (minPrice.value !== null) n++;
+  if (maxPrice.value !== null) n++;
   return n;
 });
 
@@ -60,10 +62,10 @@ const hasActiveFilters = computed(() => activeFilterCount.value > 0);
 
 const clearFilters = () => {
   categoryFilter.value = null;
-  statusFilter.value   = null;
-  minPrice.value       = null;
-  maxPrice.value       = null;
-  first.value          = 0;
+  statusFilter.value = null;
+  minPrice.value = null;
+  maxPrice.value = null;
+  first.value = 0;
 };
 
 const statusTag = (status) => {
@@ -109,11 +111,13 @@ const loadCategories = async () => {
     categories.value = Array.isArray(raw)
       ? raw
       : Array.isArray(raw?.value)
-      ? raw.value
-      : Array.isArray(raw?.items)
-      ? raw.items
-      : [];
-  } catch { /* non-critical */ }
+        ? raw.value
+        : Array.isArray(raw?.items)
+          ? raw.items
+          : [];
+  } catch {
+    /* non-critical */
+  }
 };
 
 const loadProducts = async (page = 1) => {
@@ -122,12 +126,12 @@ const loadProducts = async (page = 1) => {
   try {
     const res = await getProducts({
       page,
-      pageSize:   rows.value,
-      searchTerm: search.value.trim()  || undefined,
-      isActive:   statusFilter.value   ?? undefined,
+      pageSize: rows.value,
+      searchTerm: search.value.trim() || undefined,
+      isActive: statusFilter.value ?? undefined,
       categoryId: categoryFilter.value ?? undefined,
-      minPrice:   minPrice.value       ?? undefined,
-      maxPrice:   maxPrice.value       ?? undefined,
+      minPrice: minPrice.value ?? undefined,
+      maxPrice: maxPrice.value ?? undefined,
     });
     const paged = res?.data ?? {};
     products.value =
@@ -152,17 +156,29 @@ const loadProducts = async (page = 1) => {
   }
 };
 
+const handleToggleActive = async (row) => {
+  try {
+    await toggleProductActive(row.id);
+    const page = rows.value > 0 ? Math.floor(first.value / rows.value) + 1 : 1;
+    await loadProducts(page);
+    loadStats();
+  } catch (err) {
+    errorMessage.value =
+      err?.response?.data?.title ?? `Failed to update product "${row.name}".`;
+  }
+};
+
 onMounted(() => {
   loadCategories();
   const cached = cache.restore();
   if (cached) {
-    search.value         = cached.search         ?? "";
-    rows.value           = cached.rows           ?? 10;
-    first.value          = cached.first          ?? 0;
+    search.value = cached.search ?? "";
+    rows.value = cached.rows ?? 10;
+    first.value = cached.first ?? 0;
     categoryFilter.value = cached.categoryFilter ?? null;
-    statusFilter.value   = cached.statusFilter   ?? null;
-    minPrice.value       = cached.minPrice       ?? null;
-    maxPrice.value       = cached.maxPrice       ?? null;
+    statusFilter.value = cached.statusFilter ?? null;
+    minPrice.value = cached.minPrice ?? null;
+    maxPrice.value = cached.maxPrice ?? null;
     if (cached.colDefs) colDefs.value = cached.colDefs;
     const page = rows.value > 0 ? Math.floor(first.value / rows.value) + 1 : 1;
     loadProducts(page);
@@ -174,14 +190,14 @@ onMounted(() => {
 
 onBeforeRouteLeave(() => {
   cache.save({
-    search:         search.value,
-    rows:           rows.value,
-    first:          first.value,
+    search: search.value,
+    rows: rows.value,
+    first: first.value,
     categoryFilter: categoryFilter.value,
-    statusFilter:   statusFilter.value,
-    minPrice:       minPrice.value,
-    maxPrice:       maxPrice.value,
-    colDefs:        colDefs.value,
+    statusFilter: statusFilter.value,
+    minPrice: minPrice.value,
+    maxPrice: maxPrice.value,
+    colDefs: colDefs.value,
   });
 });
 
@@ -283,7 +299,8 @@ watch([categoryFilter, statusFilter], () => {
       variant="accent"
       closable
       @close="errorMessage = ''"
-    >{{ errorMessage }}</prime-alert>
+      >{{ errorMessage }}</prime-alert
+    >
 
     <!-- ── Table ──────────────────────────────────────────────────── -->
     <AppTable
@@ -328,7 +345,11 @@ watch([categoryFilter, statusFilter], () => {
 
               <!-- Category -->
               <div class="tw:space-y-1.5">
-                <label for="filter-category" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Category</label>
+                <label
+                  for="filter-category"
+                  class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
+                  >Category</label
+                >
                 <prime-select
                   v-model="categoryFilter"
                   input-id="filter-category"
@@ -343,7 +364,11 @@ watch([categoryFilter, statusFilter], () => {
 
               <!-- Status -->
               <div class="tw:space-y-1.5">
-                <label for="filter-status" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Status</label>
+                <label
+                  for="filter-status"
+                  class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
+                  >Status</label
+                >
                 <prime-select
                   v-model="statusFilter"
                   input-id="filter-status"
@@ -358,7 +383,10 @@ watch([categoryFilter, statusFilter], () => {
 
               <!-- Price range -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Price range (VND)</label>
+                <label
+                  class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
+                  >Price range (VND)</label
+                >
                 <div class="tw:flex tw:items-center tw:gap-2">
                   <prime-input-number
                     v-model="minPrice"
@@ -396,8 +424,17 @@ watch([categoryFilter, statusFilter], () => {
         </div>
       </template>
 
-      <prime-column v-if="colVisible('id')" field="id" header="ID" style="min-width: 4rem" />
-      <prime-column v-if="colVisible('product')" header="Product" style="min-width: 14rem">
+      <prime-column
+        v-if="colVisible('id')"
+        field="id"
+        header="ID"
+        style="min-width: 4rem"
+      />
+      <prime-column
+        v-if="colVisible('product')"
+        header="Product"
+        style="min-width: 14rem"
+      >
         <template #body="{ data }">
           <div class="tw:flex tw:items-center tw:gap-3">
             <img
@@ -410,13 +447,20 @@ watch([categoryFilter, statusFilter], () => {
               v-else
               class="tw:h-9 tw:w-9 tw:rounded-lg tw:bg-white/10 tw:flex-shrink-0 tw:flex tw:items-center tw:justify-center"
             >
-              <iconify icon="ph:coffee-bold" class="tw:text-sm app-text-muted" />
+              <iconify
+                icon="ph:coffee-bold"
+                class="tw:text-sm app-text-muted"
+              />
             </div>
             <span class="tw:font-medium tw:text-sm">{{ data.name }}</span>
           </div>
         </template>
       </prime-column>
-      <prime-column v-if="colVisible('category')" field="category" header="Category" />
+      <prime-column
+        v-if="colVisible('category')"
+        field="category"
+        header="Category"
+      />
       <prime-column v-if="colVisible('price')" field="price" header="Price">
         <template #body="{ data }">{{ formatVnd(data.price) }}</template>
       </prime-column>
@@ -428,20 +472,44 @@ watch([categoryFilter, statusFilter], () => {
           />
         </template>
       </prime-column>
-      <prime-column header="Actions" style="min-width: 8rem">
+      <prime-column header="Actions" style="min-width: 12rem">
         <template #body="{ data }">
-          <prime-button
-            iconPos="right"
-            severity="secondary"
-            outlined
-            size="small"
-            @click="
-              router.push({ name: 'productsDetail', params: { id: data.id } })
-            "
-          >
-            <iconify icon="ph:arrow-right-bold" />
-            <span>View</span>
-          </prime-button>
+          <div class="tw:flex tw:justify-end tw:gap-2">
+            <!-- Toggle active -->
+            <prime-button
+            v-if="can('product.update')"
+              :severity="data.status === 'active' ? 'success' : 'danger'"
+              outlined
+              size="small"
+              :class="btnIcon"
+              :v-tooltip.top="
+                data.status === 'active' ? 'Deactivate' : 'Activate'
+              "
+              @click="handleToggleActive(data)"
+            >
+              <iconify
+                :icon="
+                  data.status === 'active'
+                    ? 'ph:toggle-right-bold'
+                    : 'ph:toggle-left-bold'
+                "
+              />
+            </prime-button>
+            <!-- View detail -->
+            <prime-button
+            v-if="can('product.view')"
+              severity="secondary"
+              outlined
+              size="small"
+              v-tooltip.top="'View detail'"
+              @click="
+                router.push({ name: 'productsDetail', params: { id: data.id } })
+              "
+              :class="btnIcon"
+            >
+              <iconify icon="ph:arrow-right-bold" />
+            </prime-button>
+          </div>
         </template>
       </prime-column>
     </AppTable>
