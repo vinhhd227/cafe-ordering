@@ -16,6 +16,8 @@ Thumbs.db
 ## Build artifacts - Ignore bin/obj anywhere
 [Bb]in/
 [Oo]bj/
+**/bin/
+**/obj/
  
 ## Build configurations
 [Dd]ebug/
