@@ -15,7 +15,7 @@ public class CreateTable(IMediator mediator) : Endpoint<CreateTableRequest, Tabl
   public override void Configure()
   {
     Post("/api/admin/tables");
-    Policies("StaffOrAdmin");
+    Policies("table.create");
     DontAutoTag();
     Description(b => b.WithTags("Tables"));
   }

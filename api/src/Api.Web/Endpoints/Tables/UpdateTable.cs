@@ -16,7 +16,7 @@ public class UpdateTable(IMediator mediator) : Endpoint<UpdateTableRequest, Tabl
   public override void Configure()
   {
     Put("/api/admin/tables/{TableId}");
-    Policies("StaffOrAdmin");
+    Policies("table.update");
     DontAutoTag();
     Description(b => b.WithTags("Tables"));
   }

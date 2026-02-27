@@ -9,7 +9,7 @@ public class ListTables(IMediator mediator) : EndpointWithoutRequest<List<TableD
   public override void Configure()
   {
     Get("/api/admin/tables");
-    Policies("StaffOrAdmin");
+    Policies("table.read");
     DontAutoTag();
     Description(b => b.WithTags("Tables"));
   }

@@ -14,7 +14,7 @@ public class DeleteTable(IMediator mediator) : Ep.Req<DeleteTableRequest>.NoRes
   public override void Configure()
   {
     Delete("/api/admin/tables/{TableId}");
-    Policies("StaffOrAdmin");
+    Policies("table.delete");
     DontAutoTag();
     Description(b => b.WithTags("Tables"));
   }

@@ -13,7 +13,7 @@ public class ToggleTableActive(IMediator mediator) : Endpoint<ToggleTableActiveR
   public override void Configure()
   {
     Patch("/api/admin/tables/{TableId}/toggle-active");
-    Policies("StaffOrAdmin");
+    Policies("table.update");
     DontAutoTag();
     Description(b => b.WithTags("Tables"));
   }
