@@ -342,8 +342,8 @@ onMounted(async () => {
         </section>
 
         <!-- ── Cart aside ──────────────────────────────────── -->
-        <aside class="tw:lg:col-span-4">
-          <div class="tw:sticky tw:top-6 tw:rounded-2xl tw:border tw:border-orange-100 tw:bg-white tw:p-5 tw:shadow-sm">
+        <aside class="tw:lg:col-span-4 tw:lg:self-start tw:lg:sticky tw:lg:top-6">
+          <div class="tw:rounded-2xl tw:border tw:border-orange-100 tw:bg-white tw:p-5 tw:shadow-sm">
             <div class="tw:flex tw:items-center tw:justify-between">
               <h2 class="tw:text-xl tw:font-semibold tw:text-slate-900">Giỏ hàng</h2>
               <span class="tw:rounded-full tw:bg-orange-50 tw:px-3 tw:py-1 tw:text-xs tw:font-semibold tw:text-orange-600">
