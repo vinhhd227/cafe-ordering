@@ -18,6 +18,16 @@ const errorMessage = ref("");
 const products     = ref([]);
 const rows         = ref(10);
 const first        = ref(0);
+
+// ── Column visibility ────────────────────────────────────────────────
+const colDefs = ref([
+  { field: "id",       header: "ID",       visible: true },
+  { field: "product",  header: "Product",  visible: true },
+  { field: "category", header: "Category", visible: true },
+  { field: "price",    header: "Price",    visible: true },
+  { field: "status",   header: "Status",   visible: true },
+]);
+const colVisible = (field) => colDefs.value.find((c) => c.field === field)?.visible !== false;
 const totalRecords = ref(0);
 const summary      = ref({ total: 0, active: 0, low: 0, inactive: 0 });
 const searchTimer  = ref(null);
@@ -153,6 +163,7 @@ onMounted(() => {
     statusFilter.value   = cached.statusFilter   ?? null;
     minPrice.value       = cached.minPrice       ?? null;
     maxPrice.value       = cached.maxPrice       ?? null;
+    if (cached.colDefs) colDefs.value = cached.colDefs;
     const page = rows.value > 0 ? Math.floor(first.value / rows.value) + 1 : 1;
     loadProducts(page);
   } else {
@@ -170,6 +181,7 @@ onBeforeRouteLeave(() => {
     statusFilter:   statusFilter.value,
     minPrice:       minPrice.value,
     maxPrice:       maxPrice.value,
+    colDefs:        colDefs.value,
   });
 });
 
@@ -277,6 +289,7 @@ watch([categoryFilter, statusFilter], () => {
     <AppTable
       v-model:first="first"
       v-model:rows="rows"
+      v-model:columns="colDefs"
       :value="products"
       :loading="loading"
       :totalRecords="totalRecords"
@@ -383,8 +396,8 @@ watch([categoryFilter, statusFilter], () => {
         </div>
       </template>
 
-      <prime-column field="id" header="ID" style="min-width: 4rem" />
-      <prime-column header="Product" style="min-width: 14rem">
+      <prime-column v-if="colVisible('id')" field="id" header="ID" style="min-width: 4rem" />
+      <prime-column v-if="colVisible('product')" header="Product" style="min-width: 14rem">
         <template #body="{ data }">
           <div class="tw:flex tw:items-center tw:gap-3">
             <img
@@ -403,11 +416,11 @@ watch([categoryFilter, statusFilter], () => {
           </div>
         </template>
       </prime-column>
-      <prime-column field="category" header="Category" />
-      <prime-column field="price" header="Price">
+      <prime-column v-if="colVisible('category')" field="category" header="Category" />
+      <prime-column v-if="colVisible('price')" field="price" header="Price">
         <template #body="{ data }">{{ formatVnd(data.price) }}</template>
       </prime-column>
-      <prime-column field="status" header="Status">
+      <prime-column v-if="colVisible('status')" field="status" header="Status">
         <template #body="{ data }">
           <prime-tag
             :value="statusTag(data.status).label"
