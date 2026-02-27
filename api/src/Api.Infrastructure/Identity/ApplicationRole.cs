@@ -10,6 +10,7 @@ public class ApplicationRole : IdentityRole<Guid>
 {
   public string? Description { get; set; }
   public bool IsActive { get; set; } = true;
+  public DateTime CreatedAt { get; set; }
 
   public ICollection<ApplicationUserRole> UserRoles { get; set; } = new List<ApplicationUserRole>();
 
@@ -21,7 +22,8 @@ public class ApplicationRole : IdentityRole<Guid>
     {
       Name = name,
       Description = description,
-      ConcurrencyStamp = Guid.NewGuid().ToString()
+      ConcurrencyStamp = Guid.NewGuid().ToString(),
+      CreatedAt = DateTime.UtcNow
     };
   }
 

@@ -19,6 +19,7 @@ public class ApplicationRoleConfiguration : IEntityTypeConfiguration<Application
     builder.Property(r => r.NormalizedName).HasMaxLength(256).IsRequired();
     builder.Property(r => r.Description).HasMaxLength(500);
     builder.Property(r => r.ConcurrencyStamp).HasMaxLength(100);
+    builder.Property(r => r.CreatedAt).IsRequired();
 
     builder.HasMany(r => r.UserRoles)
       .WithOne(ur => ur.Role)

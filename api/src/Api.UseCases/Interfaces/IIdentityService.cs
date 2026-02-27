@@ -69,6 +69,12 @@ public interface IIdentityService
   Task<Result> ActivateUserAsync(Guid userId);
 
   /// <summary>
+  /// Reset a user's password to a newly generated temporary password.
+  /// Revokes all active refresh tokens after the reset.
+  /// </summary>
+  Task<Result<TemporaryPasswordDto>> ResetUserPasswordAsync(Guid userId);
+
+  /// <summary>
   /// Replace all current roles of a user with a single new role.
   /// </summary>
   Task<Result> ChangeUserRoleAsync(Guid userId, string newRole);
@@ -130,7 +136,7 @@ public record UserDto(
 public record PagedUsersDto(List<UserDto> Items, int Total, int Page, int PageSize);
 
 /// <summary>Represents a role record in admin role management.</summary>
-public record RoleDto(Guid Id, string Name, string? Description, bool IsActive, int UserCount);
+public record RoleDto(Guid Id, string Name, string? Description, bool IsActive, int UserCount, DateTime CreatedAt);
 
 /// <summary>Paged result for role list queries.</summary>
 public record PagedRolesDto(List<RoleDto> Items, int Total, int Page, int PageSize);

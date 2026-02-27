@@ -195,6 +195,29 @@ public class IdentityService : IIdentityService
     return Result<TemporaryPasswordDto>.Success(new TemporaryPasswordDto(username, tempPassword));
   }
 
+  public async Task<Result<TemporaryPasswordDto>> ResetUserPasswordAsync(Guid userId)
+  {
+    var user = await _userManager.FindByIdAsync(userId.ToString());
+    if (user is null)
+      return Result<TemporaryPasswordDto>.NotFound();
+
+    var tempPassword = GenerateTemporaryPassword();
+
+    var removeResult = await _userManager.RemovePasswordAsync(user);
+    if (!removeResult.Succeeded)
+      return Result<TemporaryPasswordDto>.Error(string.Join("; ", removeResult.Errors.Select(e => e.Description)));
+
+    var addResult = await _userManager.AddPasswordAsync(user, tempPassword);
+    if (!addResult.Succeeded)
+      return Result<TemporaryPasswordDto>.Error(string.Join("; ", addResult.Errors.Select(e => e.Description)));
+
+    await RevokeAllUserTokensAsync(userId);
+
+    _logger.LogInformation("Password reset for user {UserId}", userId);
+
+    return Result<TemporaryPasswordDto>.Success(new TemporaryPasswordDto(user.UserName!, tempPassword));
+  }
+
   public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
   {
     var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -377,7 +400,8 @@ public class IdentityService : IIdentityService
       r.Name!,
       r.Description,
       r.IsActive,
-      r.UserRoles.Count
+      r.UserRoles.Count,
+      r.CreatedAt
     )).ToList();
 
     return Result<PagedRolesDto>.Success(new PagedRolesDto(items, total, page, pageSize));
@@ -393,7 +417,7 @@ public class IdentityService : IIdentityService
       return Result<RoleDto>.NotFound();
 
     return Result<RoleDto>.Success(new RoleDto(
-      role.Id, role.Name!, role.Description, role.IsActive, role.UserRoles.Count));
+      role.Id, role.Name!, role.Description, role.IsActive, role.UserRoles.Count, role.CreatedAt));
   }
 
   public async Task<Result> CreateRoleAsync(string name, string? description)
