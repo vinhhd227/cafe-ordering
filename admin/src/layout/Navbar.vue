@@ -4,11 +4,13 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useThemeStore } from "@/stores/theme";
 import { navGroups } from "@/layout/nav";
+import { useSidebar } from "@/composables/useSidebar";
 
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const themeStore = useThemeStore();
+const { isOpen, isCollapsed, close } = useSidebar();
 
 const canAccess = (item) => {
   const user = auth.user
@@ -91,27 +93,46 @@ const toggleProfileMenu = (event) => {
 </script>
 
 <template>
-  <aside class="app-sidebar tw:flex tw:h-screen tw:w-64 tw:flex-col tw:border-r tw:backdrop-blur">
+  <aside
+    class="app-sidebar tw:fixed tw:inset-y-0 tw:left-0 tw:z-40 tw:flex tw:flex-col tw:border-r tw:backdrop-blur tw:transition-all tw:duration-300 tw:overflow-x-hidden"
+    :class="[
+      isCollapsed ? 'tw:w-16' : 'tw:w-64',
+      isOpen ? 'tw:translate-x-0' : 'tw:-translate-x-full tw:lg:translate-x-0'
+    ]"
+  >
 
     <!-- Brand -->
-    <div class="tw:shrink-0 tw:border-b tw:px-6 tw:py-5" style="border-color: var(--app-border)">
-      <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-[0.4em] tw:text-emerald-400">
-        Cafe Ordering
-      </p>
-      <h1 class="tw:mt-1 tw:text-base tw:font-semibold">Admin Panel</h1>
+    <div
+      class="tw:shrink-0 tw:flex tw:border-b tw:transition-all tw:duration-300 tw:h-[5.25rem]"
+      :class="isCollapsed ? 'tw:items-center tw:justify-center tw:px-2' : 'tw:flex-col tw:justify-center tw:px-6'"
+      style="border-color: var(--app-border)"
+    >
+      <template v-if="!isCollapsed">
+        <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-[0.4em] tw:text-emerald-400">
+          Cafe Ordering
+        </p>
+        <h1 class="tw:mt-1 tw:text-base tw:font-semibold">Admin Panel</h1>
+      </template>
+      <iconify v-else icon="ph:coffee-bold" class="tw:text-xl tw:text-emerald-400" />
     </div>
 
     <!-- Navigation groups -->
-    <nav class="tw:flex-1 tw:overflow-y-auto tw:px-3 tw:py-4">
+    <nav
+      class="tw:flex-1 tw:overflow-y-auto tw:py-4 tw:transition-all tw:duration-300"
+      :class="isCollapsed ? 'tw:px-2' : 'tw:px-3'"
+    >
       <div
         v-for="group in visibleNavGroups"
         :key="group.label"
         class="tw:mb-5 last:tw:mb-0"
       >
         <!-- Section label -->
-        <p class="tw:mb-1.5 tw:px-3 tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-[0.15em] app-text-subtle">
-          {{ group.label }}
-        </p>
+        <template v-if="!isCollapsed">
+          <p class="tw:mb-1.5 tw:px-3 tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-[0.15em] app-text-subtle">
+            {{ group.label }}
+          </p>
+        </template>
+        <div v-else class="tw:mb-2 tw:mx-1 tw:h-px" style="background: var(--app-border)" />
 
         <!-- Nav items -->
         <div class="tw:space-y-0.5">
@@ -119,15 +140,18 @@ const toggleProfileMenu = (event) => {
             v-for="item in group.items"
             :key="item.to.name"
             :to="item.to"
-            class="tw:flex tw:items-center tw:gap-3 tw:rounded-lg tw:px-3 tw:py-2.5 tw:text-sm tw:font-medium tw:transition-all tw:duration-150 tw:no-underline"
-            :class="
+            class="tw:flex tw:items-center tw:rounded-lg tw:py-2.5 tw:text-sm tw:font-medium tw:transition-all tw:duration-150 tw:no-underline"
+            :class="[
+              isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
               isActive(item.to)
                 ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
                 : 'app-text-muted hover:tw:bg-white/5 hover:tw:text-white'
-            "
+            ]"
+            :title="isCollapsed ? item.label : undefined"
+            @click="close"
           >
             <iconify :icon="item.icon" class="tw:shrink-0 tw:text-base" />
-            <span>{{ item.label }}</span>
+            <span v-if="!isCollapsed">{{ item.label }}</span>
           </router-link>
         </div>
       </div>
@@ -137,7 +161,9 @@ const toggleProfileMenu = (event) => {
     <div class="tw:shrink-0 tw:border-t tw:p-3" style="border-color: var(--app-border)">
       <button
         type="button"
-        class="tw:flex tw:w-full tw:items-center tw:gap-3 tw:rounded-xl tw:px-3 tw:py-2.5 tw:transition-all tw:duration-150 hover:tw:bg-white/5"
+        class="tw:flex tw:w-full tw:items-center tw:rounded-xl tw:py-2.5 tw:transition-all tw:duration-150 hover:tw:bg-white/5"
+        :class="isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3'"
+        :title="isCollapsed ? fullName : undefined"
         @click="toggleProfileMenu"
       >
         <prime-avatar
@@ -154,11 +180,13 @@ const toggleProfileMenu = (event) => {
           size="normal"
           class="tw:shrink-0 tw:bg-emerald-500/20 tw:text-emerald-300"
         />
-        <div class="tw:min-w-0 tw:flex-1 tw:text-left">
-          <p class="tw:truncate tw:text-sm tw:font-semibold">{{ fullName }}</p>
-          <p class="tw:truncate tw:text-xs app-text-subtle tw:capitalize">{{ roleLabel }}</p>
-        </div>
-        <iconify icon="ph:dots-three-bold" class="tw:shrink-0 tw:text-base app-text-subtle" />
+        <template v-if="!isCollapsed">
+          <div class="tw:min-w-0 tw:flex-1 tw:text-left">
+            <p class="tw:truncate tw:text-sm tw:font-semibold">{{ fullName }}</p>
+            <p class="tw:truncate tw:text-xs app-text-subtle tw:capitalize">{{ roleLabel }}</p>
+          </div>
+          <iconify icon="ph:dots-three-bold" class="tw:shrink-0 tw:text-base app-text-subtle" />
+        </template>
       </button>
       <prime-menu ref="profileMenu" :model="profileItems" popup />
     </div>
