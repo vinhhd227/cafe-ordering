@@ -35,6 +35,12 @@ public class GetOrCreateSessionHandler(
         existingSession.Status));
     }
 
+    // If the table is still marked Occupied but no active session exists, the state is
+    // inconsistent (e.g. the session was closed without the table being reset).
+    // Reset the table so we can safely open a fresh session below.
+    if (table.Status == TableStatus.Occupied)
+      table.MarkAvailable();
+
     // Create a new session and open the table
     var session = GuestSession.Create(request.TableId);
     table.OpenSession(session.Id);
