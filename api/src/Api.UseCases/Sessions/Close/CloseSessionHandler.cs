@@ -24,13 +24,17 @@ public class CloseSessionHandler(
     session.Close();
     await sessionRepository.UpdateAsync(session, ct);
 
-    var tableSpec = new TableByIdSpec(session.TableId);
-    var table = await tableRepository.FirstOrDefaultAsync(tableSpec, ct);
-
-    if (table is not null)
+    // Counter sessions (TableId == null) have no associated table to update
+    if (session.TableId.HasValue)
     {
-      table.CloseSession();
-      await tableRepository.UpdateAsync(table, ct);
+      var tableSpec = new TableByIdSpec(session.TableId.Value);
+      var table = await tableRepository.FirstOrDefaultAsync(tableSpec, ct);
+
+      if (table is not null)
+      {
+        table.CloseSession();
+        await tableRepository.UpdateAsync(table, ct);
+      }
     }
 
     return Result.Success();

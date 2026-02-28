@@ -6,7 +6,7 @@ public class GuestSession : AuditableEntity<Guid>, IAggregateRoot
 {
   private GuestSession() { }
 
-  public int TableId { get; private set; }
+  public int? TableId { get; private set; }
   public GuestSessionStatus Status { get; private set; }
   public DateTime OpenedAt { get; private set; }
   public DateTime? ClosedAt { get; private set; }
@@ -28,6 +28,18 @@ public class GuestSession : AuditableEntity<Guid>, IAggregateRoot
     return session;
   }
 
+  /// <summary>Creates a counter/takeaway session not tied to any table.</summary>
+  public static GuestSession CreateCounter()
+  {
+    return new GuestSession
+    {
+      Id = Guid.NewGuid(),
+      TableId = null,
+      Status = GuestSessionStatus.Active,
+      OpenedAt = DateTime.UtcNow
+    };
+  }
+
   public void Close()
   {
     if (Status == GuestSessionStatus.Closed)
@@ -35,7 +47,8 @@ public class GuestSession : AuditableEntity<Guid>, IAggregateRoot
 
     Status = GuestSessionStatus.Closed;
     ClosedAt = DateTime.UtcNow;
-    RegisterDomainEvent(new SessionClosedEvent(Id, TableId));
+    if (TableId.HasValue)
+      RegisterDomainEvent(new SessionClosedEvent(Id, TableId.Value));
   }
 
   public void MergeWithCustomer(string customerId)

@@ -4,6 +4,6 @@ namespace Api.UseCases.Sessions.DTOs;
 
 public record SessionContextDto(
   Guid SessionId,
-  int TableId,
+  int? TableId,
   GuestSessionStatus Status
 );

@@ -13,7 +13,7 @@ public class GuestSessionConfiguration : IEntityTypeConfiguration<GuestSession>
 
     builder.HasKey(s => s.Id);
 
-    builder.Property(s => s.TableId).IsRequired();
+    builder.Property(s => s.TableId).IsRequired(false);
 
     builder.Property(s => s.Status)
       .IsRequired()
@@ -25,10 +25,11 @@ public class GuestSessionConfiguration : IEntityTypeConfiguration<GuestSession>
 
     builder.Property(s => s.CustomerId).HasMaxLength(36);
 
-    // FK: GuestSession → Table
+    // FK: GuestSession → Table (optional for counter sessions)
     builder.HasOne<Table>()
       .WithMany()
       .HasForeignKey(s => s.TableId)
+      .IsRequired(false)
       .OnDelete(DeleteBehavior.Restrict);
 
     // Index for active session lookups

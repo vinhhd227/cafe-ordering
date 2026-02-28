@@ -20,7 +20,7 @@ public record OrderLineDto(
 
 public record SessionSummaryDto(
   Guid SessionId,
-  int TableId,
+  int? TableId,
   DateTime OpenedAt,
   GuestSessionStatus Status,
   IReadOnlyList<OrderLineDto> Orders,
