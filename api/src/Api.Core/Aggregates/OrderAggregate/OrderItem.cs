@@ -17,6 +17,12 @@ public class OrderItem : BaseEntity
   public int Quantity { get; private set; }
   public decimal Discount { get; private set; }
 
+  // Customization options
+  public string? Temperature { get; private set; }
+  public string? IceLevel { get; private set; }
+  public string? SugarLevel { get; private set; }
+  public bool IsTakeaway { get; private set; }
+
   // Calculated property
   public decimal TotalPrice => (UnitPrice - Discount) * Quantity;
 
@@ -24,7 +30,9 @@ public class OrderItem : BaseEntity
   ///   Factory method - chỉ được gọi từ Order aggregate
   /// </summary>
   internal static OrderItem Create(int orderId, int productId,
-    string productName, decimal unitPrice, int quantity)
+    string productName, decimal unitPrice, int quantity,
+    string? temperature = null, string? iceLevel = null, string? sugarLevel = null,
+    bool isTakeaway = false)
   {
     return new OrderItem
     {
@@ -33,7 +41,11 @@ public class OrderItem : BaseEntity
       ProductName = Guard.Against.NullOrEmpty(productName),
       UnitPrice = Guard.Against.NegativeOrZero(unitPrice),
       Quantity = Guard.Against.NegativeOrZero(quantity),
-      Discount = 0
+      Discount = 0,
+      Temperature = temperature,
+      IceLevel = iceLevel,
+      SugarLevel = sugarLevel,
+      IsTakeaway = isTakeaway,
     };
   }
 

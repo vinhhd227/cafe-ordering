@@ -32,8 +32,8 @@ public class ListOrdersHandler(
     var dtos = orders.Select(o =>
     {
       string? tableCode = null;
-      if (sessionMap.TryGetValue(o.SessionId, out var tableId))
-        tableMap.TryGetValue(tableId, out tableCode);
+      if (sessionMap.TryGetValue(o.SessionId, out var tableId) && tableId.HasValue)
+        tableMap.TryGetValue(tableId.Value, out tableCode);
 
       return new OrderDto(
         o.Id,

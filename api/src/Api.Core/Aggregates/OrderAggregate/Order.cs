@@ -56,14 +56,16 @@ public class Order : AuditableEntity<int>, IAggregateRoot
     return order;
   }
 
-  public void AddItem(int productId, string productName, decimal unitPrice, int quantity)
+  public void AddItem(int productId, string productName, decimal unitPrice, int quantity,
+    string? temperature = null, string? iceLevel = null, string? sugarLevel = null,
+    bool isTakeaway = false)
   {
     if (Status == OrderStatus.Completed)
     {
       throw new InvalidOperationException("Cannot add items to completed order");
     }
 
-    var item = OrderItem.Create(Id, productId, productName, unitPrice, quantity);
+    var item = OrderItem.Create(Id, productId, productName, unitPrice, quantity, temperature, iceLevel, sugarLevel, isTakeaway);
     _items.Add(item);
 
     RegisterDomainEvent(new OrderItemAddedEvent(this, productId, quantity));

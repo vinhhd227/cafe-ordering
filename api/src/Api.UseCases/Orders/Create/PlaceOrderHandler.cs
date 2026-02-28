@@ -39,7 +39,8 @@ public class PlaceOrderHandler(
     // 4. Thêm items (dùng order.Id đã được sinh)
     foreach (var item in request.Items)
     {
-      order.AddItem(item.ProductId, item.ProductName, item.UnitPrice, item.Quantity);
+      order.AddItem(item.ProductId, item.ProductName, item.UnitPrice, item.Quantity,
+        item.Temperature, item.IceLevel, item.SugarLevel, item.IsTakeaway);
     }
 
     await orderRepository.UpdateAsync(order, ct); // Lưu items
