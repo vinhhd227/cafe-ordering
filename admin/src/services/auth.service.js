@@ -6,3 +6,5 @@ export const checkUsername = (payload) => api.post('/auth/check-username', paylo
 export const refresh = (refreshToken) =>
   api.post('/auth/refresh', { refreshToken }, { _skipAuthRefresh: true })
 export const logout = () => api.post('/auth/logout', null, { _skipAuthRefresh: true })
+export const changePassword = (payload) =>
+  api.post('/auth/change-password', payload, { _skipAuthRefresh: true })

@@ -30,19 +30,27 @@ const profileMenu = ref();
 
 const isActive = (to) => route.name === to.name;
 
-const fullName = computed(() => {
-  const firstName = auth.user?.firstName || "";
-  const lastName = auth.user?.lastName || "";
-  const name = `${firstName} ${lastName}`.trim();
-  return name || "Staff";
-});
+const fullName = computed(() => auth.user?.fullName || "Staff");
 
 const roleLabel = computed(() => {
-  if (auth.user?.role) return auth.user.role;
   if (Array.isArray(auth.user?.roles) && auth.user.roles.length > 0) {
     return auth.user.roles[0];
   }
-  return "staff";
+  return auth.user?.role || "Staff";
+});
+
+const roleTextColor = computed(() => {
+  const role = roleLabel.value.toLowerCase();
+  if (role === "admin") return "tw:text-emerald-400";
+  if (role === "manager") return "tw:text-sky-400";
+  return "tw:text-amber-400";
+});
+
+const roleDotColor = computed(() => {
+  const role = roleLabel.value.toLowerCase();
+  if (role === "admin") return "tw:bg-emerald-400";
+  if (role === "manager") return "tw:bg-sky-400";
+  return "tw:bg-amber-400";
 });
 
 const avatarLabel = computed(() => {
@@ -183,7 +191,10 @@ const toggleProfileMenu = (event) => {
         <template v-if="!isCollapsed">
           <div class="tw:min-w-0 tw:flex-1 tw:text-left">
             <p class="tw:truncate tw:text-sm tw:font-semibold">{{ fullName }}</p>
-            <p class="tw:truncate tw:text-xs app-text-subtle tw:capitalize">{{ roleLabel }}</p>
+            <p class="tw:flex tw:items-center tw:gap-1 tw:mt-0.5">
+              <span class="tw:inline-block tw:h-1.5 tw:w-1.5 tw:rounded-full tw:shrink-0" :class="roleDotColor" style="opacity: 0.85" />
+              <span class="tw:truncate tw:text-xs tw:font-medium tw:capitalize" :class="roleTextColor">{{ roleLabel }}</span>
+            </p>
           </div>
           <iconify icon="ph:dots-three-bold" class="tw:shrink-0 tw:text-base app-text-subtle" />
         </template>

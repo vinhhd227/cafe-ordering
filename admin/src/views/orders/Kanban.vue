@@ -430,6 +430,15 @@ onUnmounted(() => clearInterval(refreshTimer));
         </p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
+        <!-- New Order -->
+        <prime-button
+          severity="success"
+          size="small"
+          @click="router.push({ name: 'ordersCreate' })"
+        >
+          <iconify icon="ph:plus-bold" class="tw:mr-1" />
+          <span>New Order</span>
+        </prime-button>
         <!-- View toggle -->
         <div class="tw:flex tw:items-center tw:rounded-lg tw:border tw:border-white/10 tw:p-1 tw:gap-1">
           <prime-button

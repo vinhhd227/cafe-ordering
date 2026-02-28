@@ -21,3 +21,6 @@ export const splitOrder = (orderId, items) =>
 // quantity = 0 removes the item; quantity > 0 adds/updates
 export const updateOrderItem = (orderId, productId, quantity) =>
   api.put(`/admin/orders/${orderId}/items/${productId}`, { quantity })
+
+export const createOrder = (sessionId, items) =>
+  api.post('/orders', { sessionId, items })

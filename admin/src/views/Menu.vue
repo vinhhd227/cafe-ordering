@@ -350,7 +350,7 @@ const toggleProduct = async (product) => {
                     </span>
                     <prime-tag
                       v-if="!product.isActive"
-                      value="Off"
+                      value="Inactive"
                       severity="danger"
                     />
                   </div>

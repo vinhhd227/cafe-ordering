@@ -7,3 +7,9 @@ export const toggleActive  = (id)                    => api.patch(`/admin/tables
 export const deleteTable   = (id)                    => api.delete(`/admin/tables/${id}`)
 export const markAvailable = (id)                    => api.put(`/tables/${id}/available`, {})
 export const closeSession  = (sessionId)             => api.put(`/sessions/${sessionId}/close`, {})
+
+export const getOrCreateSession = (tableId) =>
+  api.get(`/tables/${tableId}/session`)
+
+export const createCounterSession = () =>
+  api.post('/admin/sessions/counter')
