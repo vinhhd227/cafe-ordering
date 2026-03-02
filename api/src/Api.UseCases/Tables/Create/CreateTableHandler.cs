@@ -1,4 +1,5 @@
 using Api.Core.Aggregates.TableAggregate;
+using Api.Core.Aggregates.TableAggregate.Specifications;
 using Api.UseCases.Tables.DTOs;
 
 namespace Api.UseCases.Tables.Create;
@@ -13,6 +14,10 @@ public class CreateTableHandler(IRepositoryBase<Table> repository)
 
     if (string.IsNullOrWhiteSpace(request.Code))
       return Result.Invalid(new ValidationError("Code", "Table code is required."));
+
+    var existing = await repository.FirstOrDefaultAsync(new TableByNumberSpec(request.Number), ct);
+    if (existing is not null)
+      return Result.Invalid(new ValidationError("Number", $"Table number {request.Number} already exists."));
 
     var table = Table.Create(request.Number, request.Code);
     await repository.AddAsync(table, ct);

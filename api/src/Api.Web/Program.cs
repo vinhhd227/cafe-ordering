@@ -65,3 +65,6 @@ static ILogger Log()
   using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
   return loggerFactory.CreateLogger("Program");
 }
+
+// Make Program accessible for WebApplicationFactory in test projects
+public partial class Program { }
