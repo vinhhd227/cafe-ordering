@@ -63,6 +63,34 @@ namespace Api.Infrastructure.Identity.Migrations
                     b.ToTable("Roles", "identity");
                 });
 
+            modelBuilder.Entity("Api.Infrastructure.Identity.ApplicationRoleClaim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("RoleClaims", "identity");
+                });
+
             modelBuilder.Entity("Api.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -212,34 +240,6 @@ namespace Api.Infrastructure.Identity.Migrations
                     b.ToTable("RefreshTokens", "identity");
                 });
 
-            modelBuilder.Entity("Api.Infrastructure.Identity.ApplicationRoleClaim", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("RoleClaims", "identity");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -304,6 +304,15 @@ namespace Api.Infrastructure.Identity.Migrations
                     b.ToTable("UserTokens", "identity");
                 });
 
+            modelBuilder.Entity("Api.Infrastructure.Identity.ApplicationRoleClaim", b =>
+                {
+                    b.HasOne("Api.Infrastructure.Identity.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Api.Infrastructure.Identity.ApplicationUserRole", b =>
                 {
                     b.HasOne("Api.Infrastructure.Identity.ApplicationRole", "Role")
@@ -332,15 +341,6 @@ namespace Api.Infrastructure.Identity.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Api.Infrastructure.Identity.ApplicationRoleClaim", b =>
-                {
-                    b.HasOne("Api.Infrastructure.Identity.ApplicationRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>

@@ -12,23 +12,6 @@ namespace Api.Infrastructure.Identity.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Drop stale tables from any previous schema version (e.g. int-key era).
-            // IF EXISTS makes this safe on a completely fresh database too.
-            // __EFMigrationsHistory is preserved by EF before Up() runs, so we only
-            // clear its rows — letting EF re-record this migration after Up() completes.
-            migrationBuilder.Sql("""
-                DROP TABLE IF EXISTS identity."UserTokens"        CASCADE;
-                DROP TABLE IF EXISTS identity."UserRoles"          CASCADE;
-                DROP TABLE IF EXISTS identity."UserLogins"         CASCADE;
-                DROP TABLE IF EXISTS identity."UserClaims"         CASCADE;
-                DROP TABLE IF EXISTS identity."RoleClaims"         CASCADE;
-                DROP TABLE IF EXISTS identity."UserRefreshTokens"  CASCADE;
-                DROP TABLE IF EXISTS identity."RefreshTokens"      CASCADE;
-                DROP TABLE IF EXISTS identity."Users"              CASCADE;
-                DROP TABLE IF EXISTS identity."Roles"              CASCADE;
-                DELETE FROM identity."__EFMigrationsHistory";
-                """);
-
             migrationBuilder.EnsureSchema(
                 name: "identity");
 
@@ -40,6 +23,7 @@ namespace Api.Infrastructure.Identity.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true)
@@ -90,6 +74,7 @@ namespace Api.Infrastructure.Identity.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Description = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
                     RoleId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)

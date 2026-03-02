@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260223085453_AddGuestSessionAndExtendTable")]
-    partial class AddGuestSessionAndExtendTable
+    [Migration("20260228175339_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,6 +45,10 @@ namespace Api.Infrastructure.Data.Migrations
 
                     b.Property<string>("DeletedBy")
                         .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -178,7 +182,7 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(1);
 
-                    b.Property<int>("TableId")
+                    b.Property<int?>("TableId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -188,6 +192,10 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TableId")
+                        .HasDatabaseName("IX_GuestSessions_ActiveByTable")
+                        .HasFilter("\"Status\" = 1");
 
                     b.HasIndex("TableId", "Status")
                         .HasDatabaseName("IX_GuestSessions_TableId_Status");
@@ -202,6 +210,9 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("AmountReceived")
+                        .HasColumnType("numeric");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -225,6 +236,16 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("PaymentMethod")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("PaymentStatus")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -235,6 +256,11 @@ namespace Api.Infrastructure.Data.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<decimal>("TipAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric")
+                        .HasDefaultValue(0m);
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -264,6 +290,12 @@ namespace Api.Infrastructure.Data.Migrations
                     b.Property<decimal>("Discount")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("IceLevel")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsTakeaway")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
@@ -276,6 +308,12 @@ namespace Api.Infrastructure.Data.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
+
+                    b.Property<string>("SugarLevel")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Temperature")
+                        .HasColumnType("text");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
@@ -375,6 +413,11 @@ namespace Api.Infrastructure.Data.Migrations
                     b.Property<Guid?>("ActiveSessionId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -414,6 +457,11 @@ namespace Api.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Tables_Code")
+                        .HasFilter("\"IsDeleted\" = false");
+
                     b.HasIndex("Number")
                         .IsUnique()
                         .HasDatabaseName("IX_Tables_Number")
@@ -430,8 +478,7 @@ namespace Api.Infrastructure.Data.Migrations
                     b.HasOne("Api.Core.Aggregates.TableAggregate.Table", null)
                         .WithMany()
                         .HasForeignKey("TableId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Api.Core.Aggregates.OrderAggregate.Order", b =>

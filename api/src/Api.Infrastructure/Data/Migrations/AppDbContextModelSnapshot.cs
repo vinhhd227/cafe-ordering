@@ -190,6 +190,10 @@ namespace Api.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TableId")
+                        .HasDatabaseName("IX_GuestSessions_ActiveByTable")
+                        .HasFilter("\"Status\" = 1");
+
                     b.HasIndex("TableId", "Status")
                         .HasDatabaseName("IX_GuestSessions_TableId_Status");
 
