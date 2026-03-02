@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "admin-dev",
-      "runtimeExecutable": "/Users/vinhhd227/.nvm/versions/node/v24.12.0/bin/node",
-      "runtimeArgs": ["/Users/vinhhd227/Source/cafe-ordering/.claude/worktrees/elegant-bardeen/admin/node_modules/vite/bin/vite.js"],
+      "runtimeExecutable": "/opt/homebrew/bin/node",
+      "runtimeArgs": ["/Users/vinhhd227/Source/cafe-ordering/.claude/worktrees/great-chaum/admin/node_modules/vite/bin/vite.js"],
       "port": 5173,
       "cwd": "admin"
     },

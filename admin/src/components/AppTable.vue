@@ -180,6 +180,7 @@ watch(
             :disabled="currentPage <= 1"
             v-tooltip.top="'First page'"
             @click="goToPage(1)"
+            :class="btnIcon"
           >
             <iconify icon="ph:caret-double-left-bold" />
           </prime-button>
@@ -191,6 +192,7 @@ watch(
             :disabled="currentPage <= 1"
             v-tooltip.top="'Previous page'"
             @click="goToPage(currentPage - 1)"
+            :class="btnIcon"
           >
             <iconify icon="ph:caret-left-bold" />
           </prime-button>
@@ -206,9 +208,10 @@ watch(
               :severity="token === currentPage ? 'primary' : 'secondary'"
               :text="token !== currentPage"
               size="small"
-              style="min-width: 2rem"
               @click="goToPage(token)"
+               :class="[btnIcon, 'tw:mx-1']"
               >{{ token }}</prime-button
+             
             >
           </template>
 
@@ -219,6 +222,7 @@ watch(
             :disabled="currentPage >= totalPages"
             v-tooltip.top="'Next page'"
             @click="goToPage(currentPage + 1)"
+            :class="btnIcon"
           >
             <iconify icon="ph:caret-right-bold" />
           </prime-button>
@@ -230,6 +234,7 @@ watch(
             :disabled="currentPage >= totalPages"
             v-tooltip.top="'Last page'"
             @click="goToPage(totalPages)"
+            :class="btnIcon"
           >
             <iconify icon="ph:caret-double-right-bold" />
           </prime-button>
@@ -254,6 +259,7 @@ watch(
             outlined
             v-tooltip.top="'Toggle columns'"
             @click="colDialogVisible = true"
+            :class="btnIcon"
           >
             <iconify icon="ph:list-dashes-bold" />
           </prime-button>

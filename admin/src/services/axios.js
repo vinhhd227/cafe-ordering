@@ -16,6 +16,11 @@ api.interceptors.request.use((config) => {
     config.headers = config.headers ?? {}
     config.headers.Authorization = `Bearer ${auth.accessToken}`
   }
+  // Remove Content-Type for bodyless requests (PUT/PATCH with no data),
+  // otherwise the backend returns 415 on token-refresh retries.
+  if (config.data === undefined || config.data === null) {
+    delete config.headers['Content-Type']
+  }
   return config
 })
 

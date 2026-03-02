@@ -10,7 +10,6 @@ import {
 import AppTable from '@/components/AppTable.vue'
 import { useTableCache } from '@/composables/useTableCache'
 import { usePermission } from '@/composables/usePermission'
-import { btnIcon } from "@/layout/ui";
 
 const cache  = useTableCache('users')
 const router = useRouter()
@@ -454,8 +453,14 @@ const confirmAndDeactivate = async () => {
               size="small"
               v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
               @click="handleToggleActive(data)"
+               :class="btnIcon"
             >
-              <iconify :icon="data.isActive ? 'ph:prohibit-bold' : 'ph:check-circle-bold'" />
+            <iconify
+                :icon="
+                  data.isActive
+                    ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'
+                "
+              />
             </prime-button>
              <!-- View / Edit detail -->
             <prime-button
@@ -464,6 +469,7 @@ const confirmAndDeactivate = async () => {
               size="small"
               v-tooltip.top="'View / Edit'"
               @click="router.push({ name: 'userDetail', params: { id: data.id } })"
+              :class="btnIcon"
             >
               <iconify icon="ph:arrow-right-bold" />
             </prime-button>

@@ -16,10 +16,27 @@ export default defineConfig({
         AutoImport({
             imports: [
                 'vue',
+                'vue-router',
+                'vee-validate',
                 {
                     pinia: ['useStore'],
                 },
+                {
+                    '@/layout/ui': ['btnIcon', 'inputCustom', 'labelCustom', 'passwordCustom'],
+                },
+                {
+                    'primevue/usetoast': ['useToast'],
+                    'primevue/useconfirm': ['useConfirm'],
+                },
+                {
+                    '@vee-validate/zod': ['toTypedSchema'],
+                },
+                {
+                    zod: ['z'],
+                },
             ],
+            dirs: ['src/composables', 'src/stores'],
+            vueTemplate: true,
             dts: 'src/auto-imports.d.ts',
         }),
         Unfonts({

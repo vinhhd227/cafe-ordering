@@ -478,11 +478,11 @@ watch([categoryFilter, statusFilter], () => {
             <!-- Toggle active -->
             <prime-button
             v-if="can('product.update')"
-              :severity="data.status === 'active' ? 'success' : 'danger'"
+              :severity="data.status === 'active' ? 'danger' :'success' "
               outlined
               size="small"
               :class="btnIcon"
-              :v-tooltip.top="
+              v-tooltip.top="
                 data.status === 'active' ? 'Deactivate' : 'Activate'
               "
               @click="handleToggleActive(data)"
@@ -490,8 +490,7 @@ watch([categoryFilter, statusFilter], () => {
               <iconify
                 :icon="
                   data.status === 'active'
-                    ? 'ph:toggle-right-bold'
-                    : 'ph:toggle-left-bold'
+                    ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'
                 "
               />
             </prime-button>

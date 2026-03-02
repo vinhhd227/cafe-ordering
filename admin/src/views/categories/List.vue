@@ -229,6 +229,7 @@ watch([search, statusFilter], () => {
             :outlined="!hasActiveFilters"
             v-tooltip.top="'Filters'"
             @click="filterPanel.toggle($event)"
+            :class="!hasActiveFilters ? btnIcon : ''"
           >
             <iconify icon="ph:funnel-bold" />
             <prime-badge
@@ -296,15 +297,15 @@ watch([search, statusFilter], () => {
           <div class="tw:flex tw:justify-end tw:gap-2">
             <!-- Toggle active -->
             <prime-button
-              :severity="data.isActive ? 'success' : 'danger'"
+              :severity="data.isActive ? 'danger' : 'success'"
               outlined
               size="small"
               :class="btnIcon"
-              :v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
+              v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
               @click="handleToggleActive(data)"
             >
               <iconify
-                :icon="data.isActive ? 'ph:toggle-right-bold' : 'ph:toggle-left-bold'"
+                :icon="data.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold' "
               />
             </prime-button>
             <!-- View detail -->
@@ -314,9 +315,9 @@ watch([search, statusFilter], () => {
               size="small"
               v-tooltip.top="'View detail'"
               @click="router.push({ name: 'categoriesDetail', params: { id: data.id } })"
+              :class="btnIcon"
             >
               <iconify icon="ph:arrow-right-bold" />
-              <span>View</span>
             </prime-button>
           </div>
         </template>

@@ -713,7 +713,7 @@ watch([statusFilter, activeFilter], () => {
             <!-- Toggle active -->
             <prime-button
               :disabled="data.status == 'Occupied'"
-              :severity=" data.status == 'Occupied' ? 'secondary' : data.isActive ? 'success' : 'danger'"
+              :severity=" data.status == 'Occupied' ? 'secondary' : data.isActive ? 'danger' : 'success' "
               outlined
               size="small"
               @click="handleToggleActive(data)"
@@ -721,7 +721,7 @@ watch([statusFilter, activeFilter], () => {
             >
               <iconify
                 :icon="
-                  data.isActive ? 'ph:toggle-right-bold' : 'ph:toggle-left-bold'
+                  data.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'
                 "
               />
             </prime-button>
