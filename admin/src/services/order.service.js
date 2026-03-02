@@ -1,7 +1,7 @@
 import api from './axios'
 
-export const getOrders = (status) =>
-  api.get('/admin/orders', { params: status ? { status } : {} })
+export const getOrders = ({ status, page = 1, pageSize = 20, dateFrom, dateTo } = {}) =>
+  api.get('/admin/orders', { params: { status, page, pageSize, dateFrom, dateTo } })
 
 export const updateOrderStatus = (orderId, status) =>
   api.patch(`/admin/orders/${orderId}/status`, { status })

@@ -1,5 +1,4 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { getOrders, updatePayment } from "@/services/order.service";
 import AppTable from "@/components/AppTable.vue";
@@ -8,19 +7,23 @@ import { btnIcon } from "@/layout/ui";
 const router = useRouter();
 
 // ── Data ──────────────────────────────────────────────────────────
-const allOrders = ref([]);
+const orders = ref([]);       // current page only
+const totalRecords = ref(0);  // from server
 const loading = ref(false);
 const errorMessage = ref("");
 
-// ── Pagination ────────────────────────────────────────────────────
+// ── Pagination (server-side) ───────────────────────────────────────
 const rows = ref(20);
 const first = ref(0);
 
 // ── Filters ───────────────────────────────────────────────────────
-const searchOrder = ref("");
+// Server-side: trigger API reload
 const dateFrom = ref(null);
 const dateTo = ref(null);
 const statusFilter = ref(null);
+
+// Client-side: filter within current page
+const searchOrder = ref("");
 const paymentStatusFilter = ref(null);
 const minTotal = ref(null);
 const maxTotal = ref(null);
@@ -64,28 +67,16 @@ const clearFilters = () => {
   minTotal.value = null;
   maxTotal.value = null;
   tableCodeFilter.value = "";
-  first.value = 0;
+  // server-side filter changes are watched and will reload
 };
 
-// ── Computed ──────────────────────────────────────────────────────
-const filteredOrders = computed(() => {
+// ── Computed: client-side filter within current page ───────────────
+const displayedOrders = computed(() => {
   const term = searchOrder.value.trim().toLowerCase();
 
-  return allOrders.value.filter((o) => {
+  return orders.value.filter((o) => {
     if (term && !o.orderNumber.toLowerCase().includes(term)) return false;
 
-    if (dateFrom.value) {
-      const from = new Date(dateFrom.value);
-      from.setHours(0, 0, 0, 0);
-      if (new Date(o.orderDate) < from) return false;
-    }
-    if (dateTo.value) {
-      const to = new Date(dateTo.value);
-      to.setHours(23, 59, 59, 999);
-      if (new Date(o.orderDate) > to) return false;
-    }
-
-    if (statusFilter.value && o.status !== statusFilter.value) return false;
     if (
       paymentStatusFilter.value &&
       o.paymentStatus !== paymentStatusFilter.value
@@ -107,35 +98,12 @@ const filteredOrders = computed(() => {
   });
 });
 
-const displayedOrders = computed(() =>
-  filteredOrders.value.slice(first.value, first.value + rows.value),
-);
-
-const totalRecords = computed(() => filteredOrders.value.length);
-
 const summary = computed(() => ({
-  total: allOrders.value.length,
-  pending: allOrders.value.filter((o) => o.status === "Pending").length,
-  unpaid: allOrders.value.filter((o) => o.paymentStatus === "Unpaid").length,
-  completed: allOrders.value.filter((o) => o.status === "Completed").length,
+  total: totalRecords.value,
+  pending: orders.value.filter((o) => o.status === "Pending").length,
+  unpaid: orders.value.filter((o) => o.paymentStatus === "Unpaid").length,
+  completed: orders.value.filter((o) => o.status === "Completed").length,
 }));
-
-// Reset to page 1 when any filter changes
-watch(
-  [
-    searchOrder,
-    dateFrom,
-    dateTo,
-    statusFilter,
-    paymentStatusFilter,
-    minTotal,
-    maxTotal,
-    tableCodeFilter,
-  ],
-  () => {
-    first.value = 0;
-  },
-);
 
 // ── Helpers ───────────────────────────────────────────────────────
 const formatVnd = (value) =>
@@ -195,8 +163,17 @@ const loadOrders = async () => {
   loading.value = true;
   errorMessage.value = "";
   try {
-    const res = await getOrders();
-    allOrders.value = res?.data ?? [];
+    const page = Math.floor(first.value / rows.value) + 1;
+    const res = await getOrders({
+      status: statusFilter.value,
+      page,
+      pageSize: rows.value,
+      dateFrom: dateFrom.value ?? undefined,
+      dateTo: dateTo.value ?? undefined,
+    });
+    const data = res?.data;
+    orders.value = data?.items ?? [];
+    totalRecords.value = data?.totalCount ?? 0;
   } catch (err) {
     errorMessage.value =
       err?.response?.data?.message || "Failed to load orders.";
@@ -206,6 +183,19 @@ const loadOrders = async () => {
 };
 
 onMounted(loadOrders);
+
+// Re-fetch when server-side filters change — reset to page 1
+watch([statusFilter, dateFrom, dateTo], () => {
+  first.value = 0;
+  loadOrders();
+});
+
+// Handle server-side page change from AppTable
+const onPage = (e) => {
+  first.value = e.first;
+  rows.value = e.rows;
+  loadOrders();
+};
 
 // ── Payment dialog ────────────────────────────────────────────────
 const payDialog = ref(false);
@@ -392,7 +382,7 @@ const confirmPayment = async () => {
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
         <p
-          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+          class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
         >
           Orders
         </p>
@@ -402,6 +392,15 @@ const confirmPayment = async () => {
         </p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
+        <!-- New Order -->
+        <prime-button
+          severity="success"
+          size="small"
+          @click="router.push({ name: 'ordersCreate' })"
+        >
+          <iconify icon="ph:plus-bold" class="tw:mr-1" />
+          <span>New Order</span>
+        </prime-button>
         <!-- View toggle -->
         <div
           class="tw:flex tw:items-center tw:rounded-lg tw:border tw:border-white/10 tw:p-1 tw:gap-1"
@@ -499,22 +498,18 @@ const confirmPayment = async () => {
 
     <!-- Table -->
     <AppTable
+      lazy
       v-model:first="first"
       v-model:rows="rows"
       :value="displayedOrders"
       :loading="loading"
       :totalRecords="totalRecords"
       :rowsPerPageOptions="[10, 20, 50]"
-      @page="
-        (e) => {
-          first = e.first;
-          rows = e.rows;
-        }
-      "
+      @page="onPage"
     >
       <template #toolbar-left>
         <div class="tw:flex tw:items-center tw:gap-2">
-          <!-- Search by order number -->
+          <!-- Search by order number (client-side within page) -->
           <prime-input-text
             v-model="searchOrder"
             placeholder="Search order #…"
@@ -542,7 +537,7 @@ const confirmPayment = async () => {
             <div class="tw:flex tw:flex-col tw:gap-4 tw:w-full">
               <p class="tw:text-sm tw:font-semibold">Filter orders</p>
 
-              <!-- Date range -->
+              <!-- Date range (server-side) -->
               <div class="tw:space-y-1.5">
                 <label
                   for="dateFrom"
@@ -569,7 +564,7 @@ const confirmPayment = async () => {
                 </div>
               </div>
 
-              <!-- Order status -->
+              <!-- Order status (server-side) -->
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
@@ -586,7 +581,7 @@ const confirmPayment = async () => {
                 />
               </div>
 
-              <!-- Payment status -->
+              <!-- Payment status (client-side) -->
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
@@ -603,7 +598,7 @@ const confirmPayment = async () => {
                 />
               </div>
 
-              <!-- Total price range -->
+              <!-- Total price range (client-side) -->
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
@@ -628,7 +623,7 @@ const confirmPayment = async () => {
                 </div>
               </div>
 
-              <!-- Table code -->
+              <!-- Table code (client-side) -->
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
@@ -672,7 +667,7 @@ const confirmPayment = async () => {
       <prime-column field="orderDate" header="Date" style="min-width: 10rem">
         <template #body="{ data }">
           <span class="tw:text-sm app-text-muted">{{
-            formatDate(data.orderDate)  
+            formatDate(data.orderDate)
           }}</span>
         </template>
       </prime-column>

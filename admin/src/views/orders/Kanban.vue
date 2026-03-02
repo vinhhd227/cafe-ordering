@@ -190,7 +190,7 @@ const loadOrders = async () => {
   errorMessage.value = "";
   try {
     const res = await getOrders();
-    orders.value = res?.data ?? [];
+    orders.value = res?.data?.items ?? [];
   } catch (err) {
     errorMessage.value =
       err?.response?.data?.message || "Failed to load orders.";
