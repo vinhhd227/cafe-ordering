@@ -71,36 +71,42 @@ public static class IdentitySeedData
       }
     }
 
-    // 2. Seed Admin User
-    var adminUsername = configuration["AdminAccount:Username"] ?? "admin";
-    var adminFullName = configuration["AdminAccount:FullName"] ?? "System Administrator";
-    var adminPassword = configuration["AdminAccount:Password"] ?? "Admin@123456";
-
-    var adminUser = await userManager.FindByNameAsync(adminUsername);
-
-    if (adminUser is null)
+    // 2. Seed dev accounts
+    var devAccounts = new[]
     {
-      adminUser = new ApplicationUser
+      (Username: configuration["AdminAccount:Username"] ?? "admin",
+       FullName: configuration["AdminAccount:FullName"] ?? "System Administrator",
+       Password: configuration["AdminAccount:Password"] ?? "Ab@123456",
+       Role: "Admin"),
+      (Username: "staff",  FullName: "Staff Account",    Password: "Ab@123456", Role: "Staff"),
+      (Username: "customer", FullName: "Customer Account", Password: "Ab@123456", Role: "Customer"),
+    };
+
+    foreach (var (username, fullName, password, role) in devAccounts)
+    {
+      var user = await userManager.FindByNameAsync(username);
+      if (user is not null) continue;
+
+      user = new ApplicationUser
       {
-        UserName = adminUsername,
-        FullName = adminFullName,
+        UserName  = username,
+        FullName  = fullName,
         EmailConfirmed = true,
-        IsActive = true,
+        IsActive  = true,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
       };
 
-      var result = await userManager.CreateAsync(adminUser, adminPassword);
-
+      var result = await userManager.CreateAsync(user, password);
       if (result.Succeeded)
       {
-        await userManager.AddToRoleAsync(adminUser, "Admin");
-        logger.LogInformation("Created admin user: {Username}", adminUsername);
+        await userManager.AddToRoleAsync(user, role);
+        logger.LogInformation("Created {Role} user: {Username}", role, username);
       }
       else
       {
-        logger.LogError("Failed to create admin user: {Errors}",
-          string.Join(", ", result.Errors.Select(e => e.Description)));
+        logger.LogError("Failed to create {Role} user {Username}: {Errors}",
+          role, username, string.Join(", ", result.Errors.Select(e => e.Description)));
       }
     }
   }
