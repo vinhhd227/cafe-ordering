@@ -226,7 +226,12 @@ public class IdentityService : IIdentityService
 
     var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
     if (!result.Succeeded)
-      return Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
+    {
+      var errors = result.Errors
+        .Select(e => new ValidationError(e.Code, e.Description))
+        .ToList();
+      return Result.Invalid(errors);
+    }
 
     // Security best practice: revoke all sessions after password change
     await RevokeAllUserTokensAsync(userId);
