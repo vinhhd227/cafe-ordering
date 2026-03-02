@@ -28,18 +28,6 @@ public class GuestSession : AuditableEntity<Guid>, IAggregateRoot
     return session;
   }
 
-  /// <summary>Creates a counter/takeaway session not tied to any table.</summary>
-  public static GuestSession CreateCounter()
-  {
-    return new GuestSession
-    {
-      Id = Guid.NewGuid(),
-      TableId = null,
-      Status = GuestSessionStatus.Active,
-      OpenedAt = DateTime.UtcNow
-    };
-  }
-
   public void Close()
   {
     if (Status == GuestSessionStatus.Closed)
