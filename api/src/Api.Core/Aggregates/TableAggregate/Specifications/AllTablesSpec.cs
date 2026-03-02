@@ -5,6 +5,6 @@ public class AllTablesSpec : Specification<Table>
   public AllTablesSpec()
   {
     Query.Where(t => !t.IsDeleted);
-    Query.OrderBy(t => t.Number);
+    Query.OrderBy(t => t.Code);
   }
 }

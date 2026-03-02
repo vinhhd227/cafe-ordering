@@ -9,22 +9,20 @@ public class UpdateTableHandler(IRepositoryBase<Table> repository)
 {
   public async ValueTask<Result<TableDto>> Handle(UpdateTableCommand request, CancellationToken ct)
   {
-    if (request.Number <= 0)
-      return Result.Invalid(new ValidationError("Number", "Table number must be greater than zero."));
-
     if (string.IsNullOrWhiteSpace(request.Code))
       return Result.Invalid(new ValidationError("Code", "Table code is required."));
 
-    var spec = new TableByIdSpec(request.TableId);
-    var table = await repository.FirstOrDefaultAsync(spec, ct);
-
+    var table = await repository.FirstOrDefaultAsync(new TableByIdSpec(request.TableId), ct);
     if (table is null)
       return Result.NotFound($"Table {request.TableId} not found.");
 
-    table.UpdateNumber(request.Number);
+    var duplicate = await repository.FirstOrDefaultAsync(new TableByCodeSpec(request.Code), ct);
+    if (duplicate is not null && duplicate.Id != request.TableId)
+      return Result.Invalid(new ValidationError("Code", $"Table code '{request.Code}' already exists."));
+
     table.UpdateCode(request.Code);
     await repository.UpdateAsync(table, ct);
 
-    return Result.Success(new TableDto(table.Id, table.Number, table.Code, table.IsActive, table.Status.ToString(), table.ActiveSessionId));
+    return Result.Success(new TableDto(table.Id, table.Code, table.IsActive, table.Status.ToString(), table.ActiveSessionId));
   }
 }

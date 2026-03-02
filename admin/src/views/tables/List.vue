@@ -127,23 +127,17 @@ const handleDelete = async (row) => {
 
 // ── Add table dialog ───────────────────────────────────────────────
 const showAddDialog = ref(false);
-const newNumber = ref(null);
 const newCode = ref("");
 const addError = ref("");
 const addLoading = ref(false);
 
 const openAddDialog = () => {
-  newNumber.value = null;
   newCode.value = "";
   addError.value = "";
   showAddDialog.value = true;
 };
 
 const handleAddTable = async () => {
-  if (!newNumber.value || newNumber.value <= 0) {
-    addError.value = "Table number must be greater than 0.";
-    return;
-  }
   if (!newCode.value.trim()) {
     addError.value = "Table code is required.";
     return;
@@ -151,16 +145,15 @@ const handleAddTable = async () => {
   addLoading.value = true;
   addError.value = "";
   try {
-    await createTable(newNumber.value, newCode.value.trim());
+    await createTable(newCode.value.trim());
     await load();
     showAddDialog.value = false;
-    newNumber.value = null;
     newCode.value = "";
   } catch (err) {
     addError.value =
       err?.response?.data?.errors?.join(", ") ||
       err?.response?.data?.title ||
-      "Failed to create table. Code or number may already exist.";
+      "Failed to create table. Code may already exist.";
   } finally {
     addLoading.value = false;
   }
@@ -169,24 +162,18 @@ const handleAddTable = async () => {
 // ── Edit dialog ────────────────────────────────────────────────────
 const showEditDialog = ref(false);
 const editRow = ref(null);
-const editNumber = ref(null);
 const editCode = ref("");
 const editError = ref("");
 const editLoading = ref(false);
 
 const openEditDialog = (row) => {
   editRow.value = row;
-  editNumber.value = row.number;
   editCode.value = row.code;
   editError.value = "";
   showEditDialog.value = true;
 };
 
 const handleEditTable = async () => {
-  if (!editNumber.value || editNumber.value <= 0) {
-    editError.value = "Table number must be greater than 0.";
-    return;
-  }
   if (!editCode.value.trim()) {
     editError.value = "Table code is required.";
     return;
@@ -195,7 +182,6 @@ const handleEditTable = async () => {
   editError.value = "";
   try {
     await updateTable(editRow.value.id, {
-      number: editNumber.value,
       code: editCode.value.trim(),
     });
     await load();
@@ -204,7 +190,7 @@ const handleEditTable = async () => {
     editError.value =
       err?.response?.data?.errors?.join(", ") ||
       err?.response?.data?.title ||
-      "Failed to update table. Code or number may already exist.";
+      "Failed to update table. Code may already exist.";
   } finally {
     editLoading.value = false;
   }
@@ -326,24 +312,6 @@ watch([statusFilter, activeFilter], () => {
           Format tự do — ví dụ: F1-01 (tầng 1 bàn 1)
         </p>
       </div>
-      <div class="tw:space-y-1.5">
-        <label
-          for="tableNumber"
-          class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
-        >
-          Table number
-        </label>
-        <prime-input-number
-          id="tableNumber"
-          v-model="newNumber"
-          :min="1"
-          :use-grouping="false"
-          placeholder="e.g. 1"
-          class="app-input tw:w-full"
-          @keyup.enter="handleAddTable"
-        />
-        <p class="tw:text-[11px] app-text-subtle">Dùng để sắp xếp thứ tự bàn</p>
-      </div>
       <p v-if="addError" class="tw:text-xs tw:text-red-400">{{ addError }}</p>
     </div>
     <template #footer>
@@ -377,18 +345,6 @@ watch([statusFilter, activeFilter], () => {
           v-model="editCode"
           placeholder="e.g. F1-01"
           class="app-input tw:w-full tw:font-mono"
-          @keyup.enter="handleEditTable"
-        />
-      </div>
-      <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
-          >Table number</label
-        >
-        <prime-input-number
-          v-model="editNumber"
-          :min="1"
-          :use-grouping="false"
-          class="app-input tw:w-full"
           @keyup.enter="handleEditTable"
         />
       </div>
@@ -614,12 +570,6 @@ watch([statusFilter, activeFilter], () => {
           <span class="tw:font-mono tw:font-semibold tw:text-sm">{{
             data.code
           }}</span>
-        </template>
-      </prime-column>
-
-      <prime-column field="number" header="#" style="min-width: 4rem">
-        <template #body="{ data }">
-          <span class="tw:text-sm app-text-muted">{{ data.number }}</span>
         </template>
       </prime-column>
 

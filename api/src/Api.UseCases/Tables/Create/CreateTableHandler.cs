@@ -9,19 +9,16 @@ public class CreateTableHandler(IRepositoryBase<Table> repository)
 {
   public async ValueTask<Result<TableDto>> Handle(CreateTableCommand request, CancellationToken ct)
   {
-    if (request.Number <= 0)
-      return Result.Invalid(new ValidationError("Number", "Table number must be greater than zero."));
-
     if (string.IsNullOrWhiteSpace(request.Code))
       return Result.Invalid(new ValidationError("Code", "Table code is required."));
 
-    var existing = await repository.FirstOrDefaultAsync(new TableByNumberSpec(request.Number), ct);
+    var existing = await repository.FirstOrDefaultAsync(new TableByCodeSpec(request.Code), ct);
     if (existing is not null)
-      return Result.Invalid(new ValidationError("Number", $"Table number {request.Number} already exists."));
+      return Result.Invalid(new ValidationError("Code", $"Table code '{request.Code}' already exists."));
 
-    var table = Table.Create(request.Number, request.Code);
+    var table = Table.Create(request.Code);
     await repository.AddAsync(table, ct);
 
-    return Result.Success(new TableDto(table.Id, table.Number, table.Code, table.IsActive, table.Status.ToString(), null));
+    return Result.Success(new TableDto(table.Id, table.Code, table.IsActive, table.Status.ToString(), null));
   }
 }

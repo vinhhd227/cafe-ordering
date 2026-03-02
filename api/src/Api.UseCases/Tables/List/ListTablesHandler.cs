@@ -14,7 +14,6 @@ public class ListTablesHandler(IReadRepositoryBase<Table> repository)
 
     var dtos = tables.Select(t => new TableDto(
       t.Id,
-      t.Number,
       t.Code,
       t.IsActive,
       t.Status.ToString(),

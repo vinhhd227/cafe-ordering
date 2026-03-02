@@ -6,28 +6,21 @@ public class Table : SoftDeletableEntity<int>, IAggregateRoot
 {
   private Table() { }
 
-  public int Number { get; private set; }
   public string Code { get; private set; } = string.Empty;
   public bool IsActive { get; private set; } = true;
   public TableStatus Status { get; private set; } = TableStatus.Available;
   public Guid? ActiveSessionId { get; private set; }
 
-  public static Table Create(int number, string code)
+  public static Table Create(string code)
   {
     var table = new Table
     {
-      Number = Guard.Against.NegativeOrZero(number),
-      Code   = Guard.Against.NullOrWhiteSpace(code),
+      Code     = Guard.Against.NullOrWhiteSpace(code),
       IsActive = true,
-      Status = TableStatus.Available
+      Status   = TableStatus.Available
     };
 
     return table;
-  }
-
-  public void UpdateNumber(int number)
-  {
-    Number = Guard.Against.NegativeOrZero(number);
   }
 
   public void UpdateCode(string code)
@@ -48,7 +41,7 @@ public class Table : SoftDeletableEntity<int>, IAggregateRoot
   public void OpenSession(Guid sessionId)
   {
     if (Status == TableStatus.Occupied)
-      throw new InvalidOperationException($"Table {Number} already has an active session.");
+      throw new InvalidOperationException($"Table {Code} already has an active session.");
 
     Status = TableStatus.Occupied;
     ActiveSessionId = sessionId;
