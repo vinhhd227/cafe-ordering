@@ -59,5 +59,15 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
     // Concurrency token
     builder.Property(o => o.RowVersion)
       .IsRowVersion();
+
+    builder.HasIndex(o => o.OrderDate)
+      .HasDatabaseName("IX_Orders_OrderDate");
+
+    builder.HasIndex(o => o.Status)
+      .HasDatabaseName("IX_Orders_Status");
+
+    builder.HasIndex(o => o.OrderNumber)
+      .IsUnique()
+      .HasDatabaseName("IX_Orders_OrderNumber_Unique");
   }
 }

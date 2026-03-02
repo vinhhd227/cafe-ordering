@@ -22,3 +22,10 @@ public record OrderDto(
   string? TableCode,
   List<OrderItemDto> Items
 );
+
+public record PagedOrdersDto(
+  List<OrderDto> Items,
+  int TotalCount,
+  int Page,
+  int PageSize
+);

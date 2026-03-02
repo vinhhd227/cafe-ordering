@@ -12,12 +12,15 @@ public class ListOrdersHandler(
   IReadRepositoryBase<Order> repository,
   IReadRepositoryBase<GuestSession> sessionRepository,
   IReadRepositoryBase<Table> tableRepository)
-  : IQueryHandler<ListOrdersQuery, Result<List<OrderDto>>>
+  : IQueryHandler<ListOrdersQuery, Result<PagedOrdersDto>>
 {
-  public async ValueTask<Result<List<OrderDto>>> Handle(
+  public async ValueTask<Result<PagedOrdersDto>> Handle(
     ListOrdersQuery request, CancellationToken ct)
   {
-    var spec   = new OrdersListSpec(request.Status);
+    var countSpec = new OrdersCountSpec(request.Status, request.DateFrom, request.DateTo);
+    var totalCount = await repository.CountAsync(countSpec, ct);
+
+    var spec   = new OrdersListSpec(request.Status, request.DateFrom, request.DateTo, request.Page, request.PageSize);
     var orders = await repository.ListAsync(spec, ct);
 
     // Build sessionId → tableId map
@@ -25,8 +28,9 @@ public class ListOrdersHandler(
     var sessions   = await sessionRepository.ListAsync(new SessionsByIdsSpec(sessionIds), ct);
     var sessionMap = sessions.ToDictionary(s => s.Id, s => s.TableId);
 
-    // Build tableId → tableCode map (small, bounded dataset)
-    var tables   = await tableRepository.ListAsync(new AllTablesSpec(), ct);
+    // Build tableId → tableCode map — only load tables referenced by current page
+    var tableIds = sessions.Select(s => s.TableId).OfType<int>().Distinct().ToList();
+    var tables   = await tableRepository.ListAsync(new TablesByIdsSpec(tableIds), ct);
     var tableMap = tables.ToDictionary(t => t.Id, t => t.Code);
 
     var dtos = orders.Select(o =>
@@ -57,6 +61,6 @@ public class ListOrdersHandler(
       );
     }).ToList();
 
-    return Result.Success(dtos);
+    return Result.Success(new PagedOrdersDto(dtos, totalCount, request.Page, request.PageSize));
   }
 }

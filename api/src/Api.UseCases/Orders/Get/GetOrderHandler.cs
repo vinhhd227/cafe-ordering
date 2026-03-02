@@ -4,6 +4,7 @@ using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
 using Api.Core.Aggregates.TableAggregate;
 using Api.Core.Aggregates.TableAggregate.Specifications;
+
 using Api.UseCases.Orders.DTOs;
 
 namespace Api.UseCases.Orders.Get;
@@ -25,10 +26,10 @@ public class GetOrderHandler(
     // Look up table code: Order → Session → Table
     string? tableCode = null;
     var session = await sessionRepository.FirstOrDefaultAsync(new SessionByIdSpec(order.SessionId), ct);
-    if (session != null)
+    if (session?.TableId.HasValue == true)
     {
-      var tables = await tableRepository.ListAsync(new AllTablesSpec(), ct);
-      tableCode = tables.FirstOrDefault(t => t.Id == session.TableId)?.Code;
+      var table = await tableRepository.FirstOrDefaultAsync(new TableByIdSpec(session.TableId.Value), ct);
+      tableCode = table?.Code;
     }
 
     var dto = new OrderDto(
