@@ -89,24 +89,4 @@ public class SessionEndpointTests
     response.EnsureUnauthorized();
   }
 
-  // POST /api/admin/sessions/counter
-  [Fact]
-  public async Task CreateCounterSession_WithAdminToken_ReturnsSession()
-  {
-    var result = await _adminClient.PostAndDeserializeAsync<SessionContextDto>(
-      "/api/admin/sessions/counter", JsonContent.Create(new { }), _output);
-
-    result.Should().NotBeNull();
-    result.TableId.Should().BeNull();
-    result.Status.Should().Be(GuestSessionStatus.Active);
-  }
-
-  [Fact]
-  public async Task CreateCounterSession_WithoutAuth_ReturnsUnauthorized()
-  {
-    var response = await _client.PostAsync(
-      "/api/admin/sessions/counter", JsonContent.Create(new { }));
-
-    response.EnsureUnauthorized();
-  }
 }

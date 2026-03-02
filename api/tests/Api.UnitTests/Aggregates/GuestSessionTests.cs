@@ -34,15 +34,6 @@ public class GuestSessionTests
   }
 
   [Fact]
-  public void CreateCounter_ShouldHaveNullTableId()
-  {
-    var session = GuestSession.CreateCounter();
-
-    session.TableId.Should().BeNull();
-    session.Status.Should().Be(GuestSessionStatus.Active);
-  }
-
-  [Fact]
   public void Close_ShouldSetStatusClosedAndClosedAt()
   {
     var session = GuestSession.Create(tableId: 3);

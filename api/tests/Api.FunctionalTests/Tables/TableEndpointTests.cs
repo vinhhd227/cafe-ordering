@@ -37,15 +37,12 @@ public class TableEndpointTests
   [Fact]
   public async Task CreateTable_WithAdminToken_ReturnsCreatedTable()
   {
-    // Use a large unique number to avoid conflicts with seeded data (1-5) or prior test runs
-    var number = Random.Shared.Next(10_000, 99_999);
-    var code   = $"T{number}";
+    var code = $"T{Random.Shared.Next(10_000, 99_999)}";
 
     var result = await _adminClient.PostAndDeserializeAsync<TableDto>(
-      "/api/admin/tables", JsonContent.Create(new { Number = number, Code = code }), _output);
+      "/api/admin/tables", JsonContent.Create(new { Code = code }), _output);
 
     result.Should().NotBeNull();
-    result.Number.Should().Be(number);
     result.Code.Should().Be(code);
   }
 
@@ -53,16 +50,16 @@ public class TableEndpointTests
   public async Task CreateTable_WithoutAuth_ReturnsUnauthorized()
   {
     var response = await _client.PostAsync(
-      "/api/admin/tables", JsonContent.Create(new { Number = 98, Code = "T98" }));
+      "/api/admin/tables", JsonContent.Create(new { Code = "T98" }));
 
     response.EnsureUnauthorized();
   }
 
   [Fact]
-  public async Task CreateTable_WithDuplicateNumber_ReturnsBadRequest()
+  public async Task CreateTable_WithDuplicateCode_ReturnsBadRequest()
   {
-    // Table 1 already seeded
+    // F1-01 already seeded
     await _adminClient.PostAndEnsureBadRequestAsync(
-      "/api/admin/tables", JsonContent.Create(new { Number = 1, Code = "DUPLICATE" }), _output);
+      "/api/admin/tables", JsonContent.Create(new { Code = "F1-01" }), _output);
   }
 }

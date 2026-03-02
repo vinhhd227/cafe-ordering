@@ -32,7 +32,7 @@ public class GuestSessionRepositoryTests : IAsyncLifetime
   public async Task ActiveSessionByTableIdSpec_ShouldReturnOnlyActiveSession()
   {
     // Arrange — seed one table and two sessions (one active, one closed)
-    var table = Table.Create(number: 100, code: "T100");
+    var table = Table.Create(code: "T100");
     _db.Tables.Add(table);
     await _db.SaveChangesAsync();
 
@@ -59,7 +59,7 @@ public class GuestSessionRepositoryTests : IAsyncLifetime
   [Fact]
   public async Task ActiveSessionByTableIdSpec_WhenNoActiveSession_ShouldReturnNull()
   {
-    var table = Table.Create(number: 101, code: "T101");
+    var table = Table.Create(code: "T101");
     _db.Tables.Add(table);
     await _db.SaveChangesAsync();
 

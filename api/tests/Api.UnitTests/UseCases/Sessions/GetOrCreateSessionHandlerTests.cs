@@ -31,7 +31,7 @@ public class GetOrCreateSessionHandlerTests
   [Fact]
   public async Task Handle_WhenTableInactive_ShouldReturnError()
   {
-    var table = Table.Create(1, "T01");
+    var table = Table.Create("F1-01");
     table.Deactivate();
     _tableRepo.FirstOrDefaultAsync(Arg.Any<TableByIdSpec>(), Arg.Any<CancellationToken>())
               .Returns(table);
@@ -44,7 +44,7 @@ public class GetOrCreateSessionHandlerTests
   [Fact]
   public async Task Handle_WhenActiveSessionExists_ShouldReturnExistingSession()
   {
-    var table = Table.Create(1, "T01");
+    var table = Table.Create("F1-01");
     var existingSession = GuestSession.Create(tableId: 1);
 
     _tableRepo.FirstOrDefaultAsync(Arg.Any<TableByIdSpec>(), Arg.Any<CancellationToken>())
@@ -64,7 +64,7 @@ public class GetOrCreateSessionHandlerTests
   [Fact]
   public async Task Handle_WhenNoActiveSession_ShouldCreateNewSession()
   {
-    var table = Table.Create(1, "T01");
+    var table = Table.Create("F1-01");
 
     _tableRepo.FirstOrDefaultAsync(Arg.Any<TableByIdSpec>(), Arg.Any<CancellationToken>())
               .Returns(table);
@@ -83,7 +83,7 @@ public class GetOrCreateSessionHandlerTests
   [Fact]
   public async Task Handle_WhenTableOccupiedButNoActiveSession_ShouldResetTableAndCreateSession()
   {
-    var table = Table.Create(1, "T01");
+    var table = Table.Create("F1-01");
     table.OpenSession(Guid.NewGuid()); // stale Occupied state
 
     _tableRepo.FirstOrDefaultAsync(Arg.Any<TableByIdSpec>(), Arg.Any<CancellationToken>())
