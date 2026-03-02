@@ -15,37 +15,37 @@ import { useAuthStore } from "@/stores/auth";
 import { usePermission } from "@/composables/usePermission";
 import { btnIcon } from "@/layout/ui";
 
-const route  = useRoute();
+const route = useRoute();
 const router = useRouter();
 const userId = route.params.id;
-const toast  = useToast();
-const auth   = useAuthStore();
+const toast = useToast();
+const auth = useAuthStore();
 const { can } = usePermission();
 
 // ── State ──────────────────────────────────────────────────────────
-const user         = ref(null);
-const loading      = ref(false);
+const user = ref(null);
+const loading = ref(false);
 const errorMessage = ref("");
 
 // Profile form
 const profileForm = ref({ fullName: "", email: "" });
-const saving      = ref(false);
+const saving = ref(false);
 
 // Role form
 const selectedRole = ref("");
-const roleLoading  = ref(false);
-const roleOptions  = ref([]);
+const roleLoading = ref(false);
+const roleOptions = ref([]);
 
 // Shared feedback
 const successMessage = ref("");
 
 // Activate / Deactivate
-const toggleLoading          = ref(false);
-const showDeactivateConfirm  = ref(false);
+const toggleLoading = ref(false);
+const showDeactivateConfirm = ref(false);
 
 // Reset password
-const resetLoading      = ref(false);
-const showResetResult   = ref(false);
+const resetLoading = ref(false);
+const showResetResult = ref(false);
 const resetPasswordData = ref({ username: "", temporaryPassword: "" });
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -58,8 +58,7 @@ const initials = (fullName) =>
     .join("")
     .toUpperCase();
 
-const formatDate = (d) =>
-  d ? new Date(d).toLocaleDateString("vi-VN") : "—";
+const formatDate = (d) => (d ? new Date(d).toLocaleDateString("vi-VN") : "—");
 
 const roleSeverity = (role) =>
   role === "Admin" ? "danger" : role === "Staff" ? "info" : "secondary";
@@ -71,14 +70,14 @@ const extractError = (err) =>
 
 // ── Load ──────────────────────────────────────────────────────────
 const loadUser = async () => {
-  loading.value      = true;
+  loading.value = true;
   errorMessage.value = "";
   try {
-    const res    = await getUserById(userId);
-    user.value   = res?.data;
+    const res = await getUserById(userId);
+    user.value = res?.data;
     profileForm.value = {
-      fullName: user.value.fullName  ?? "",
-      email:    user.value.email     ?? "",
+      fullName: user.value.fullName ?? "",
+      email: user.value.email ?? "",
     };
     selectedRole.value = user.value.roles?.[0] ?? "Staff";
   } catch (err) {
@@ -107,13 +106,13 @@ onMounted(() => {
 
 // ── Save profile ──────────────────────────────────────────────────
 const saveProfile = async () => {
-  saving.value         = true;
-  errorMessage.value   = "";
+  saving.value = true;
+  errorMessage.value = "";
   successMessage.value = "";
   try {
     await updateUser(userId, {
       fullName: profileForm.value.fullName.trim(),
-      email:    profileForm.value.email.trim() || null,
+      email: profileForm.value.email.trim() || null,
     });
     await loadUser();
     successMessage.value = "Profile updated successfully.";
@@ -127,8 +126,8 @@ const saveProfile = async () => {
 
 // ── Change role ───────────────────────────────────────────────────
 const saveRole = async () => {
-  roleLoading.value    = true;
-  errorMessage.value   = "";
+  roleLoading.value = true;
+  errorMessage.value = "";
   successMessage.value = "";
   try {
     await changeUserRole(userId, selectedRole.value);
@@ -137,9 +136,10 @@ const saveRole = async () => {
     setTimeout(() => (successMessage.value = ""), 3000);
     if (userId === auth.user?.id) {
       toast.add({
-        severity: 'warn',
-        summary: 'Role updated',
-        detail: 'Your role was changed. Please log in again for it to take effect.',
+        severity: "warn",
+        summary: "Role updated",
+        detail:
+          "Your role was changed. Please log in again for it to take effect.",
         life: 8000,
       });
     }
@@ -153,7 +153,7 @@ const saveRole = async () => {
 // ── Toggle active ─────────────────────────────────────────────────
 const doActivate = async () => {
   toggleLoading.value = true;
-  errorMessage.value  = "";
+  errorMessage.value = "";
   try {
     await activateUser(userId);
     await loadUser();
@@ -165,9 +165,9 @@ const doActivate = async () => {
 };
 
 const confirmDeactivate = async () => {
-  toggleLoading.value      = true;
+  toggleLoading.value = true;
   showDeactivateConfirm.value = false;
-  errorMessage.value       = "";
+  errorMessage.value = "";
   try {
     await deactivateUser(userId);
     await loadUser();
@@ -202,12 +202,17 @@ const doResetPassword = async () => {
 
 <template>
   <section class="tw:space-y-6">
-
     <!-- ── Header ─────────────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">Users</p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold tw:flex tw:items-center tw:gap-3">
+        <p
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+        >
+          Users
+        </p>
+        <h1
+          class="tw:mt-2 tw:text-3xl tw:font-semibold tw:flex tw:items-center tw:gap-3"
+        >
           <span v-if="user">{{ user.username }}</span>
           <prime-skeleton v-else width="12rem" height="2rem" />
           <prime-tag
@@ -240,45 +245,57 @@ const doResetPassword = async () => {
       severity="success"
       variant="accent"
       :closable="false"
-    >{{ successMessage }}</prime-alert>
+      >{{ successMessage }}</prime-alert
+    >
     <prime-alert
       v-if="errorMessage"
       severity="error"
       variant="accent"
       closable
       @close="errorMessage = ''"
-    >{{ errorMessage }}</prime-alert>
+      >{{ errorMessage }}</prime-alert
+    >
 
     <!-- ── Loading skeleton ───────────────────────────────────────── -->
-    <div v-if="loading" class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3">
+    <div
+      v-if="loading"
+      class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3"
+    >
       <prime-card class="app-card tw:rounded-2xl tw:border">
         <template #content>
           <div class="tw:flex tw:flex-col tw:items-center tw:gap-3">
             <prime-skeleton shape="circle" size="5rem" />
             <prime-skeleton width="8rem" height="1.25rem" />
           </div>
-          <prime-skeleton v-for="i in 3" :key="i" height="1rem" class="tw:mt-3" />
+          <prime-skeleton
+            v-for="i in 3"
+            :key="i"
+            height="1rem"
+            class="tw:mt-3"
+          />
         </template>
       </prime-card>
       <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-2">
         <template #content>
-          <prime-skeleton v-for="i in 4" :key="i" height="2.5rem" class="tw:mb-4" />
+          <prime-skeleton
+            v-for="i in 4"
+            :key="i"
+            height="2.5rem"
+            class="tw:mb-4"
+          />
         </template>
       </prime-card>
     </div>
 
     <template v-else-if="user">
       <div class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3">
-
         <!-- ── Left card: overview + status toggle ─────────────── -->
         <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-1">
           <template #content>
-
             <!-- Avatar -->
             <div class="tw:flex tw:flex-col tw:items-center tw:gap-3 tw:mb-6">
               <div
-                class="tw:h-20 tw:w-20 tw:rounded-full tw:flex tw:items-center tw:justify-center
-                       tw:bg-emerald-500/20 tw:text-emerald-300 tw:text-2xl tw:font-bold"
+                class="tw:h-20 tw:w-20 tw:rounded-full tw:flex tw:items-center tw:justify-center tw:bg-emerald-500/20 tw:text-emerald-300 tw:text-2xl tw:font-bold"
               >
                 {{ initials(user.fullName) }}
               </div>
@@ -291,7 +308,9 @@ const doResetPassword = async () => {
             <!-- Info rows -->
             <div class="tw:space-y-3">
               <!-- Roles -->
-              <div class="tw:flex tw:justify-between tw:items-center tw:text-sm tw:gap-2">
+              <div
+                class="tw:flex tw:justify-between tw:items-center tw:text-sm tw:gap-2"
+              >
                 <span class="app-text-muted tw:shrink-0">Role</span>
                 <div class="tw:flex tw:gap-1 tw:flex-wrap tw:justify-end">
                   <prime-tag
@@ -300,12 +319,16 @@ const doResetPassword = async () => {
                     :value="role"
                     :severity="roleSeverity(role)"
                   />
-                  <span v-if="!user.roles?.length" class="app-text-muted">—</span>
+                  <span v-if="!user.roles?.length" class="app-text-muted"
+                    >—</span
+                  >
                 </div>
               </div>
 
               <!-- Status -->
-              <div class="tw:flex tw:justify-between tw:items-center tw:text-sm">
+              <div
+                class="tw:flex tw:justify-between tw:items-center tw:text-sm"
+              >
                 <span class="app-text-muted">Status</span>
                 <prime-tag
                   :value="user.isActive ? 'Active' : 'Inactive'"
@@ -317,19 +340,21 @@ const doResetPassword = async () => {
               <div class="tw:flex tw:justify-between tw:text-sm tw:gap-2">
                 <span class="app-text-muted tw:shrink-0">Email</span>
                 <span class="tw:font-medium tw:text-right tw:truncate">
-                  {{ user.email || '—' }}
+                  {{ user.email || "—" }}
                 </span>
               </div>
 
               <!-- Created -->
               <div class="tw:flex tw:justify-between tw:text-sm">
                 <span class="app-text-muted">Joined</span>
-                <span class="tw:font-medium">{{ formatDate(user.createdAt) }}</span>
+                <span class="tw:font-medium">{{
+                  formatDate(user.createdAt)
+                }}</span>
               </div>
             </div>
-
+            <prime-divider />
             <!-- Activate / Deactivate -->
-            <div v-if="can('user.deactivate')" class="tw:mt-6 tw:pt-5 tw:border-t">
+            <div v-if="can('user.deactivate')">
               <prime-button
                 v-if="user.isActive"
                 severity="danger"
@@ -355,9 +380,11 @@ const doResetPassword = async () => {
                 <span>Activate account</span>
               </prime-button>
             </div>
-
+            <prime-divider
+              v-if="can('user.resetPassword') && userId !== auth.user?.id"
+            />
             <!-- Reset Password -->
-            <div v-if="can('user.resetPassword') && userId !== auth.user?.id" class="tw:mt-4 tw:pt-4 tw:border-t">
+            <div v-if="can('user.resetPassword') && userId !== auth.user?.id">
               <prime-button
                 severity="warning"
                 outlined
@@ -370,14 +397,12 @@ const doResetPassword = async () => {
                 <span>Reset password</span>
               </prime-button>
             </div>
-
           </template>
         </prime-card>
 
         <!-- ── Right card: edit form ───────────────────────────── -->
         <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-2">
           <template #content>
-
             <!-- ── Profile section ───────────────────────────── -->
             <p class="tw:text-sm tw:font-semibold tw:mb-5">Profile</p>
 
@@ -417,33 +442,9 @@ const doResetPassword = async () => {
                 />
               </div>
             </div>
-
-            <div
-              v-if="can('user.update')"
-              class="tw:flex tw:justify-end tw:gap-3 tw:mt-5 tw:pt-5 tw:border-t"
-            >
-              <prime-button
-                severity="secondary"
-                outlined
-                size="small"
-                @click="loadUser"
-              >
-                <iconify icon="ph:arrow-counter-clockwise-bold" />
-                <span>Reset</span>
-              </prime-button>
-              <prime-button
-                severity="success"
-                size="small"
-                :loading="saving"
-                @click="saveProfile"
-              >
-                <iconify icon="ph:check-bold" />
-                <span>Save changes</span>
-              </prime-button>
-            </div>
-
+            <prime-divider />
             <!-- ── Role section ───────────────────────────────── -->
-            <div class="tw:mt-8 tw:pt-6 tw:border-t">
+            <div>
               <p class="tw:text-sm tw:font-semibold tw:mb-4">Role</p>
 
               <div class="tw:flex tw:items-end tw:gap-3">
@@ -472,17 +473,41 @@ const doResetPassword = async () => {
                 Changing the role will take effect on the user's next login.
               </p>
             </div>
-
+            <prime-divider />
+            <div
+              v-if="can('user.update')"
+              class="tw:flex tw:justify-end tw:gap-3"
+            >
+              <prime-button
+                severity="secondary"
+                outlined
+                size="small"
+                @click="loadUser"
+              >
+                <iconify icon="ph:arrow-counter-clockwise-bold" />
+                <span>Reset</span>
+              </prime-button>
+              <prime-button
+                severity="success"
+                size="small"
+                :loading="saving"
+                @click="saveProfile"
+              >
+                <iconify icon="ph:check-bold" />
+                <span>Save changes</span>
+              </prime-button>
+            </div>
           </template>
         </prime-card>
-
       </div>
     </template>
 
     <!-- ── Not found ──────────────────────────────────────────────── -->
     <prime-card v-else class="app-card tw:rounded-2xl tw:border">
       <template #content>
-        <div class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted">
+        <div
+          class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted"
+        >
           <iconify icon="ph:user-x-bold" class="tw:text-3xl tw:mb-2" />
           <p class="tw:text-sm">User not found.</p>
         </div>
@@ -498,8 +523,10 @@ const doResetPassword = async () => {
     >
       <div class="tw:pt-2">
         <p class="tw:text-sm app-text-muted">
-          Deactivate <strong class="tw:font-semibold">{{ user?.username }}</strong>?
-          They will be immediately logged out and cannot log in until reactivated.
+          Deactivate
+          <strong class="tw:font-semibold">{{ user?.username }}</strong
+          >? They will be immediately logged out and cannot log in until
+          reactivated.
         </p>
       </div>
       <template #footer>
@@ -532,16 +559,30 @@ const doResetPassword = async () => {
       style="width: 26rem"
     >
       <div class="tw:space-y-4 tw:pt-2">
-        <prime-message severity="warn">Save this password now - it will not be show again.</prime-message>
+        <prime-message severity="warn"
+          >Save this password now - it will not be show again.</prime-message
+        >
         <div class="tw:rounded-xl tw:border tw:p-4 tw:space-y-3 app-card">
           <div class="tw:space-y-0.5">
-            <p class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle">Username</p>
-            <p class="tw:font-mono tw:font-semibold">{{ resetPasswordData.username }}</p>
+            <p
+              class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle"
+            >
+              Username
+            </p>
+            <p class="tw:font-mono tw:font-semibold">
+              {{ resetPasswordData.username }}
+            </p>
           </div>
           <div class="tw:space-y-0.5">
-            <p class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle">Temporary password</p>
+            <p
+              class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle"
+            >
+              Temporary password
+            </p>
             <div class="tw:flex tw:items-center tw:gap-2">
-              <p class="tw:font-mono tw:font-bold tw:text-xl tw:tracking-widest tw:text-emerald-300">
+              <p
+                class="tw:font-mono tw:font-bold tw:text-xl tw:tracking-widest tw:text-emerald-300"
+              >
                 {{ resetPasswordData.temporaryPassword }}
               </p>
               <prime-button
@@ -569,6 +610,5 @@ const doResetPassword = async () => {
         </prime-button>
       </template>
     </prime-dialog>
-
   </section>
 </template>

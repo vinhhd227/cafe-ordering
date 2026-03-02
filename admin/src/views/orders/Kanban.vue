@@ -3,7 +3,12 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
-import { getOrders, updateOrderStatus, updatePayment } from "@/services/order.service";
+import {
+  getOrders,
+  updateOrderStatus,
+  updatePayment,
+} from "@/services/order.service";
+import { btnIcon } from "@/layout/ui";
 
 const router = useRouter();
 
@@ -19,18 +24,18 @@ const confirm = useConfirm();
 let refreshTimer = null;
 
 // ── Payment dialog ────────────────────────────────────────────────
-const payDialog           = ref(false);
-const payOrder            = ref(null);   // order being paid
-const payMethod           = ref("Cash"); // selected PaymentMethod
-const payAmountReceived   = ref(null);   // số tiền thực nhận
-const payLoading          = ref(false);
+const payDialog = ref(false);
+const payOrder = ref(null); // order being paid
+const payMethod = ref("Cash"); // selected PaymentMethod
+const payAmountReceived = ref(null); // số tiền thực nhận
+const payLoading = ref(false);
 
 const payChange = computed(() => {
   if (payAmountReceived.value == null || !payOrder.value) return null;
   return payAmountReceived.value - payOrder.value.totalAmount;
 });
 
-const payTip    = ref(0);
+const payTip = ref(0);
 const payReturn = computed(() => {
   if (payChange.value === null || payChange.value <= 0) return null;
   return payChange.value - (payTip.value ?? 0);
@@ -44,8 +49,8 @@ watch(payChange, (val) => {
 });
 
 const PAYMENT_METHODS = [
-  { label: "Cash",          value: "Cash",         icon: "ph:money-bold"  },
-  { label: "Bank Transfer", value: "BankTransfer", icon: "ph:bank-bold"   },
+  { label: "Cash", value: "Cash", icon: "ph:money-bold" },
+  { label: "Bank Transfer", value: "BankTransfer", icon: "ph:bank-bold" },
 ];
 
 const methodLabel = (method) => {
@@ -60,26 +65,34 @@ const paymentTag = (status, method) => {
       const m = methodLabel(method);
       return { label: m ? `Paid · ${m}` : "Paid", severity: "success" };
     }
-    case "Refunded":  return { label: "Refunded",  severity: "secondary" };
-    case "Voided":    return { label: "Voided",    severity: "danger"    };
-    default:          return { label: "Unpaid",    severity: "warn"      };
+    case "Refunded":
+      return { label: "Refunded", severity: "secondary" };
+    case "Voided":
+      return { label: "Voided", severity: "danger" };
+    default:
+      return { label: "Unpaid", severity: "warn" };
   }
 };
 
 const openPayDialog = (order) => {
-  payOrder.value           = order;
-  payMethod.value          = "Cash";
-  payAmountReceived.value  = null;
-  payTip.value             = 0;
-  payDialog.value          = true;
+  payOrder.value = order;
+  payMethod.value = "Cash";
+  payAmountReceived.value = null;
+  payTip.value = 0;
+  payDialog.value = true;
 };
 
 const confirmPayment = async () => {
   if (!payOrder.value) return;
   payLoading.value = true;
   try {
-    await updatePayment(payOrder.value.id, "Paid", payMethod.value,
-      payAmountReceived.value, payTip.value ?? 0);
+    await updatePayment(
+      payOrder.value.id,
+      "Paid",
+      payMethod.value,
+      payAmountReceived.value,
+      payTip.value ?? 0,
+    );
     payOrder.value.paymentStatus = "Paid";
     payOrder.value.paymentMethod = payMethod.value;
     payDialog.value = false;
@@ -223,8 +236,13 @@ const isValidDrop = (fromStatus, toStatus) => {
   return false;
 };
 
-const handleDragStart = (order) => { draggingOrder.value = order; };
-const handleDragEnd   = () => { draggingOrder.value = null; dragOverCol.value = null; };
+const handleDragStart = (order) => {
+  draggingOrder.value = order;
+};
+const handleDragEnd = () => {
+  draggingOrder.value = null;
+  dragOverCol.value = null;
+};
 
 const handleDragOver = (e, colKey) => {
   if (!isValidDrop(draggingOrder.value?.status, colKey)) return;
@@ -232,7 +250,9 @@ const handleDragOver = (e, colKey) => {
   dragOverCol.value = colKey;
 };
 
-const handleDragleave = () => { dragOverCol.value = null; };
+const handleDragleave = () => {
+  dragOverCol.value = null;
+};
 
 const commitMove = async (order, toStatus, originalStatus) => {
   pendingMoves.value.delete(order.id);
@@ -314,7 +334,9 @@ onUnmounted(() => clearInterval(refreshTimer));
       </p>
       <!-- Amount received -->
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Amount received</label>
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          >Amount received</label
+        >
         <prime-input-number
           v-model="payAmountReceived"
           :min="0"
@@ -330,19 +352,28 @@ onUnmounted(() => clearInterval(refreshTimer));
           class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5"
         >
           <span class="app-text-muted">Short</span>
-          <span class="tw:text-red-400 tw:font-semibold">{{ formatVnd(Math.abs(payChange)) }}</span>
+          <span class="tw:text-red-400 tw:font-semibold">{{
+            formatVnd(Math.abs(payChange))
+          }}</span>
         </div>
 
         <!-- Change → tip + return -->
         <template v-if="payChange !== null && payChange > 0">
-          <div class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5">
+          <div
+            class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5"
+          >
             <span class="app-text-muted">Change</span>
             <span class="tw:font-semibold">{{ formatVnd(payChange) }}</span>
           </div>
           <div class="tw:space-y-1">
-            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Tip</label>
+            <label
+              for="tip"
+              class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+              >Tip</label
+            >
             <div class="tw:flex tw:gap-2">
               <prime-input-number
+                id="tip"
                 v-model="payTip"
                 :min="0"
                 :max="payChange"
@@ -363,22 +394,30 @@ onUnmounted(() => clearInterval(refreshTimer));
           </div>
           <div class="tw:flex tw:items-center tw:justify-between tw:text-sm">
             <span class="app-text-muted">Return to customer</span>
-            <span :class="payReturn === 0 ? 'app-text-muted' : 'tw:text-emerald-400 tw:font-semibold'">
-              {{ payReturn === 0 ? '—' : formatVnd(payReturn) }}
+            <span
+              :class="
+                payReturn === 0
+                  ? 'app-text-muted'
+                  : 'tw:text-emerald-400 tw:font-semibold'
+              "
+            >
+              {{ payReturn === 0 ? "—" : formatVnd(payReturn) }}
             </span>
           </div>
         </template>
       </div>
 
       <div class="tw:space-y-2">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Payment method</label>
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          >Payment method</label
+        >
         <prime-select-button
           v-model="payMethod"
           :options="PAYMENT_METHODS"
           option-label="label"
           option-value="value"
           :pt="{
-            root:   { class: 'tw:flex tw:w-full' },
+            root: { class: 'tw:flex tw:w-full' },
             button: { class: 'tw:flex-1 tw:justify-center' },
           }"
         >
@@ -390,8 +429,14 @@ onUnmounted(() => clearInterval(refreshTimer));
       </div>
     </div>
     <template #footer>
-      <prime-button severity="secondary" outlined @click="payDialog = false">Cancel</prime-button>
-      <prime-button severity="success" :loading="payLoading" @click="confirmPayment">
+      <prime-button severity="secondary" outlined @click="payDialog = false"
+        >Cancel</prime-button
+      >
+      <prime-button
+        severity="success"
+        :loading="payLoading"
+        @click="confirmPayment"
+      >
         <iconify icon="ph:check-bold" />
         <span>Confirm payment</span>
       </prime-button>
@@ -402,7 +447,10 @@ onUnmounted(() => clearInterval(refreshTimer));
   <prime-toast group="order-move" position="bottom-right">
     <template #message="{ message }">
       <div class="tw:flex tw:items-center tw:gap-3 tw:w-full">
-        <iconify icon="ph:arrows-left-right-bold" class="tw:text-lg tw:shrink-0 tw:text-blue-400" />
+        <iconify
+          icon="ph:arrows-left-right-bold"
+          class="tw:text-lg tw:shrink-0 tw:text-blue-400"
+        />
         <div class="tw:flex-1 tw:min-w-0">
           <p class="tw:text-sm tw:font-semibold">{{ message.summary }}</p>
           <p class="tw:text-xs app-text-muted">{{ message.detail }}</p>
@@ -423,7 +471,11 @@ onUnmounted(() => clearInterval(refreshTimer));
     <!-- Header -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">Orders</p>
+        <p
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+        >
+          Orders
+        </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Order management</h1>
         <p class="tw:mt-2 tw:text-sm app-text-muted">
           Track and update orders in real time. Refreshes every 30s.
@@ -440,11 +492,14 @@ onUnmounted(() => clearInterval(refreshTimer));
           <span>New Order</span>
         </prime-button>
         <!-- View toggle -->
-        <div class="tw:flex tw:items-center tw:rounded-lg tw:border tw:border-white/10 tw:p-1 tw:gap-1">
+        <div
+          class="tw:flex tw:items-center tw:rounded-lg tw:border tw:border-white/10 tw:p-1 tw:gap-1"
+        >
           <prime-button
             severity="primary"
             size="small"
             v-tooltip.top="'Kanban'"
+            :class="btnIcon"
           >
             <iconify icon="ph:kanban-bold" />
           </prime-button>
@@ -453,6 +508,7 @@ onUnmounted(() => clearInterval(refreshTimer));
             text
             size="small"
             v-tooltip.top="'List'"
+            :class="btnIcon"
             @click="router.push({ name: 'ordersList' })"
           >
             <iconify icon="ph:list-bold" />
@@ -476,26 +532,50 @@ onUnmounted(() => clearInterval(refreshTimer));
     <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:md:grid-cols-4">
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle">Total today</p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ summary.total }}</p>
+          <p
+            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle"
+          >
+            Total today
+          </p>
+          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
+            {{ summary.total }}
+          </p>
         </template>
       </prime-card>
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-amber-400">Pending</p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ summary.pending }}</p>
+          <p
+            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-amber-400"
+          >
+            Pending
+          </p>
+          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
+            {{ summary.pending }}
+          </p>
         </template>
       </prime-card>
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-blue-400">Processing</p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ summary.processing }}</p>
+          <p
+            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-blue-400"
+          >
+            Processing
+          </p>
+          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
+            {{ summary.processing }}
+          </p>
         </template>
       </prime-card>
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400">Completed</p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ summary.completed }}</p>
+          <p
+            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400"
+          >
+            Completed
+          </p>
+          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
+            {{ summary.completed }}
+          </p>
         </template>
       </prime-card>
     </div>
@@ -508,22 +588,35 @@ onUnmounted(() => clearInterval(refreshTimer));
       variant="simple"
       :closable="true"
       @close="errorMessage = ''"
-    >{{ errorMessage }}</prime-message>
+      >{{ errorMessage }}</prime-message
+    >
 
     <!-- Kanban board -->
-    <div class="tw:grid tw:grid-cols-1 tw:gap-4 tw:md:grid-cols-2 tw:xl:grid-cols-4">
-      <div v-for="col in STATUSES" :key="col.key" class="tw:flex tw:flex-col tw:gap-3">
+    <div
+      class="tw:grid tw:grid-cols-1 tw:gap-4 tw:md:grid-cols-2 tw:xl:grid-cols-4"
+    >
+      <div
+        v-for="col in STATUSES"
+        :key="col.key"
+        class="tw:flex tw:flex-col tw:gap-3"
+      >
         <!-- Column header -->
         <div
           class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-4 tw:py-3"
           :class="col.bg"
         >
-          <span class="tw:inline-block tw:h-2 tw:w-2 tw:rounded-full tw:shrink-0" :class="col.dot" />
-          <span class="tw:font-semibold tw:text-sm" :class="col.color">{{ col.label }}</span>
+          <span
+            class="tw:inline-block tw:h-2 tw:w-2 tw:rounded-full tw:shrink-0"
+            :class="col.dot"
+          />
+          <span class="tw:font-semibold tw:text-sm" :class="col.color">{{
+            col.label
+          }}</span>
           <span
             class="tw:ml-auto tw:rounded-full tw:px-2 tw:py-0.5 tw:text-xs tw:font-medium"
             :class="col.bg + ' ' + col.color"
-          >{{ ordersByStatus[col.key].length }}</span>
+            >{{ ordersByStatus[col.key].length }}</span
+          >
         </div>
 
         <!-- Cards -->
@@ -537,7 +630,8 @@ onUnmounted(() => clearInterval(refreshTimer));
           <!-- Loading skeleton -->
           <template v-if="loading && orders.length === 0">
             <div
-              v-for="i in 2" :key="i"
+              v-for="i in 2"
+              :key="i"
               class="app-card tw:rounded-xl tw:border tw:p-4 tw:animate-pulse tw:space-y-3"
             >
               <div class="tw:h-3 tw:rounded tw:bg-white/10 tw:w-2/3" />
@@ -574,18 +668,28 @@ onUnmounted(() => clearInterval(refreshTimer));
             <!-- Order header -->
             <div class="tw:flex tw:items-start tw:justify-between tw:gap-2">
               <div>
-                <p class="tw:text-xs tw:font-mono tw:font-semibold" :class="col.color">
+                <p
+                  class="tw:text-xs tw:font-mono tw:font-semibold"
+                  :class="col.color"
+                >
                   {{ order.orderNumber }}
                 </p>
-                <p class="tw:text-xs app-text-muted tw:mt-0.5">{{ timeAgo(order.orderDate) }}</p>
+                <p class="tw:text-xs app-text-muted tw:mt-0.5">
+                  {{ timeAgo(order.orderDate) }}
+                </p>
               </div>
               <div class="tw:flex tw:flex-col tw:items-end tw:gap-1">
                 <p class="tw:text-sm tw:font-semibold tw:whitespace-nowrap">
                   {{ formatVnd(order.totalAmount) }}
                 </p>
                 <prime-tag
-                  :value="paymentTag(order.paymentStatus, order.paymentMethod).label"
-                  :severity="paymentTag(order.paymentStatus, order.paymentMethod).severity"
+                  :value="
+                    paymentTag(order.paymentStatus, order.paymentMethod).label
+                  "
+                  :severity="
+                    paymentTag(order.paymentStatus, order.paymentMethod)
+                      .severity
+                  "
                   class="tw:text-[10px]"
                 />
               </div>
@@ -598,8 +702,12 @@ onUnmounted(() => clearInterval(refreshTimer));
                 :key="item.productId"
                 class="tw:flex tw:items-center tw:justify-between tw:text-xs app-text-muted"
               >
-                <span class="tw:truncate tw:max-w-30">{{ item.productName }}</span>
-                <span class="tw:font-medium tw:shrink-0">×{{ item.quantity }}</span>
+                <span class="tw:truncate tw:max-w-30">{{
+                  item.productName
+                }}</span>
+                <span class="tw:font-medium tw:shrink-0"
+                  >×{{ item.quantity }}</span
+                >
               </li>
             </ul>
 
@@ -623,14 +731,24 @@ onUnmounted(() => clearInterval(refreshTimer));
                   :class="NEXT_STATUS[col.key] ? 'tw:w-1/4' : 'tw:flex-1'"
                   :loading="updatingId === order.id"
                   @click="
-                    (e) => confirm.require({
-                      target: e.currentTarget,
-                      message: `Cancel order ${order.orderNumber}?`,
-                      icon: 'ph:warning-bold',
-                      rejectProps: { label: 'Keep', severity: 'secondary', outlined: true, size: 'small' },
-                      acceptProps: { label: 'Yes, cancel', severity: 'danger', size: 'small' },
-                      accept: () => cancelOrder(order),
-                    })
+                    (e) =>
+                      confirm.require({
+                        target: e.currentTarget,
+                        message: `Cancel order ${order.orderNumber}?`,
+                        icon: 'ph:warning-bold',
+                        rejectProps: {
+                          label: 'Keep',
+                          severity: 'secondary',
+                          outlined: true,
+                          size: 'small',
+                        },
+                        acceptProps: {
+                          label: 'Yes, cancel',
+                          severity: 'danger',
+                          size: 'small',
+                        },
+                        accept: () => cancelOrder(order),
+                      })
                   "
                 >
                   <iconify icon="ph:x-circle" />
@@ -638,7 +756,9 @@ onUnmounted(() => clearInterval(refreshTimer));
                 </prime-button>
               </div>
               <prime-button
-                v-if="order.paymentStatus === 'Unpaid' && col.key !== 'Cancelled'"
+                v-if="
+                  order.paymentStatus === 'Unpaid' && col.key !== 'Cancelled'
+                "
                 severity="warn"
                 size="small"
                 outlined

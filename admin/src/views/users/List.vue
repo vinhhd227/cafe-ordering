@@ -444,17 +444,7 @@ const confirmAndDeactivate = async () => {
       <prime-column header="Actions" style="min-width: 8rem">
         <template #body="{ data }">
           <div class="tw:flex tw:gap-2">
-            <!-- View / Edit detail -->
-            <prime-button
-              severity="secondary"
-              outlined
-              size="small"
-              v-tooltip.top="'View / Edit'"
-              @click="router.push({ name: 'userDetail', params: { id: data.id } })"
-            >
-              <iconify icon="ph:arrow-right-bold" />
-              <span>View</span>
-            </prime-button>
+           
 
             <!-- Quick toggle active -->
             <prime-button
@@ -466,6 +456,16 @@ const confirmAndDeactivate = async () => {
               @click="handleToggleActive(data)"
             >
               <iconify :icon="data.isActive ? 'ph:prohibit-bold' : 'ph:check-circle-bold'" />
+            </prime-button>
+             <!-- View / Edit detail -->
+            <prime-button
+              severity="secondary"
+              outlined
+              size="small"
+              v-tooltip.top="'View / Edit'"
+              @click="router.push({ name: 'userDetail', params: { id: data.id } })"
+            >
+              <iconify icon="ph:arrow-right-bold" />
             </prime-button>
           </div>
         </template>

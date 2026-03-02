@@ -35,5 +35,10 @@ public class GuestSessionConfiguration : IEntityTypeConfiguration<GuestSession>
     // Index for active session lookups
     builder.HasIndex(s => new { s.TableId, s.Status })
       .HasDatabaseName("IX_GuestSessions_TableId_Status");
+    
+    builder.HasIndex(s => s.TableId)
+      .HasDatabaseName("IX_GuestSessions_ActiveByTable")
+      .HasFilter("\"Status\" = 1");
   }
+  
 }

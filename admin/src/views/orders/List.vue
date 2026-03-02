@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { getOrders, updatePayment } from "@/services/order.service";
 import AppTable from "@/components/AppTable.vue";
+import { btnIcon } from "@/layout/ui";
 
 const router = useRouter();
 
@@ -410,11 +411,12 @@ const confirmPayment = async () => {
             text
             size="small"
             v-tooltip.top="'Kanban'"
+            :class="btnIcon"
             @click="router.push({ name: 'orders' })"
           >
             <iconify icon="ph:kanban-bold" />
           </prime-button>
-          <prime-button severity="primary" size="small" v-tooltip.top="'List'">
+          <prime-button severity="primary" size="small" v-tooltip.top="'List'" :class="btnIcon">
             <iconify icon="ph:list-bold" />
           </prime-button>
         </div>
