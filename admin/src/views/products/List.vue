@@ -328,6 +328,7 @@ watch([categoryFilter, statusFilter], () => {
             :outlined="!hasActiveFilters"
             v-tooltip.top="'Filters'"
             @click="filterPanel.toggle($event)"
+            :class="!hasActiveFilters ? btnIcon : ''"
           >
             <iconify icon="ph:funnel-bold" />
             <prime-badge

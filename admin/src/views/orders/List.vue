@@ -522,6 +522,7 @@ const confirmPayment = async () => {
             :outlined="!hasActiveFilters"
             v-tooltip.top="'Filters'"
             @click="filterPanel.toggle($event)"
+            :class="!hasActiveFilters ? btnIcon : ''"
           >
             <iconify icon="ph:funnel-bold" />
             <prime-badge
@@ -714,7 +715,7 @@ const confirmPayment = async () => {
 
       <prime-column header="Actions" style="min-width: 12rem">
         <template #body="{ data }">
-          <div class="tw:flex tw:items-center tw:gap-2">
+          <div class="tw:flex tw:justify-end tw:items-center tw:gap-2">
             <prime-button
               v-if="
                 data.paymentStatus === 'Unpaid' && data.status !== 'Cancelled'
@@ -734,9 +735,9 @@ const confirmPayment = async () => {
               @click="
                 router.push({ name: 'ordersDetail', params: { id: data.id } })
               "
+              :class="btnIcon"
             >
               <iconify icon="ph:arrow-right-bold" />
-              <span>View</span>
             </prime-button>
           </div>
         </template>

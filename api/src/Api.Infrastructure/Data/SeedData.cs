@@ -38,7 +38,6 @@ public static class SeedData
           Product.Create(traHoaQua.Id, "Trà Dứa Chanh Dây",      29000, "Trà dứa chanh dây nhiệt đới",  hasIceLevelOption: true, hasSugarLevelOption: true),
           Product.Create(traHoaQua.Id, "Trà Hoa Quả Nhiệt Đới",  29000, "Trà hoa quả nhiệt đới tổng hợp", hasIceLevelOption: true, hasSugarLevelOption: true),
           Product.Create(traHoaQua.Id, "Trà Xoài Chanh Dây",     29000, "Trà trái cây nhiệt đới",       hasIceLevelOption: true, hasSugarLevelOption: true),
-          Product.Create(traHoaQua.Id, "Trà Nhiệt Đới",          29000, "Trà trái cây tổng hợp",        hasIceLevelOption: true, hasSugarLevelOption: true),
           Product.Create(traHoaQua.Id, "Trà Mãng Cầu",           35000, "Trà mãng cầu chua ngọt",       hasIceLevelOption: true, hasSugarLevelOption: true),
           Product.Create(traHoaQua.Id, "Trà Đào Cam Sả",         35000, "Trà đào cam sả thanh mát",     hasIceLevelOption: true, hasSugarLevelOption: true),
 
@@ -66,6 +65,7 @@ public static class SeedData
           Product.Create(doUongKhac.Id, "Phindi Choco",       35000, "Phindi Choco đặc biệt",        hasIceLevelOption: true, hasSugarLevelOption: true),
           Product.Create(doUongKhac.Id, "Phindi Choco Muối",  35000, "Phindi Choco kem muối",        hasIceLevelOption: true),
           Product.Create(doUongKhac.Id, "Matcha Latte",  35000, "Matcha nguyên chất hòa quyện cùng sữa tươi thơm béo", hasIceLevelOption: true, hasSugarLevelOption: true),
+          
           // Đồ Ăn Kèm
           Product.Create(doAnKem.Id, "Hạt Hướng Dương", 15000, "Hạt hướng dương rang"),
           Product.Create(doAnKem.Id, "Hạt Bí",          15000, "Hạt bí rang"),
