@@ -1,9 +1,11 @@
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
+using Api.UseCases.Sessions.AutoClose;
+using IMediator = Mediator.IMediator;
 
 namespace Api.UseCases.Orders.UpdateStatus;
 
-public class UpdateOrderStatusHandler(IRepositoryBase<Order> repository)
+public class UpdateOrderStatusHandler(IRepositoryBase<Order> repository, IMediator mediator)
   : ICommandHandler<UpdateOrderStatusCommand, Result>
 {
   public async ValueTask<Result> Handle(UpdateOrderStatusCommand request, CancellationToken ct)
@@ -31,6 +33,10 @@ public class UpdateOrderStatusHandler(IRepositoryBase<Order> repository)
     }
 
     await repository.UpdateAsync(order, ct);
+
+    if (request.Status == OrderStatus.Cancelled.Name)
+      await mediator.Send(new TryAutoCloseSessionCommand(order.SessionId), ct);
+
     return Result.Success();
   }
 }

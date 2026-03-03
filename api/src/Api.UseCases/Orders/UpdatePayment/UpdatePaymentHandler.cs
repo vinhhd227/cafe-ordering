@@ -1,10 +1,12 @@
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
 using Api.Core.Domain.Enums;
+using Api.UseCases.Sessions.AutoClose;
+using IMediator = Mediator.IMediator;
 
 namespace Api.UseCases.Orders.UpdatePayment;
 
-public class UpdatePaymentHandler(IRepositoryBase<Order> repository)
+public class UpdatePaymentHandler(IRepositoryBase<Order> repository, IMediator mediator)
   : ICommandHandler<UpdatePaymentCommand, Result>
 {
   public async ValueTask<Result> Handle(UpdatePaymentCommand request, CancellationToken ct)
@@ -31,6 +33,7 @@ public class UpdatePaymentHandler(IRepositoryBase<Order> repository)
     }
 
     await repository.UpdateAsync(order, ct);
+    await mediator.Send(new TryAutoCloseSessionCommand(order.SessionId), ct);
     return Result.Success();
   }
 }
