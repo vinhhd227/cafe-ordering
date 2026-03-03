@@ -26,7 +26,7 @@ public static class IdentitySeedData
       "menu.read",
       "order.read", "order.update",
       "product.read",
-      "table.read"
+      "table.read", "table.update"
     ],
     ["Customer"] =
     [
