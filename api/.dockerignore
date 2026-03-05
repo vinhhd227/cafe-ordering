@@ -1,6 +1,6 @@
-﻿bin/
+bin/
 obj/
 .idea
 Dockerfile*
 .dockerignore
-appsettings.Development.json
+**/appsettings.Development.json

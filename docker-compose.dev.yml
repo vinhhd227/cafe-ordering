@@ -1,17 +1,26 @@
+x-frontend-env: &frontend-env
+  CHOKIDAR_USEPOLLING: "true"
+  VITE_API_BASE_URL: http://${HOST_IP:-localhost}:${API_PORT:-8080}/api
+
 services:
-  # Database Service — 1 database, 2 schema (business + identity)
+  # Database service
   cafe-db:
     image: postgres:16-alpine
     container_name: cafe-db-dev
     restart: always
     environment:
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: your_password_here  # Override trong docker-compose.dev.override.yml
+      POSTGRES_PASSWORD: CHANGE_ME # Must be overridden in docker-compose.dev.override.yml
       POSTGRES_DB: cafe_ordering_db
     ports:
       - "5432:5432"
     volumes:
       - cafe-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d cafe_ordering_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - cafe-network
 
@@ -22,19 +31,30 @@ services:
       context: ./api
       dockerfile: Dockerfile.dev
     depends_on:
-      - cafe-db
+      cafe-db:
+        condition: service_healthy
     environment:
-      - ConnectionStrings__DefaultConnection=Host=cafe-db;Port=5432;Database=cafe_ordering_db;Username=admin;Password=your_password_here
+      - ConnectionStrings__DefaultConnection=Host=cafe-db;Port=5432;Database=cafe_ordering_db;Username=admin;Password=CHANGE_ME
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - Cors__AllowedOrigins__0=http://localhost:5173
+      - Cors__AllowedOrigins__1=http://localhost:5174
+      - Cors__AllowedOrigins__2=http://${HOST_IP:-localhost}:5173
+      - Cors__AllowedOrigins__3=http://${HOST_IP:-localhost}:5174
     ports:
-      - "8080:8080"
+      - "${API_PORT:-8080}:8080"
     volumes:
-      - ./api:/app # Thường Dockerfile WORKDIR là /app hoặc /src, khớp với Dockerfile của bạn
+      - ./api:/app # Must match WORKDIR in api/Dockerfile.dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/openapi/v1.json > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     networks:
       - cafe-network
 
-  # Frontend Client (Vue)
+  # Frontend client (Vue)
   client:
     container_name: coffee-client-dev
     build:
@@ -42,16 +62,37 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "5173:5173"
+    depends_on:
+      api:
+        condition: service_healthy
     volumes:
       - ./client:/app
-      - /app/node_modules # Anonymous volume để tránh xung đột node_modules giữa máy host và container
+      - /app/node_modules # Anonymous volume prevents host/container node_modules conflicts
     environment:
-      - CHOKIDAR_USEPOLLING=true
-      - VITE_API_URL=http://localhost:8080
+      <<: *frontend-env
     networks:
       - cafe-network
 
-# Khai báo các tài nguyên dùng chung
+  # Frontend admin (Vue)
+  admin:
+    container_name: coffee-admin-dev
+    build:
+      context: ./admin
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5174:5174"
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./admin:/app
+      - /app/node_modules
+    environment:
+      <<: *frontend-env
+    networks:
+      - cafe-network
+
+# Shared resources
 volumes:
   cafe-db-data:
 

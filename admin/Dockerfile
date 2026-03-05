@@ -1,17 +1,19 @@
-FROM node:20-alpine
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# copy package files trước để cache
-COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# install deps (tự chọn theo project)
-RUN pnpm install
-# RUN yarn install
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-# copy source
 COPY . .
+RUN pnpm build
 
-EXPOSE 5173
+FROM nginx:1.27-alpine
 
-CMD ["npm", "run", "dev", "--", "--host"]
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
