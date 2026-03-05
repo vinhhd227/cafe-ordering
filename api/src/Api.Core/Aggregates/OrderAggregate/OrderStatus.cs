@@ -19,10 +19,8 @@ public class OrderStatus : SmartEnum<OrderStatus>
   }
 
   // Nested classes for each status
-  private class PendingStatus : OrderStatus
+  private class PendingStatus() : OrderStatus(nameof(Pending), 1)
   {
-    public PendingStatus() : base(nameof(Pending), 1) { }
-
     public override bool CanAddItems => true;
     public override bool CanCancel => true;
 
@@ -32,10 +30,8 @@ public class OrderStatus : SmartEnum<OrderStatus>
     }
   }
 
-  private class ProcessingStatus : OrderStatus
+  private class ProcessingStatus() : OrderStatus(nameof(Processing), 2)
   {
-    public ProcessingStatus() : base(nameof(Processing), 2) { }
-
     public override bool CanAddItems => false;
     public override bool CanCancel => true;
 
@@ -45,18 +41,14 @@ public class OrderStatus : SmartEnum<OrderStatus>
     }
   }
 
-  private class CompletedStatus : OrderStatus
+  private class CompletedStatus() : OrderStatus(nameof(Completed), 3)
   {
-    public CompletedStatus() : base(nameof(Completed), 3) { }
-
     public override bool CanAddItems => false;
     public override bool CanCancel => false;
   }
 
-  private class CancelledStatus : OrderStatus
+  private class CancelledStatus() : OrderStatus(nameof(Cancelled), 4)
   {
-    public CancelledStatus() : base(nameof(Cancelled), 4) { }
-
     public override bool CanAddItems => false;
     public override bool CanCancel => false;
   }
