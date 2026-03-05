@@ -28,6 +28,14 @@ const pendingOptions = ref({
   sugarLevel: null,
   isTakeaway: false,
 });
+const orderTypeOptions = [
+  { label: "Dine-in", value: false, icon: "tdesign:drink-filled" },
+  { label: "Takeaway", value: true , icon: "streamline:coffee-takeaway-cup-remix" },
+];
+const orderTemperatureOptions = [
+  { label: "Hot", value: 1, icon:"ph:thermometer-hot-light" },
+  { label: "Cold", value: 2, icon:"ph:thermometer-cold-light" },
+];
 
 // ── Cart ─────────────────────────────────────────────────────────
 const cart = ref([]);
@@ -53,15 +61,22 @@ const formatVnd = (val) =>
   }).format(val ?? 0);
 
 const makeCartKey = (productId, opts) => {
-  const { temperature = "", iceLevel = "", sugarLevel = "", isTakeaway = false } = opts ?? {};
+  const {
+    temperature = "",
+    iceLevel = "",
+    sugarLevel = "",
+    isTakeaway = false,
+  } = opts ?? {};
   return `${productId}|${temperature}|${iceLevel}|${sugarLevel}|${isTakeaway}`;
 };
 
 const optionsLabel = (item) => {
   const parts = [];
   if (item.temperature) parts.push(item.temperature);
-  if (item.iceLevel && item.iceLevel !== "Bình thường") parts.push(`Đá: ${item.iceLevel}`);
-  if (item.sugarLevel && item.sugarLevel !== "Bình thường") parts.push(`Đường: ${item.sugarLevel}`);
+  if (item.iceLevel && item.iceLevel !== "Bình thường")
+    parts.push(`Đá: ${item.iceLevel}`);
+  if (item.sugarLevel && item.sugarLevel !== "Bình thường")
+    parts.push(`Đường: ${item.sugarLevel}`);
   return parts.join(" · ");
 };
 
@@ -76,24 +91,24 @@ const visibleCategories = computed(() =>
         products = products.filter(
           (p) =>
             p.name.toLowerCase().includes(q) ||
-            (p.description?.toLowerCase().includes(q) ?? false)
+            (p.description?.toLowerCase().includes(q) ?? false),
         );
       }
       return { ...c, filteredProducts: products };
     })
-    .filter((c) => c.filteredProducts.length > 0)
+    .filter((c) => c.filteredProducts.length > 0),
 );
 
 const cartTotal = computed(() =>
-  cart.value.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0)
+  cart.value.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
 );
 
 const cartItemCount = computed(() =>
-  cart.value.reduce((sum, i) => sum + i.quantity, 0)
+  cart.value.reduce((sum, i) => sum + i.quantity, 0),
 );
 
 const canPlaceOrder = computed(
-  () => !!sessionId.value && cart.value.length > 0 && !placing.value
+  () => !!sessionId.value && cart.value.length > 0 && !placing.value,
 );
 
 const orderLabel = computed(() => {
@@ -103,7 +118,9 @@ const orderLabel = computed(() => {
 
 // ── Cart helpers ──────────────────────────────────────────────────
 const cartQuantity = (productId) =>
-  cart.value.filter((i) => i.productId === productId).reduce((sum, i) => sum + i.quantity, 0);
+  cart.value
+    .filter((i) => i.productId === productId)
+    .reduce((sum, i) => sum + i.quantity, 0);
 
 const changeQty = (key, delta) => {
   const idx = cart.value.findIndex((i) => i._key === key);
@@ -112,13 +129,15 @@ const changeQty = (key, delta) => {
   if (cart.value[idx].quantity <= 0) cart.value.splice(idx, 1);
 };
 
-const clearCart = () => { cart.value = []; };
+const clearCart = () => {
+  cart.value = [];
+};
 
 // ── Options dialog ────────────────────────────────────────────────
 const handleAddToCart = (product) => {
   selectedProduct.value = product;
   pendingOptions.value = {
-    temperature: product.hasTemperatureOption ? "Lạnh" : null,
+    temperature: product.hasTemperatureOption ? 2 : null,
     iceLevel: product.hasIceLevelOption ? "Bình thường" : null,
     sugarLevel: product.hasSugarLevelOption ? "Bình thường" : null,
     isTakeaway: false,
@@ -129,11 +148,16 @@ const handleAddToCart = (product) => {
 
 const setTemperature = (opt) => {
   pendingOptions.value.temperature = opt;
-  if (opt === "Nóng") {
-    if (selectedProduct.value?.hasIceLevelOption) pendingOptions.value.iceLevel = "Không đá";
-    if (selectedProduct.value?.hasSugarLevelOption) pendingOptions.value.sugarLevel = "Bình thường";
-  } else if (opt === "Lạnh") {
-    if (selectedProduct.value?.hasIceLevelOption && pendingOptions.value.iceLevel === "Không đá")
+  if (opt === 1) {
+    if (selectedProduct.value?.hasIceLevelOption)
+      pendingOptions.value.iceLevel = "Không đá";
+    if (selectedProduct.value?.hasSugarLevelOption)
+      pendingOptions.value.sugarLevel = "Bình thường";
+  } else if (opt === 2) {
+    if (
+      selectedProduct.value?.hasIceLevelOption &&
+      pendingOptions.value.iceLevel === "Không đá"
+    )
       pendingOptions.value.iceLevel = "Bình thường";
   }
 };
@@ -171,11 +195,12 @@ const onTableSelect = async (tableId) => {
   sessionId.value = null;
   try {
     const res = await getOrCreateSession(tableId);
-    const existed = !!tables.value.find((t) => t.id === tableId)?.activeSessionId;
+    const existed = !!tables.value.find((t) => t.id === tableId)
+      ?.activeSessionId;
     sessionId.value = res.data.sessionId;
     sessionHadExisting.value = existed;
   } catch {
-    errorMessage.value = "Không thể lấy session cho bàn này.";
+    errorMessage.value = "Could not get session for table.";
   } finally {
     sessionLoading.value = false;
   }
@@ -198,7 +223,7 @@ const placeOrder = async () => {
         iceLevel: item.iceLevel ?? null,
         sugarLevel: item.sugarLevel ?? null,
         isTakeaway: item.isTakeaway ?? false,
-      }))
+      })),
     );
     const { orderId } = res.data;
     toast.add({
@@ -223,7 +248,10 @@ onMounted(async () => {
   loadingTables.value = true;
   loadingMenu.value = true;
   try {
-    const [tablesRes, menuRes] = await Promise.all([listTables(), getAdminMenu()]);
+    const [tablesRes, menuRes] = await Promise.all([
+      listTables(),
+      getAdminMenu(),
+    ]);
     tables.value = (tablesRes.data ?? []).filter((t) => t.isActive);
     menuCategories.value = menuRes.data ?? [];
   } finally {
@@ -235,54 +263,68 @@ onMounted(async () => {
 
 <template>
   <section class="tw:space-y-4">
-
     <!-- Header -->
     <div class="tw:flex tw:items-center tw:gap-4">
-      <prime-button icon="pi pi-arrow-left" severity="secondary" text @click="router.push({ name: 'orders' })" />
+      <prime-button
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        text
+        @click="router.push({ name: 'orders' })"
+      />
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">Orders</p>
-        <h1 class="tw:text-2xl tw:font-semibold">Tạo đơn mới</h1>
+        <p
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+        >
+          Orders
+        </p>
+        <h1 class="tw:text-2xl tw:font-semibold">Create order</h1>
       </div>
     </div>
 
     <!-- Table / Session bar -->
-    <div class="app-panel tw:rounded-2xl tw:border tw:px-4 tw:py-3 tw:flex tw:flex-wrap tw:items-center tw:gap-3">
+    <div
+      class="app-panel tw:rounded-2xl tw:border tw:px-4 tw:py-3 tw:flex tw:flex-wrap tw:items-center tw:gap-3"
+    >
       <prime-select
         v-model="selectedTableId"
         :options="tables"
         optionLabel="code"
         optionValue="id"
-        placeholder="Chọn bàn"
+        placeholder="Select a table"
         :disabled="sessionLoading"
         class="tw:w-40"
         @change="(e) => onTableSelect(e.value)"
       />
       <template v-if="sessionLoading">
-        <prime-tag icon="pi pi-spin pi-spinner" value="Đang kết nối..." severity="secondary" />
+        <prime-tag severity="secondary">
+          <iconify icon="prime:spinner" />
+          <span>Connecting...</span>
+        </prime-tag>
       </template>
       <template v-else-if="sessionId">
-        <prime-tag
-          v-if="sessionHadExisting"
-          icon="pi pi-info-circle"
-          value="Bàn đang có session — order sẽ được thêm vào"
-          severity="info"
-        />
-        <prime-tag v-else icon="pi pi-check" value="Session sẵn sàng" severity="success" />
+        <prime-tag v-if="sessionHadExisting" severity="info">
+          <iconify icon="prime:info-circle" />
+          <span>Table has an existing session. Order will be added to it.</span>
+        </prime-tag>
+        <prime-tag v-else severity="success">
+          <iconify icon="prime:check" />
+          <span>Session ready</span>
+        </prime-tag>
       </template>
     </div>
 
     <!-- Main grid -->
     <div class="tw:grid tw:gap-6 tw:lg:grid-cols-12">
-
       <!-- ── LEFT: Menu ──────────────────────────────────────── -->
       <section class="tw:lg:col-span-8 tw:space-y-4">
-
         <!-- Search -->
         <div class="tw:relative">
-          <i class="pi pi-search tw:absolute tw:left-3 tw:top-1/2 tw:-translate-y-1/2 tw:text-sm app-text-subtle tw:pointer-events-none" />
+          <i
+            class="pi pi-search tw:absolute tw:left-3 tw:top-1/2 tw:-translate-y-1/2 tw:text-sm app-text-subtle tw:pointer-events-none"
+          />
           <prime-input-text
             v-model="searchQuery"
-            placeholder="Tìm sản phẩm..."
+            placeholder="Search..."
             class="tw:w-full tw:pl-9"
           />
         </div>
@@ -290,13 +332,29 @@ onMounted(async () => {
         <!-- Loading skeleton -->
         <div v-if="loadingMenu" class="tw:space-y-6">
           <div v-for="n in 2" :key="n" class="tw:space-y-3">
-            <div class="tw:h-6 tw:w-32 tw:rounded-lg tw:animate-pulse" style="background: var(--app-bg-subtle)" />
+            <div
+              class="tw:h-6 tw:w-32 tw:rounded-lg tw:animate-pulse"
+              style="background: var(--app-bg-subtle)"
+            />
             <div class="tw:grid tw:grid-cols-2 tw:gap-3 sm:tw:grid-cols-3">
-              <div v-for="m in 3" :key="m" class="tw:animate-pulse tw:rounded-2xl app-panel tw:border tw:overflow-hidden">
-                <div class="tw:h-32 tw:w-full" style="background: var(--app-bg-subtle)" />
+              <div
+                v-for="m in 3"
+                :key="m"
+                class="tw:animate-pulse tw:rounded-2xl app-panel tw:border tw:overflow-hidden"
+              >
+                <div
+                  class="tw:h-32 tw:w-full"
+                  style="background: var(--app-bg-subtle)"
+                />
                 <div class="tw:p-3 tw:space-y-2">
-                  <div class="tw:h-4 tw:w-3/4 tw:rounded" style="background: var(--app-bg-subtle)" />
-                  <div class="tw:h-3 tw:w-1/2 tw:rounded" style="background: var(--app-bg-subtle)" />
+                  <div
+                    class="tw:h-4 tw:w-3/4 tw:rounded"
+                    style="background: var(--app-bg-subtle)"
+                  />
+                  <div
+                    class="tw:h-3 tw:w-1/2 tw:rounded"
+                    style="background: var(--app-bg-subtle)"
+                  />
                 </div>
               </div>
             </div>
@@ -308,7 +366,10 @@ onMounted(async () => {
           v-else-if="!loadingMenu && visibleCategories.length === 0"
           class="app-panel tw:rounded-2xl tw:border tw:p-12 tw:text-center app-text-muted"
         >
-          <iconify icon="ph:magnifying-glass-bold" class="tw:text-3xl tw:mb-3 tw:block tw:mx-auto tw:opacity-40" />
+          <iconify
+            icon="ph:magnifying-glass-bold"
+            class="tw:text-3xl tw:mb-3 tw:block tw:mx-auto tw:opacity-40"
+          />
           Không tìm thấy sản phẩm nào.
         </div>
 
@@ -319,7 +380,6 @@ onMounted(async () => {
             :key="category.id"
             class="app-panel tw:rounded-2xl tw:border tw:overflow-hidden"
           >
-
             <!-- Category header — click to collapse -->
             <button
               class="tw:w-full tw:flex tw:items-center tw:justify-between tw:px-4 tw:py-3 tw:transition hover:tw:bg-white/5"
@@ -327,7 +387,9 @@ onMounted(async () => {
             >
               <div class="tw:flex tw:items-center tw:gap-2">
                 <h2 class="tw:text-sm tw:font-semibold">{{ category.name }}</h2>
-                <span class="tw:text-xs app-text-muted">{{ category.filteredProducts.length }} món</span>
+                <span class="tw:text-xs app-text-muted"
+                  >{{ category.filteredProducts.length }} món</span
+                >
               </div>
               <iconify
                 icon="ph:caret-down-bold"
@@ -345,7 +407,10 @@ onMounted(async () => {
                 v-for="product in category.filteredProducts"
                 :key="product.id"
                 class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all hover:tw:-translate-y-0.5 hover:tw:border-emerald-500/50"
-                style="border-color: var(--app-border); background: var(--app-bg-subtle)"
+                style="
+                  border-color: var(--app-border);
+                  background: var(--app-bg-subtle);
+                "
                 @click="handleAddToCart(product)"
               >
                 <!-- Product image / placeholder -->
@@ -361,7 +426,10 @@ onMounted(async () => {
                     class="tw:h-32 tw:w-full tw:flex tw:items-center tw:justify-center"
                     style="background: var(--app-bg)"
                   >
-                    <iconify icon="ph:coffee-bold" class="tw:text-3xl tw:text-emerald-400/20" />
+                    <iconify
+                      icon="ph:coffee-bold"
+                      class="tw:text-3xl tw:text-emerald-400/20"
+                    />
                   </div>
                   <!-- Cart qty badge -->
                   <div
@@ -374,28 +442,41 @@ onMounted(async () => {
 
                 <!-- Product info -->
                 <div class="tw:flex tw:flex-1 tw:flex-col tw:p-2.5">
-                  <h3 class="tw:text-xs tw:font-semibold tw:line-clamp-2 tw:leading-snug">{{ product.name }}</h3>
-                  <p class="tw:mt-1 tw:text-xs tw:font-semibold tw:text-emerald-400">
+                  <h3
+                    class="tw:text-xs tw:font-semibold tw:line-clamp-2 tw:leading-snug"
+                  >
+                    {{ product.name }}
+                  </h3>
+                  <p
+                    class="tw:mt-1 tw:text-xs tw:font-semibold tw:text-emerald-400"
+                  >
                     {{ formatVnd(product.price) }}
                   </p>
 
                   <!-- Option badges -->
                   <div
-                    v-if="product.hasTemperatureOption || product.hasIceLevelOption || product.hasSugarLevelOption"
+                    v-if="
+                      product.hasTemperatureOption ||
+                      product.hasIceLevelOption ||
+                      product.hasSugarLevelOption
+                    "
                     class="tw:mt-1.5 tw:flex tw:flex-wrap tw:gap-1"
                   >
                     <span
                       v-if="product.hasTemperatureOption"
                       class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-orange-500/10 tw:text-orange-400"
-                    >N/L</span>
+                      >N/L</span
+                    >
                     <span
                       v-if="product.hasIceLevelOption"
                       class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-sky-500/10 tw:text-sky-400"
-                    >Đá</span>
+                      >Đá</span
+                    >
                     <span
                       v-if="product.hasSugarLevelOption"
                       class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-amber-500/10 tw:text-amber-400"
-                    >Đường</span>
+                      >Đường</span
+                    >
                   </div>
 
                   <div class="tw:flex-1" />
@@ -414,35 +495,42 @@ onMounted(async () => {
                 </div>
               </article>
             </div>
-
           </div>
         </div>
-
       </section>
 
       <!-- ── RIGHT: Cart ────────────────────────────────────── -->
       <aside class="tw:lg:col-span-4 tw:lg:self-start tw:lg:sticky tw:lg:top-6">
         <div class="app-panel tw:rounded-2xl tw:border tw:p-5">
-
           <!-- Cart header -->
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
-            <h2 class="tw:text-base tw:font-semibold tw:flex tw:items-center tw:gap-2">
-              Giỏ hàng
-              <prime-badge v-if="cartItemCount > 0" :value="cartItemCount" severity="success" />
+            <h2
+              class="tw:text-base tw:font-semibold tw:flex tw:items-center tw:gap-2"
+            >
+              Cart
+              <prime-badge
+                v-if="cartItemCount > 0"
+                :value="cartItemCount"
+                severity="success"
+              />
             </h2>
             <prime-button
               v-if="cart.length > 0"
-              icon="pi pi-trash"
               size="small"
               severity="danger"
-              text
+              outlined
               @click="clearCart"
-            />
+              :class="btnIcon"
+            >
+              <iconify icon="prime:trash" />
+            </prime-button>
           </div>
 
           <!-- Order label -->
           <div v-if="orderLabel" class="tw:mb-3">
-            <prime-tag :value="orderLabel" icon="pi pi-table" severity="secondary" />
+            <prime-tag :value="orderLabel" severity="secondary">
+              <iconify icon="prime:table" />
+            </prime-tag>
           </div>
 
           <!-- Empty state -->
@@ -451,8 +539,10 @@ onMounted(async () => {
             class="tw:py-8 tw:text-center app-text-muted tw:text-sm tw:rounded-xl tw:border tw:border-dashed"
             style="border-color: var(--app-border)"
           >
-            Chưa có món nào.<br />
-            <span class="tw:text-xs tw:opacity-60">Chọn món từ menu bên trái.</span>
+            Cart is empty<br />
+            <span class="tw:text-xs tw:opacity-60">
+              Choose a product to add it to your cart.
+            </span>
           </div>
 
           <!-- Cart items -->
@@ -465,16 +555,24 @@ onMounted(async () => {
             >
               <div class="tw:flex tw:items-start tw:gap-2">
                 <div class="tw:flex-1 tw:min-w-0">
-                  <p class="tw:text-sm tw:font-medium tw:leading-snug">{{ item.productName }}</p>
-                  <p class="tw:text-xs tw:text-emerald-400 tw:mt-0.5">{{ formatVnd(item.unitPrice) }}</p>
-                  <p v-if="optionsLabel(item)" class="tw:text-xs tw:text-amber-400 tw:mt-0.5 tw:leading-snug">
+                  <p class="tw:text-sm tw:font-medium tw:leading-snug">
+                    {{ item.productName }}
+                  </p>
+                  <p class="tw:text-xs tw:text-emerald-400 tw:mt-0.5">
+                    {{ formatVnd(item.unitPrice) }}
+                  </p>
+                  <p
+                    v-if="optionsLabel(item)"
+                    class="tw:text-xs tw:text-amber-400 tw:mt-0.5 tw:leading-snug"
+                  >
                     {{ optionsLabel(item) }}
                   </p>
                   <!-- Takeaway badge -->
                   <span
                     v-if="item.isTakeaway"
                     class="tw:inline-block tw:mt-1 tw:text-xs tw:px-1.5 tw:py-0.5 tw:rounded tw:bg-sky-500/10 tw:text-sky-400"
-                  >Mang về</span>
+                    >Takeaway</span
+                  >
                 </div>
                 <div class="tw:flex tw:items-center tw:gap-1 tw:shrink-0">
                   <prime-button
@@ -484,16 +582,23 @@ onMounted(async () => {
                     rounded
                     severity="secondary"
                     @click="changeQty(item._key, -1)"
-                  />
-                  <span class="tw:text-sm tw:font-bold tw:w-5 tw:text-center">{{ item.quantity }}</span>
+                    :class="btnIcon"
+                  >
+                    <iconify icon="prime:minus" />
+                  </prime-button>
+                  <span class="tw:text-sm tw:font-bold tw:w-5 tw:text-center">{{
+                    item.quantity
+                  }}</span>
                   <prime-button
-                    icon="pi pi-plus"
                     size="small"
                     text
                     rounded
                     severity="secondary"
                     @click="changeQty(item._key, 1)"
-                  />
+                    :class="btnIcon"
+                  >
+                    <iconify icon="prime:plus" />
+                  </prime-button>
                 </div>
               </div>
               <div class="tw:flex tw:justify-end tw:mt-1.5">
@@ -504,45 +609,67 @@ onMounted(async () => {
             </div>
 
             <!-- Total summary -->
-            <div class="tw:rounded-xl tw:p-3 tw:mt-1" style="background: var(--app-bg-subtle)">
-              <div class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:mb-1">
-                <span class="app-text-muted">Tạm tính</span>
+            <div
+              class="tw:rounded-xl tw:p-3 tw:mt-1"
+              style="background: var(--app-bg-subtle)"
+            >
+              <div
+                class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:mb-1"
+              >
+                <span class="app-text-muted">Subtotal</span>
                 <span class="tw:font-medium">{{ formatVnd(cartTotal) }}</span>
               </div>
-              <div class="tw:flex tw:items-center tw:justify-between tw:text-xs tw:mb-2">
-                <span class="app-text-muted">Phí phục vụ</span>
-                <span class="app-text-muted">Miễn phí</span>
+              <div
+                class="tw:flex tw:items-center tw:justify-between tw:text-xs tw:mb-2"
+              >
+                <span class="app-text-muted">Service Charge</span>
+                <span class="app-text-muted">Free</span>
               </div>
-              <div class="tw:border-t tw:pt-2" style="border-color: var(--app-border)">
-                <div class="tw:flex tw:items-center tw:justify-between tw:font-bold">
-                  <span>Tổng cộng</span>
-                  <span class="tw:text-emerald-400 tw:text-base">{{ formatVnd(cartTotal) }}</span>
+              <div
+                class="tw:border-t tw:pt-2"
+                style="border-color: var(--app-border)"
+              >
+                <div
+                  class="tw:flex tw:items-center tw:justify-between tw:font-bold"
+                >
+                  <span>Total</span>
+                  <span class="tw:text-emerald-400 tw:text-base">{{
+                    formatVnd(cartTotal)
+                  }}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Error -->
-          <prime-message v-if="errorMessage" severity="error" :closable="false" class="tw:mt-3">
+          <prime-message
+            v-if="errorMessage"
+            severity="error"
+            :closable="false"
+            class="tw:mt-3"
+          >
             {{ errorMessage }}
           </prime-message>
 
           <!-- Place order -->
           <prime-button
-            label="Đặt order"
-            icon="pi pi-check"
             class="tw:w-full tw:mt-4"
             :loading="placing"
             :disabled="!canPlaceOrder"
             @click="placeOrder"
-          />
+          >
+            <iconify icon="prime:check" />
+            <span>Create order</span>
+          </prime-button>
 
-          <p v-if="!sessionId && !sessionLoading" class="tw:text-xs app-text-muted tw:text-center tw:mt-2">
-            Chọn bàn trước (dùng BAR cho order tại quầy)
+          <p
+            v-if="!sessionId && !sessionLoading"
+            class="tw:text-xs app-text-muted tw:text-center tw:mt-2"
+          >
+            Select a table ( use BAR for orders at the bar )
           </p>
         </div>
       </aside>
-
     </div>
   </section>
 
@@ -555,7 +682,6 @@ onMounted(async () => {
     @hide="selectedProduct = null"
   >
     <div class="tw:space-y-5">
-
       <!-- Số lượng -->
       <div>
         <p class="tw:mb-2 tw:text-sm tw:font-semibold">Số lượng</p>
@@ -567,7 +693,9 @@ onMounted(async () => {
           >
             <iconify icon="ph:minus-bold" class="tw:h-4 tw:w-4" />
           </button>
-          <span class="tw:min-w-10 tw:text-center tw:text-xl tw:font-bold">{{ pendingQuantity }}</span>
+          <span class="tw:min-w-10 tw:text-center tw:text-xl tw:font-bold">{{
+            pendingQuantity
+          }}</span>
           <button
             class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
             style="border-color: var(--app-border)"
@@ -582,49 +710,86 @@ onMounted(async () => {
       <div v-if="selectedProduct?.hasTemperatureOption">
         <p class="tw:mb-2 tw:text-sm tw:font-semibold">Nhiệt độ</p>
         <div class="tw:flex tw:gap-2">
-          <button
-            v-for="opt in ['Nóng', 'Lạnh']"
+           <prime-button
+           v-for="opt in orderTemperatureOptions"
+            variant="outlined"
+            class="tw:w-full"
+            :severity="pendingOptions.temperature === opt.value ? 'primary' : 'secondary'"
+             @click="setTemperature(opt.value)"
+          >
+          <iconify :icon="opt.icon" />
+          <span>{{ opt.label }}</span>
+        </prime-button>
+          <!-- <button
+            v-for="opt in ['Hot', 'Cold']"
             :key="opt"
             class="tw:flex-1 tw:rounded-xl tw:border tw:px-4 tw:py-2 tw:text-sm tw:font-medium tw:transition"
-            :class="pendingOptions.temperature === opt
-              ? (opt === 'Nóng'
+            :class="
+              pendingOptions.temperature === opt
+                ? opt === 'Nóng'
                   ? 'tw:border-orange-400 tw:bg-orange-500/10 tw:text-orange-400'
-                  : 'tw:border-sky-400 tw:bg-sky-500/10 tw:text-sky-400')
-              : 'tw:border-white/10 app-text-muted hover:tw:border-white/30'"
+                  : 'tw:border-sky-400 tw:bg-sky-500/10 tw:text-sky-400'
+                : 'tw:border-white/10 app-text-muted hover:tw:border-white/30'
+            "
             @click="setTemperature(opt)"
-          >{{ opt }}</button>
+          >
+            {{ opt }}
+          </button> -->
         </div>
       </div>
 
       <!-- Mức đá -->
-      <div v-if="selectedProduct?.hasIceLevelOption && pendingOptions.temperature !== 'Nóng'">
+      <div
+        v-if="
+          selectedProduct?.hasIceLevelOption &&
+          pendingOptions.temperature !== 1
+        "
+      >
         <p class="tw:mb-2 tw:text-sm tw:font-semibold">Mức đá</p>
         <div class="tw:grid tw:grid-cols-2 tw:gap-2">
           <button
             v-for="opt in ['Không đá', 'Ít đá', 'Bình thường', 'Nhiều đá']"
             :key="opt"
             class="tw:rounded-xl tw:border tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:transition"
-            :class="pendingOptions.iceLevel === opt
-              ? 'tw:border-sky-400 tw:bg-sky-500/10 tw:text-sky-400'
-              : 'tw:border-white/10 app-text-muted hover:tw:border-sky-400/50'"
+            :class="
+              pendingOptions.iceLevel === opt
+                ? 'tw:border-sky-400 tw:bg-sky-500/10 tw:text-sky-400'
+                : 'tw:border-white/10 app-text-muted hover:tw:border-sky-400/50'
+            "
             @click="pendingOptions.iceLevel = opt"
-          >{{ opt }}</button>
+          >
+            {{ opt }}
+          </button>
         </div>
       </div>
 
       <!-- Mức đường -->
-      <div v-if="selectedProduct?.hasSugarLevelOption && pendingOptions.temperature !== 'Nóng'">
+      <div
+        v-if="
+          selectedProduct?.hasSugarLevelOption &&
+          pendingOptions.temperature !== 1
+        "
+      >
         <p class="tw:mb-2 tw:text-sm tw:font-semibold">Mức đường</p>
         <div class="tw:grid tw:grid-cols-2 tw:gap-2">
           <button
-            v-for="opt in ['Không đường', 'Ít đường', 'Bình thường', 'Nhiều đường']"
+            v-for="opt in [
+              'Không đường',
+              'Ít đường',
+              'Bình thường',
+              'Nhiều đường',
+            ]"
             :key="opt"
             class="tw:rounded-xl tw:border tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:transition"
-            :class="pendingOptions.sugarLevel === opt
-              ? 'tw:border-amber-400 tw:bg-amber-500/10 tw:text-amber-400'
-              : 'tw:border-white/10 app-text-muted hover:tw:border-amber-400/50'"
+            :class="
+              pendingOptions.sugarLevel === opt
+                ? 'tw:border-amber-400 tw:bg-amber-500/10 tw:text-amber-400'
+                : 'tw:border-white/10 app-text-muted hover:tw:border-amber-400/50'
+            "
             @click="pendingOptions.sugarLevel = opt"
-          >{{ opt }}</button>
+          >
+            {{ opt }}
+          </button>
         </div>
       </div>
 
@@ -632,32 +797,32 @@ onMounted(async () => {
       <div>
         <p class="tw:mb-2 tw:text-sm tw:font-semibold">Phục vụ</p>
         <div class="tw:flex tw:gap-2">
-          <button
-            class="tw:flex-1 tw:rounded-xl tw:border tw:px-4 tw:py-2 tw:text-sm tw:font-medium tw:transition"
-            :class="!pendingOptions.isTakeaway
-              ? 'tw:border-emerald-400 tw:bg-emerald-500/10 tw:text-emerald-400'
-              : 'tw:border-white/10 app-text-muted hover:tw:border-white/30'"
-            @click="pendingOptions.isTakeaway = false"
-          >Tại chỗ</button>
-          <button
-            class="tw:flex-1 tw:rounded-xl tw:border tw:px-4 tw:py-2 tw:text-sm tw:font-medium tw:transition"
-            :class="pendingOptions.isTakeaway
-              ? 'tw:border-sky-400 tw:bg-sky-500/10 tw:text-sky-400'
-              : 'tw:border-white/10 app-text-muted hover:tw:border-white/30'"
-            @click="pendingOptions.isTakeaway = true"
-          >Mang về</button>
+          <prime-button
+            v-for="orderType in orderTypeOptions"
+            variant="outlined"
+            class="tw:w-full"
+            :severity="pendingOptions.isTakeaway === orderType.value ? 'primary' : 'secondary'"
+            @click="pendingOptions.isTakeaway = orderType.value"
+          >
+            <iconify :icon="orderType.icon" />
+            <span>{{ orderType.label }}</span>
+          </prime-button>
         </div>
       </div>
-
     </div>
 
     <template #footer>
-      <prime-button label="Huỷ" severity="secondary" text @click="showOptionsDialog = false" />
       <prime-button
-        label="Thêm vào giỏ"
-        icon="pi pi-shopping-cart"
-        @click="confirmAddToCart"
-      />
+        severity="secondary"
+        text
+        @click="showOptionsDialog = false"
+      >
+        <span class="tw:ml-2">Cancel</span>
+      </prime-button>
+      <prime-button @click="confirmAddToCart">
+        <iconify icon="prime:shopping-cart" />
+        <span class="tw:ml-2">Add to cart</span>
+      </prime-button>
     </template>
   </prime-dialog>
 </template>

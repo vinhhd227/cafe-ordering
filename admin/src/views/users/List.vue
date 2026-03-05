@@ -327,6 +327,7 @@ const confirmAndDeactivate = async () => {
             :outlined="!hasActiveFilters"
             v-tooltip.top="'Filters'"
             @click="filterPanel.toggle($event)"
+            :class="!hasActiveFilters ? btnIcon : ''"
           >
             <iconify icon="ph:funnel-bold" />
             <prime-badge
@@ -442,7 +443,7 @@ const confirmAndDeactivate = async () => {
       <!-- Actions -->
       <prime-column header="Actions" style="min-width: 8rem">
         <template #body="{ data }">
-          <div class="tw:flex tw:gap-2">
+          <div class="tw:flex tw:justify-end tw:gap-2">
            
 
             <!-- Quick toggle active -->
