@@ -17,13 +17,52 @@ public class ListOrdersHandler(
   public async ValueTask<Result<PagedOrdersDto>> Handle(
     ListOrdersQuery request, CancellationToken ct)
   {
-    var countSpec = new OrdersCountSpec(request.Status, request.DateFrom, request.DateTo);
-    var totalCount = await repository.CountAsync(countSpec, ct);
+    // Pre-resolve TableCode → tableIds → sessionIds (nếu có filter tableCode)
+    IReadOnlyList<Guid>? filteredSessionIds = null;
+    if (!string.IsNullOrWhiteSpace(request.TableCode))
+    {
+      var matchedTables   = await tableRepository.ListAsync(new TablesByCodePatternSpec(request.TableCode), ct);
+      var matchedTableIds = matchedTables.Select(t => t.Id).ToList();
+      if (matchedTableIds.Count > 0)
+      {
+        var matchedSessions = await sessionRepository.ListAsync(new SessionsByTableIdsSpec(matchedTableIds), ct);
+        filteredSessionIds = matchedSessions.Select(s => s.Id).ToList();
+      }
+      else
+      {
+        filteredSessionIds = []; // không tìm thấy bàn → trả về rỗng
+      }
+    }
 
-    var spec   = new OrdersListSpec(request.Status, request.DateFrom, request.DateTo, request.Page, request.PageSize);
-    var orders = await repository.ListAsync(spec, ct);
+    var countSpec = new OrdersCountSpec(request.Status, request.PaymentStatus,
+      request.DateFrom, request.DateTo, filteredSessionIds,
+      request.MinAmount, request.MaxAmount, request.OrderNumber);
 
-    // Build sessionId → tableId map
+    var spec = new OrdersListSpec(request.Status, request.PaymentStatus,
+      request.DateFrom, request.DateTo, request.Page, request.PageSize,
+      filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+
+    var cashSpec = new PaidOrdersTotalSpec(PaymentMethod.Cash,
+      request.Status, request.DateFrom, request.DateTo,
+      filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+
+    var bankSpec = new PaidOrdersTotalSpec(PaymentMethod.BankTransfer,
+      request.Status, request.DateFrom, request.DateTo,
+      filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+
+    // Chạy song song: count + list + 2 aggregate totals
+    var countTask     = repository.CountAsync(countSpec, ct);
+    var listTask      = repository.ListAsync(spec, ct);
+    var cashTask      = repository.ListAsync(cashSpec, ct);
+    var bankTask      = repository.ListAsync(bankSpec, ct);
+    await Task.WhenAll(countTask, listTask, cashTask, bankTask);
+
+    var totalCount  = countTask.Result;
+    var orders      = listTask.Result;
+    var cashAmounts = cashTask.Result;
+    var bankAmounts = bankTask.Result;
+
+    // Build sessionId → tableId map (chỉ load sessions cho trang hiện tại)
     var sessionIds = orders.Select(o => o.SessionId).Distinct().ToList();
     var sessions   = await sessionRepository.ListAsync(new SessionsByIdsSpec(sessionIds), ct);
     var sessionMap = sessions.ToDictionary(s => s.Id, s => s.TableId);
@@ -42,9 +81,9 @@ public class ListOrdersHandler(
       return new OrderDto(
         o.Id,
         o.OrderNumber,
-        o.Status.Name,
-        o.PaymentStatus.ToString(),
-        o.PaymentMethod.ToString(),
+        o.Status.Name.ToUpperInvariant(),
+        o.PaymentStatus.Name.ToUpperInvariant(),
+        o.PaymentMethod.Name.ToUpperInvariant(),
         o.AmountReceived,
         o.TipAmount,
         o.TotalAmount,
@@ -61,6 +100,10 @@ public class ListOrdersHandler(
       );
     }).ToList();
 
-    return Result.Success(new PagedOrdersDto(dtos, totalCount, request.Page, request.PageSize));
+    var cashTotal         = cashAmounts.Sum();
+    var bankTransferTotal = bankAmounts.Sum();
+
+    return Result.Success(new PagedOrdersDto(dtos, totalCount, request.Page, request.PageSize,
+      cashTotal, bankTransferTotal));
   }
 }

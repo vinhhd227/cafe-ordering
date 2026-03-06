@@ -1,35 +1,29 @@
 namespace Api.Core.Aggregates.OrderAggregate.Specifications;
 
 /// <summary>
-///   Lấy danh sách Orders có phân trang, tùy chọn lọc theo nhiều tiêu chí, include Items
+///   Projection spec: lấy TotalAmount của các orders đã PAID theo phương thức thanh toán,
+///   áp dụng cùng bộ filter như OrdersCountSpec (trừ paymentStatus — luôn là PAID).
 /// </summary>
-public class OrdersListSpec : Specification<Order>
+public class PaidOrdersTotalSpec : Specification<Order, decimal>
 {
-  public OrdersListSpec(
+  public PaidOrdersTotalSpec(
+    PaymentMethod method,
     string? status = null,
-    string? paymentStatus = null,
     DateTime? dateFrom = null,
     DateTime? dateTo = null,
-    int page = 1,
-    int pageSize = 20,
     IReadOnlyList<Guid>? sessionIds = null,
     decimal? minAmount = null,
     decimal? maxAmount = null,
     string? orderNumber = null)
   {
-    Query.Include(o => o.Items);
-    Query.OrderByDescending(o => o.OrderDate);
+    Query
+      .Where(o => o.PaymentStatus == PaymentStatus.Paid && o.PaymentMethod == method)
+      .Select(o => o.TotalAmount);
 
     if (!string.IsNullOrWhiteSpace(status))
     {
       var target = OrderStatus.FromName(status, true);
       Query.Where(o => o.Status == target);
-    }
-
-    if (!string.IsNullOrWhiteSpace(paymentStatus))
-    {
-      var target = PaymentStatus.FromName(paymentStatus, true);
-      Query.Where(o => o.PaymentStatus == target);
     }
 
     if (!string.IsNullOrWhiteSpace(orderNumber))
@@ -49,7 +43,5 @@ public class OrdersListSpec : Specification<Order>
 
     if (sessionIds is not null)
       Query.Where(o => sessionIds.Contains(o.SessionId));
-
-    Query.Skip((page - 1) * pageSize).Take(pageSize);
   }
 }

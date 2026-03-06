@@ -27,5 +27,7 @@ public record PagedOrdersDto(
   List<OrderDto> Items,
   int TotalCount,
   int Page,
-  int PageSize
+  int PageSize,
+  decimal CashTotal,
+  decimal BankTransferTotal
 );

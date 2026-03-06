@@ -7,6 +7,11 @@ namespace Api.Web.Endpoints.Orders;
 public sealed class ListOrdersRequest
 {
   [QueryParam] public string? Status { get; set; }
+  [QueryParam] public string? PaymentStatus { get; set; }
+  [QueryParam] public string? OrderNumber { get; set; }
+  [QueryParam] public decimal? MinAmount { get; set; }
+  [QueryParam] public decimal? MaxAmount { get; set; }
+  [QueryParam] public string? TableCode { get; set; }
   [QueryParam] public DateTime? DateFrom { get; set; }
   [QueryParam] public DateTime? DateTo { get; set; }
   [QueryParam] public int Page { get; set; } = 1;
@@ -26,7 +31,8 @@ public class ListOrders(IMediator mediator) : Endpoint<ListOrdersRequest, PagedO
   public override async Task HandleAsync(ListOrdersRequest req, CancellationToken ct)
   {
     var result = await mediator.Send(
-      new ListOrdersQuery(req.Status, req.DateFrom, req.DateTo, req.Page, req.PageSize), ct);
+      new ListOrdersQuery(req.Status, req.PaymentStatus, req.OrderNumber, req.MinAmount,
+        req.MaxAmount, req.TableCode, req.DateFrom, req.DateTo, req.Page, req.PageSize), ct);
     await this.SendResultAsync(result, ct);
   }
 }

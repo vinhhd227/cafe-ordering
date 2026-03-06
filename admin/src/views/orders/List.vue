@@ -3,12 +3,17 @@ import { useRouter } from "vue-router";
 import { getOrders, updatePayment } from "@/services/order.service";
 import AppTable from "@/components/AppTable.vue";
 import { btnIcon } from "@/layout/ui";
+import { ORDER_STATUS, ORDER_STATUS_MAP } from "@/constants/orderStatus";
+import { PAYMENT_STATUS, PAYMENT_STATUS_MAP } from "@/constants/paymentStatus";
+import { PAYMENT_METHOD, PAYMENT_METHOD_MAP } from "@/constants/paymentMethod";
 
 const router = useRouter();
 
 // ── Data ──────────────────────────────────────────────────────────
-const orders = ref([]);       // current page only
-const totalRecords = ref(0);  // from server
+const orders = ref([]);             // current page only
+const totalRecords = ref(0);        // from server
+const cashTotal = ref(0);           // tổng tiền mặt đã thu (PAID + CASH)
+const bankTransferTotal = ref(0);   // tổng chuyển khoản đã thu (PAID + BANK_TRANSFER)
 const loading = ref(false);
 const errorMessage = ref("");
 
@@ -17,9 +22,15 @@ const rows = ref(20);
 const first = ref(0);
 
 // ── Filters ───────────────────────────────────────────────────────
+const todayMidnight = () => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
 // Server-side: trigger API reload
-const dateFrom = ref(null);
-const dateTo = ref(null);
+const dateFrom = ref(todayMidnight());  // mặc định: hôm nay
+const dateTo = ref(todayMidnight());    // mặc định: hôm nay
 const statusFilter = ref(null);
 
 // Client-side: filter within current page
@@ -31,19 +42,15 @@ const tableCodeFilter = ref("");
 
 const filterPanel = ref(null);
 
-const statusOptions = [
-  { label: "Pending", value: "Pending" },
-  { label: "Processing", value: "Processing" },
-  { label: "Completed", value: "Completed" },
-  { label: "Cancelled", value: "Cancelled" },
-];
+const statusOptions = Object.entries(ORDER_STATUS_MAP).map(([value, meta]) => ({
+  label: meta.label,
+  value,
+}));
 
-const paymentStatusOptions = [
-  { label: "Unpaid", value: "Unpaid" },
-  { label: "Paid", value: "Paid" },
-  { label: "Refunded", value: "Refunded" },
-  { label: "Voided", value: "Voided" },
-];
+const paymentStatusOptions = Object.entries(PAYMENT_STATUS_MAP).map(([value, meta]) => ({
+  label: meta.label,
+  value,
+}));
 
 const activeFilterCount = computed(() => {
   let n = 0;
@@ -60,8 +67,8 @@ const activeFilterCount = computed(() => {
 const hasActiveFilters = computed(() => activeFilterCount.value > 0);
 
 const clearFilters = () => {
-  dateFrom.value = null;
-  dateTo.value = null;
+  dateFrom.value = todayMidnight();
+  dateTo.value = todayMidnight();
   statusFilter.value = null;
   paymentStatusFilter.value = null;
   minTotal.value = null;
@@ -70,39 +77,10 @@ const clearFilters = () => {
   // server-side filter changes are watched and will reload
 };
 
-// ── Computed: client-side filter within current page ───────────────
-const displayedOrders = computed(() => {
-  const term = searchOrder.value.trim().toLowerCase();
-
-  return orders.value.filter((o) => {
-    if (term && !o.orderNumber.toLowerCase().includes(term)) return false;
-
-    if (
-      paymentStatusFilter.value &&
-      o.paymentStatus !== paymentStatusFilter.value
-    )
-      return false;
-
-    if (minTotal.value !== null && o.totalAmount < minTotal.value) return false;
-    if (maxTotal.value !== null && o.totalAmount > maxTotal.value) return false;
-
-    if (
-      tableCodeFilter.value.trim() &&
-      !o.tableCode
-        ?.toLowerCase()
-        .includes(tableCodeFilter.value.trim().toLowerCase())
-    )
-      return false;
-
-    return true;
-  });
-});
-
 const summary = computed(() => ({
   total: totalRecords.value,
-  pending: orders.value.filter((o) => o.status === "Pending").length,
-  unpaid: orders.value.filter((o) => o.paymentStatus === "Unpaid").length,
-  completed: orders.value.filter((o) => o.status === "Completed").length,
+  cash: cashTotal.value,
+  bank: bankTransferTotal.value,
 }));
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -122,40 +100,15 @@ const formatDate = (dateStr) =>
     minute: "2-digit",
   }).format(new Date(dateStr));
 
-const statusTag = (status) => {
-  switch (status) {
-    case "Pending":
-      return { severity: "warn", label: "Pending" };
-    case "Processing":
-      return { severity: "info", label: "Processing" };
-    case "Completed":
-      return { severity: "success", label: "Completed" };
-    case "Cancelled":
-      return { severity: "danger", label: "Cancelled" };
-    default:
-      return { severity: "secondary", label: status };
-  }
-};
-
-const methodLabel = (method) => {
-  if (method === "BankTransfer") return "Bank Transfer";
-  if (method === "Cash") return "Cash";
-  return "";
-};
+const statusTag = (status) =>
+  ORDER_STATUS_MAP[status] ?? { severity: "secondary", label: status };
 
 const paymentTag = (status, method) => {
-  switch (status) {
-    case "Paid": {
-      const m = methodLabel(method);
-      return { label: m ? `Paid · ${m}` : "Paid", severity: "success" };
-    }
-    case "Refunded":
-      return { label: "Refunded", severity: "secondary" };
-    case "Voided":
-      return { label: "Voided", severity: "danger" };
-    default:
-      return { label: "Unpaid", severity: "warn" };
+  if (status === PAYMENT_STATUS.PAID) {
+    const m = PAYMENT_METHOD_MAP[method]?.label ?? "";
+    return { label: m ? `Paid · ${m}` : "Paid", severity: "success" };
   }
+  return PAYMENT_STATUS_MAP[status] ?? { label: "Unpaid", severity: "warn" };
 };
 
 // ── Load ──────────────────────────────────────────────────────────
@@ -165,7 +118,12 @@ const loadOrders = async () => {
   try {
     const page = Math.floor(first.value / rows.value) + 1;
     const res = await getOrders({
-      status: statusFilter.value,
+      status: statusFilter.value || undefined,
+      paymentStatus: paymentStatusFilter.value || undefined,
+      orderNumber: searchOrder.value.trim() || undefined,
+      minAmount: minTotal.value ?? undefined,
+      maxAmount: maxTotal.value ?? undefined,
+      tableCode: tableCodeFilter.value.trim() || undefined,
       page,
       pageSize: rows.value,
       dateFrom: dateFrom.value ?? undefined,
@@ -174,6 +132,8 @@ const loadOrders = async () => {
     const data = res?.data;
     orders.value = data?.items ?? [];
     totalRecords.value = data?.totalCount ?? 0;
+    cashTotal.value = data?.cashTotal ?? 0;
+    bankTransferTotal.value = data?.bankTransferTotal ?? 0;
   } catch (err) {
     errorMessage.value =
       err?.response?.data?.message || "Failed to load orders.";
@@ -184,11 +144,14 @@ const loadOrders = async () => {
 
 onMounted(loadOrders);
 
-// Re-fetch when server-side filters change — reset to page 1
-watch([statusFilter, dateFrom, dateTo], () => {
-  first.value = 0;
-  loadOrders();
-});
+// Re-fetch khi bất kỳ filter nào thay đổi — reset về trang 1
+watch(
+  [statusFilter, paymentStatusFilter, dateFrom, dateTo, searchOrder, tableCodeFilter, minTotal, maxTotal],
+  () => {
+    first.value = 0;
+    loadOrders();
+  },
+);
 
 // Handle server-side page change from AppTable
 const onPage = (e) => {
@@ -200,13 +163,13 @@ const onPage = (e) => {
 // ── Payment dialog ────────────────────────────────────────────────
 const payDialog = ref(false);
 const payOrder = ref(null);
-const payMethod = ref("Cash");
+const payMethod = ref(PAYMENT_METHOD.CASH);
 const payAmountReceived = ref(null);
 const payLoading = ref(false);
 
 const PAYMENT_METHODS = [
-  { label: "Cash", value: "Cash", icon: "ph:money-bold" },
-  { label: "Bank Transfer", value: "BankTransfer", icon: "ph:bank-bold" },
+  { label: "Cash", value: PAYMENT_METHOD.CASH, icon: "ph:money-bold" },
+  { label: "Bank Transfer", value: PAYMENT_METHOD.BANK_TRANSFER, icon: "ph:bank-bold" },
 ];
 
 const payChange = computed(() => {
@@ -226,7 +189,7 @@ watch(payChange, (val) => {
 
 const openPayDialog = (order) => {
   payOrder.value = order;
-  payMethod.value = "Cash";
+  payMethod.value = PAYMENT_METHOD.CASH;
   payAmountReceived.value = null;
   payTip.value = 0;
   payDialog.value = true;
@@ -238,12 +201,12 @@ const confirmPayment = async () => {
   try {
     await updatePayment(
       payOrder.value.id,
-      "Paid",
+      PAYMENT_STATUS.PAID,
       payMethod.value,
       payAmountReceived.value,
       payTip.value ?? 0,
     );
-    payOrder.value.paymentStatus = "Paid";
+    payOrder.value.paymentStatus = PAYMENT_STATUS.PAID;
     payOrder.value.paymentMethod = payMethod.value;
     payDialog.value = false;
   } catch (err) {
@@ -434,13 +397,11 @@ const confirmPayment = async () => {
     </div>
 
     <!-- Summary stats -->
-    <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:lg:grid-cols-4">
+    <div class="tw:grid tw:grid-cols-1 tw:gap-3 tw:sm:grid-cols-3">
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle"
-          >
-            Total
+          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle">
+            Total orders
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
             {{ summary.total }}
@@ -449,37 +410,27 @@ const confirmPayment = async () => {
       </prime-card>
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-amber-400"
-          >
-            Pending
-          </p>
+          <div class="tw:flex tw:items-center tw:justify-between">
+            <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400">
+              Cash collected
+            </p>
+            <iconify icon="ph:money-bold" class="tw:text-emerald-400 tw:opacity-60" />
+          </div>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.pending }}
+            {{ formatVnd(summary.cash) }}
           </p>
         </template>
       </prime-card>
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-orange-400"
-          >
-            Unpaid
-          </p>
+          <div class="tw:flex tw:items-center tw:justify-between">
+            <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-blue-400">
+              Bank transfer
+            </p>
+            <iconify icon="ph:bank-bold" class="tw:text-blue-400 tw:opacity-60" />
+          </div>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.unpaid }}
-          </p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400"
-          >
-            Completed
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.completed }}
+            {{ formatVnd(summary.bank) }}
           </p>
         </template>
       </prime-card>
@@ -501,7 +452,7 @@ const confirmPayment = async () => {
       lazy
       v-model:first="first"
       v-model:rows="rows"
-      :value="displayedOrders"
+      :value="orders"
       :loading="loading"
       :totalRecords="totalRecords"
       :rowsPerPageOptions="[10, 20, 50]"
@@ -509,7 +460,7 @@ const confirmPayment = async () => {
     >
       <template #toolbar-left>
         <div class="tw:flex tw:items-center tw:gap-2">
-          <!-- Search by order number (client-side within page) -->
+          <!-- Search by order number (server-side) -->
           <prime-input-text
             v-model="searchOrder"
             placeholder="Search order #…"
@@ -582,7 +533,7 @@ const confirmPayment = async () => {
                 />
               </div>
 
-              <!-- Payment status (client-side) -->
+              <!-- Payment status (server-side) -->
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
@@ -599,7 +550,7 @@ const confirmPayment = async () => {
                 />
               </div>
 
-              <!-- Total price range (client-side) -->
+              <!-- Total price range (server-side) -->
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
@@ -624,7 +575,7 @@ const confirmPayment = async () => {
                 </div>
               </div>
 
-              <!-- Table code (client-side) -->
+              <!-- Table code (server-side) -->
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
@@ -718,7 +669,7 @@ const confirmPayment = async () => {
           <div class="tw:flex tw:justify-end tw:items-center tw:gap-2">
             <prime-button
               v-if="
-                data.paymentStatus === 'Unpaid' && data.status !== 'Cancelled'
+                data.paymentStatus === PAYMENT_STATUS.UNPAID && data.status !== ORDER_STATUS.CANCELLED
               "
               severity="warn"
               size="small"
