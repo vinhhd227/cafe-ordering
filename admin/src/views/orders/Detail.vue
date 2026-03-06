@@ -12,6 +12,9 @@ import {
   splitOrder,
   updateOrderItem,
 } from "@/services/order.service";
+import { ORDER_STATUS, ORDER_STATUS_MAP } from "@/constants/orderStatus";
+import { PAYMENT_STATUS, PAYMENT_STATUS_MAP } from "@/constants/paymentStatus";
+import { PAYMENT_METHOD, PAYMENT_METHOD_MAP } from "@/constants/paymentMethod";
 import { getProducts } from "@/services/product.service";
 
 const route = useRoute();
@@ -43,47 +46,28 @@ const formatDate = (dateStr) =>
     minute: "2-digit",
   }).format(new Date(dateStr));
 
-const statusTag = (status) => {
-  switch (status) {
-    case "Pending":
-      return { severity: "warn", label: "Pending" };
-    case "Processing":
-      return { severity: "info", label: "Processing" };
-    case "Completed":
-      return { severity: "success", label: "Completed" };
-    case "Cancelled":
-      return { severity: "danger", label: "Cancelled" };
-    default:
-      return { severity: "secondary", label: status };
-  }
-};
-
-const methodLabel = (method) => {
-  if (method === "BankTransfer") return "Bank Transfer";
-  if (method === "Cash") return "Cash";
-  return "";
-};
+const statusTag = (status) =>
+  ORDER_STATUS_MAP[status] ?? { severity: "secondary", label: status };
 
 const paymentTag = (status, method) => {
-  switch (status) {
-    case "Paid": {
-      const m = methodLabel(method);
-      return { label: m ? `Paid · ${m}` : "Paid", severity: "success" };
-    }
-    case "Refunded":
-      return { label: "Refunded", severity: "secondary" };
-    case "Voided":
-      return { label: "Voided", severity: "danger" };
-    default:
-      return { label: "Unpaid", severity: "warn" };
+  if (status === PAYMENT_STATUS.PAID) {
+    const m = PAYMENT_METHOD_MAP[method]?.label ?? "";
+    return { label: m ? `Paid · ${m}` : "Paid", severity: "success" };
   }
+  return PAYMENT_STATUS_MAP[status] ?? { label: "Unpaid", severity: "warn" };
 };
 
-const NEXT_STATUS = { Pending: "Processing", Processing: "Completed" };
-const NEXT_LABEL = { Pending: "Start preparing", Processing: "Mark complete" };
+const NEXT_STATUS = {
+  [ORDER_STATUS.PENDING]: ORDER_STATUS.PROCESSING,
+  [ORDER_STATUS.PROCESSING]: ORDER_STATUS.COMPLETED,
+};
+const NEXT_LABEL = {
+  [ORDER_STATUS.PENDING]: "Start preparing",
+  [ORDER_STATUS.PROCESSING]: "Mark complete",
+};
 
 const canSplit = computed(() => {
-  if (!order.value || order.value.paymentStatus !== "Unpaid") return false;
+  if (!order.value || order.value.paymentStatus !== PAYMENT_STATUS.UNPAID) return false;
   const items = order.value.items ?? [];
   return items.length > 1 || (items.length === 1 && items[0].quantity > 1);
 });
@@ -91,8 +75,8 @@ const canSplit = computed(() => {
 // Can edit items only when Pending + Unpaid
 const canEditItems = computed(
   () =>
-    order.value?.status === "Pending" &&
-    order.value?.paymentStatus === "Unpaid",
+    order.value?.status === ORDER_STATUS.PENDING &&
+    order.value?.paymentStatus === PAYMENT_STATUS.UNPAID,
 );
 
 // ── Load ──────────────────────────────────────────────────────────
@@ -131,8 +115,8 @@ const cancelOrder = async () => {
   updatingId.value = "status";
   errorMessage.value = "";
   try {
-    await updateOrderStatus(orderId, "Cancelled");
-    order.value.status = "Cancelled";
+    await updateOrderStatus(orderId, ORDER_STATUS.CANCELLED);
+    order.value.status = ORDER_STATUS.CANCELLED;
   } catch (err) {
     errorMessage.value =
       err?.response?.data?.errors?.join(", ") || "Failed to cancel order.";
@@ -142,14 +126,14 @@ const cancelOrder = async () => {
 };
 
 // ── Payment (inline form) ─────────────────────────────────────────
-const payMethod = ref("Cash");
+const payMethod = ref(PAYMENT_METHOD.CASH);
 const payAmountReceived = ref(null);
 const payTip = ref(0);
 const payLoading = ref(false);
 
 const PAYMENT_METHODS = [
-  { label: "Cash", value: "Cash", icon: "ph:money-bold" },
-  { label: "Bank Transfer", value: "BankTransfer", icon: "ph:bank-bold" },
+  { label: "Cash", value: PAYMENT_METHOD.CASH, icon: "ph:money-bold" },
+  { label: "Bank Transfer", value: PAYMENT_METHOD.BANK_TRANSFER, icon: "ph:bank-bold" },
 ];
 
 const payChange = computed(() => {
@@ -172,12 +156,12 @@ const confirmPayment = async () => {
   try {
     await updatePayment(
       orderId,
-      "Paid",
+      PAYMENT_STATUS.PAID,
       payMethod.value,
       payAmountReceived.value,
       payTip.value ?? 0,
     );
-    order.value.paymentStatus = "Paid";
+    order.value.paymentStatus = PAYMENT_STATUS.PAID;
     order.value.paymentMethod = payMethod.value;
     order.value.amountReceived = payAmountReceived.value;
     order.value.tipAmount = payTip.value ?? 0;
@@ -281,7 +265,7 @@ const openMergeDialog = async () => {
     const res = await getOrders();
     const all = res?.data ?? [];
     mergeOrders_.value = all.filter(
-      (o) => o.paymentStatus === "Unpaid" && o.id !== orderId,
+      (o) => o.paymentStatus === PAYMENT_STATUS.UNPAID && o.id !== orderId,
     );
   } catch {
     mergeOrders_.value = [];
@@ -820,7 +804,7 @@ const confirmSplit = async () => {
 
           <!-- Status action card -->
           <prime-card
-            v-if="order.status !== 'Completed' && order.status !== 'Cancelled'"
+            v-if="order.status !== ORDER_STATUS.COMPLETED && order.status !== ORDER_STATUS.CANCELLED"
             class="app-card tw:rounded-2xl tw:border"
           >
             <template #content>
@@ -868,7 +852,7 @@ const confirmSplit = async () => {
 
                 <!-- Merge button -->
                 <prime-button
-                  v-if="order.paymentStatus === 'Unpaid'"
+                  v-if="order.paymentStatus === PAYMENT_STATUS.UNPAID"
                   severity="secondary"
                   outlined
                   size="small"
@@ -885,7 +869,7 @@ const confirmSplit = async () => {
           <!-- Merge button for Completed+Unpaid (no status action card) -->
           <prime-card
             v-else-if="
-              order.status === 'Completed' && order.paymentStatus === 'Unpaid'
+              order.status === ORDER_STATUS.COMPLETED && order.paymentStatus === PAYMENT_STATUS.UNPAID
             "
             class="app-card tw:rounded-2xl tw:border"
           >
@@ -1042,12 +1026,12 @@ const confirmSplit = async () => {
               </div>
 
               <!-- Paid: show recorded info -->
-              <template v-if="order.paymentStatus === 'Paid'">
+              <template v-if="order.paymentStatus === PAYMENT_STATUS.PAID">
                 <div class="tw:space-y-3">
                   <div class="tw:flex tw:justify-between tw:text-sm">
                     <span class="app-text-muted">Method</span>
                     <span class="tw:font-medium">{{
-                      methodLabel(order.paymentMethod)
+                      PAYMENT_METHOD_MAP[order.paymentMethod]?.label ?? order.paymentMethod
                     }}</span>
                   </div>
                   <div
@@ -1081,8 +1065,8 @@ const confirmSplit = async () => {
               <!-- Unpaid & not Cancelled: inline payment form -->
               <template
                 v-else-if="
-                  order.paymentStatus === 'Unpaid' &&
-                  order.status !== 'Cancelled'
+                  order.paymentStatus === PAYMENT_STATUS.UNPAID &&
+                  order.status !== ORDER_STATUS.CANCELLED
                 "
               >
                 <div class="tw:space-y-4">

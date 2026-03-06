@@ -9,6 +9,9 @@ import {
   updatePayment,
 } from "@/services/order.service";
 import { btnIcon } from "@/layout/ui";
+import { ORDER_STATUS } from "@/constants/orderStatus";
+import { PAYMENT_STATUS } from "@/constants/paymentStatus";
+import { PAYMENT_METHOD, PAYMENT_METHOD_MAP } from "@/constants/paymentMethod";
 
 const router = useRouter();
 
@@ -49,34 +52,22 @@ watch(payChange, (val) => {
 });
 
 const PAYMENT_METHODS = [
-  { label: "Cash", value: "Cash", icon: "ph:money-bold" },
-  { label: "Bank Transfer", value: "BankTransfer", icon: "ph:bank-bold" },
+  { label: "Cash", value: PAYMENT_METHOD.CASH, icon: "ph:money-bold" },
+  { label: "Bank Transfer", value: PAYMENT_METHOD.BANK_TRANSFER, icon: "ph:bank-bold" },
 ];
 
-const methodLabel = (method) => {
-  if (method === "BankTransfer") return "Bank Transfer";
-  if (method === "Cash") return "Cash";
-  return "";
-};
-
 const paymentTag = (status, method) => {
-  switch (status) {
-    case "Paid": {
-      const m = methodLabel(method);
-      return { label: m ? `Paid · ${m}` : "Paid", severity: "success" };
-    }
-    case "Refunded":
-      return { label: "Refunded", severity: "secondary" };
-    case "Voided":
-      return { label: "Voided", severity: "danger" };
-    default:
-      return { label: "Unpaid", severity: "warn" };
+  if (status === PAYMENT_STATUS.PAID) {
+    const m = PAYMENT_METHOD_MAP[method]?.label ?? "";
+    return { label: m ? `Paid · ${m}` : "Paid", severity: "success" };
   }
+  const info = { REFUNDED: { label: "Refunded", severity: "secondary" }, VOIDED: { label: "Voided", severity: "danger" } };
+  return info[status] ?? { label: "Unpaid", severity: "warn" };
 };
 
 const openPayDialog = (order) => {
   payOrder.value = order;
-  payMethod.value = "Cash";
+  payMethod.value = PAYMENT_METHOD.CASH;
   payAmountReceived.value = null;
   payTip.value = 0;
   payDialog.value = true;
@@ -88,12 +79,12 @@ const confirmPayment = async () => {
   try {
     await updatePayment(
       payOrder.value.id,
-      "Paid",
+      PAYMENT_STATUS.PAID,
       payMethod.value,
       payAmountReceived.value,
       payTip.value ?? 0,
     );
-    payOrder.value.paymentStatus = "Paid";
+    payOrder.value.paymentStatus = PAYMENT_STATUS.PAID;
     payOrder.value.paymentMethod = payMethod.value;
     payDialog.value = false;
   } catch (err) {
@@ -108,7 +99,7 @@ const confirmPayment = async () => {
 
 const STATUSES = [
   {
-    key: "Pending",
+    key: ORDER_STATUS.PENDING,
     label: "Pending",
     icon: "ph:clock-bold",
     color: "tw:text-amber-400",
@@ -116,7 +107,7 @@ const STATUSES = [
     dot: "tw:bg-amber-400",
   },
   {
-    key: "Processing",
+    key: ORDER_STATUS.PROCESSING,
     label: "Processing",
     icon: "ph:fire-bold",
     color: "tw:text-blue-400",
@@ -124,7 +115,7 @@ const STATUSES = [
     dot: "tw:bg-blue-400",
   },
   {
-    key: "Completed",
+    key: ORDER_STATUS.COMPLETED,
     label: "Completed",
     icon: "ph:check-circle-bold",
     color: "tw:text-emerald-400",
@@ -132,7 +123,7 @@ const STATUSES = [
     dot: "tw:bg-emerald-400",
   },
   {
-    key: "Cancelled",
+    key: ORDER_STATUS.CANCELLED,
     label: "Cancelled",
     icon: "ph:x-circle-bold",
     color: "tw:text-red-400",
@@ -142,13 +133,13 @@ const STATUSES = [
 ];
 
 const NEXT_STATUS = {
-  Pending: "Processing",
-  Processing: "Completed",
+  [ORDER_STATUS.PENDING]: ORDER_STATUS.PROCESSING,
+  [ORDER_STATUS.PROCESSING]: ORDER_STATUS.COMPLETED,
 };
 
 const NEXT_LABEL = {
-  Pending: "Start preparing",
-  Processing: "Mark complete",
+  [ORDER_STATUS.PENDING]: "Start preparing",
+  [ORDER_STATUS.PROCESSING]: "Mark complete",
 };
 
 const ordersByStatus = computed(() => {
@@ -162,9 +153,9 @@ const ordersByStatus = computed(() => {
 
 const summary = computed(() => ({
   total: orders.value.length,
-  pending: ordersByStatus.value["Pending"].length,
-  processing: ordersByStatus.value["Processing"].length,
-  completed: ordersByStatus.value["Completed"].length,
+  pending: ordersByStatus.value[ORDER_STATUS.PENDING].length,
+  processing: ordersByStatus.value[ORDER_STATUS.PROCESSING].length,
+  completed: ordersByStatus.value[ORDER_STATUS.COMPLETED].length,
 }));
 
 const formatVnd = (value) =>
@@ -215,8 +206,8 @@ const moveOrder = async (order, toStatus) => {
 const cancelOrder = async (order) => {
   updatingId.value = order.id;
   try {
-    await updateOrderStatus(order.id, "Cancelled");
-    order.status = "Cancelled";
+    await updateOrderStatus(order.id, ORDER_STATUS.CANCELLED);
+    order.status = ORDER_STATUS.CANCELLED;
   } catch (err) {
     errorMessage.value =
       err?.response?.data?.errors?.join(", ") || "Failed to cancel order.";
@@ -229,8 +220,8 @@ const isValidDrop = (fromStatus, toStatus) => {
   if (!fromStatus || fromStatus === toStatus) return false;
   if (NEXT_STATUS[fromStatus] === toStatus) return true;
   if (
-    toStatus === "Cancelled" &&
-    (fromStatus === "Pending" || fromStatus === "Processing")
+    toStatus === ORDER_STATUS.CANCELLED &&
+    (fromStatus === ORDER_STATUS.PENDING || fromStatus === ORDER_STATUS.PROCESSING)
   )
     return true;
   return false;
@@ -657,11 +648,11 @@ onUnmounted(() => clearInterval(refreshTimer));
             :class="[
               updatingId === order.id ? 'tw:opacity-50' : '',
               draggingOrder?.id === order.id ? 'tw:opacity-40 tw:scale-95' : '',
-              col.key === 'Pending' || col.key === 'Processing'
+              col.key === ORDER_STATUS.PENDING || col.key === ORDER_STATUS.PROCESSING
                 ? 'tw:cursor-grab active:tw:cursor-grabbing'
                 : '',
             ]"
-            :draggable="col.key === 'Pending' || col.key === 'Processing'"
+            :draggable="col.key === ORDER_STATUS.PENDING || col.key === ORDER_STATUS.PROCESSING"
             @dragstart="handleDragStart(order)"
             @dragend="handleDragEnd"
           >
@@ -724,7 +715,7 @@ onUnmounted(() => clearInterval(refreshTimer));
                   @click="moveOrder(order, NEXT_STATUS[col.key])"
                 />
                 <prime-button
-                  v-if="col.key === 'Pending' || col.key === 'Processing'"
+                  v-if="col.key === ORDER_STATUS.PENDING || col.key === ORDER_STATUS.PROCESSING"
                   severity="danger"
                   size="small"
                   outlined
@@ -757,7 +748,7 @@ onUnmounted(() => clearInterval(refreshTimer));
               </div>
               <prime-button
                 v-if="
-                  order.paymentStatus === 'Unpaid' && col.key !== 'Cancelled'
+                  order.paymentStatus === PAYMENT_STATUS.UNPAID && col.key !== ORDER_STATUS.CANCELLED
                 "
                 severity="warn"
                 size="small"
