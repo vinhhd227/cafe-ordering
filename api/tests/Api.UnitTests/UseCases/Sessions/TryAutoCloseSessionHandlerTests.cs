@@ -4,7 +4,7 @@ using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
 using Api.Core.Aggregates.TableAggregate;
 using Api.Core.Aggregates.TableAggregate.Specifications;
-using Api.Core.Domain.Enums;
+using Api.Core.Aggregates.OrderAggregate;
 using Api.UseCases.Sessions.AutoClose;
 
 namespace Api.UnitTests.UseCases.Sessions;
