@@ -10,7 +10,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: CHANGE_ME # Must be overridden in docker-compose.dev.override.yml
+      POSTGRES_PASSWORD: your_password_here # Must be overridden in docker-compose.dev.override.yml
       POSTGRES_DB: cafe_ordering_db
     ports:
       - "5432:5432"
@@ -34,7 +34,7 @@ services:
       cafe-db:
         condition: service_healthy
     environment:
-      - ConnectionStrings__DefaultConnection=Host=cafe-db;Port=5432;Database=cafe_ordering_db;Username=admin;Password=CHANGE_ME
+      - ConnectionStrings__DefaultConnection=Host=cafe-db;Port=5432;Database=cafe_ordering_db;Username=admin;Password=your_password_here
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - Cors__AllowedOrigins__0=http://localhost:5173
