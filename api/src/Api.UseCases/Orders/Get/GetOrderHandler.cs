@@ -35,9 +35,9 @@ public class GetOrderHandler(
     var dto = new OrderDto(
       order.Id,
       order.OrderNumber,
-      order.Status.Name,
-      order.PaymentStatus.ToString(),
-      order.PaymentMethod.ToString(),
+      order.Status.Name.ToUpperInvariant(),
+      order.PaymentStatus.Name.ToUpperInvariant(),
+      order.PaymentMethod.Name.ToUpperInvariant(),
       order.AmountReceived,
       order.TipAmount,
       order.TotalAmount,

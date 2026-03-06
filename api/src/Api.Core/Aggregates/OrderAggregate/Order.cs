@@ -1,7 +1,7 @@
 // Core/Aggregates/OrderAggregate/Order.cs
 
 using Api.Core.Aggregates.OrderAggregate.Events;
-using Api.Core.Domain.Enums;
+using Api.Core.Aggregates.OrderAggregate;
 
 namespace Api.Core.Aggregates.OrderAggregate;
 
@@ -57,7 +57,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   }
 
   public void AddItem(int productId, string productName, decimal unitPrice, int quantity,
-    string? temperature = null, string? iceLevel = null, string? sugarLevel = null,
+    DrinkTemperature? temperature = null, IceLevel? iceLevel = null, SugarLevel? sugarLevel = null,
     bool isTakeaway = false)
   {
     if (Status == OrderStatus.Completed)

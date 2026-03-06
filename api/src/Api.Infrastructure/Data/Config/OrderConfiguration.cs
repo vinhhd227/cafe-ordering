@@ -1,6 +1,6 @@
 using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.OrderAggregate;
-using Api.Core.Domain.Enums;
+using Api.Core.Aggregates.OrderAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,20 +24,29 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
     builder.Property(o => o.DeviceToken).HasMaxLength(200);
 
-    // OrderStatus is a SmartEnum (class) — map via value converter using its int Value
+    // OrderStatus is a SmartEnum — store as UPPERCASE string for readability and correct EF Core translation
     builder.Property(o => o.Status)
       .IsRequired()
+      .HasMaxLength(20)
       .HasConversion(
-        v => v.Value,
-        v => OrderStatus.FromValue(v));
+        v => v.Name.ToUpperInvariant(),
+        v => OrderStatus.FromName(v, true));
 
     builder.Property(o => o.PaymentStatus)
       .IsRequired()
-      .HasDefaultValue(PaymentStatus.Unpaid);
+      .HasMaxLength(20)
+      .HasDefaultValueSql("'UNPAID'")
+      .HasConversion(
+        v => v.Name.ToUpperInvariant(),
+        v => PaymentStatus.FromName(v, true));
 
     builder.Property(o => o.PaymentMethod)
       .IsRequired()
-      .HasDefaultValue(PaymentMethod.Unknown);
+      .HasMaxLength(20)
+      .HasDefaultValueSql("'UNKNOWN'")
+      .HasConversion(
+        v => v.Name.ToUpperInvariant(),
+        v => PaymentMethod.FromName(v, true));
 
     builder.Property(o => o.AmountReceived);
     builder.Property(o => o.TipAmount).IsRequired().HasDefaultValue(0m);

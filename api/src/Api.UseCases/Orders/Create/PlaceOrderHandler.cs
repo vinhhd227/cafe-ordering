@@ -1,6 +1,7 @@
 using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
 using Api.Core.Aggregates.OrderAggregate;
+using Api.Core.Aggregates.OrderAggregate;
 using Api.UseCases.Orders.DTOs;
 
 namespace Api.UseCases.Orders.Create;
@@ -39,8 +40,15 @@ public class PlaceOrderHandler(
     // 4. Thêm items (dùng order.Id đã được sinh)
     foreach (var item in request.Items)
     {
+      DrinkTemperature? temp = item.Temperature is not null
+        ? DrinkTemperature.FromName(item.Temperature, true) : null;
+      IceLevel? iceLevel = item.IceLevel is not null
+        ? IceLevel.FromName(item.IceLevel, true) : null;
+      SugarLevel? sugarLevel = item.SugarLevel is not null
+        ? SugarLevel.FromName(item.SugarLevel, true) : null;
+
       order.AddItem(item.ProductId, item.ProductName, item.UnitPrice, item.Quantity,
-        item.Temperature, item.IceLevel, item.SugarLevel, item.IsTakeaway);
+        temp, iceLevel, sugarLevel, item.IsTakeaway);
     }
 
     await orderRepository.UpdateAsync(order, ct); // Lưu items

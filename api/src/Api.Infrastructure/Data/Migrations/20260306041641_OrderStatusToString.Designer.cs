@@ -3,6 +3,7 @@ using System;
 using Api.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260306041641_OrderStatusToString")]
+    partial class OrderStatusToString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -233,19 +236,15 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
+                    b.Property<int>("PaymentMethod")
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasDefaultValueSql("'UNKNOWN'");
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
+                    b.Property<int>("PaymentStatus")
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasDefaultValueSql("'UNPAID'");
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -304,8 +303,7 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<string>("IceLevel")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsTakeaway")
                         .HasColumnType("boolean");
@@ -324,12 +322,10 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SugarLevel")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Temperature")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
@@ -338,7 +334,7 @@ namespace Api.Infrastructure.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems", "business");
+                    b.ToTable("OrderItem", "business");
                 });
 
             modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.Product", b =>

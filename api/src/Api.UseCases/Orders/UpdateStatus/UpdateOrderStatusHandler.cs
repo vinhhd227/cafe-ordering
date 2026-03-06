@@ -16,16 +16,19 @@ public class UpdateOrderStatusHandler(IRepositoryBase<Order> repository, IMediat
     if (order is null)
       return Result.NotFound($"Order {request.OrderId} not found.");
 
+    if (!OrderStatus.TryFromName(request.Status, true, out var target))
+      return Result.Invalid(new ValidationError("Status", $"Unknown status: {request.Status}"));
+
     try
     {
-      if (request.Status == OrderStatus.Processing.Name)
+      if (target == OrderStatus.Processing)
         order.Process();
-      else if (request.Status == OrderStatus.Completed.Name)
+      else if (target == OrderStatus.Completed)
         order.Complete();
-      else if (request.Status == OrderStatus.Cancelled.Name)
+      else if (target == OrderStatus.Cancelled)
         order.Cancel();
       else
-        return Result.Invalid(new ValidationError("Status", $"Unknown status: {request.Status}"));
+        return Result.Invalid(new ValidationError("Status", $"Cannot transition to: {request.Status}"));
     }
     catch (InvalidOperationException ex)
     {
@@ -34,7 +37,7 @@ public class UpdateOrderStatusHandler(IRepositoryBase<Order> repository, IMediat
 
     await repository.UpdateAsync(order, ct);
 
-    if (request.Status == OrderStatus.Cancelled.Name)
+    if (target == OrderStatus.Cancelled)
       await mediator.Send(new TryAutoCloseSessionCommand(order.SessionId), ct);
 
     return Result.Success();

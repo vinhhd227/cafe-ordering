@@ -1,3 +1,4 @@
+using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Exceptions;
 
 namespace Api.Core.Aggregates.OrderAggregate;
@@ -18,9 +19,9 @@ public class OrderItem : BaseEntity
   public decimal Discount { get; private set; }
 
   // Customization options
-  public string? Temperature { get; private set; }
-  public string? IceLevel { get; private set; }
-  public string? SugarLevel { get; private set; }
+  public DrinkTemperature? Temperature { get; private set; }
+  public IceLevel? IceLevel { get; private set; }
+  public SugarLevel? SugarLevel { get; private set; }
   public bool IsTakeaway { get; private set; }
 
   // Calculated property
@@ -31,7 +32,7 @@ public class OrderItem : BaseEntity
   /// </summary>
   internal static OrderItem Create(int orderId, int productId,
     string productName, decimal unitPrice, int quantity,
-    string? temperature = null, string? iceLevel = null, string? sugarLevel = null,
+    DrinkTemperature? temperature = null, IceLevel? iceLevel = null, SugarLevel? sugarLevel = null,
     bool isTakeaway = false)
   {
     return new OrderItem

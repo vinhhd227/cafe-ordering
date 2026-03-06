@@ -2,7 +2,7 @@ using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
 using Api.Core.Aggregates.ProductAggregate;
 using Api.Core.Aggregates.ProductAggregate.Specifications;
-using Api.Core.Domain.Enums;
+using Api.Core.Aggregates.OrderAggregate;
 using Api.UseCases.Orders.DTOs;
 
 namespace Api.UseCases.Orders.UpdateItem;
@@ -72,9 +72,9 @@ public class UpdateOrderItemHandler(
     var dto = new OrderDto(
       order.Id,
       order.OrderNumber,
-      order.Status.Name,
-      order.PaymentStatus.ToString(),
-      order.PaymentMethod.ToString(),
+      order.Status.Name.ToUpperInvariant(),
+      order.PaymentStatus.Name.ToUpperInvariant(),
+      order.PaymentMethod.Name.ToUpperInvariant(),
       order.AmountReceived,
       order.TipAmount,
       order.TotalAmount,
