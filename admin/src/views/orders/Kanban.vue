@@ -1,17 +1,9 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { useRouter } from "vue-router";
-import { useToast } from "primevue/usetoast";
-import { useConfirm } from "primevue/useconfirm";
 import {
   getOrders,
   updateOrderStatus,
   updatePayment,
 } from "@/services/order.service";
-import { btnIcon } from "@/layout/ui";
-import { ORDER_STATUS } from "@/constants/orderStatus";
-import { PAYMENT_STATUS } from "@/constants/paymentStatus";
-import { PAYMENT_METHOD, PAYMENT_METHOD_MAP } from "@/constants/paymentMethod";
 
 const router = useRouter();
 
@@ -24,7 +16,35 @@ const dragOverCol = ref(null);
 const pendingMoves = ref(new Map()); // orderId → { timeoutId, originalStatus }
 const toast = useToast();
 const confirm = useConfirm();
-let refreshTimer = null;
+
+// ── SSE: real-time order updates ──────────────────────────────────
+const isToday = (dateStr) => {
+  const d = new Date(dateStr);
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear()
+    && d.getMonth() === now.getMonth()
+    && d.getDate() === now.getDate();
+};
+
+const { connected: sseConnected } = useOrderSse({
+  onOrderCreated(order) {
+    // Chỉ thêm nếu order thuộc ngày hôm nay và chưa có trong danh sách
+    if (!isToday(order.orderDate)) return;
+    const exists = orders.value.some((o) => o.id === order.id);
+    if (!exists) orders.value.unshift(order);
+  },
+  onOrderUpdated(order) {
+    const idx = orders.value.findIndex((o) => o.id === order.id);
+    if (idx !== -1) {
+      // Giữ lại pending drag-and-drop nếu đang trong quá trình undo
+      if (pendingMoves.value.has(order.id)) return;
+      orders.value[idx] = order;
+    }
+  },
+  onError(msg) {
+    errorMessage.value = msg;
+  },
+});
 
 // ── Payment dialog ────────────────────────────────────────────────
 const payDialog = ref(false);
@@ -51,18 +71,20 @@ watch(payChange, (val) => {
   }
 });
 
-const PAYMENT_METHODS = [
-  { label: "Cash", value: PAYMENT_METHOD.CASH, icon: "ph:money-bold" },
-  { label: "Bank Transfer", value: PAYMENT_METHOD.BANK_TRANSFER, icon: "ph:bank-bold" },
-];
+// Exclude UNKNOWN from payment dialog options
+const PAYMENT_METHODS = PAYMENT_METHOD_OPTIONS.filter(
+  (o) => o.value !== PAYMENT_METHOD.UNKNOWN,
+);
 
 const paymentTag = (status, method) => {
   if (status === PAYMENT_STATUS.PAID) {
     const m = PAYMENT_METHOD_MAP[method]?.label ?? "";
-    return { label: m ? `Paid · ${m}` : "Paid", severity: "success" };
+    return {
+      label: m ? `Paid · ${m}` : "Paid",
+      severity: PAYMENT_STATUS_MAP[PAYMENT_STATUS.PAID].severity,
+    };
   }
-  const info = { REFUNDED: { label: "Refunded", severity: "secondary" }, VOIDED: { label: "Voided", severity: "danger" } };
-  return info[status] ?? { label: "Unpaid", severity: "warn" };
+  return PAYMENT_STATUS_MAP[status] ?? PAYMENT_STATUS_MAP[PAYMENT_STATUS.UNPAID];
 };
 
 const openPayDialog = (order) => {
@@ -175,12 +197,19 @@ const timeAgo = (dateStr) => {
   return `${Math.floor(hrs / 24)}d ago`;
 };
 
+const todayRange = () => {
+  const now = new Date();
+  const dateFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).toISOString();
+  const dateTo   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+  return { dateFrom, dateTo };
+};
+
 const loadOrders = async () => {
   if (loading.value) return;
   loading.value = true;
   errorMessage.value = "";
   try {
-    const res = await getOrders();
+    const res = await getOrders({ ...todayRange(), pageSize: 200 });
     orders.value = res?.data?.items ?? [];
   } catch (err) {
     errorMessage.value =
@@ -300,10 +329,8 @@ const handleDrop = (colKey) => {
 
 onMounted(() => {
   loadOrders();
-  refreshTimer = setInterval(loadOrders, 30000);
+  // SSE connection được quản lý bởi useOrderSse (onMounted/onUnmounted bên trong composable)
 });
-
-onUnmounted(() => clearInterval(refreshTimer));
 </script>
 
 <template>
@@ -468,8 +495,12 @@ onUnmounted(() => clearInterval(refreshTimer));
           Orders
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Order management</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
-          Track and update orders in real time. Refreshes every 30s.
+        <p class="tw:mt-2 tw:text-sm app-text-muted tw:flex tw:items-center tw:gap-1.5">
+          <span
+            class="tw:inline-block tw:h-2 tw:w-2 tw:rounded-full tw:shrink-0 tw:transition-colors"
+            :class="sseConnected ? 'tw:bg-emerald-400' : 'tw:bg-amber-400 tw:animate-pulse'"
+          />
+          {{ sseConnected ? 'Live — updates instantly' : 'Connecting...' }}
         </p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
@@ -758,6 +789,16 @@ onUnmounted(() => clearInterval(refreshTimer));
               >
                 <iconify icon="ph:money-bold" />
                 <span>Mark paid</span>
+              </prime-button>
+              <prime-button
+                severity="secondary"
+                size="small"
+                text
+                class="tw:w-full"
+                @click="router.push({ name: 'ordersDetail', params: { id: order.id } })"
+              >
+                <iconify icon="ph:arrow-square-out-bold" />
+                <span>View detail</span>
               </prime-button>
             </div>
           </div>

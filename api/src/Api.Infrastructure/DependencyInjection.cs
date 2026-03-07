@@ -1,6 +1,7 @@
 ﻿using Api.Infrastructure.Identity;
 using Api.Infrastructure.Services;
 using Api.UseCases.Interfaces;
+using Api.UseCases.Orders.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace Api.Infrastructure;
@@ -81,6 +82,9 @@ public static class DependencyInjection
 
     // === Memory Cache ===
     services.AddMemoryCache();
+
+    // === SSE: Order real-time notifications ===
+    services.AddSingleton<IOrderSseNotifier, OrderSseNotifier>();
 
     logger.LogInformation("{Project} services registered", "Infrastructure");
 

@@ -77,6 +77,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
       throw new InvalidOperationException($"Cannot process order in {Status} status");
 
     Status = OrderStatus.Processing;
+    RegisterDomainEvent(new OrderStatusChangedEvent(this));
   }
 
   public void Cancel()
@@ -85,6 +86,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
       throw new InvalidOperationException($"Cannot cancel order in {Status} status");
 
     Status = OrderStatus.Cancelled;
+    RegisterDomainEvent(new OrderStatusChangedEvent(this));
   }
 
   public void Complete()
@@ -95,6 +97,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
     Status = OrderStatus.Completed;
 
     RegisterDomainEvent(new OrderCompletedEvent(this));
+    RegisterDomainEvent(new OrderStatusChangedEvent(this));
   }
 
   public void UpdatePayment(PaymentStatus status, PaymentMethod method,
@@ -107,6 +110,8 @@ public class Order : AuditableEntity<int>, IAggregateRoot
     PaymentMethod = method;
     AmountReceived = amountReceived;
     TipAmount = tipAmount;
+
+    RegisterDomainEvent(new OrderPaymentUpdatedEvent(this));
   }
 
   /// <summary>
