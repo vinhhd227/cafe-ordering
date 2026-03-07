@@ -1,6 +1,6 @@
 export const PAYMENT_METHOD = Object.freeze({
-  UNKNOWN: 'UNKNOWN',
-  CASH: 'CASH',
+  UNKNOWN:       'UNKNOWN',
+  CASH:          'CASH',
   BANK_TRANSFER: 'BANK_TRANSFER',
 });
 
@@ -9,3 +9,8 @@ export const PAYMENT_METHOD_MAP = Object.freeze({
   [PAYMENT_METHOD.CASH]:          { label: 'Cash',          icon: 'ph:money-bold' },
   [PAYMENT_METHOD.BANK_TRANSFER]: { label: 'Bank Transfer', icon: 'ph:bank-bold' },
 });
+
+/** Array ready for v-for */
+export const PAYMENT_METHOD_OPTIONS = Object.freeze(
+  Object.values(PAYMENT_METHOD).map((v) => ({ value: v, ...PAYMENT_METHOD_MAP[v] })),
+);

@@ -35,7 +35,7 @@ export default defineConfig({
                     zod: ['z'],
                 },
             ],
-            dirs: ['src/composables', 'src/stores'],
+            dirs: ['src/composables', 'src/stores', 'src/constants'],
             vueTemplate: true,
             dts: 'src/auto-imports.d.ts',
         }),
