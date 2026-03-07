@@ -9,6 +9,9 @@ import { PAYMENT_METHOD, PAYMENT_METHOD_MAP } from "@/constants/paymentMethod";
 
 const router = useRouter();
 
+// ── Table state cache ─────────────────────────────────────────────
+const { save: saveCache, restore: restoreCache } = useTableCache("orders-list");
+
 // ── Data ──────────────────────────────────────────────────────────
 const orders = ref([]);             // current page only
 const totalRecords = ref(0);        // from server
@@ -39,6 +42,22 @@ const paymentStatusFilter = ref(null);
 const minTotal = ref(null);
 const maxTotal = ref(null);
 const tableCodeFilter = ref("");
+
+// ── Restore cached state (trước khi watchers kích hoạt) ──────────
+const _cached = restoreCache();
+if (_cached) {
+  if (_cached.rows !== undefined)              rows.value              = _cached.rows;
+  if (_cached.first !== undefined)             first.value             = _cached.first;
+  if (_cached.statusFilter !== undefined)      statusFilter.value      = _cached.statusFilter;
+  if (_cached.paymentStatusFilter !== undefined) paymentStatusFilter.value = _cached.paymentStatusFilter;
+  if (_cached.searchOrder !== undefined)       searchOrder.value       = _cached.searchOrder;
+  if (_cached.tableCodeFilter !== undefined)   tableCodeFilter.value   = _cached.tableCodeFilter;
+  if (_cached.minTotal !== undefined)          minTotal.value          = _cached.minTotal;
+  if (_cached.maxTotal !== undefined)          maxTotal.value          = _cached.maxTotal;
+  // Date được lưu dạng ISO string → khôi phục thành Date object
+  if (_cached.dateFrom) dateFrom.value = new Date(_cached.dateFrom);
+  if (_cached.dateTo)   dateTo.value   = new Date(_cached.dateTo);
+}
 
 const filterPanel = ref(null);
 
@@ -74,7 +93,9 @@ const clearFilters = () => {
   minTotal.value = null;
   maxTotal.value = null;
   tableCodeFilter.value = "";
-  // server-side filter changes are watched and will reload
+  searchOrder.value = "";
+  first.value = 0;
+  // server-side filter changes are watched and will reload + re-save cache
 };
 
 const summary = computed(() => ({
@@ -112,6 +133,21 @@ const paymentTag = (status, method) => {
 };
 
 // ── Load ──────────────────────────────────────────────────────────
+const saveCurrentState = () => {
+  saveCache({
+    rows: rows.value,
+    first: first.value,
+    statusFilter: statusFilter.value,
+    paymentStatusFilter: paymentStatusFilter.value,
+    searchOrder: searchOrder.value,
+    tableCodeFilter: tableCodeFilter.value,
+    minTotal: minTotal.value,
+    maxTotal: maxTotal.value,
+    dateFrom: dateFrom.value?.toISOString?.() ?? dateFrom.value,
+    dateTo: dateTo.value?.toISOString?.() ?? dateTo.value,
+  });
+};
+
 const loadOrders = async () => {
   loading.value = true;
   errorMessage.value = "";
@@ -134,6 +170,7 @@ const loadOrders = async () => {
     totalRecords.value = data?.totalCount ?? 0;
     cashTotal.value = data?.cashTotal ?? 0;
     bankTransferTotal.value = data?.bankTransferTotal ?? 0;
+    saveCurrentState();
   } catch (err) {
     errorMessage.value =
       err?.response?.data?.message || "Failed to load orders.";
@@ -476,6 +513,7 @@ const confirmPayment = async () => {
             :class="!hasActiveFilters ? btnIcon : ''"
           >
             <iconify icon="ph:funnel-bold" />
+            <span>Filters</span>
             <prime-badge
               v-if="activeFilterCount > 0"
               :value="activeFilterCount"
