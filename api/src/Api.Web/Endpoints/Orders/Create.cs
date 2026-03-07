@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Api.UseCases.Orders.Create;
 using Api.UseCases.Orders.DTOs;
 using Api.Web.Extensions;
@@ -16,6 +17,20 @@ public sealed class CreateOrderItemRequest
   public string ProductName { get; set; } = string.Empty;
   public decimal UnitPrice { get; set; }
   public int Quantity { get; set; }
+
+  /// <summary>Accepts string name ("HOT"/"COLD"), integer value ("1"/"2"), or null.</summary>
+  [JsonConverter(typeof(NumberOrStringConverter))]
+  public string? Temperature { get; set; }
+
+  /// <summary>Accepts string name ("LESS"/"NORMAL"/"MORE"), integer value, or null.</summary>
+  [JsonConverter(typeof(NumberOrStringConverter))]
+  public string? IceLevel { get; set; }
+
+  /// <summary>Accepts string name ("LESS"/"NORMAL"/"MORE"), integer value, or null.</summary>
+  [JsonConverter(typeof(NumberOrStringConverter))]
+  public string? SugarLevel { get; set; }
+
+  public bool IsTakeaway { get; set; }
 }
 
 public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrderResponseDto>
@@ -31,7 +46,9 @@ public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrde
   public override async Task HandleAsync(CreateOrderRequest req, CancellationToken ct)
   {
     var items = req.Items
-      .Select(i => new PlaceOrderItemDto(i.ProductId, i.ProductName, i.UnitPrice, i.Quantity))
+      .Select(i => new PlaceOrderItemDto(
+        i.ProductId, i.ProductName, i.UnitPrice, i.Quantity,
+        i.Temperature, i.IceLevel, i.SugarLevel, i.IsTakeaway))
       .ToList();
 
     var result = await mediator.Send(new PlaceOrderCommand(req.SessionId, items), ct);

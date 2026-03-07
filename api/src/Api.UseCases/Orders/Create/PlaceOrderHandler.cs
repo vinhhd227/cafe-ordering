@@ -1,7 +1,6 @@
 using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
 using Api.Core.Aggregates.OrderAggregate;
-using Api.Core.Aggregates.OrderAggregate;
 using Api.UseCases.Orders.DTOs;
 
 namespace Api.UseCases.Orders.Create;
@@ -41,11 +40,11 @@ public class PlaceOrderHandler(
     foreach (var item in request.Items)
     {
       DrinkTemperature? temp = item.Temperature is not null
-        ? DrinkTemperature.FromName(item.Temperature, true) : null;
+        ? DrinkTemperature.FromName(NormalizeTemperature(item.Temperature), true) : null;
       IceLevel? iceLevel = item.IceLevel is not null
-        ? IceLevel.FromName(item.IceLevel, true) : null;
+        ? IceLevel.FromName(NormalizeIceLevel(item.IceLevel), true) : null;
       SugarLevel? sugarLevel = item.SugarLevel is not null
-        ? SugarLevel.FromName(item.SugarLevel, true) : null;
+        ? SugarLevel.FromName(NormalizeSugarLevel(item.SugarLevel), true) : null;
 
       order.AddItem(item.ProductId, item.ProductName, item.UnitPrice, item.Quantity,
         temp, iceLevel, sugarLevel, item.IsTakeaway);
@@ -55,4 +54,29 @@ public class PlaceOrderHandler(
 
     return Result.Success(new PlaceOrderResponseDto(order.Id, order.OrderNumber, order.TotalAmount));
   }
+
+  // Normalize legacy/alternative representations to canonical SmartEnum names.
+  // Handles: integer strings ("1","2"), Vietnamese strings, already-correct names.
+  private static string NormalizeTemperature(string raw) => raw.Trim() switch
+  {
+    "1" or "HOT"  or "Nóng"  or "nóng"  => "HOT",
+    "2" or "COLD" or "Lạnh"  or "lạnh"  => "COLD",
+    var s                                 => s.ToUpperInvariant()
+  };
+
+  private static string NormalizeIceLevel(string raw) => raw.Trim() switch
+  {
+    "1" or "LESS"   or "Ít đá"       or "ít đá"       => "LESS",
+    "2" or "NORMAL" or "Bình thường"  or "bình thường" => "NORMAL",
+    "3" or "MORE"   or "Nhiều đá"     or "nhiều đá"    => "MORE",
+    var s                                                => s.ToUpperInvariant()
+  };
+
+  private static string NormalizeSugarLevel(string raw) => raw.Trim() switch
+  {
+    "1" or "LESS"   or "Ít đường"    or "ít đường"    => "LESS",
+    "2" or "NORMAL" or "Bình thường" or "bình thường" => "NORMAL",
+    "3" or "MORE"   or "Nhiều đường" or "nhiều đường" => "MORE",
+    var s                                               => s.ToUpperInvariant()
+  };
 }
