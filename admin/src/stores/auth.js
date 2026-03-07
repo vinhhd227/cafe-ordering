@@ -57,11 +57,19 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async doRefreshToken() {
+            // Dedup: nếu đang refresh thì trả về promise hiện tại
             if (this.refreshing && this._refreshPromise) {
                 return this._refreshPromise
             }
+
+            // Set refreshing = true TRƯỚC khi tăng attempts để tránh race condition:
+            // nếu 2 request cùng bị 401, cả 2 thấy refreshing = false đồng thời
+            // → cả 2 cùng vào, attempts = 2 → logout ngay mà không thực sự refresh
+            this.refreshing = true
             this.refreshAttempts += 1
+
             if (this.refreshAttempts > 1) {
+                this.refreshing = false
                 this.logout()
                 throw new Error('Refresh attempt exceeded')
             }
@@ -71,9 +79,12 @@ export const useAuthStore = defineStore('auth', {
                 this.refreshToken = localStorage.getItem('refreshToken')
             }
 
-            this.refreshing = true
+            // Snapshot token ngay lúc này để tránh bị overwrite
+            // nếu có concurrent call nào đó thay đổi this.refreshToken
+            const tokenToUse = this.refreshToken
+
             this._refreshPromise = (async () => {
-                const res = await refresh(this.refreshToken)
+                const res = await refresh(tokenToUse)
                 this.accessToken = res.data.accessToken
                 this.refreshToken = res.data.refreshToken
                 localStorage.setItem('refreshToken', res.data.refreshToken)

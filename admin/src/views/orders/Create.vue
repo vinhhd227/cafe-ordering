@@ -28,14 +28,6 @@ const pendingOptions = ref({
   sugarLevel: null,
   isTakeaway: false,
 });
-const orderTypeOptions = [
-  { label: "Dine-in", value: false, icon: "tdesign:drink-filled" },
-  { label: "Takeaway", value: true , icon: "streamline:coffee-takeaway-cup-remix" },
-];
-const orderTemperatureOptions = [
-  { label: "Hot", value: 1, icon:"ph:thermometer-hot-light" },
-  { label: "Cold", value: 2, icon:"ph:thermometer-cold-light" },
-];
 
 // ── Cart ─────────────────────────────────────────────────────────
 const cart = ref([]);
@@ -72,11 +64,12 @@ const makeCartKey = (productId, opts) => {
 
 const optionsLabel = (item) => {
   const parts = [];
-  if (item.temperature) parts.push(item.temperature);
-  if (item.iceLevel && item.iceLevel !== "Bình thường")
-    parts.push(`Đá: ${item.iceLevel}`);
-  if (item.sugarLevel && item.sugarLevel !== "Bình thường")
-    parts.push(`Đường: ${item.sugarLevel}`);
+  if (item.temperature)
+    parts.push(DRINK_TEMPERATURE_MAP[item.temperature]?.label ?? item.temperature);
+  if (item.iceLevel && item.iceLevel !== ICE_LEVEL.NORMAL)
+    parts.push(ICE_LEVEL_MAP[item.iceLevel]?.label ?? item.iceLevel);
+  if (item.sugarLevel && item.sugarLevel !== SUGAR_LEVEL.NORMAL)
+    parts.push(SUGAR_LEVEL_MAP[item.sugarLevel]?.label ?? item.sugarLevel);
   return parts.join(" · ");
 };
 
@@ -113,7 +106,7 @@ const canPlaceOrder = computed(
 
 const orderLabel = computed(() => {
   const t = tables.value.find((t) => t.id === selectedTableId.value);
-  return t ? `Bàn ${t.code}` : "";
+  return t ? `Table ${t.code}` : "";
 });
 
 // ── Cart helpers ──────────────────────────────────────────────────
@@ -137,9 +130,9 @@ const clearCart = () => {
 const handleAddToCart = (product) => {
   selectedProduct.value = product;
   pendingOptions.value = {
-    temperature: product.hasTemperatureOption ? 2 : null,
-    iceLevel: product.hasIceLevelOption ? "Bình thường" : null,
-    sugarLevel: product.hasSugarLevelOption ? "Bình thường" : null,
+    temperature: product.hasTemperatureOption ? DRINK_TEMPERATURE.COLD : null,
+    iceLevel: product.hasIceLevelOption ? ICE_LEVEL.NORMAL : null,
+    sugarLevel: product.hasSugarLevelOption ? SUGAR_LEVEL.NORMAL : null,
     isTakeaway: false,
   };
   pendingQuantity.value = 1;
@@ -148,17 +141,17 @@ const handleAddToCart = (product) => {
 
 const setTemperature = (opt) => {
   pendingOptions.value.temperature = opt;
-  if (opt === 1) {
+  if (opt === DRINK_TEMPERATURE.HOT) {
     if (selectedProduct.value?.hasIceLevelOption)
-      pendingOptions.value.iceLevel = "Không đá";
+      pendingOptions.value.iceLevel = ICE_LEVEL.LESS;
     if (selectedProduct.value?.hasSugarLevelOption)
-      pendingOptions.value.sugarLevel = "Bình thường";
-  } else if (opt === 2) {
+      pendingOptions.value.sugarLevel = SUGAR_LEVEL.NORMAL;
+  } else if (opt === DRINK_TEMPERATURE.COLD) {
     if (
       selectedProduct.value?.hasIceLevelOption &&
-      pendingOptions.value.iceLevel === "Không đá"
+      pendingOptions.value.iceLevel === ICE_LEVEL.LESS
     )
-      pendingOptions.value.iceLevel = "Bình thường";
+      pendingOptions.value.iceLevel = ICE_LEVEL.NORMAL;
   }
 };
 
@@ -228,8 +221,8 @@ const placeOrder = async () => {
     const { orderId } = res.data;
     toast.add({
       severity: "success",
-      summary: "Đặt hàng thành công",
-      detail: `Order #${res.data.orderNumber} đã tạo.`,
+      summary: "Order placed",
+      detail: `Order #${res.data.orderNumber} created.`,
       life: 3000,
     });
     router.push({ name: "ordersDetail", params: { id: orderId } });
@@ -370,7 +363,7 @@ onMounted(async () => {
             icon="ph:magnifying-glass-bold"
             class="tw:text-3xl tw:mb-3 tw:block tw:mx-auto tw:opacity-40"
           />
-          Không tìm thấy sản phẩm nào.
+          No products found.
         </div>
 
         <!-- Categories (collapsible) -->
@@ -388,7 +381,7 @@ onMounted(async () => {
               <div class="tw:flex tw:items-center tw:gap-2">
                 <h2 class="tw:text-sm tw:font-semibold">{{ category.name }}</h2>
                 <span class="tw:text-xs app-text-muted"
-                  >{{ category.filteredProducts.length }} món</span
+                  >{{ category.filteredProducts.length }} items</span
                 >
               </div>
               <iconify
@@ -465,17 +458,17 @@ onMounted(async () => {
                     <span
                       v-if="product.hasTemperatureOption"
                       class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-orange-500/10 tw:text-orange-400"
-                      >N/L</span
+                      >Temp</span
                     >
                     <span
                       v-if="product.hasIceLevelOption"
                       class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-sky-500/10 tw:text-sky-400"
-                      >Đá</span
+                      >Ice</span
                     >
                     <span
                       v-if="product.hasSugarLevelOption"
                       class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-amber-500/10 tw:text-amber-400"
-                      >Đường</span
+                      >Sugar</span
                     >
                   </div>
 
@@ -682,9 +675,9 @@ onMounted(async () => {
     @hide="selectedProduct = null"
   >
     <div class="tw:space-y-5">
-      <!-- Số lượng -->
+      <!-- Quantity -->
       <div>
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">Số lượng</p>
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">Quantity</p>
         <div class="tw:flex tw:items-center tw:gap-3">
           <button
             class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
@@ -706,12 +699,12 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- Nhiệt độ -->
+      <!-- Temperature -->
       <div v-if="selectedProduct?.hasTemperatureOption">
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">Nhiệt độ</p>
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">Temperature</p>
         <div class="tw:flex tw:gap-2">
            <prime-button
-           v-for="opt in orderTemperatureOptions"
+           v-for="opt in DRINK_TEMPERATURE_OPTIONS"
             variant="outlined"
             class="tw:w-full"
             :severity="pendingOptions.temperature === opt.value ? 'primary' : 'secondary'"
@@ -720,92 +713,68 @@ onMounted(async () => {
           <iconify :icon="opt.icon" />
           <span>{{ opt.label }}</span>
         </prime-button>
-          <!-- <button
-            v-for="opt in ['Hot', 'Cold']"
-            :key="opt"
-            class="tw:flex-1 tw:rounded-xl tw:border tw:px-4 tw:py-2 tw:text-sm tw:font-medium tw:transition"
-            :class="
-              pendingOptions.temperature === opt
-                ? opt === 'Nóng'
-                  ? 'tw:border-orange-400 tw:bg-orange-500/10 tw:text-orange-400'
-                  : 'tw:border-sky-400 tw:bg-sky-500/10 tw:text-sky-400'
-                : 'tw:border-white/10 app-text-muted hover:tw:border-white/30'
-            "
-            @click="setTemperature(opt)"
-          >
-            {{ opt }}
-          </button> -->
         </div>
       </div>
 
-      <!-- Mức đá -->
+      <!-- Ice level — only when Cold -->
       <div
         v-if="
           selectedProduct?.hasIceLevelOption &&
-          pendingOptions.temperature !== 1
+          pendingOptions.temperature !== DRINK_TEMPERATURE.HOT
         "
       >
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">Mức đá</p>
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">Ice level</p>
         <div class="tw:grid tw:grid-cols-2 tw:gap-2">
-          <button
-            v-for="opt in ['Không đá', 'Ít đá', 'Bình thường', 'Nhiều đá']"
-            :key="opt"
-            class="tw:rounded-xl tw:border tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:transition"
-            :class="
-              pendingOptions.iceLevel === opt
-                ? 'tw:border-sky-400 tw:bg-sky-500/10 tw:text-sky-400'
-                : 'tw:border-white/10 app-text-muted hover:tw:border-sky-400/50'
-            "
-            @click="pendingOptions.iceLevel = opt"
+          <prime-button
+            v-for="opt in ICE_LEVEL_OPTIONS"
+            :key="opt.value"
+            variant="outlined"
+            class="tw:w-full"
+            :severity="pendingOptions.iceLevel === opt.value ? 'primary' : 'secondary'"
+            @click="pendingOptions.iceLevel = opt.value"
           >
-            {{ opt }}
-          </button>
+            <iconify :icon="opt.icon" />
+            <span>{{ opt.label }}</span>
+          </prime-button>
         </div>
       </div>
 
-      <!-- Mức đường -->
+      <!-- Sugar level — only when Cold -->
       <div
         v-if="
           selectedProduct?.hasSugarLevelOption &&
-          pendingOptions.temperature !== 1
+          pendingOptions.temperature !== DRINK_TEMPERATURE.HOT
         "
       >
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">Mức đường</p>
-        <div class="tw:grid tw:grid-cols-2 tw:gap-2">
-          <button
-            v-for="opt in [
-              'Không đường',
-              'Ít đường',
-              'Bình thường',
-              'Nhiều đường',
-            ]"
-            :key="opt"
-            class="tw:rounded-xl tw:border tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:transition"
-            :class="
-              pendingOptions.sugarLevel === opt
-                ? 'tw:border-amber-400 tw:bg-amber-500/10 tw:text-amber-400'
-                : 'tw:border-white/10 app-text-muted hover:tw:border-amber-400/50'
-            "
-            @click="pendingOptions.sugarLevel = opt"
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">Sugar level</p>
+        <div class="tw:grid tw:grid-cols-3 tw:gap-2">
+          <prime-button
+            v-for="opt in SUGAR_LEVEL_OPTIONS"
+            :key="opt.value"
+            variant="outlined"
+            class="tw:w-full"
+            :severity="pendingOptions.sugarLevel === opt.value ? 'primary' : 'secondary'"
+            @click="pendingOptions.sugarLevel = opt.value"
           >
-            {{ opt }}
-          </button>
+            <iconify v-if="opt.icon" :icon="opt.icon" />
+            <span>{{ opt.label }}</span>
+          </prime-button>
         </div>
       </div>
 
-      <!-- Phục vụ: Dùng tại chỗ / Mang về -->
+      <!-- Serving -->
       <div>
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">Phục vụ</p>
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">Serving</p>
         <div class="tw:flex tw:gap-2">
           <prime-button
-            v-for="orderType in orderTypeOptions"
+            v-for="servingType in SERVING_TYPE_OPTIONS"
             variant="outlined"
             class="tw:w-full"
-            :severity="pendingOptions.isTakeaway === orderType.value ? 'primary' : 'secondary'"
-            @click="pendingOptions.isTakeaway = orderType.value"
+            :severity="pendingOptions.isTakeaway === servingType.value ? 'primary' : 'secondary'"
+            @click="pendingOptions.isTakeaway = servingType.value"
           >
-            <iconify :icon="orderType.icon" />
-            <span>{{ orderType.label }}</span>
+            <iconify :icon="servingType.icon" />
+            <span>{{ servingType.label }}</span>
           </prime-button>
         </div>
       </div>

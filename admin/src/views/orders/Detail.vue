@@ -262,11 +262,9 @@ const openMergeDialog = async () => {
   mergeFetching.value = true;
   mergeDialog.value = true;
   try {
-    const res = await getOrders();
-    const all = res?.data ?? [];
-    mergeOrders_.value = all.filter(
-      (o) => o.paymentStatus === PAYMENT_STATUS.UNPAID && o.id !== orderId,
-    );
+    const res = await getOrders({ paymentStatus: PAYMENT_STATUS.UNPAID, pageSize: 100 });
+    const all = res?.data?.items ?? [];
+    mergeOrders_.value = all.filter((o) => o.id !== orderId);
   } catch {
     mergeOrders_.value = [];
   } finally {
@@ -446,6 +444,11 @@ const confirmSplit = async () => {
             </p>
             <p class="tw:text-xs app-text-muted">
               {{ o.items?.length ?? 0 }} item(s)
+              <span v-if="o.tableCode" class="tw:ml-1">
+                · <iconify icon="ph:table-bold" class="tw:inline tw:text-[10px]" />
+                {{ o.tableCode }}
+              </span>
+              <span v-else class="tw:ml-1 tw:italic">· No table</span>
             </p>
           </div>
           <div class="tw:text-right tw:shrink-0">
@@ -781,6 +784,13 @@ const confirmSplit = async () => {
                     :severity="statusTag(order.status).severity"
                   />
                 </div>
+                <div class="tw:flex tw:justify-between tw:text-sm tw:items-center">
+                  <span class="app-text-muted">Table</span>
+                  <span v-if="order.tableCode" class="tw:font-semibold tw:font-mono">
+                    {{ order.tableCode }}
+                  </span>
+                  <span v-else class="app-text-muted tw:italic tw:text-xs">—</span>
+                </div>
                 <div
                   class="tw:flex tw:justify-between tw:text-sm tw:items-center"
                 >
@@ -967,7 +977,42 @@ const confirmSplit = async () => {
                       class="tw:w-6 tw:h-6 tw:rounded-full tw:bg-white/10 tw:flex tw:items-center tw:justify-center tw:text-xs tw:font-semibold tw:shrink-0"
                       >{{ item.quantity }}</span
                     >
-                    <span class="tw:font-medium tw:truncate">{{ item.productName }}</span>
+                    <div class="tw:min-w-0">
+                      <span class="tw:font-medium tw:truncate tw:block">{{ item.productName }}</span>
+                      <!-- Drink options -->
+                      <div
+                        v-if="item.temperature || item.iceLevel || item.sugarLevel || item.isTakeaway"
+                        class="tw:flex tw:flex-wrap tw:gap-1 tw:mt-1"
+                      >
+                        <span v-if="item.temperature"
+                          class="tw:inline-flex tw:items-center tw:gap-0.5 tw:rounded tw:px-1.5 tw:py-0.5 tw:text-[10px] tw:font-medium"
+                          :class="item.temperature === 'HOT'
+                            ? 'tw:bg-orange-500/15 tw:text-orange-300'
+                            : 'tw:bg-sky-500/15 tw:text-sky-300'"
+                        >
+                          <iconify :icon="item.temperature === 'HOT' ? 'ph:flame-bold' : 'ph:snowflake-bold'" class="tw:text-[9px]" />
+                          {{ item.temperature === 'HOT' ? 'Hot' : 'Cold' }}
+                        </span>
+                        <span v-if="item.iceLevel && item.iceLevel !== 'NORMAL'"
+                          class="tw:inline-flex tw:items-center tw:gap-0.5 tw:rounded tw:px-1.5 tw:py-0.5 tw:text-[10px] tw:font-medium tw:bg-sky-500/10 tw:text-sky-400"
+                        >
+                          <iconify icon="ph:ice-cream-bold" class="tw:text-[9px]" />
+                          Ice {{ item.iceLevel === 'LESS' ? 'less' : 'more' }}
+                        </span>
+                        <span v-if="item.sugarLevel && item.sugarLevel !== 'NORMAL'"
+                          class="tw:inline-flex tw:items-center tw:gap-0.5 tw:rounded tw:px-1.5 tw:py-0.5 tw:text-[10px] tw:font-medium tw:bg-amber-500/10 tw:text-amber-400"
+                        >
+                          <iconify icon="ph:cube-bold" class="tw:text-[9px]" />
+                          Sugar {{ item.sugarLevel === 'LESS' ? 'less' : 'more' }}
+                        </span>
+                        <span v-if="item.isTakeaway"
+                          class="tw:inline-flex tw:items-center tw:gap-0.5 tw:rounded tw:px-1.5 tw:py-0.5 tw:text-[10px] tw:font-medium tw:bg-purple-500/10 tw:text-purple-400"
+                        >
+                          <iconify icon="ph:bag-bold" class="tw:text-[9px]" />
+                          Takeaway
+                        </span>
+                      </div>
+                    </div>
                   </div>
                   <div class="tw:flex tw:items-center tw:gap-2 tw:shrink-0">
                     <div class="tw:text-right">

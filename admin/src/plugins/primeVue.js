@@ -57,6 +57,7 @@ import ConfirmPopup from 'primevue/confirmpopup';
 import Popover from 'primevue/popover';
 import SelectButton from 'primevue/selectbutton';
 import DatePicker from 'primevue/datepicker';
+import ProgressSpinner from 'primevue/progressspinner';
 
 
 import ConfirmationService from 'primevue/confirmationservice';
@@ -162,5 +163,6 @@ export default {
         app.component('prime-alert', AppAlert)
         app.component('prime-select-button', SelectButton)
         app.component('prime-date-picker', DatePicker)
+        app.component('prime-progress-spinner', ProgressSpinner)
     },
 }
