@@ -2,7 +2,6 @@ using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
 using Api.Core.Aggregates.ProductAggregate;
 using Api.Core.Aggregates.ProductAggregate.Specifications;
-using Api.Core.Aggregates.OrderAggregate;
 using Api.UseCases.Orders.DTOs;
 
 namespace Api.UseCases.Orders.UpdateItem;
@@ -86,7 +85,11 @@ public class UpdateOrderItemHandler(
         i.ProductName,
         i.UnitPrice,
         i.Quantity,
-        i.TotalPrice
+        i.TotalPrice,
+        i.Temperature?.Name.ToUpperInvariant(),
+        i.IceLevel?.Name.ToUpperInvariant(),
+        i.SugarLevel?.Name.ToUpperInvariant(),
+        i.IsTakeaway
       )).ToList()
     );
 

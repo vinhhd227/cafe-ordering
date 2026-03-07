@@ -1,8 +1,5 @@
 using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.OrderAggregate;
-using Api.Core.Aggregates.OrderAggregate;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Api.Infrastructure.Data.Config;
 

@@ -34,33 +34,35 @@ public class ListOrdersHandler(
       }
     }
 
+    // Npgsql chỉ chấp nhận DateTimeKind.Utc cho timestamp with time zone
+    var dateFrom = request.DateFrom.HasValue
+      ? DateTime.SpecifyKind(request.DateFrom.Value, DateTimeKind.Utc)
+      : (DateTime?)null;
+    var dateTo = request.DateTo.HasValue
+      ? DateTime.SpecifyKind(request.DateTo.Value, DateTimeKind.Utc)
+      : (DateTime?)null;
+
     var countSpec = new OrdersCountSpec(request.Status, request.PaymentStatus,
-      request.DateFrom, request.DateTo, filteredSessionIds,
+      dateFrom, dateTo, filteredSessionIds,
       request.MinAmount, request.MaxAmount, request.OrderNumber);
 
     var spec = new OrdersListSpec(request.Status, request.PaymentStatus,
-      request.DateFrom, request.DateTo, request.Page, request.PageSize,
+      dateFrom, dateTo, request.Page, request.PageSize,
       filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
 
     var cashSpec = new PaidOrdersTotalSpec(PaymentMethod.Cash,
-      request.Status, request.DateFrom, request.DateTo,
+      request.Status, dateFrom, dateTo,
       filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
 
     var bankSpec = new PaidOrdersTotalSpec(PaymentMethod.BankTransfer,
-      request.Status, request.DateFrom, request.DateTo,
+      request.Status, dateFrom, dateTo,
       filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
 
-    // Chạy song song: count + list + 2 aggregate totals
-    var countTask     = repository.CountAsync(countSpec, ct);
-    var listTask      = repository.ListAsync(spec, ct);
-    var cashTask      = repository.ListAsync(cashSpec, ct);
-    var bankTask      = repository.ListAsync(bankSpec, ct);
-    await Task.WhenAll(countTask, listTask, cashTask, bankTask);
-
-    var totalCount  = countTask.Result;
-    var orders      = listTask.Result;
-    var cashAmounts = cashTask.Result;
-    var bankAmounts = bankTask.Result;
+    // Thực hiện tuần tự — EF Core DbContext không hỗ trợ concurrent operations
+    var totalCount  = await repository.CountAsync(countSpec, ct);
+    var orders      = await repository.ListAsync(spec, ct);
+    var cashAmounts = await repository.ListAsync(cashSpec, ct);
+    var bankAmounts = await repository.ListAsync(bankSpec, ct);
 
     // Build sessionId → tableId map (chỉ load sessions cho trang hiện tại)
     var sessionIds = orders.Select(o => o.SessionId).Distinct().ToList();
@@ -95,7 +97,11 @@ public class ListOrdersHandler(
           i.ProductName,
           i.UnitPrice,
           i.Quantity,
-          i.TotalPrice
+          i.TotalPrice,
+          i.Temperature?.Name.ToUpperInvariant(),
+          i.IceLevel?.Name.ToUpperInvariant(),
+          i.SugarLevel?.Name.ToUpperInvariant(),
+          i.IsTakeaway
         )).ToList()
       );
     }).ToList();

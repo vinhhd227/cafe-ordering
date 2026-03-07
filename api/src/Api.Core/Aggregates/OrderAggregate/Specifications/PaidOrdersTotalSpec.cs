@@ -16,8 +16,12 @@ public class PaidOrdersTotalSpec : Specification<Order, decimal>
     decimal? maxAmount = null,
     string? orderNumber = null)
   {
+    // Phải dùng local variable thay vì static field (PaymentStatus.Paid) trong lambda
+    // EF Core không thể translate static member access trong expression tree khi dùng HasConversion
+    var paid = PaymentStatus.Paid;
+
     Query
-      .Where(o => o.PaymentStatus == PaymentStatus.Paid && o.PaymentMethod == method)
+      .Where(o => o.PaymentStatus == paid && o.PaymentMethod == method)
       .Select(o => o.TotalAmount);
 
     if (!string.IsNullOrWhiteSpace(status))

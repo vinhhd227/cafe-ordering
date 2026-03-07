@@ -1,6 +1,5 @@
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
-using Api.Core.Aggregates.OrderAggregate;
 
 namespace Api.UseCases.Orders.Split;
 

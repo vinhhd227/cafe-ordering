@@ -1,5 +1,4 @@
 using Api.Core.Aggregates.OrderAggregate;
-using Api.Core.Aggregates.OrderAggregate;
 
 namespace Api.Infrastructure.Data.Config;
 

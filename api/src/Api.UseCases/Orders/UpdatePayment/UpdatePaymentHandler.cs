@@ -1,6 +1,5 @@
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
-using Api.Core.Aggregates.OrderAggregate;
 using Api.UseCases.Sessions.AutoClose;
 using IMediator = Mediator.IMediator;
 

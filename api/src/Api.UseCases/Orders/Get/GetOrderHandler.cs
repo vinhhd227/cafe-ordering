@@ -49,7 +49,11 @@ public class GetOrderHandler(
         i.ProductName,
         i.UnitPrice,
         i.Quantity,
-        i.TotalPrice
+        i.TotalPrice,
+        i.Temperature?.Name.ToUpperInvariant(),
+        i.IceLevel?.Name.ToUpperInvariant(),
+        i.SugarLevel?.Name.ToUpperInvariant(),
+        i.IsTakeaway
       )).ToList()
     );
 
