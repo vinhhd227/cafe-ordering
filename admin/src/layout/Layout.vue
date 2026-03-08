@@ -36,7 +36,7 @@ const { isOpen, isCollapsed, close } = useSidebar();
       <admin-header />
 
       <main class="tw:flex-1 tw:px-8 tw:py-8">
-        <div class="tw:max-w-screen-xl tw:mx-auto tw:w-full">
+        <div class="tw:max-w-9xl tw:mx-auto tw:w-full">
           <router-view />
         </div>
       </main>

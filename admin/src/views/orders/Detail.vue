@@ -996,7 +996,7 @@ const confirmSplit = async () => {
                         <span v-if="item.iceLevel && item.iceLevel !== 'NORMAL'"
                           class="tw:inline-flex tw:items-center tw:gap-0.5 tw:rounded tw:px-1.5 tw:py-0.5 tw:text-[10px] tw:font-medium tw:bg-sky-500/10 tw:text-sky-400"
                         >
-                          <iconify icon="ph:ice-cream-bold" class="tw:text-[9px]" />
+                          <iconify icon="game-icons:ice-cube" class="tw:text-[9px]" />
                           Ice {{ item.iceLevel === 'LESS' ? 'less' : 'more' }}
                         </span>
                         <span v-if="item.sugarLevel && item.sugarLevel !== 'NORMAL'"

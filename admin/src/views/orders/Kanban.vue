@@ -4,10 +4,15 @@ import {
   updateOrderStatus,
   updatePayment,
 } from "@/services/order.service";
+import RevenueCard from "@/components/widgets/orders/RevenueCard.vue";
+import OrdersSummaryCard from "@/components/widgets/orders/OrdersSummaryCard.vue";
+import WidgetSettingsButton from "@/components/widgets/WidgetSettingsButton.vue";
 
 const router = useRouter();
 
 const orders = ref([]);
+const cashTotal = ref(0);
+const bankTransferTotal = ref(0);
 const loading = ref(false);
 const errorMessage = ref("");
 const updatingId = ref(null);
@@ -178,7 +183,30 @@ const summary = computed(() => ({
   pending: ordersByStatus.value[ORDER_STATUS.PENDING].length,
   processing: ordersByStatus.value[ORDER_STATUS.PROCESSING].length,
   completed: ordersByStatus.value[ORDER_STATUS.COMPLETED].length,
+  cancelled: ordersByStatus.value[ORDER_STATUS.CANCELLED].length,
+  cash: cashTotal.value,
+  bank: bankTransferTotal.value,
+  revenue: cashTotal.value + bankTransferTotal.value,
 }));
+
+// ── Widget visibility ──────────────────────────────────────────────
+const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs } =
+  useWidgetSettings('orders-kanban', [
+    {
+      id: 'summary',
+      label: 'Orders summary',
+      description: 'Tổng số đơn hàng hôm nay theo từng trạng thái.',
+      previewComponent: OrdersSummaryCard,
+      previewProps: { total: 34, pending: 8, processing: 5, completed: 21, cancelled: 0 },
+    },
+    {
+      id: 'revenue',
+      label: 'Total revenue',
+      description: 'Tổng doanh thu hôm nay, gồm tiền mặt và chuyển khoản.',
+      previewComponent: RevenueCard,
+      previewProps: { total: 1750000, cash: 1000000, bank: 750000 },
+    },
+  ])
 
 const formatVnd = (value) =>
   new Intl.NumberFormat("vi-VN", {
@@ -211,6 +239,8 @@ const loadOrders = async () => {
   try {
     const res = await getOrders({ ...todayRange(), pageSize: 200 });
     orders.value = res?.data?.items ?? [];
+    cashTotal.value = res?.data?.cashTotal ?? 0;
+    bankTransferTotal.value = res?.data?.bankTransferTotal ?? 0;
   } catch (err) {
     errorMessage.value =
       err?.response?.data?.message || "Failed to load orders.";
@@ -536,6 +566,12 @@ onMounted(() => {
             <iconify icon="ph:list-bold" />
           </prime-button>
         </div>
+        <!-- Widget settings -->
+        <widget-settings-button
+          :widgets="wDefs"
+          :hidden-count="wHidden"
+          @toggle="wToggle"
+        />
         <!-- Refresh -->
         <prime-button
           severity="secondary"
@@ -551,55 +587,21 @@ onMounted(() => {
     </div>
 
     <!-- Summary stats -->
-    <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:md:grid-cols-4">
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle"
-          >
-            Total today
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.total }}
-          </p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-amber-400"
-          >
-            Pending
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.pending }}
-          </p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-blue-400"
-          >
-            Processing
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.processing }}
-          </p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400"
-          >
-            Completed
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.completed }}
-          </p>
-        </template>
-      </prime-card>
+    <div class="tw:grid tw:grid-cols-2 tw:gap-3">
+      <orders-summary-card
+        v-if="wVisible('summary')"
+        :total="summary.total"
+        :pending="summary.pending"
+        :processing="summary.processing"
+        :completed="summary.completed"
+        :cancelled="summary.cancelled"
+      />
+      <revenue-card
+        v-if="wVisible('revenue')"
+        :total="summary.revenue"
+        :cash="summary.cash"
+        :bank="summary.bank"
+      />
     </div>
 
     <!-- Error -->

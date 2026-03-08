@@ -5,6 +5,8 @@ import { usePermission } from "@/composables/usePermission";
 import { getProducts, toggleProductActive } from "@/services/product.service";
 import { getCategory } from "@/services/category.service";
 import AppTable from "@/components/AppTable.vue";
+import StatCard from "@/components/widgets/StatCard.vue";
+import WidgetSettingsButton from "@/components/widgets/WidgetSettingsButton.vue";
 import { useTableCache } from "@/composables/useTableCache";
 import { btnIcon } from "@/layout/ui";
 
@@ -214,6 +216,15 @@ watch([categoryFilter, statusFilter], () => {
   first.value = 0;
   loadProducts(1);
 });
+
+// ── Widget visibility ──────────────────────────────────────────────
+const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs } =
+  useWidgetSettings('products', [
+    { id: 'total',    label: 'Total items', preview: '48', description: 'Tổng số sản phẩm trong danh mục.' },
+    { id: 'active',   label: 'Active',      preview: '36', description: 'Sản phẩm đang hiển thị và được bán trên menu.', labelClass: 'tw:text-emerald-400' },
+    { id: 'low',      label: 'Low stock',   preview: '4',  description: 'Sản phẩm sắp hết nguyên liệu, cần nhập thêm.' },
+    { id: 'inactive', label: 'Inactive',    preview: '8',  description: 'Sản phẩm đã tắt, không hiển thị trên menu.', labelClass: 'tw:text-red-400' },
+  ])
 </script>
 
 <template>
@@ -231,65 +242,48 @@ watch([categoryFilter, statusFilter], () => {
           Track pricing, stock, and status across the menu.
         </p>
       </div>
-      <prime-button
-        v-if="can('product.create')"
-        severity="success"
-        size="small"
-        @click="router.push({ name: 'productsCreate' })"
-      >
-        <iconify icon="ph:plus-bold" />
-        <span>Add product</span>
-      </prime-button>
+      <div class="tw:flex tw:items-center tw:gap-2">
+        <widget-settings-button
+          :widgets="wDefs"
+          :hidden-count="wHidden"
+          @toggle="wToggle"
+        />
+        <prime-button
+          v-if="can('product.create')"
+          severity="success"
+          size="small"
+          @click="router.push({ name: 'productsCreate' })"
+        >
+          <iconify icon="ph:plus-bold" />
+          <span>Add product</span>
+        </prime-button>
+      </div>
     </div>
 
     <!-- ── Summary Stats ─────────────────────────────────────────── -->
     <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:lg:grid-cols-4">
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle"
-          >
-            Total items
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.total }}
-          </p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400"
-          >
-            Active
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.active }}
-          </p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle"
-          >
-            Low stock
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ summary.low }}</p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-red-400"
-          >
-            Inactive
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.inactive }}
-          </p>
-        </template>
-      </prime-card>
+      <stat-card
+        v-if="wVisible('total')"
+        label="Total items"
+        :value="summary.total"
+      />
+      <stat-card
+        v-if="wVisible('active')"
+        label="Active"
+        label-class="tw:text-emerald-400"
+        :value="summary.active"
+      />
+      <stat-card
+        v-if="wVisible('low')"
+        label="Low stock"
+        :value="summary.low"
+      />
+      <stat-card
+        v-if="wVisible('inactive')"
+        label="Inactive"
+        label-class="tw:text-red-400"
+        :value="summary.inactive"
+      />
     </div>
 
     <!-- ── Error ─────────────────────────────────────────────────── -->

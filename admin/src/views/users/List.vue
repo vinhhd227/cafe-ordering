@@ -8,6 +8,8 @@ import {
   deactivateUser,
 } from '@/services/user.service'
 import AppTable from '@/components/AppTable.vue'
+import StatCard from '@/components/widgets/StatCard.vue'
+import WidgetSettingsButton from '@/components/widgets/WidgetSettingsButton.vue'
 import { useTableCache } from '@/composables/useTableCache'
 import { usePermission } from '@/composables/usePermission'
 
@@ -240,6 +242,15 @@ const confirmAndDeactivate = async () => {
     deactivateLoading.value = false
   }
 }
+
+// ── Widget visibility ──────────────────────────────────────────────
+const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs } =
+  useWidgetSettings('users', [
+    { id: 'total',  label: 'Total users', preview: '24', description: 'Tổng số tài khoản đã được tạo trong hệ thống.' },
+    { id: 'active', label: 'Active',      preview: '20', description: 'Tài khoản đang hoạt động, có thể đăng nhập.', labelClass: 'tw:text-emerald-400' },
+    { id: 'admins', label: 'Admins',      preview: '3',  description: 'Tài khoản có quyền quản trị toàn hệ thống.', labelClass: 'tw:text-red-400' },
+    { id: 'staff',  label: 'Staff',       preview: '17', description: 'Nhân viên phục vụ, có quyền xử lý đơn hàng.', labelClass: 'tw:text-blue-400' },
+  ])
 </script>
 
 <template>
@@ -254,43 +265,30 @@ const confirmAndDeactivate = async () => {
           Maintain access, roles, and account status.
         </p>
       </div>
-      <prime-button
-        v-if="can('user.create')"
-        severity="success"
-        size="small"
-        @click="openAddDialog"
-      >
-        <iconify icon="ph:user-plus-bold" />
-        <span>Add user</span>
-      </prime-button>
+      <div class="tw:flex tw:items-center tw:gap-2">
+        <widget-settings-button
+          :widgets="wDefs"
+          :hidden-count="wHidden"
+          @toggle="wToggle"
+        />
+        <prime-button
+          v-if="can('user.create')"
+          severity="success"
+          size="small"
+          @click="openAddDialog"
+        >
+          <iconify icon="ph:user-plus-bold" />
+          <span>Add user</span>
+        </prime-button>
+      </div>
     </div>
 
     <!-- ── Summary Stats ─────────────────────────────────────────── -->
     <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:md:grid-cols-4">
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle">Total users</p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ stats.total }}</p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400">Active</p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ stats.active }}</p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-red-400">Admins</p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ stats.admins }}</p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-blue-400">Staff</p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ stats.staff }}</p>
-        </template>
-      </prime-card>
+      <stat-card v-if="wVisible('total')"  label="Total users" :value="stats.total" />
+      <stat-card v-if="wVisible('active')" label="Active"      :value="stats.active" label-class="tw:text-emerald-400" />
+      <stat-card v-if="wVisible('admins')" label="Admins"      :value="stats.admins" label-class="tw:text-red-400" />
+      <stat-card v-if="wVisible('staff')"  label="Staff"       :value="stats.staff"  label-class="tw:text-blue-400" />
     </div>
 
     <!-- ── Error Banner ──────────────────────────────────────────── -->

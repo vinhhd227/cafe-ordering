@@ -4,6 +4,8 @@ import { onBeforeRouteLeave } from "vue-router";
 import { usePermission } from "@/composables/usePermission";
 import { useTableCache } from "@/composables/useTableCache";
 import AppTable from "@/components/AppTable.vue";
+import StatCard from "@/components/widgets/StatCard.vue";
+import WidgetSettingsButton from "@/components/widgets/WidgetSettingsButton.vue";
 import {
   listTables,
   createTable,
@@ -283,6 +285,15 @@ onBeforeRouteLeave(() => {
 watch([statusFilter, activeFilter], () => {
   first.value = 0;
 });
+
+// ── Widget visibility ──────────────────────────────────────────────
+const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs } =
+  useWidgetSettings('tables', [
+    { id: 'total',     label: 'Total',     preview: '20', description: 'Tổng số bàn có trong nhà hàng.' },
+    { id: 'available', label: 'Available', preview: '12', description: 'Bàn trống, sẵn sàng đón khách mới.', labelClass: 'tw:text-emerald-400' },
+    { id: 'occupied',  label: 'Occupied',  preview: '6',  description: 'Bàn đang có khách, đang trong phiên đặt món.', labelClass: 'tw:text-blue-400' },
+    { id: 'cleaning',  label: 'Cleaning',  preview: '2',  description: 'Bàn đang dọn dẹp sau khi khách rời đi.', labelClass: 'tw:text-yellow-400' },
+  ])
 </script>
 
 <template>
@@ -410,67 +421,30 @@ watch([statusFilter, activeFilter], () => {
           Manage dining tables, sessions, and availability.
         </p>
       </div>
-      <prime-button
-        v-if="can('table.create')"
-        severity="success"
-        size="small"
-        @click="openAddDialog"
-      >
-        <iconify icon="ph:plus-bold" />
-        <span>Add table</span>
-      </prime-button>
+      <div class="tw:flex tw:items-center tw:gap-2">
+        <widget-settings-button
+          :widgets="wDefs"
+          :hidden-count="wHidden"
+          @toggle="wToggle"
+        />
+        <prime-button
+          v-if="can('table.create')"
+          severity="success"
+          size="small"
+          @click="openAddDialog"
+        >
+          <iconify icon="ph:plus-bold" />
+          <span>Add table</span>
+        </prime-button>
+      </div>
     </div>
 
     <!-- ── Summary stats ─────────────────────────────────────────── -->
     <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:lg:grid-cols-4">
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle"
-          >
-            Total
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.total }}
-          </p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400"
-          >
-            Available
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.available }}
-          </p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-blue-400"
-          >
-            Occupied
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.occupied }}
-          </p>
-        </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-yellow-400"
-          >
-            Cleaning
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.cleaning }}
-          </p>
-        </template>
-      </prime-card>
+      <stat-card v-if="wVisible('total')"     label="Total"     :value="summary.total" />
+      <stat-card v-if="wVisible('available')" label="Available" :value="summary.available" label-class="tw:text-emerald-400" />
+      <stat-card v-if="wVisible('occupied')"  label="Occupied"  :value="summary.occupied"  label-class="tw:text-blue-400" />
+      <stat-card v-if="wVisible('cleaning')"  label="Cleaning"  :value="summary.cleaning"  label-class="tw:text-yellow-400" />
     </div>
 
     <!-- ── Error ──────────────────────────────────────────────────── -->

@@ -2,6 +2,10 @@
 import { useRouter } from "vue-router";
 import { getOrders, updatePayment } from "@/services/order.service";
 import AppTable from "@/components/AppTable.vue";
+import StatCard from "@/components/widgets/StatCard.vue";
+import RevenueCard from "@/components/widgets/orders/RevenueCard.vue";
+import OrdersSummaryCard from "@/components/widgets/orders/OrdersSummaryCard.vue";
+import WidgetSettingsButton from "@/components/widgets/WidgetSettingsButton.vue";
 import { btnIcon } from "@/layout/ui";
 import { ORDER_STATUS, ORDER_STATUS_MAP } from "@/constants/orderStatus";
 import { PAYMENT_STATUS, PAYMENT_STATUS_MAP } from "@/constants/paymentStatus";
@@ -17,6 +21,10 @@ const orders = ref([]);             // current page only
 const totalRecords = ref(0);        // from server
 const cashTotal = ref(0);           // tổng tiền mặt đã thu (PAID + CASH)
 const bankTransferTotal = ref(0);   // tổng chuyển khoản đã thu (PAID + BANK_TRANSFER)
+const pendingCount = ref(0);
+const processingCount = ref(0);
+const completedCount = ref(0);
+const cancelledCount = ref(0);
 const loading = ref(false);
 const errorMessage = ref("");
 
@@ -61,6 +69,39 @@ if (_cached) {
 
 const filterPanel = ref(null);
 
+// ── Widget visibility ──────────────────────────────────────────────
+const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs } =
+  useWidgetSettings('orders-list', [
+    {
+      id: 'total',
+      label: 'Total orders',
+      description: 'Tổng số đơn hàng trong khoảng thời gian được chọn.',
+      previewComponent: OrdersSummaryCard,
+      previewProps: { total: 128, pending: 18, processing: 8, completed: 98, cancelled: 4 },
+    },
+    {
+      id: 'revenue',
+      label: 'Total revenue',
+      description: 'Tổng doanh thu đã thu, gồm tiền mặt và chuyển khoản.',
+      previewComponent: RevenueCard,
+      previewProps: { total: 4250000, cash: 2400000, bank: 1850000 },
+    },
+    {
+      id: 'cash',
+      label: 'Cash collected',
+      description: 'Tổng tiền mặt đã thu từ các đơn đã thanh toán.',
+      previewComponent: StatCard,
+      previewProps: { label: 'Cash collected', value: '2,400,000 ₫', labelClass: 'tw:text-emerald-400' },
+    },
+    {
+      id: 'bank',
+      label: 'Bank transfer',
+      description: 'Tổng chuyển khoản ngân hàng từ các đơn đã thanh toán.',
+      previewComponent: StatCard,
+      previewProps: { label: 'Bank transfer', value: '1,850,000 ₫', labelClass: 'tw:text-blue-400' },
+    },
+  ])
+
 const statusOptions = Object.entries(ORDER_STATUS_MAP).map(([value, meta]) => ({
   label: meta.label,
   value,
@@ -102,6 +143,11 @@ const summary = computed(() => ({
   total: totalRecords.value,
   cash: cashTotal.value,
   bank: bankTransferTotal.value,
+  revenue: cashTotal.value + bankTransferTotal.value,
+  pending: pendingCount.value,
+  processing: processingCount.value,
+  completed: completedCount.value,
+  cancelled: cancelledCount.value,
 }));
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -170,6 +216,10 @@ const loadOrders = async () => {
     totalRecords.value = data?.totalCount ?? 0;
     cashTotal.value = data?.cashTotal ?? 0;
     bankTransferTotal.value = data?.bankTransferTotal ?? 0;
+    pendingCount.value = data?.pendingCount ?? 0;
+    processingCount.value = data?.processingCount ?? 0;
+    completedCount.value = data?.completedCount ?? 0;
+    cancelledCount.value = data?.cancelledCount ?? 0;
     saveCurrentState();
   } catch (err) {
     errorMessage.value =
@@ -419,6 +469,12 @@ const confirmPayment = async () => {
             <iconify icon="ph:list-bold" />
           </prime-button>
         </div>
+        <!-- Widget settings -->
+        <widget-settings-button
+          :widgets="wDefs"
+          :hidden-count="wHidden"
+          @toggle="wToggle"
+        />
         <!-- Refresh -->
         <prime-button
           severity="secondary"
@@ -434,43 +490,41 @@ const confirmPayment = async () => {
     </div>
 
     <!-- Summary stats -->
-    <div class="tw:grid tw:grid-cols-1 tw:gap-3 tw:sm:grid-cols-3">
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle">
-            Total orders
-          </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ summary.total }}
-          </p>
+    <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:lg:grid-cols-4">
+      <orders-summary-card
+        v-if="wVisible('total')"
+        :total="summary.total"
+        :pending="summary.pending"
+        :processing="summary.processing"
+        :completed="summary.completed"
+        :cancelled="summary.cancelled"
+      />
+      <revenue-card
+        v-if="wVisible('revenue')"
+        :total="summary.revenue"
+        :cash="summary.cash"
+        :bank="summary.bank"
+      />
+      <stat-card
+        v-if="wVisible('cash')"
+        label="Cash collected"
+        label-class="tw:text-emerald-400"
+        :value="formatVnd(summary.cash)"
+      >
+        <template #icon>
+          <iconify icon="ph:money-bold" class="tw:text-emerald-400 tw:opacity-60" />
         </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <div class="tw:flex tw:items-center tw:justify-between">
-            <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400">
-              Cash collected
-            </p>
-            <iconify icon="ph:money-bold" class="tw:text-emerald-400 tw:opacity-60" />
-          </div>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ formatVnd(summary.cash) }}
-          </p>
+      </stat-card>
+      <stat-card
+        v-if="wVisible('bank')"
+        label="Bank transfer"
+        label-class="tw:text-blue-400"
+        :value="formatVnd(summary.bank)"
+      >
+        <template #icon>
+          <iconify icon="ph:bank-bold" class="tw:text-blue-400 tw:opacity-60" />
         </template>
-      </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
-        <template #content>
-          <div class="tw:flex tw:items-center tw:justify-between">
-            <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-blue-400">
-              Bank transfer
-            </p>
-            <iconify icon="ph:bank-bold" class="tw:text-blue-400 tw:opacity-60" />
-          </div>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ formatVnd(summary.bank) }}
-          </p>
-        </template>
-      </prime-card>
+      </stat-card>
     </div>
 
     <!-- Error -->
