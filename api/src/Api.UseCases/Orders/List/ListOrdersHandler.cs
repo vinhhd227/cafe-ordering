@@ -58,11 +58,20 @@ public class ListOrdersHandler(
       request.Status, dateFrom, dateTo,
       filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
 
+    var pendingSpec    = new OrdersCountSpec("PENDING",    null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+    var processingSpec = new OrdersCountSpec("PROCESSING", null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+    var completedSpec  = new OrdersCountSpec("COMPLETED",  null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+    var cancelledSpec  = new OrdersCountSpec("CANCELLED",  null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+
     // Thực hiện tuần tự — EF Core DbContext không hỗ trợ concurrent operations
-    var totalCount  = await repository.CountAsync(countSpec, ct);
-    var orders      = await repository.ListAsync(spec, ct);
-    var cashAmounts = await repository.ListAsync(cashSpec, ct);
-    var bankAmounts = await repository.ListAsync(bankSpec, ct);
+    var totalCount      = await repository.CountAsync(countSpec, ct);
+    var pendingCount    = await repository.CountAsync(pendingSpec, ct);
+    var processingCount = await repository.CountAsync(processingSpec, ct);
+    var completedCount  = await repository.CountAsync(completedSpec, ct);
+    var cancelledCount  = await repository.CountAsync(cancelledSpec, ct);
+    var orders         = await repository.ListAsync(spec, ct);
+    var cashAmounts    = await repository.ListAsync(cashSpec, ct);
+    var bankAmounts    = await repository.ListAsync(bankSpec, ct);
 
     // Build sessionId → tableId map (chỉ load sessions cho trang hiện tại)
     var sessionIds = orders.Select(o => o.SessionId).Distinct().ToList();
@@ -110,6 +119,6 @@ public class ListOrdersHandler(
     var bankTransferTotal = bankAmounts.Sum();
 
     return Result.Success(new PagedOrdersDto(dtos, totalCount, request.Page, request.PageSize,
-      cashTotal, bankTransferTotal));
+      cashTotal, bankTransferTotal, pendingCount, processingCount, completedCount, cancelledCount));
   }
 }
