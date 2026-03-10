@@ -153,6 +153,18 @@ const routes = [
         meta: { requiresAuth: true, adminOnly: true },
       },
       {
+        path: "expenses",
+        name: "expenses",
+        component: () => import("@/views/expenses/List.vue"),
+        meta: { requiresAuth: true, requiredClaim: "expense.read" },
+      },
+      {
+        path: "promotions",
+        name: "promotions",
+        component: () => import("@/views/promotions/List.vue"),
+        meta: { requiresAuth: true, requiredClaim: "promotion.read" },
+      },
+      {
         path: "profile",
         name: "profile",
         component: () => import("@/views/Profile.vue"),
