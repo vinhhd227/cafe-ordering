@@ -48,6 +48,12 @@ public static class PermissionRegistry
       ["table.create"]       = "Create tables",
       ["table.read"]         = "View table status",
       ["table.update"]       = "Update table information",
+
+      // Expenses
+      ["expense.read"]       = "View expense list and P&L summary",
+      ["expense.create"]     = "Record new expenses",
+      ["expense.update"]     = "Edit expense records",
+      ["expense.delete"]     = "Delete expense records",
     };
 
   /// <summary>Returns the description for a permission value, or null if unknown.</summary>

@@ -19,14 +19,16 @@ public static class IdentitySeedData
       "order.create", "order.read", "order.update", "order.delete",
       "product.create", "product.read", "product.update", "product.delete",
       "staff.create", "staff.read", "staff.update", "staff.deactivate",
-      "table.create", "table.read", "table.update"
+      "table.create", "table.read", "table.update",
+      "expense.read", "expense.create", "expense.update", "expense.delete",
     ],
     ["Staff"] =
     [
       "menu.read",
       "order.read", "order.update",
       "product.read",
-      "table.read", "table.update"
+      "table.read", "table.update",
+      "expense.read", "expense.create", "expense.update",
     ],
     ["Customer"] =
     [
