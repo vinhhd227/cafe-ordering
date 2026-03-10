@@ -65,7 +65,9 @@ const makeCartKey = (productId, opts) => {
 const optionsLabel = (item) => {
   const parts = [];
   if (item.temperature)
-    parts.push(DRINK_TEMPERATURE_MAP[item.temperature]?.label ?? item.temperature);
+    parts.push(
+      DRINK_TEMPERATURE_MAP[item.temperature]?.label ?? item.temperature,
+    );
   if (item.iceLevel && item.iceLevel !== ICE_LEVEL.NORMAL)
     parts.push(ICE_LEVEL_MAP[item.iceLevel]?.label ?? item.iceLevel);
   if (item.sugarLevel && item.sugarLevel !== SUGAR_LEVEL.NORMAL)
@@ -355,7 +357,7 @@ onMounted(async () => {
         </div>
 
         <!-- Empty state -->
-        <div
+        <prime-panel
           v-else-if="!loadingMenu && visibleCategories.length === 0"
           class="app-panel tw:rounded-2xl tw:border tw:p-12 tw:text-center app-text-muted"
         >
@@ -364,132 +366,116 @@ onMounted(async () => {
             class="tw:text-3xl tw:mb-3 tw:block tw:mx-auto tw:opacity-40"
           />
           No products found.
-        </div>
+        </prime-panel>
 
-        <!-- Categories (collapsible) -->
-        <div v-else class="tw:space-y-4">
+        <prime-panel
+          v-else
+          v-for="category in visibleCategories"
+          :key="category.id"
+          :header="category.name"
+          toggleable
+        >
+          <!-- Products grid -->
           <div
-            v-for="category in visibleCategories"
-            :key="category.id"
-            class="app-panel tw:rounded-2xl tw:border tw:overflow-hidden"
+            v-show="!collapsedCategories[category.id]"
+            class="tw:grid tw:grid-cols-2 tw:md:grid-cols-3 tw:xl:grid-cols-4 tw:gap-3 sm:tw:grid-cols-3 tw:p-3 tw:pt-0"
           >
-            <!-- Category header — click to collapse -->
-            <button
-              class="tw:w-full tw:flex tw:items-center tw:justify-between tw:px-4 tw:py-3 tw:transition hover:tw:bg-white/5"
-              @click="toggleCategory(category.id)"
+            <article
+              v-for="product in category.filteredProducts"
+              :key="product.id"
+              class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all hover:tw:-translate-y-0.5 hover:tw:border-emerald-500/50"
+              style="
+                border-color: var(--app-border);
+                background: var(--app-bg-subtle);
+              "
+              @click="handleAddToCart(product)"
             >
-              <div class="tw:flex tw:items-center tw:gap-2">
-                <h2 class="tw:text-sm tw:font-semibold">{{ category.name }}</h2>
-                <span class="tw:text-xs app-text-muted"
-                  >{{ category.filteredProducts.length }} items</span
+              <!-- Product image / placeholder -->
+              <div class="tw:relative tw:overflow-hidden tw:shrink-0">
+                <img
+                  v-if="product.imageUrl"
+                  :src="product.imageUrl"
+                  :alt="product.name"
+                  class="tw:h-32 tw:w-full tw:object-cover"
+                />
+                <div
+                  v-else
+                  class="tw:h-32 tw:w-full tw:flex tw:items-center tw:justify-center"
+                  style="background: var(--app-bg)"
                 >
-              </div>
-              <iconify
-                icon="ph:caret-down-bold"
-                class="tw:text-sm app-text-muted tw:transition-transform tw:duration-200"
-                :class="collapsedCategories[category.id] ? 'tw:-rotate-90' : ''"
-              />
-            </button>
-
-            <!-- Products grid -->
-            <div
-              v-show="!collapsedCategories[category.id]"
-              class="tw:grid tw:grid-cols-2 tw:gap-3 sm:tw:grid-cols-3 tw:p-3 tw:pt-0"
-            >
-              <article
-                v-for="product in category.filteredProducts"
-                :key="product.id"
-                class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all hover:tw:-translate-y-0.5 hover:tw:border-emerald-500/50"
-                style="
-                  border-color: var(--app-border);
-                  background: var(--app-bg-subtle);
-                "
-                @click="handleAddToCart(product)"
-              >
-                <!-- Product image / placeholder -->
-                <div class="tw:relative tw:overflow-hidden tw:shrink-0">
-                  <img
-                    v-if="product.imageUrl"
-                    :src="product.imageUrl"
-                    :alt="product.name"
-                    class="tw:h-32 tw:w-full tw:object-cover"
+                  <iconify
+                    icon="ph:coffee-bold"
+                    class="tw:text-3xl tw:text-emerald-400/20"
                   />
-                  <div
-                    v-else
-                    class="tw:h-32 tw:w-full tw:flex tw:items-center tw:justify-center"
-                    style="background: var(--app-bg)"
+                </div>
+                <!-- Cart qty badge -->
+                <div
+                  v-if="cartQuantity(product.id) > 0"
+                  class="tw:absolute tw:top-2 tw:right-2 tw:h-5 tw:min-w-5 tw:px-1 tw:rounded-full tw:bg-emerald-500 tw:flex tw:items-center tw:justify-center tw:text-xs tw:font-bold tw:text-white tw:shadow-lg"
+                >
+                  {{ cartQuantity(product.id) }}
+                </div>
+              </div>
+
+              <!-- Product info -->
+              <div class="tw:flex tw:flex-1 tw:flex-col tw:p-2.5">
+                <h3
+                  class="tw:text-xs tw:font-semibold tw:line-clamp-2 tw:leading-snug"
+                >
+                  {{ product.name }}
+                </h3>
+                <p
+                  class="tw:mt-1 tw:text-xs tw:font-semibold tw:text-emerald-400"
+                >
+                  {{ formatVnd(product.price) }}
+                </p>
+
+                <!-- Option badges -->
+                <div
+                  v-if="
+                    product.hasTemperatureOption ||
+                    product.hasIceLevelOption ||
+                    product.hasSugarLevelOption
+                  "
+                  class="tw:mt-1.5 tw:flex tw:flex-wrap tw:gap-1"
+                >
+                  <span
+                    v-if="product.hasTemperatureOption"
+                    class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-orange-500/10 tw:text-orange-400"
+                    >Temp</span
                   >
-                    <iconify
-                      icon="ph:coffee-bold"
-                      class="tw:text-3xl tw:text-emerald-400/20"
-                    />
-                  </div>
-                  <!-- Cart qty badge -->
-                  <div
-                    v-if="cartQuantity(product.id) > 0"
-                    class="tw:absolute tw:top-2 tw:right-2 tw:h-5 tw:min-w-5 tw:px-1 tw:rounded-full tw:bg-emerald-500 tw:flex tw:items-center tw:justify-center tw:text-xs tw:font-bold tw:text-white tw:shadow-lg"
+                  <span
+                    v-if="product.hasIceLevelOption"
+                    class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-sky-500/10 tw:text-sky-400"
+                    >Ice</span
                   >
-                    {{ cartQuantity(product.id) }}
-                  </div>
+                  <span
+                    v-if="product.hasSugarLevelOption"
+                    class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-amber-500/10 tw:text-amber-400"
+                    >Sugar</span
+                  >
                 </div>
 
-                <!-- Product info -->
-                <div class="tw:flex tw:flex-1 tw:flex-col tw:p-2.5">
-                  <h3
-                    class="tw:text-xs tw:font-semibold tw:line-clamp-2 tw:leading-snug"
-                  >
-                    {{ product.name }}
-                  </h3>
-                  <p
-                    class="tw:mt-1 tw:text-xs tw:font-semibold tw:text-emerald-400"
-                  >
-                    {{ formatVnd(product.price) }}
-                  </p>
+                <div class="tw:flex-1" />
 
-                  <!-- Option badges -->
-                  <div
-                    v-if="
-                      product.hasTemperatureOption ||
-                      product.hasIceLevelOption ||
-                      product.hasSugarLevelOption
-                    "
-                    class="tw:mt-1.5 tw:flex tw:flex-wrap tw:gap-1"
+                <!-- Add button -->
+                <div class="tw:flex tw:justify-end tw:mt-2">
+                  <prime-button
+                    size="small"
+                    rounded
+                    text
+                    severity="success"
+                    @click.stop="handleAddToCart(product)"
+                    :class="btnIcon"
                   >
-                    <span
-                      v-if="product.hasTemperatureOption"
-                      class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-orange-500/10 tw:text-orange-400"
-                      >Temp</span
-                    >
-                    <span
-                      v-if="product.hasIceLevelOption"
-                      class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-sky-500/10 tw:text-sky-400"
-                      >Ice</span
-                    >
-                    <span
-                      v-if="product.hasSugarLevelOption"
-                      class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-amber-500/10 tw:text-amber-400"
-                      >Sugar</span
-                    >
-                  </div>
-
-                  <div class="tw:flex-1" />
-
-                  <!-- Add button -->
-                  <div class="tw:flex tw:justify-end tw:mt-2">
-                    <prime-button
-                      icon="pi pi-plus"
-                      size="small"
-                      rounded
-                      text
-                      severity="success"
-                      @click.stop="handleAddToCart(product)"
-                    />
-                  </div>
+                <iconify icon="prime:plus" />
+                </prime-button>
                 </div>
-              </article>
-            </div>
+              </div>
+            </article>
           </div>
-        </div>
+        </prime-panel>
+        <!-- Categories (collapsible) -->
       </section>
 
       <!-- ── RIGHT: Cart ────────────────────────────────────── -->
@@ -569,7 +555,6 @@ onMounted(async () => {
                 </div>
                 <div class="tw:flex tw:items-center tw:gap-1 tw:shrink-0">
                   <prime-button
-                    icon="pi pi-minus"
                     size="small"
                     text
                     rounded
@@ -703,16 +688,18 @@ onMounted(async () => {
       <div v-if="selectedProduct?.hasTemperatureOption">
         <p class="tw:mb-2 tw:text-sm tw:font-semibold">Temperature</p>
         <div class="tw:flex tw:gap-2">
-           <prime-button
-           v-for="opt in DRINK_TEMPERATURE_OPTIONS"
+          <prime-button
+            v-for="opt in DRINK_TEMPERATURE_OPTIONS"
             variant="outlined"
             class="tw:w-full"
-            :severity="pendingOptions.temperature === opt.value ? 'primary' : 'secondary'"
-             @click="setTemperature(opt.value)"
+            :severity="
+              pendingOptions.temperature === opt.value ? 'primary' : 'secondary'
+            "
+            @click="setTemperature(opt.value)"
           >
-          <iconify :icon="opt.icon" />
-          <span>{{ opt.label }}</span>
-        </prime-button>
+            <iconify :icon="opt.icon" />
+            <span>{{ opt.label }}</span>
+          </prime-button>
         </div>
       </div>
 
@@ -730,7 +717,9 @@ onMounted(async () => {
             :key="opt.value"
             variant="outlined"
             class="tw:w-full"
-            :severity="pendingOptions.iceLevel === opt.value ? 'primary' : 'secondary'"
+            :severity="
+              pendingOptions.iceLevel === opt.value ? 'primary' : 'secondary'
+            "
             @click="pendingOptions.iceLevel = opt.value"
           >
             <iconify :icon="opt.icon" />
@@ -747,13 +736,15 @@ onMounted(async () => {
         "
       >
         <p class="tw:mb-2 tw:text-sm tw:font-semibold">Sugar level</p>
-        <div class="tw:grid tw:grid-cols-3 tw:gap-2">
+        <div class="tw:grid tw:grid-cols-2 tw:gap-2">
           <prime-button
             v-for="opt in SUGAR_LEVEL_OPTIONS"
             :key="opt.value"
             variant="outlined"
             class="tw:w-full"
-            :severity="pendingOptions.sugarLevel === opt.value ? 'primary' : 'secondary'"
+            :severity="
+              pendingOptions.sugarLevel === opt.value ? 'primary' : 'secondary'
+            "
             @click="pendingOptions.sugarLevel = opt.value"
           >
             <iconify v-if="opt.icon" :icon="opt.icon" />
@@ -770,7 +761,11 @@ onMounted(async () => {
             v-for="servingType in SERVING_TYPE_OPTIONS"
             variant="outlined"
             class="tw:w-full"
-            :severity="pendingOptions.isTakeaway === servingType.value ? 'primary' : 'secondary'"
+            :severity="
+              pendingOptions.isTakeaway === servingType.value
+                ? 'primary'
+                : 'secondary'
+            "
             @click="pendingOptions.isTakeaway = servingType.value"
           >
             <iconify :icon="servingType.icon" />

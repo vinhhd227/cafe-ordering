@@ -47,6 +47,7 @@ const statusFilter = ref(null);
 // Client-side: filter within current page
 const searchOrder = ref("");
 const paymentStatusFilter = ref(null);
+const paymentMethodFilter = ref(null);
 const minTotal = ref(null);
 const maxTotal = ref(null);
 const tableCodeFilter = ref("");
@@ -58,6 +59,7 @@ if (_cached) {
   if (_cached.first !== undefined)             first.value             = _cached.first;
   if (_cached.statusFilter !== undefined)      statusFilter.value      = _cached.statusFilter;
   if (_cached.paymentStatusFilter !== undefined) paymentStatusFilter.value = _cached.paymentStatusFilter;
+  if (_cached.paymentMethodFilter !== undefined) paymentMethodFilter.value = _cached.paymentMethodFilter;
   if (_cached.searchOrder !== undefined)       searchOrder.value       = _cached.searchOrder;
   if (_cached.tableCodeFilter !== undefined)   tableCodeFilter.value   = _cached.tableCodeFilter;
   if (_cached.minTotal !== undefined)          minTotal.value          = _cached.minTotal;
@@ -112,12 +114,18 @@ const paymentStatusOptions = Object.entries(PAYMENT_STATUS_MAP).map(([value, met
   value,
 }));
 
+const paymentMethodOptions = [
+  { label: PAYMENT_METHOD_MAP[PAYMENT_METHOD.CASH].label, value: PAYMENT_METHOD.CASH },
+  { label: PAYMENT_METHOD_MAP[PAYMENT_METHOD.BANK_TRANSFER].label, value: PAYMENT_METHOD.BANK_TRANSFER },
+];
+
 const activeFilterCount = computed(() => {
   let n = 0;
   if (dateFrom.value) n++;
   if (dateTo.value) n++;
   if (statusFilter.value !== null) n++;
   if (paymentStatusFilter.value !== null) n++;
+  if (paymentMethodFilter.value !== null) n++;
   if (minTotal.value !== null) n++;
   if (maxTotal.value !== null) n++;
   if (tableCodeFilter.value.trim()) n++;
@@ -131,6 +139,7 @@ const clearFilters = () => {
   dateTo.value = todayMidnight();
   statusFilter.value = null;
   paymentStatusFilter.value = null;
+  paymentMethodFilter.value = null;
   minTotal.value = null;
   maxTotal.value = null;
   tableCodeFilter.value = "";
@@ -151,6 +160,11 @@ const summary = computed(() => ({
 }));
 
 // ── Helpers ───────────────────────────────────────────────────────
+const toMidnight = (d) => {
+  if (!d) return undefined;
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+};
+
 const formatVnd = (value) =>
   new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -185,6 +199,7 @@ const saveCurrentState = () => {
     first: first.value,
     statusFilter: statusFilter.value,
     paymentStatusFilter: paymentStatusFilter.value,
+    paymentMethodFilter: paymentMethodFilter.value,
     searchOrder: searchOrder.value,
     tableCodeFilter: tableCodeFilter.value,
     minTotal: minTotal.value,
@@ -202,14 +217,15 @@ const loadOrders = async () => {
     const res = await getOrders({
       status: statusFilter.value || undefined,
       paymentStatus: paymentStatusFilter.value || undefined,
+      paymentMethod: paymentMethodFilter.value || undefined,
       orderNumber: searchOrder.value.trim() || undefined,
       minAmount: minTotal.value ?? undefined,
       maxAmount: maxTotal.value ?? undefined,
       tableCode: tableCodeFilter.value.trim() || undefined,
       page,
       pageSize: rows.value,
-      dateFrom: dateFrom.value ?? undefined,
-      dateTo: dateTo.value ?? undefined,
+      dateFrom: toMidnight(dateFrom.value),
+      dateTo: toMidnight(dateTo.value),
     });
     const data = res?.data;
     orders.value = data?.items ?? [];
@@ -233,7 +249,7 @@ onMounted(loadOrders);
 
 // Re-fetch khi bất kỳ filter nào thay đổi — reset về trang 1
 watch(
-  [statusFilter, paymentStatusFilter, dateFrom, dateTo, searchOrder, tableCodeFilter, minTotal, maxTotal],
+  [statusFilter, paymentStatusFilter, paymentMethodFilter, dateFrom, dateTo, searchOrder, tableCodeFilter, minTotal, maxTotal],
   () => {
     first.value = 0;
     loadOrders();
@@ -261,7 +277,7 @@ const PAYMENT_METHODS = [
 
 const payChange = computed(() => {
   if (payAmountReceived.value == null || !payOrder.value) return null;
-  return payAmountReceived.value - payOrder.value.totalAmount;
+  return payAmountReceived.value - (payOrder.value.finalAmount ?? payOrder.value.totalAmount);
 });
 
 const payTip = ref(0);
@@ -331,7 +347,7 @@ const confirmPayment = async () => {
           v-model="payAmountReceived"
           :min="0"
           :use-grouping="true"
-          :placeholder="String(payOrder?.totalAmount ?? '')"
+          :placeholder="String(payOrder?.finalAmount ?? payOrder?.totalAmount ?? '')"
           class="app-input tw:w-full"
           suffix=" ₫"
           @input="(e) => (payAmountReceived = e.value)"
@@ -642,6 +658,23 @@ const confirmPayment = async () => {
                 />
               </div>
 
+              <!-- Payment method (server-side) -->
+              <div class="tw:space-y-1.5">
+                <label
+                  class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
+                  >Payment method</label
+                >
+                <prime-select
+                  v-model="paymentMethodFilter"
+                  :options="paymentMethodOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="All methods"
+                  show-clear
+                  class="app-input tw:w-full"
+                />
+              </div>
+
               <!-- Total price range (server-side) -->
               <div class="tw:space-y-1.5">
                 <label
@@ -748,11 +781,26 @@ const confirmPayment = async () => {
         </template>
       </prime-column>
 
-      <prime-column field="totalAmount" header="Total" style="min-width: 8rem">
+      <prime-column field="totalAmount" header="Total" style="min-width: 9rem">
         <template #body="{ data }">
-          <span class="tw:font-semibold tw:text-sm">{{
-            formatVnd(data.totalAmount)
-          }}</span>
+          <div>
+            <span
+              v-if="data.totalDiscount > 0"
+              class="tw:text-xs app-text-muted tw:line-through tw:block"
+            >{{ formatVnd(data.totalAmount) }}</span>
+            <span class="tw:font-semibold tw:text-sm">{{
+              formatVnd(data.totalDiscount > 0 ? data.finalAmount : data.totalAmount)
+            }}</span>
+            <div v-if="data.promotions?.length" class="tw:flex tw:flex-wrap tw:gap-1 tw:mt-1">
+              <prime-tag
+                v-for="p in data.promotions"
+                :key="p.promotionId"
+                :value="p.promoCode"
+                severity="success"
+                class="tw:text-[10px]!"
+              />
+            </div>
+          </div>
         </template>
       </prime-column>
 

@@ -1,11 +1,11 @@
 import api from './axios'
 
 export const getOrders = ({
-  status, paymentStatus, orderNumber, minAmount, maxAmount, tableCode,
+  status, paymentStatus, paymentMethod, orderNumber, minAmount, maxAmount, tableCode,
   page = 1, pageSize = 20, dateFrom, dateTo,
 } = {}) =>
   api.get('/admin/orders', {
-    params: { status, paymentStatus, orderNumber, minAmount, maxAmount, tableCode,
+    params: { status, paymentStatus, paymentMethod, orderNumber, minAmount, maxAmount, tableCode,
       page, pageSize, dateFrom, dateTo },
   })
 
