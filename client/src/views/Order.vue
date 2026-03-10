@@ -9,6 +9,7 @@ import {
 import {
   placeOrder as placeOrderApi,
   updateOrderItem,
+  validatePromotion,
 } from "../services/order.service.js";
 import { useCartStore } from "../stores/cart.js";
 
@@ -59,6 +60,38 @@ const showSummary = ref(false);
 const summary = ref(null);
 const isSummaryLoading = ref(false);
 const itemUpdating = ref(null);
+
+/* ─── Promo code ────────────────────────────────────────────────── */
+const promoCode    = ref("");
+const promoApplying = ref(false);
+const promoResult  = ref(null);   // ValidatePromotionResult from API
+const promoError   = ref("");
+
+const applyPromoCode = async () => {
+  if (!promoCode.value.trim()) return;
+  promoApplying.value = true;
+  promoError.value = "";
+  promoResult.value = null;
+  try {
+    const res = await validatePromotion(promoCode.value.trim(), cartStore.total);
+    const data = res?.data;
+    if (!data?.isApplicable) {
+      promoError.value = data?.message || "Promo code is not applicable.";
+    } else {
+      promoResult.value = data;
+    }
+  } catch (e) {
+    promoError.value = e?.response?.data?.title || "Invalid promo code.";
+  } finally {
+    promoApplying.value = false;
+  }
+};
+
+const clearPromo = () => {
+  promoCode.value = "";
+  promoResult.value = null;
+  promoError.value = "";
+};
 
 /* ─── Helpers ──────────────────────────────────────────── */
 const formatPrice = (value) =>
@@ -176,6 +209,7 @@ const submitOrder = async () => {
     const sessionId = session.value.sessionId ?? session.value.id;
     const payload = {
       sessionId,
+      promoCode: promoResult.value ? promoCode.value.trim() : null,
       items: cartStore.items.map((item) => ({
         productId: item.id,
         productName: item.name,
@@ -189,6 +223,7 @@ const submitOrder = async () => {
     };
     const result = await placeOrderApi(payload);
     cartStore.clear();
+    clearPromo();
     showMobileCart.value = false;
     orderSuccess.value = `Order placed! Order number: ${result.orderNumber ?? result.OrderNumber}`;
   } catch (e) {
@@ -556,6 +591,38 @@ onMounted(async () => {
                 </div>
               </div>
 
+              <!-- Promo code input -->
+              <div class="tw:space-y-1">
+                <div class="tw:flex tw:gap-2">
+                  <input
+                    v-model="promoCode"
+                    type="text"
+                    placeholder="Promo code"
+                    class="tw:flex-1 tw:rounded-xl tw:border tw:border-orange-200 tw:px-3 tw:py-2 tw:text-sm tw:uppercase tw:outline-none focus:tw:border-orange-400 focus:tw:ring-1 focus:tw:ring-orange-300"
+                    @keyup.enter="applyPromoCode"
+                  />
+                  <button
+                    v-if="!promoResult"
+                    class="tw:rounded-xl tw:bg-orange-500 tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:text-white tw:transition hover:tw:bg-orange-600 disabled:tw:opacity-50"
+                    :disabled="promoApplying || !promoCode.trim()"
+                    @click="applyPromoCode"
+                  >
+                    Apply
+                  </button>
+                  <button
+                    v-else
+                    class="tw:rounded-xl tw:border tw:border-slate-200 tw:px-3 tw:py-2 tw:text-sm tw:text-slate-600 tw:transition hover:tw:border-red-300 hover:tw:text-red-500"
+                    @click="clearPromo"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <p v-if="promoError" class="tw:text-xs tw:text-rose-500">{{ promoError }}</p>
+                <p v-if="promoResult" class="tw:text-xs tw:text-green-600 tw:font-medium">
+                  ✓ {{ promoResult.name }} — save {{ promoResult.discountType === 'PERCENTAGE' ? promoResult.discountValue + '%' : formatPrice(promoResult.estimatedDiscount ?? promoResult.discountValue) }}
+                </p>
+              </div>
+
               <div class="tw:rounded-xl tw:bg-orange-50 tw:p-4">
                 <div
                   class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:text-slate-600"
@@ -564,6 +631,13 @@ onMounted(async () => {
                   <span class="tw:font-semibold tw:text-slate-900">{{
                     formatPrice(cartStore.total)
                   }}</span>
+                </div>
+                <div
+                  v-if="promoResult?.estimatedDiscount"
+                  class="tw:mt-1 tw:flex tw:items-center tw:justify-between tw:text-sm tw:text-green-600"
+                >
+                  <span>Discount ({{ promoCode }})</span>
+                  <span class="tw:font-semibold">−{{ formatPrice(promoResult.estimatedDiscount) }}</span>
                 </div>
                 <div
                   class="tw:mt-2 tw:flex tw:items-center tw:justify-between tw:text-xs tw:text-slate-500"
@@ -575,7 +649,7 @@ onMounted(async () => {
                   class="tw:mt-4 tw:flex tw:items-center tw:justify-between tw:text-lg tw:font-semibold tw:text-slate-900"
                 >
                   <span>Total</span>
-                  <span>{{ formatPrice(cartStore.total) }}</span>
+                  <span>{{ formatPrice(promoResult?.estimatedDiscount ? Math.max(0, cartStore.total - promoResult.estimatedDiscount) : cartStore.total) }}</span>
                 </div>
               </div>
 
@@ -681,6 +755,38 @@ onMounted(async () => {
         </div>
       </div>
 
+      <!-- Promo code input (mobile) -->
+      <div class="tw:space-y-1">
+        <div class="tw:flex tw:gap-2">
+          <input
+            v-model="promoCode"
+            type="text"
+            placeholder="Promo code"
+            class="tw:flex-1 tw:rounded-xl tw:border tw:border-orange-200 tw:px-3 tw:py-2 tw:text-sm tw:uppercase tw:outline-none focus:tw:border-orange-400"
+            @keyup.enter="applyPromoCode"
+          />
+          <button
+            v-if="!promoResult"
+            class="tw:rounded-xl tw:bg-orange-500 tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:text-white tw:transition hover:tw:bg-orange-600 disabled:tw:opacity-50"
+            :disabled="promoApplying || !promoCode.trim()"
+            @click="applyPromoCode"
+          >
+            Apply
+          </button>
+          <button
+            v-else
+            class="tw:rounded-xl tw:border tw:border-slate-200 tw:px-3 tw:py-2 tw:text-sm tw:text-slate-600"
+            @click="clearPromo"
+          >
+            Remove
+          </button>
+        </div>
+        <p v-if="promoError" class="tw:text-xs tw:text-rose-500">{{ promoError }}</p>
+        <p v-if="promoResult" class="tw:text-xs tw:text-green-600 tw:font-medium">
+          ✓ {{ promoResult.name }} — save {{ promoResult.discountType === 'PERCENTAGE' ? promoResult.discountValue + '%' : formatPrice(promoResult.estimatedDiscount ?? promoResult.discountValue) }}
+        </p>
+      </div>
+
       <div class="tw:rounded-xl tw:bg-orange-50 tw:p-4">
         <div
           class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:text-slate-600"
@@ -689,6 +795,13 @@ onMounted(async () => {
           <span class="tw:font-semibold tw:text-slate-900">{{
             formatPrice(cartStore.total)
           }}</span>
+        </div>
+        <div
+          v-if="promoResult?.estimatedDiscount"
+          class="tw:mt-1 tw:flex tw:items-center tw:justify-between tw:text-sm tw:text-green-600"
+        >
+          <span>Discount ({{ promoCode }})</span>
+          <span class="tw:font-semibold">−{{ formatPrice(promoResult.estimatedDiscount) }}</span>
         </div>
         <div
           class="tw:mt-2 tw:flex tw:items-center tw:justify-between tw:text-xs tw:text-slate-500"
@@ -700,7 +813,7 @@ onMounted(async () => {
           class="tw:mt-4 tw:flex tw:items-center tw:justify-between tw:text-lg tw:font-semibold tw:text-slate-900"
         >
           <span>Total</span>
-          <span class="tw:text-orange-600">{{ formatPrice(cartStore.total) }}</span>
+          <span class="tw:text-orange-600">{{ formatPrice(promoResult?.estimatedDiscount ? Math.max(0, cartStore.total - promoResult.estimatedDiscount) : cartStore.total) }}</span>
         </div>
       </div>
 
