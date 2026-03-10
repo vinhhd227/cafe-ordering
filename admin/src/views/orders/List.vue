@@ -72,7 +72,7 @@ if (_cached) {
 const filterPanel = ref(null);
 
 // ── Widget visibility ──────────────────────────────────────────────
-const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs } =
+const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('orders-list', [
     {
       id: 'total',
@@ -102,7 +102,9 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
       previewComponent: StatCard,
       previewProps: { label: 'Bank transfer', value: '1,850,000 ₫', labelClass: 'tw:text-blue-400' },
     },
-  ])
+  ], { defaultCols: 4 })
+const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
+const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 
 const statusOptions = Object.entries(ORDER_STATUS_MAP).map(([value, meta]) => ({
   label: meta.label,
@@ -489,7 +491,9 @@ const confirmPayment = async () => {
         <widget-settings-button
           :widgets="wDefs"
           :hidden-count="wHidden"
+          :cols-per-row="wCols"
           @toggle="wToggle"
+          @update:cols-per-row="wSetCols"
         />
         <!-- Refresh -->
         <prime-button
@@ -506,7 +510,7 @@ const confirmPayment = async () => {
     </div>
 
     <!-- Summary stats -->
-    <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:lg:grid-cols-4">
+    <div :class="['tw:grid tw:gap-3', wColsClass]">
       <orders-summary-card
         v-if="wVisible('total')"
         :total="summary.total"

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import {
   getUsers,
@@ -176,6 +176,10 @@ watch([search], () => {
   }, 400)
 })
 
+onBeforeUnmount(() => {
+  clearTimeout(searchTimer.value)
+})
+
 watch([roleFilter, statusFilter], () => {
   first.value = 0
   loadUsers(1)
@@ -244,13 +248,15 @@ const confirmAndDeactivate = async () => {
 }
 
 // ── Widget visibility ──────────────────────────────────────────────
-const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs } =
+const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('users', [
     { id: 'total',  label: 'Total users', preview: '24', description: 'Tổng số tài khoản đã được tạo trong hệ thống.' },
     { id: 'active', label: 'Active',      preview: '20', description: 'Tài khoản đang hoạt động, có thể đăng nhập.', labelClass: 'tw:text-emerald-400' },
     { id: 'admins', label: 'Admins',      preview: '3',  description: 'Tài khoản có quyền quản trị toàn hệ thống.', labelClass: 'tw:text-red-400' },
     { id: 'staff',  label: 'Staff',       preview: '17', description: 'Nhân viên phục vụ, có quyền xử lý đơn hàng.', labelClass: 'tw:text-blue-400' },
-  ])
+  ], { defaultCols: 4 })
+const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
+const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 </script>
 
 <template>
@@ -269,7 +275,9 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
         <widget-settings-button
           :widgets="wDefs"
           :hidden-count="wHidden"
+          :cols-per-row="wCols"
           @toggle="wToggle"
+          @update:cols-per-row="wSetCols"
         />
         <prime-button
           v-if="can('user.create')"
@@ -284,7 +292,7 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
     </div>
 
     <!-- ── Summary Stats ─────────────────────────────────────────── -->
-    <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:md:grid-cols-4">
+    <div :class="['tw:grid tw:gap-3', wColsClass]">
       <stat-card v-if="wVisible('total')"  label="Total users" :value="stats.total" />
       <stat-card v-if="wVisible('active')" label="Active"      :value="stats.active" label-class="tw:text-emerald-400" />
       <stat-card v-if="wVisible('admins')" label="Admins"      :value="stats.admins" label-class="tw:text-red-400" />

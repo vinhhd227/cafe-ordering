@@ -153,7 +153,7 @@ export function useOrderSse({ onOrderCreated, onOrderUpdated, onConnected, onDis
       abortController?.abort()
       // reset retry count vì đây là token mới hợp lệ
       retryCount.value = 0
-      setTimeout(connect, 100) // nhỏ delay để abort hoàn tất
+      retryTimeout = setTimeout(connect, 100) // nhỏ delay để abort hoàn tất
     }
   })
 

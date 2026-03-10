@@ -190,7 +190,7 @@ const summary = computed(() => ({
 }));
 
 // ── Widget visibility ──────────────────────────────────────────────
-const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs } =
+const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('orders-kanban', [
     {
       id: 'summary',
@@ -206,7 +206,9 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
       previewComponent: RevenueCard,
       previewProps: { total: 1750000, cash: 1000000, bank: 750000 },
     },
-  ])
+  ], { defaultCols: 2 })
+const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
+const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 
 const formatVnd = (value) =>
   new Intl.NumberFormat("vi-VN", {
@@ -360,6 +362,11 @@ const handleDrop = (colKey) => {
 onMounted(() => {
   loadOrders();
   // SSE connection được quản lý bởi useOrderSse (onMounted/onUnmounted bên trong composable)
+});
+
+onUnmounted(() => {
+  // Clear tất cả pending drag-drop timers để tránh API call sau khi unmount
+  pendingMoves.value.forEach(({ timeoutId }) => clearTimeout(timeoutId));
 });
 </script>
 
@@ -570,7 +577,9 @@ onMounted(() => {
         <widget-settings-button
           :widgets="wDefs"
           :hidden-count="wHidden"
+          :cols-per-row="wCols"
           @toggle="wToggle"
+          @update:cols-per-row="wSetCols"
         />
         <!-- Refresh -->
         <prime-button
@@ -587,7 +596,7 @@ onMounted(() => {
     </div>
 
     <!-- Summary stats -->
-    <div class="tw:grid tw:grid-cols-2 tw:gap-3">
+    <div :class="['tw:grid tw:gap-3', wColsClass]">
       <orders-summary-card
         v-if="wVisible('summary')"
         :total="summary.total"

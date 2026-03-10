@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { getProducts } from "@/services/product.service";
 import { useAuthStore } from "@/stores/auth";
 import AppTable from "@/components/AppTable.vue";
@@ -102,6 +102,10 @@ watch(search, () => {
     loadProducts(1);
     loadStats();
   }, 400);
+});
+
+onBeforeUnmount(() => {
+  clearTimeout(searchTimer.value);
 });
 </script>
 

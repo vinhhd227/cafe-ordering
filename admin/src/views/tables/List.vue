@@ -287,13 +287,15 @@ watch([statusFilter, activeFilter], () => {
 });
 
 // ── Widget visibility ──────────────────────────────────────────────
-const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs } =
+const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('tables', [
     { id: 'total',     label: 'Total',     preview: '20', description: 'Tổng số bàn có trong nhà hàng.' },
     { id: 'available', label: 'Available', preview: '12', description: 'Bàn trống, sẵn sàng đón khách mới.', labelClass: 'tw:text-emerald-400' },
     { id: 'occupied',  label: 'Occupied',  preview: '6',  description: 'Bàn đang có khách, đang trong phiên đặt món.', labelClass: 'tw:text-blue-400' },
     { id: 'cleaning',  label: 'Cleaning',  preview: '2',  description: 'Bàn đang dọn dẹp sau khi khách rời đi.', labelClass: 'tw:text-yellow-400' },
-  ])
+  ], { defaultCols: 4 })
+const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
+const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 </script>
 
 <template>
@@ -425,7 +427,9 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
         <widget-settings-button
           :widgets="wDefs"
           :hidden-count="wHidden"
+          :cols-per-row="wCols"
           @toggle="wToggle"
+          @update:cols-per-row="wSetCols"
         />
         <prime-button
           v-if="can('table.create')"
@@ -440,7 +444,7 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
     </div>
 
     <!-- ── Summary stats ─────────────────────────────────────────── -->
-    <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:lg:grid-cols-4">
+    <div :class="['tw:grid tw:gap-3', wColsClass]">
       <stat-card v-if="wVisible('total')"     label="Total"     :value="summary.total" />
       <stat-card v-if="wVisible('available')" label="Available" :value="summary.available" label-class="tw:text-emerald-400" />
       <stat-card v-if="wVisible('occupied')"  label="Occupied"  :value="summary.occupied"  label-class="tw:text-blue-400" />

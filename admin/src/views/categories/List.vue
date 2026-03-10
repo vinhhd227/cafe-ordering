@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
 import { getCategory, toggleCategoryActive } from "@/services/category.service";
 import AppTable from "@/components/AppTable.vue";
@@ -139,6 +139,10 @@ watch([search, statusFilter], () => {
   searchTimer.value = setTimeout(() => {
     first.value = 0;
   }, 300);
+});
+
+onBeforeUnmount(() => {
+  clearTimeout(searchTimer.value);
 });
 </script>
 

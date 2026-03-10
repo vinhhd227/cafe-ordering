@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
 import { usePermission } from "@/composables/usePermission";
 import { getProducts, toggleProductActive } from "@/services/product.service";
@@ -212,19 +212,25 @@ watch([search, minPrice, maxPrice], () => {
   }, 400);
 });
 
+onBeforeUnmount(() => {
+  clearTimeout(searchTimer.value);
+});
+
 watch([categoryFilter, statusFilter], () => {
   first.value = 0;
   loadProducts(1);
 });
 
 // ── Widget visibility ──────────────────────────────────────────────
-const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs } =
+const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('products', [
     { id: 'total',    label: 'Total items', preview: '48', description: 'Tổng số sản phẩm trong danh mục.' },
     { id: 'active',   label: 'Active',      preview: '36', description: 'Sản phẩm đang hiển thị và được bán trên menu.', labelClass: 'tw:text-emerald-400' },
     { id: 'low',      label: 'Low stock',   preview: '4',  description: 'Sản phẩm sắp hết nguyên liệu, cần nhập thêm.' },
     { id: 'inactive', label: 'Inactive',    preview: '8',  description: 'Sản phẩm đã tắt, không hiển thị trên menu.', labelClass: 'tw:text-red-400' },
-  ])
+  ], { defaultCols: 4 })
+const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
+const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 </script>
 
 <template>
@@ -246,7 +252,9 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
         <widget-settings-button
           :widgets="wDefs"
           :hidden-count="wHidden"
+          :cols-per-row="wCols"
           @toggle="wToggle"
+          @update:cols-per-row="wSetCols"
         />
         <prime-button
           v-if="can('product.create')"
@@ -261,7 +269,7 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
     </div>
 
     <!-- ── Summary Stats ─────────────────────────────────────────── -->
-    <div class="tw:grid tw:grid-cols-2 tw:gap-3 tw:lg:grid-cols-4">
+    <div :class="['tw:grid tw:gap-3', wColsClass]">
       <stat-card
         v-if="wVisible('total')"
         label="Total items"

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import {
@@ -176,6 +176,10 @@ watch([search], () => {
     first.value = 0;
     loadRoles(1);
   }, 400);
+});
+
+onBeforeUnmount(() => {
+  clearTimeout(searchTimer.value);
 });
 
 // --- Add Role ---
