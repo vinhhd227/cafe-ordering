@@ -5,11 +5,18 @@ public record OrderItemDto(
   string ProductName,
   decimal UnitPrice,
   int Quantity,
+  decimal Discount,
   decimal TotalPrice,
   string? Temperature,
   string? IceLevel,
   string? SugarLevel,
   bool IsTakeaway
+);
+
+public record AppliedPromotionDto(
+  int PromotionId,
+  string PromoCode,
+  decimal DiscountAmount
 );
 
 public record OrderDto(
@@ -21,10 +28,13 @@ public record OrderDto(
   decimal? AmountReceived,
   decimal TipAmount,
   decimal TotalAmount,
+  decimal TotalDiscount,
+  decimal FinalAmount,
   DateTime OrderDate,
   Guid SessionId,
   string? TableCode,
-  List<OrderItemDto> Items
+  List<OrderItemDto> Items,
+  List<AppliedPromotionDto> Promotions
 );
 
 public record PagedOrdersDto(

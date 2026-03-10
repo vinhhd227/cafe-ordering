@@ -17,7 +17,7 @@ public class GetOrderHandler(
 {
   public async ValueTask<Result<OrderDto>> Handle(GetOrderQuery request, CancellationToken ct)
   {
-    var spec  = new OrderByIdWithItemsSpec(request.OrderId);
+    var spec  = new OrderByIdWithItemsAndPromotionsSpec(request.OrderId);
     var order = await repository.FirstOrDefaultAsync(spec, ct);
 
     if (order is null)
@@ -41,6 +41,8 @@ public class GetOrderHandler(
       order.AmountReceived,
       order.TipAmount,
       order.TotalAmount,
+      order.TotalDiscount,
+      order.FinalAmount,
       order.OrderDate,
       order.SessionId,
       tableCode,
@@ -49,12 +51,14 @@ public class GetOrderHandler(
         i.ProductName,
         i.UnitPrice,
         i.Quantity,
+        i.Discount,
         i.TotalPrice,
         i.Temperature?.Name.ToUpperInvariant(),
         i.IceLevel?.Name.ToUpperInvariant(),
         i.SugarLevel?.Name.ToUpperInvariant(),
         i.IsTakeaway
-      )).ToList()
+      )).ToList(),
+      order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList()
     );
 
     return Result.Success(dto);

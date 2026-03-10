@@ -77,6 +77,8 @@ public class UpdateOrderItemHandler(
       order.AmountReceived,
       order.TipAmount,
       order.TotalAmount,
+      order.TotalDiscount,
+      order.FinalAmount,
       order.OrderDate,
       order.SessionId,
       null, // tableCode — not needed for item edit response
@@ -85,12 +87,14 @@ public class UpdateOrderItemHandler(
         i.ProductName,
         i.UnitPrice,
         i.Quantity,
+        i.Discount,
         i.TotalPrice,
         i.Temperature?.Name.ToUpperInvariant(),
         i.IceLevel?.Name.ToUpperInvariant(),
         i.SugarLevel?.Name.ToUpperInvariant(),
         i.IsTakeaway
-      )).ToList()
+      )).ToList(),
+      order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList()
     );
 
     return Result.Success(dto);

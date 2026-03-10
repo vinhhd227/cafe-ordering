@@ -34,34 +34,36 @@ public class ListOrdersHandler(
       }
     }
 
-    // Npgsql chỉ chấp nhận DateTimeKind.Utc cho timestamp with time zone
+    // ToUniversalTime() xử lý đúng khi server chạy ở timezone Vietnam:
+    // ASP.NET model binding parse "2026-03-09T17:00:00Z" → Local (March 10 00:00 VN),
+    // ToUniversalTime() convert lại về March 9 17:00 UTC đúng.
     var dateFrom = request.DateFrom.HasValue
-      ? DateTime.SpecifyKind(request.DateFrom.Value, DateTimeKind.Utc)
+      ? request.DateFrom.Value.ToUniversalTime()
       : (DateTime?)null;
     var dateTo = request.DateTo.HasValue
-      ? DateTime.SpecifyKind(request.DateTo.Value, DateTimeKind.Utc)
+      ? request.DateTo.Value.ToUniversalTime()
       : (DateTime?)null;
 
     var countSpec = new OrdersCountSpec(request.Status, request.PaymentStatus,
       dateFrom, dateTo, filteredSessionIds,
-      request.MinAmount, request.MaxAmount, request.OrderNumber);
+      request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
 
     var spec = new OrdersListSpec(request.Status, request.PaymentStatus,
       dateFrom, dateTo, request.Page, request.PageSize,
-      filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+      filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
 
     var cashSpec = new PaidOrdersTotalSpec(PaymentMethod.Cash,
       request.Status, dateFrom, dateTo,
-      filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+      filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
 
     var bankSpec = new PaidOrdersTotalSpec(PaymentMethod.BankTransfer,
       request.Status, dateFrom, dateTo,
-      filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+      filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
 
-    var pendingSpec    = new OrdersCountSpec("PENDING",    null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
-    var processingSpec = new OrdersCountSpec("PROCESSING", null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
-    var completedSpec  = new OrdersCountSpec("COMPLETED",  null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
-    var cancelledSpec  = new OrdersCountSpec("CANCELLED",  null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber);
+    var pendingSpec    = new OrdersCountSpec("PENDING",    null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
+    var processingSpec = new OrdersCountSpec("PROCESSING", null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
+    var completedSpec  = new OrdersCountSpec("COMPLETED",  null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
+    var cancelledSpec  = new OrdersCountSpec("CANCELLED",  null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
 
     // Thực hiện tuần tự — EF Core DbContext không hỗ trợ concurrent operations
     var totalCount      = await repository.CountAsync(countSpec, ct);
@@ -98,6 +100,8 @@ public class ListOrdersHandler(
         o.AmountReceived,
         o.TipAmount,
         o.TotalAmount,
+        o.TotalDiscount,
+        o.FinalAmount,
         o.OrderDate,
         o.SessionId,
         tableCode,
@@ -106,12 +110,14 @@ public class ListOrdersHandler(
           i.ProductName,
           i.UnitPrice,
           i.Quantity,
+          i.Discount,
           i.TotalPrice,
           i.Temperature?.Name.ToUpperInvariant(),
           i.IceLevel?.Name.ToUpperInvariant(),
           i.SugarLevel?.Name.ToUpperInvariant(),
           i.IsTakeaway
-        )).ToList()
+        )).ToList(),
+        o.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList()
       );
     }).ToList();
 

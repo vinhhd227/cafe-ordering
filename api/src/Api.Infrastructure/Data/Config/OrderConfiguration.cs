@@ -62,6 +62,12 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
     builder.HasIndex(o => o.CustomerId)
       .HasDatabaseName("IX_Orders_CustomerId");
 
+    // OrderPromotions — use public property (EF auto-discovers _promotions backing field via convention)
+    builder.HasMany(o => o.Promotions)
+      .WithOne()
+      .HasForeignKey(op => op.OrderId)
+      .OnDelete(DeleteBehavior.Cascade);
+
     // Concurrency token
     builder.Property(o => o.RowVersion)
       .IsRowVersion();

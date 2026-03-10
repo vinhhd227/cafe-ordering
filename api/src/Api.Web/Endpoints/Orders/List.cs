@@ -12,6 +12,7 @@ public sealed class ListOrdersRequest
   [QueryParam] public decimal? MinAmount { get; set; }
   [QueryParam] public decimal? MaxAmount { get; set; }
   [QueryParam] public string? TableCode { get; set; }
+  [QueryParam] public string? PaymentMethod { get; set; }
   [QueryParam] public DateTime? DateFrom { get; set; }
   [QueryParam] public DateTime? DateTo { get; set; }
   [QueryParam] public int Page { get; set; } = 1;
@@ -32,7 +33,7 @@ public class ListOrders(IMediator mediator) : Endpoint<ListOrdersRequest, PagedO
   {
     var result = await mediator.Send(
       new ListOrdersQuery(req.Status, req.PaymentStatus, req.OrderNumber, req.MinAmount,
-        req.MaxAmount, req.TableCode, req.DateFrom, req.DateTo, req.Page, req.PageSize), ct);
+        req.MaxAmount, req.TableCode, req.DateFrom, req.DateTo, req.Page, req.PageSize, req.PaymentMethod), ct);
     await this.SendResultAsync(result, ct);
   }
 }

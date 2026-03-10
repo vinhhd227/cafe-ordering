@@ -1,8 +1,10 @@
 using Api.Core.Aggregates.CategoryAggregate;
 using Api.Core.Aggregates.CustomerAggregate;
+using Api.Core.Aggregates.ExpenseAggregate;
 using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.ProductAggregate;
+using Api.Core.Aggregates.PromotionAggregate;
 using Api.Core.Aggregates.TableAggregate;
 
 namespace Api.Infrastructure.Data;
@@ -28,6 +30,9 @@ public class AppDbContext : DbContext
   public DbSet<Table> Tables => Set<Table>();
   public DbSet<GuestSession> GuestSessions => Set<GuestSession>();
   public DbSet<Order> Orders => Set<Order>();
+  public DbSet<OrderPromotion> OrderPromotions => Set<OrderPromotion>();
+  public DbSet<Expense> Expenses => Set<Expense>();
+  public DbSet<Promotion> Promotions => Set<Promotion>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {

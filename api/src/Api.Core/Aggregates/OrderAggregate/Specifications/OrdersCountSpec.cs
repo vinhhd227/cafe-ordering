@@ -13,7 +13,8 @@ public class OrdersCountSpec : Specification<Order>
     IReadOnlyList<Guid>? sessionIds = null,
     decimal? minAmount = null,
     decimal? maxAmount = null,
-    string? orderNumber = null)
+    string? orderNumber = null,
+    string? paymentMethod = null)
   {
     if (!string.IsNullOrWhiteSpace(status))
     {
@@ -27,20 +28,26 @@ public class OrdersCountSpec : Specification<Order>
       Query.Where(o => o.PaymentStatus == target);
     }
 
+    if (!string.IsNullOrWhiteSpace(paymentMethod))
+    {
+      var target = PaymentMethod.FromName(paymentMethod, true);
+      Query.Where(o => o.PaymentMethod == target);
+    }
+
     if (!string.IsNullOrWhiteSpace(orderNumber))
       Query.Where(o => o.OrderNumber.Contains(orderNumber));
 
     if (minAmount.HasValue)
-      Query.Where(o => o.TotalAmount >= minAmount.Value);
+      Query.Where(o => o.Items.Sum(i => (i.UnitPrice - i.Discount) * i.Quantity) >= minAmount.Value);
 
     if (maxAmount.HasValue)
-      Query.Where(o => o.TotalAmount <= maxAmount.Value);
+      Query.Where(o => o.Items.Sum(i => (i.UnitPrice - i.Discount) * i.Quantity) <= maxAmount.Value);
 
     if (dateFrom.HasValue)
       Query.Where(o => o.OrderDate >= dateFrom.Value);
 
     if (dateTo.HasValue)
-      Query.Where(o => o.OrderDate < dateTo.Value.Date.AddDays(1));
+      Query.Where(o => o.OrderDate < dateTo.Value.AddDays(1));
 
     if (sessionIds is not null)
       Query.Where(o => sessionIds.Contains(o.SessionId));

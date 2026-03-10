@@ -12,5 +12,6 @@ public record ListOrdersQuery(
   DateTime? DateFrom = null,
   DateTime? DateTo = null,
   int Page = 1,
-  int PageSize = 20
+  int PageSize = 20,
+  string? PaymentMethod = null
 ) : IQuery<Result<PagedOrdersDto>>;

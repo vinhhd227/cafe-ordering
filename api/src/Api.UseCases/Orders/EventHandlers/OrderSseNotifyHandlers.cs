@@ -44,6 +44,8 @@ file static class OrderDtoMapper
       order.AmountReceived,
       order.TipAmount,
       order.TotalAmount,
+      order.TotalDiscount,
+      order.FinalAmount,
       order.OrderDate,
       order.SessionId,
       tableCode,
@@ -52,12 +54,14 @@ file static class OrderDtoMapper
         i.ProductName,
         i.UnitPrice,
         i.Quantity,
+        i.Discount,
         i.TotalPrice,
         i.Temperature?.Name.ToUpperInvariant(),
         i.IceLevel?.Name.ToUpperInvariant(),
         i.SugarLevel?.Name.ToUpperInvariant(),
         i.IsTakeaway
-      )).ToList()
+      )).ToList(),
+      order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList()
     );
 
     return JsonSerializer.Serialize(dto, JsonOpts);

@@ -14,7 +14,8 @@ public class PaidOrdersTotalSpec : Specification<Order, decimal>
     IReadOnlyList<Guid>? sessionIds = null,
     decimal? minAmount = null,
     decimal? maxAmount = null,
-    string? orderNumber = null)
+    string? orderNumber = null,
+    string? paymentMethod = null)
   {
     // Phải dùng local variable thay vì static field (PaymentStatus.Paid) trong lambda
     // EF Core không thể translate static member access trong expression tree khi dùng HasConversion
@@ -22,7 +23,15 @@ public class PaidOrdersTotalSpec : Specification<Order, decimal>
 
     Query
       .Where(o => o.PaymentStatus == paid && o.PaymentMethod == method)
-      .Select(o => o.TotalAmount);
+      .Select(o => o.Items.Sum(i => (i.UnitPrice - i.Discount) * i.Quantity) + o.TipAmount);
+
+    // Nếu user filter theo paymentMethod mà không khớp với method của spec → kết quả rỗng
+    if (!string.IsNullOrWhiteSpace(paymentMethod))
+    {
+      var userMethod = PaymentMethod.FromName(paymentMethod, true);
+      if (userMethod != method)
+        Query.Where(_ => false);
+    }
 
     if (!string.IsNullOrWhiteSpace(status))
     {
@@ -34,16 +43,16 @@ public class PaidOrdersTotalSpec : Specification<Order, decimal>
       Query.Where(o => o.OrderNumber.Contains(orderNumber));
 
     if (minAmount.HasValue)
-      Query.Where(o => o.TotalAmount >= minAmount.Value);
+      Query.Where(o => o.Items.Sum(i => (i.UnitPrice - i.Discount) * i.Quantity) >= minAmount.Value);
 
     if (maxAmount.HasValue)
-      Query.Where(o => o.TotalAmount <= maxAmount.Value);
+      Query.Where(o => o.Items.Sum(i => (i.UnitPrice - i.Discount) * i.Quantity) <= maxAmount.Value);
 
     if (dateFrom.HasValue)
       Query.Where(o => o.OrderDate >= dateFrom.Value);
 
     if (dateTo.HasValue)
-      Query.Where(o => o.OrderDate < dateTo.Value.Date.AddDays(1));
+      Query.Where(o => o.OrderDate < dateTo.Value.AddDays(1));
 
     if (sessionIds is not null)
       Query.Where(o => sessionIds.Contains(o.SessionId));

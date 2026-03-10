@@ -2,6 +2,8 @@
 
 using Api.Core.Aggregates.OrderAggregate.Events;
 using Api.Core.Aggregates.OrderAggregate;
+using Api.Core.Aggregates.PromotionAggregate;
+using Api.Core.Exceptions;
 
 namespace Api.Core.Aggregates.OrderAggregate;
 
@@ -12,6 +14,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
 {
   // Navigation
   private readonly List<OrderItem> _items = new();
+  private readonly List<OrderPromotion> _promotions = new();
 
   // Private constructor
   private Order() { }
@@ -28,9 +31,12 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   public decimal TipAmount { get; private set; }
   public DateTime OrderDate { get; private set; }
   public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
+  public IReadOnlyCollection<OrderPromotion> Promotions => _promotions.AsReadOnly();
 
   // Calculated
-  public decimal TotalAmount => _items.Sum(i => i.TotalPrice);
+  public decimal TotalAmount  => _items.Sum(i => i.TotalPrice);
+  public decimal TotalDiscount => _promotions.Sum(p => p.DiscountAmount);
+  public decimal FinalAmount   => Math.Max(0, TotalAmount - TotalDiscount);
 
   /// <summary>
   ///   Factory method for session-based orders (guest or authenticated).
@@ -113,6 +119,59 @@ public class Order : AuditableEntity<int>, IAggregateRoot
 
     RegisterDomainEvent(new OrderPaymentUpdatedEvent(this));
   }
+
+  // ── Promotion methods ────────────────────────────────────────────
+
+  /// <summary>
+  ///   Áp dụng một chương trình khuyến mãi vào order.
+  ///   Enforce StackPolicy: EXCLUSIVE không thể kết hợp với bất kỳ promo nào khác.
+  ///   Chỉ áp dụng được khi order đang PENDING.
+  /// </summary>
+  public void ApplyPromotion(int promotionId, string promoCode, decimal discountAmount, StackPolicy stackPolicy)
+  {
+    if (Status != OrderStatus.Pending)
+      throw new DomainException("Promotions can only be applied to Pending orders.");
+
+    if (_promotions.Any(p => p.PromotionId == promotionId))
+      throw new DomainException("This promotion has already been applied to the order.");
+
+    if (_promotions.Any(p => p.StackPolicy == StackPolicy.Exclusive))
+      throw new DomainException("Cannot combine with an existing exclusive promotion.");
+
+    if (stackPolicy == StackPolicy.Exclusive && _promotions.Any())
+      throw new DomainException("An exclusive promotion cannot be combined with existing promotions.");
+
+    _promotions.Add(OrderPromotion.Create(Id, promotionId, promoCode, discountAmount, stackPolicy));
+    RegisterDomainEvent(new OrderPromotionAppliedEvent(this, promotionId));
+  }
+
+  /// <summary>
+  ///   Xóa một chương trình khuyến mãi khỏi order.
+  ///   Đồng thời reset item-level discounts liên quan về 0.
+  ///   Chỉ được phép khi order đang PENDING.
+  /// </summary>
+  public void RemovePromotion(int promotionId)
+  {
+    if (Status != OrderStatus.Pending)
+      throw new DomainException("Promotions can only be removed from Pending orders.");
+
+    var promo = _promotions.FirstOrDefault(p => p.PromotionId == promotionId);
+    if (promo is null) return;
+
+    _promotions.Remove(promo);
+    RegisterDomainEvent(new OrderPromotionRemovedEvent(this, promotionId));
+  }
+
+  /// <summary>
+  ///   Reset tất cả item discounts về 0. Gọi khi xóa một promo có PRODUCT/CATEGORY scope.
+  /// </summary>
+  public void ResetAllItemDiscounts()
+  {
+    foreach (var item in _items)
+      item.ApplyDiscount(0);
+  }
+
+  // ── Merge/Split methods ──────────────────────────────────────────
 
   /// <summary>
   ///   Merge: thêm item bất kể status (bypass CanAddItems guard).
