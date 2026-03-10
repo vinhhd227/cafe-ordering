@@ -9,13 +9,23 @@ function loadFromStorage() {
   }
 }
 
+function persist(allSettings) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(allSettings))
+  } catch {
+    // localStorage full — ignore
+  }
+}
+
 /**
- * useWidgetSettings — lưu trạng thái hiển thị widget theo từng trang vào localStorage.
+ * useWidgetSettings — lưu trạng thái hiển thị widget và số cột trên một hàng theo từng trang vào localStorage.
  *
  * @param {string} pageKey - khóa định danh trang (vd: 'orders-list', 'products')
  * @param {Array<{id: string, label: string}>} widgetDefs - danh sách widget của trang
+ * @param {Object} [options]
+ * @param {number} [options.defaultCols=2] - số cột mặc định nếu chưa có giá trị lưu
  */
-export function useWidgetSettings(pageKey, widgetDefs) {
+export function useWidgetSettings(pageKey, widgetDefs, { defaultCols = 2 } = {}) {
   const allSettings = ref(loadFromStorage())
 
   // hidden[widgetId] = true nghĩa là widget đó đang ẩn
@@ -30,11 +40,7 @@ export function useWidgetSettings(pageKey, widgetDefs) {
     } else {
       allSettings.value[pageKey][id] = true
     }
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(allSettings.value))
-    } catch {
-      // localStorage full — ignore
-    }
+    persist(allSettings.value)
   }
 
   const hiddenCount = computed(() => Object.keys(hidden.value).length)
@@ -46,5 +52,20 @@ export function useWidgetSettings(pageKey, widgetDefs) {
     })),
   )
 
-  return { isVisible, toggle, hiddenCount, widgets }
+  // ── Columns per row ──────────────────────────────────────────────
+  // Lưu riêng dưới key `pageKey:cols` để không conflict với widgetId
+  const colsKey = pageKey + ':cols'
+  const colsPerRow = ref(
+    typeof allSettings.value[colsKey] === 'number'
+      ? allSettings.value[colsKey]
+      : defaultCols,
+  )
+
+  const setColsPerRow = (n) => {
+    colsPerRow.value = n
+    allSettings.value[colsKey] = n
+    persist(allSettings.value)
+  }
+
+  return { isVisible, toggle, hiddenCount, widgets, colsPerRow, setColsPerRow }
 }

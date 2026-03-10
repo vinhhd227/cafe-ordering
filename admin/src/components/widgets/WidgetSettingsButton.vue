@@ -2,9 +2,10 @@
 defineProps({
   widgets: Array,  // [{ id, label, description, visible, previewComponent, previewProps }]
   hiddenCount: { type: Number, default: 0 },
+  colsPerRow: { type: Number, default: 2 },
 })
 
-const emit = defineEmits(['toggle'])
+const emit = defineEmits(['toggle', 'update:colsPerRow'])
 
 const visible = ref(false)
 </script>
@@ -35,6 +36,25 @@ const visible = ref(false)
       :draggable="false"
       header="Widget settings"
     >
+      <!-- ── Columns per row ──────────────────────────────────────── -->
+      <div class="tw:flex tw:items-center tw:justify-between tw:mb-5">
+        <span class="tw:text-sm app-text-muted">Columns per row</span>
+        <div class="tw:flex tw:gap-1">
+          <prime-button
+            v-for="n in [1, 2, 3, 4]"
+            :key="n"
+            :severity="colsPerRow === n ? 'primary' : 'secondary'"
+            :outlined="colsPerRow !== n"
+            size="small"
+            :class="btnIcon"
+            @click="emit('update:colsPerRow', n)"
+          >
+            {{ n }}
+          </prime-button>
+        </div>
+      </div>
+
+      <!-- ── Widget list ──────────────────────────────────────────── -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-x-3 tw:gap-y-4 sm:tw:grid-cols-3">
         <div v-for="w in widgets" :key="w.id" class="tw:flex tw:flex-col tw:gap-2">
           <!-- Actual component rendered with preview props -->

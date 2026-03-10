@@ -23,7 +23,8 @@ import { btnIcon } from "@/layout/ui";
 const { can } = usePermission();
 
 // ── Cache ──────────────────────────────────────────────────────────
-const { save: saveCache, restore: restoreCache } = useTableCache("expenses-list");
+const { save: saveCache, restore: restoreCache } =
+  useTableCache("expenses-list");
 
 // ── PrimeVue services ─────────────────────────────────────────────
 const confirm = useConfirm();
@@ -41,6 +42,20 @@ const first = ref(0);
 const loading = ref(false);
 const errorMessage = ref("");
 
+// ── Column visibility ────────────────────────────────────────────
+const colDefs = ref([
+  { field: "purchaseDate", header: "Date", visible: true },
+  { field: "name", header: "Item", visible: true },
+  { field: "category", header: "Category", visible: true },
+  { field: "paymentMethod", header: "Payment", visible: true },
+  { field: "qty", header: "Qty", visible: true },
+  { field: "unitPrice", header: "Unit price", visible: true },
+  { field: "totalAmount", header: "Total", visible: true },
+  { field: "notes", header: "Notes", visible: true },
+]);
+const colVisible = (field) =>
+  colDefs.value.find((c) => c.field === field)?.visible !== false;
+
 // ── Filters ────────────────────────────────────────────────────────
 const todayMidnight = () => {
   const d = new Date();
@@ -57,22 +72,24 @@ const startOfMonth = () => {
 
 const dateRange = ref([startOfMonth(), todayMidnight()]);
 const dateFrom = computed(() => dateRange.value?.[0] ?? null);
-const dateTo   = computed(() => dateRange.value?.[1] ?? null);
+const dateTo = computed(() => dateRange.value?.[1] ?? null);
 const categoryFilter = ref(null);
 const filterPanel = ref(null);
 
 // ── Restore cache ─────────────────────────────────────────────────
 const _cached = restoreCache();
 if (_cached) {
-  if (_cached.rows !== undefined)             rows.value           = _cached.rows;
-  if (_cached.first !== undefined)            first.value          = _cached.first;
-  if (_cached.categoryFilter !== undefined)   categoryFilter.value = _cached.categoryFilter;
+  if (_cached.rows !== undefined) rows.value = _cached.rows;
+  if (_cached.first !== undefined) first.value = _cached.first;
+  if (_cached.categoryFilter !== undefined)
+    categoryFilter.value = _cached.categoryFilter;
   if (_cached.dateFrom || _cached.dateTo) {
     dateRange.value = [
       _cached.dateFrom ? new Date(_cached.dateFrom) : null,
-      _cached.dateTo   ? new Date(_cached.dateTo)   : null,
+      _cached.dateTo ? new Date(_cached.dateTo) : null,
     ];
   }
+  if (_cached.colDefs) colDefs.value = _cached.colDefs;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -98,7 +115,11 @@ const formatDate = (dateStr) =>
   }).format(new Date(dateStr));
 
 const categoryMeta = (cat) =>
-  EXPENSE_CATEGORY_MAP[cat] ?? { label: cat, icon: "ph:tag-bold", severity: "secondary" };
+  EXPENSE_CATEGORY_MAP[cat] ?? {
+    label: cat,
+    icon: "ph:tag-bold",
+    severity: "secondary",
+  };
 
 // ── Filter helpers ─────────────────────────────────────────────────
 const activeFilterCount = computed(() => {
@@ -115,11 +136,18 @@ const clearFilters = () => {
 };
 
 // ── Computed P&L ──────────────────────────────────────────────────
-const revenue = computed(() =>
-  summary.value?.revenue ?? { cash: 0, bank: 0, total: 0 }
+const revenue = computed(
+  () => summary.value?.revenue ?? { cash: 0, bank: 0, total: 0 },
 );
-const expenseBreakdown = computed(() =>
-  summary.value?.expenses ?? { ingredient: 0, supply: 0, equipment: 0, other: 0, total: 0 }
+const expenseBreakdown = computed(
+  () =>
+    summary.value?.expenses ?? {
+      ingredient: 0,
+      supply: 0,
+      equipment: 0,
+      other: 0,
+      total: 0,
+    },
 );
 const profit = computed(() => summary.value?.profit ?? 0);
 const profitMargin = computed(() => {
@@ -136,6 +164,7 @@ const saveCurrentState = () => {
     categoryFilter: categoryFilter.value,
     dateFrom: dateFrom.value?.toISOString?.() ?? dateFrom.value,
     dateTo: dateTo.value?.toISOString?.() ?? dateTo.value,
+    colDefs: colDefs.value,
   });
 };
 
@@ -218,9 +247,13 @@ const fUnitPrice = ref(null);
 const fPurchaseDate = ref(todayMidnight());
 const fNotes = ref("");
 
-const fTotalAmount = computed(() => (fQuantity.value ?? 0) * (fUnitPrice.value ?? 0));
+const fTotalAmount = computed(
+  () => (fQuantity.value ?? 0) * (fUnitPrice.value ?? 0),
+);
 const isEditMode = computed(() => editingExpense.value !== null);
-const dialogHeader = computed(() => (isEditMode.value ? "Edit expense" : "New expense"));
+const dialogHeader = computed(() =>
+  isEditMode.value ? "Edit expense" : "New expense",
+);
 
 const openCreateDialog = () => {
   editingExpense.value = null;
@@ -280,10 +313,20 @@ const submitForm = async () => {
 
     if (isEditMode.value) {
       await updateExpense(editingExpense.value.id, payload);
-      toast.add({ severity: "success", summary: "Updated", detail: "Expense updated.", life: 3000 });
+      toast.add({
+        severity: "success",
+        summary: "Updated",
+        detail: "Expense updated.",
+        life: 3000,
+      });
     } else {
       await createExpense(payload);
-      toast.add({ severity: "success", summary: "Created", detail: "Expense recorded.", life: 3000 });
+      toast.add({
+        severity: "success",
+        summary: "Created",
+        detail: "Expense recorded.",
+        life: 3000,
+      });
     }
 
     dialogVisible.value = false;
@@ -309,7 +352,12 @@ const handleDelete = (expense) => {
     accept: async () => {
       try {
         await deleteExpense(expense.id);
-        toast.add({ severity: "success", summary: "Deleted", detail: "Expense deleted.", life: 3000 });
+        toast.add({
+          severity: "success",
+          summary: "Deleted",
+          detail: "Expense deleted.",
+          life: 3000,
+        });
         if (expenses.value.length === 1 && first.value > 0) {
           first.value = Math.max(0, first.value - rows.value);
         }
@@ -337,7 +385,9 @@ const handleDelete = (expense) => {
     <div class="tw:space-y-4">
       <!-- Purchase date -->
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label
+          class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+        >
           Purchase date
         </label>
         <prime-date-picker
@@ -350,7 +400,9 @@ const handleDelete = (expense) => {
 
       <!-- Item name -->
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label
+          class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+        >
           Item name <span class="tw:text-red-400">*</span>
         </label>
         <prime-input-text
@@ -363,7 +415,9 @@ const handleDelete = (expense) => {
       <!-- Category + Payment method -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label
+            class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          >
             Category
           </label>
           <prime-select
@@ -389,7 +443,9 @@ const handleDelete = (expense) => {
         </div>
 
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label
+            class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          >
             Payment
           </label>
           <prime-select
@@ -418,7 +474,9 @@ const handleDelete = (expense) => {
       <!-- Qty + Unit -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label
+            class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          >
             Quantity <span class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
@@ -432,7 +490,9 @@ const handleDelete = (expense) => {
           />
         </div>
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label
+            class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          >
             Unit
           </label>
           <prime-input-text
@@ -446,7 +506,9 @@ const handleDelete = (expense) => {
       <!-- Unit price + Total (computed) -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label
+            class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          >
             Unit price <span class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
@@ -460,7 +522,9 @@ const handleDelete = (expense) => {
           />
         </div>
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label
+            class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          >
             Total (auto)
           </label>
           <div
@@ -473,7 +537,9 @@ const handleDelete = (expense) => {
 
       <!-- Notes -->
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label
+          class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+        >
           Notes
         </label>
         <prime-textarea
@@ -489,7 +555,11 @@ const handleDelete = (expense) => {
     </div>
 
     <template #footer>
-      <prime-button severity="secondary" outlined @click="dialogVisible = false">
+      <prime-button
+        severity="secondary"
+        outlined
+        @click="dialogVisible = false"
+      >
         Cancel
       </prime-button>
       <prime-button
@@ -507,7 +577,9 @@ const handleDelete = (expense) => {
     <!-- Header -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+        <p
+          class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+        >
           Operations
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Expenses</h1>
@@ -557,12 +629,27 @@ const handleDelete = (expense) => {
         :value="summaryLoading ? '…' : formatVnd(revenue.total)"
       >
         <template #icon>
-          <iconify icon="ph:trend-up-bold" class="tw:text-emerald-400 tw:opacity-60" />
+          <iconify
+            icon="ph:trend-up-bold"
+            class="tw:text-emerald-400 tw:opacity-60"
+          />
         </template>
         <template #sub>
-          <div class="tw:mt-2 tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:text-xs app-text-muted">
-            <span>Cash <span class="tw:text-white/70">{{ formatVnd(revenue.cash) }}</span></span>
-            <span>Bank <span class="tw:text-white/70">{{ formatVnd(revenue.bank) }}</span></span>
+          <div
+            class="tw:mt-2 tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:text-xs app-text-muted"
+          >
+            <span
+              >Cash
+              <span class="tw:text-white/70">{{
+                formatVnd(revenue.cash)
+              }}</span></span
+            >
+            <span
+              >Bank
+              <span class="tw:text-white/70">{{
+                formatVnd(revenue.bank)
+              }}</span></span
+            >
           </div>
         </template>
       </stat-card>
@@ -574,12 +661,27 @@ const handleDelete = (expense) => {
         :value="summaryLoading ? '…' : formatVnd(expenseBreakdown.total)"
       >
         <template #icon>
-          <iconify icon="ph:trend-down-bold" class="tw:text-red-400 tw:opacity-60" />
+          <iconify
+            icon="ph:trend-down-bold"
+            class="tw:text-red-400 tw:opacity-60"
+          />
         </template>
         <template #sub>
-          <div class="tw:mt-2 tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:text-xs app-text-muted">
-            <span>Cash <span class="tw:text-white/70">{{ formatVnd(expenseBreakdown.cash) }}</span></span>
-            <span>Bank <span class="tw:text-white/70">{{ formatVnd(expenseBreakdown.bank) }}</span></span>
+          <div
+            class="tw:mt-2 tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:text-xs app-text-muted"
+          >
+            <span
+              >Cash
+              <span class="tw:text-white/70">{{
+                formatVnd(expenseBreakdown.cash)
+              }}</span></span
+            >
+            <span
+              >Bank
+              <span class="tw:text-white/70">{{
+                formatVnd(expenseBreakdown.bank)
+              }}</span></span
+            >
           </div>
         </template>
       </stat-card>
@@ -593,7 +695,11 @@ const handleDelete = (expense) => {
         <template #icon>
           <iconify
             icon="ph:chart-bar-bold"
-            :class="profit >= 0 ? 'tw:text-emerald-400 tw:opacity-60' : 'tw:text-red-400 tw:opacity-60'"
+            :class="
+              profit >= 0
+                ? 'tw:text-emerald-400 tw:opacity-60'
+                : 'tw:text-red-400 tw:opacity-60'
+            "
           />
         </template>
         <template #sub>
@@ -601,8 +707,13 @@ const handleDelete = (expense) => {
             <span v-if="profitMargin !== null">
               Margin
               <span
-                :class="profit >= 0 ? 'tw:text-emerald-400 tw:font-semibold' : 'tw:text-red-400 tw:font-semibold'"
-              >{{ profitMargin }}%</span>
+                :class="
+                  profit >= 0
+                    ? 'tw:text-emerald-400 tw:font-semibold'
+                    : 'tw:text-red-400 tw:font-semibold'
+                "
+                >{{ profitMargin }}%</span
+              >
             </span>
             <span v-else>—</span>
           </div>
@@ -618,13 +729,15 @@ const handleDelete = (expense) => {
       variant="simple"
       :closable="true"
       @close="errorMessage = ''"
-    >{{ errorMessage }}</prime-message>
+      >{{ errorMessage }}</prime-message
+    >
 
     <!-- Table -->
     <AppTable
       lazy
       v-model:first="first"
       v-model:rows="rows"
+      v-model:columns="colDefs"
       :value="expenses"
       :loading="loading"
       :totalRecords="totalRecords"
@@ -642,7 +755,6 @@ const handleDelete = (expense) => {
             :class="!hasActiveFilters ? btnIcon : ''"
           >
             <iconify icon="ph:funnel-bold" />
-            <span>Filters</span>
             <prime-badge
               v-if="activeFilterCount > 0"
               :value="activeFilterCount"
@@ -658,7 +770,9 @@ const handleDelete = (expense) => {
 
               <!-- Category -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+                <label
+                  class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
+                >
                   Category
                 </label>
                 <prime-select
@@ -695,85 +809,149 @@ const handleDelete = (expense) => {
       </template>
 
       <!-- Date -->
-      <prime-column field="purchaseDate" header="Date" style="min-width: 8rem">
+      <prime-column
+        v-if="colVisible('purchaseDate')"
+        field="purchaseDate"
+        header="Date"
+        style="min-width: 8rem"
+      >
         <template #body="{ data }">
-          <span class="tw:text-sm app-text-muted">{{ formatDate(data.purchaseDate) }}</span>
+          <span class="tw:text-sm app-text-muted">{{
+            formatDate(data.purchaseDate)
+          }}</span>
         </template>
       </prime-column>
 
       <!-- Item name -->
-      <prime-column field="name" header="Item" style="min-width: 12rem">
+      <prime-column
+        v-if="colVisible('name')"
+        field="name"
+        header="Item"
+        style="min-width: 12rem"
+      >
         <template #body="{ data }">
           <span class="tw:font-semibold tw:text-sm">{{ data.name }}</span>
         </template>
       </prime-column>
 
       <!-- Category -->
-      <prime-column field="category" header="Category" style="min-width: 9rem">
+      <prime-column
+        v-if="colVisible('category')"
+        field="category"
+        header="Category"
+        style="min-width: 9rem"
+      >
         <template #body="{ data }">
           <div class="tw:flex tw:items-center tw:gap-1.5">
-            <iconify :icon="categoryMeta(data.category).icon" class="tw:text-sm app-text-muted" />
-            <prime-tag
-              :value="categoryMeta(data.category).label"
-              :severity="categoryMeta(data.category).severity"
-            />
+            <prime-tag :severity="categoryMeta(data.category).severity">
+              <iconify
+                :icon="categoryMeta(data.category).icon"
+                class="tw:text-sm app-text-muted"
+              />
+              <span>
+                {{ categoryMeta(data.category).label }}
+              </span>
+            </prime-tag>
           </div>
         </template>
       </prime-column>
 
       <!-- Payment method -->
-      <prime-column field="paymentMethod" header="Payment" style="min-width: 9rem">
+      <prime-column
+        v-if="colVisible('paymentMethod')"
+        field="paymentMethod"
+        header="Payment"
+        class="tw:min-w-36"
+      >
         <template #body="{ data }">
           <div class="tw:flex tw:items-center tw:gap-1.5">
-            <iconify
-              :icon="EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.icon ?? 'ph:money-bold'"
-              class="tw:text-sm app-text-muted"
-            />
             <prime-tag
-              :value="EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.label ?? data.paymentMethod"
-              :severity="EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.severity ?? 'secondary'"
-            />
+              :severity="
+                EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.severity ??
+                'secondary'
+              "
+            >
+              <iconify
+                :icon="
+                  EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.icon ??
+                  'ph:money-bold'
+                "
+                class="tw:text-sm app-text-muted"
+              />
+              <span>
+                {{
+                  EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.label ??
+                  data.paymentMethod
+                }}
+              </span>
+            </prime-tag>
           </div>
         </template>
       </prime-column>
 
       <!-- Qty + Unit -->
-      <prime-column header="Qty" style="min-width: 7rem">
+      <prime-column
+        v-if="colVisible('qty')"
+        header="Qty"
+        style="min-width: 7rem"
+      >
         <template #body="{ data }">
           <span class="tw:text-sm">
             {{ data.quantity }}
-            <span v-if="data.unit" class="app-text-muted tw:ml-0.5">{{ data.unit }}</span>
+            <span v-if="data.unit" class="app-text-muted tw:ml-0.5">{{
+              data.unit
+            }}</span>
           </span>
         </template>
       </prime-column>
 
       <!-- Unit price -->
-      <prime-column field="unitPrice" header="Unit price" style="min-width: 9rem">
+      <prime-column
+        v-if="colVisible('unitPrice')"
+        field="unitPrice"
+        header="Unit price"
+        style="min-width: 9rem"
+      >
         <template #body="{ data }">
-          <span class="tw:text-sm app-text-muted">{{ formatVnd(data.unitPrice) }}</span>
+          <span class="tw:text-sm app-text-muted">{{
+            formatVnd(data.unitPrice)
+          }}</span>
         </template>
       </prime-column>
 
       <!-- Total -->
-      <prime-column field="totalAmount" header="Total" style="min-width: 9rem">
+      <prime-column
+        v-if="colVisible('totalAmount')"
+        field="totalAmount"
+        header="Total"
+        style="min-width: 9rem"
+      >
         <template #body="{ data }">
-          <span class="tw:font-semibold tw:text-sm">{{ formatVnd(data.totalAmount) }}</span>
+          <span class="tw:font-semibold tw:text-sm">{{
+            formatVnd(data.totalAmount)
+          }}</span>
         </template>
       </prime-column>
 
       <!-- Notes -->
-      <prime-column field="notes" header="Notes" style="min-width: 10rem">
+      <prime-column
+        v-if="colVisible('notes')"
+        field="notes"
+        header="Notes"
+        style="min-width: 10rem"
+      >
         <template #body="{ data }">
           <span
             v-if="data.notes"
             class="tw:text-sm app-text-muted tw:line-clamp-1"
-          >{{ data.notes }}</span>
+            >{{ data.notes }}</span
+          >
           <span v-else class="app-text-subtle">—</span>
         </template>
       </prime-column>
 
       <!-- Actions -->
-      <prime-column header="Actions" style="min-width: 8rem">
+      <prime-column header="Actions" class="tw:min-w-32">
         <template #body="{ data }">
           <div class="tw:flex tw:justify-end tw:items-center tw:gap-2">
             <prime-button
