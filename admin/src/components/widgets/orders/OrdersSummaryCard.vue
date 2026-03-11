@@ -9,18 +9,21 @@ defineProps({
 </script>
 
 <template>
-  <prime-card class="app-card tw:rounded-xl tw:border">
-    <template #content>
-      <div class="tw:flex tw:items-start tw:justify-between">
+  <prime-card  :pt="{
+      root: { class: `${appCard} ${cardRing} tw:p-4` },
+      header: { class: 'tw:flex tw:justify-between' },
+      body: { class: 'tw:p-0!' },
+      content: { class: 'tw:mt-5 tw:space-y-1 tw:grid tw:grid-cols-2 tw:gap-x-4' },
+    }">
+    <template #header>
         <p
           class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle"
         >
           Total orders
         </p>
         <p class="tw:text-2xl tw:font-semibold tw:leading-none">{{ total }}</p>
-      </div>
-
-      <div class="tw:mt-3 tw:grid tw:grid-cols-2 tw:gap-x-4 tw:gap-y-1">
+    </template>
+    <template #content>
         <div
           class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:text-amber-400"
         >
@@ -54,7 +57,6 @@ defineProps({
           </span>
           <span class="tw:text-xs tw:font-medium">{{ cancelled }}</span>
         </div>
-
         <div
           class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:text-emerald-400"
         >
@@ -69,7 +71,6 @@ defineProps({
           </span>
           <span class="tw:text-xs tw:font-medium">{{ completed }}</span>
         </div>
-      </div>
     </template>
   </prime-card>
 </template>

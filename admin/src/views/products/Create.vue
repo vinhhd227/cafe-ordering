@@ -199,7 +199,7 @@ onMounted(loadCategories);
             <div class="tw:space-y-4">
 
               <!-- Temperature -->
-              <div class="tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
+              <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
                   <p class="tw:text-sm tw:font-medium">Temperature</p>
                   <p class="tw:text-xs app-text-muted tw:mt-0.5">
@@ -210,7 +210,7 @@ onMounted(loadCategories);
               </div>
 
               <!-- Ice level -->
-              <div class="tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
+              <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
                   <p class="tw:text-sm tw:font-medium">Ice level</p>
                   <p class="tw:text-xs app-text-muted tw:mt-0.5">
@@ -221,7 +221,7 @@ onMounted(loadCategories);
               </div>
 
               <!-- Sugar level -->
-              <div class="tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
+              <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
                   <p class="tw:text-sm tw:font-medium">Sugar level</p>
                   <p class="tw:text-xs app-text-muted tw:mt-0.5">
@@ -234,9 +234,9 @@ onMounted(loadCategories);
             </div>
           </div>
         </div>
-
+        <prime-divider/>
         <!-- ── Footer actions ── -->
-        <div class="tw:flex tw:justify-end tw:gap-3 tw:mt-8 tw:pt-6 tw:border-t">
+        <div class="tw:flex tw:justify-end tw:gap-3">
           <prime-button
             label="Cancel"
             severity="secondary"

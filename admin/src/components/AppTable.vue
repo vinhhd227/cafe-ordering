@@ -115,7 +115,10 @@ const setColVisibility = (field, visible) => {
   const col = localColumns.value.find((c) => c.field === field);
   if (col) {
     col.visible = visible;
-    emit("update:columns", localColumns.value.map((c) => ({ ...c })));
+    emit(
+      "update:columns",
+      localColumns.value.map((c) => ({ ...c })),
+    );
   }
 };
 
@@ -124,14 +127,24 @@ watch(
   () => props.columns,
   (newVal) => {
     if (!newVal) return;
-    localColumns.value = newVal.map((c) => ({ ...c, visible: c.visible !== false }));
+    localColumns.value = newVal.map((c) => ({
+      ...c,
+      visible: c.visible !== false,
+    }));
   },
 );
 </script>
 
 <template>
-  <prime-card class="app-card tw:rounded-2xl tw:border">
-    <template #content>
+  <prime-card
+    :pt="{
+      root: { class: `${appCard} ${cardRing} tw:p-4` },
+      header: { class: 'tw:flex tw:justify-between' },
+      body: { class: 'tw:p-0!' },
+      content: { class: 'tw:space-y-1 tw:mt-3' },
+    }"
+  >
+    <template #header>
       <!-- ── Toolbar ───────────────────────────────────────────── -->
       <div
         v-if="$slots['toolbar-left'] || $slots['toolbar-right']"
@@ -144,11 +157,12 @@ watch(
           <slot name="toolbar-right" />
         </div>
       </div>
-
+    </template>
+    <template #content>
       <!-- ── Data Table ─────────────────────────────────────────── -->
       <prime-data-table
-        :class="{
-          'tw:mt-6': $slots['toolbar-left'] || $slots['toolbar-right'],
+        :pt="{
+          bodyCell: { class: 'tw:bg-transparent'}
         }"
         :value="value"
         :loading="loading"
@@ -158,7 +172,8 @@ watch(
       >
         <slot />
       </prime-data-table>
-
+    </template>
+    <template #footer>
       <!-- ── Pagination Bar ──────────────────────────────────────── -->
       <div
         class="tw:mt-4 tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-y-3 tw:gap-x-4"
@@ -209,9 +224,8 @@ watch(
               :text="token !== currentPage"
               size="small"
               @click="goToPage(token)"
-               :class="[btnIcon, 'tw:mx-1']"
+              :class="[btnIcon, 'tw:mx-1']"
               >{{ token }}</prime-button
-             
             >
           </template>
 
@@ -265,7 +279,6 @@ watch(
           </prime-button>
         </div>
       </div>
-
       <!-- ── Column toggle dialog ───────────────────────────────── -->
       <prime-dialog
         v-if="columns"
@@ -289,7 +302,8 @@ watch(
             <label
               :for="`col-toggle-${col.field}`"
               class="tw:text-sm tw:cursor-pointer tw:select-none"
-            >{{ col.header }}</label>
+              >{{ col.header }}</label
+            >
           </div>
         </div>
       </prime-dialog>

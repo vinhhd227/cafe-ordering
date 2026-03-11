@@ -26,9 +26,11 @@ const confirm = useConfirm();
 const isToday = (dateStr) => {
   const d = new Date(dateStr);
   const now = new Date();
-  return d.getFullYear() === now.getFullYear()
-    && d.getMonth() === now.getMonth()
-    && d.getDate() === now.getDate();
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
 };
 
 const { connected: sseConnected } = useOrderSse({
@@ -89,7 +91,9 @@ const paymentTag = (status, method) => {
       severity: PAYMENT_STATUS_MAP[PAYMENT_STATUS.PAID].severity,
     };
   }
-  return PAYMENT_STATUS_MAP[status] ?? PAYMENT_STATUS_MAP[PAYMENT_STATUS.UNPAID];
+  return (
+    PAYMENT_STATUS_MAP[status] ?? PAYMENT_STATUS_MAP[PAYMENT_STATUS.UNPAID]
+  );
 };
 
 const openPayDialog = (order) => {
@@ -190,25 +194,48 @@ const summary = computed(() => ({
 }));
 
 // ── Widget visibility ──────────────────────────────────────────────
-const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
-  useWidgetSettings('orders-kanban', [
+const {
+  isVisible: wVisible,
+  toggle: wToggle,
+  hiddenCount: wHidden,
+  widgets: wDefs,
+  colsPerRow: wCols,
+  setColsPerRow: wSetCols,
+} = useWidgetSettings(
+  "orders-kanban",
+  [
     {
-      id: 'summary',
-      label: 'Orders summary',
-      description: 'Tổng số đơn hàng hôm nay theo từng trạng thái.',
+      id: "summary",
+      label: "Orders summary",
+      description: "Tổng số đơn hàng hôm nay theo từng trạng thái.",
       previewComponent: OrdersSummaryCard,
-      previewProps: { total: 34, pending: 8, processing: 5, completed: 21, cancelled: 0 },
+      previewProps: {
+        total: 34,
+        pending: 8,
+        processing: 5,
+        completed: 21,
+        cancelled: 0,
+      },
     },
     {
-      id: 'revenue',
-      label: 'Total revenue',
-      description: 'Tổng doanh thu hôm nay, gồm tiền mặt và chuyển khoản.',
+      id: "revenue",
+      label: "Total revenue",
+      description: "Tổng doanh thu hôm nay, gồm tiền mặt và chuyển khoản.",
       previewComponent: RevenueCard,
       previewProps: { total: 1750000, cash: 1000000, bank: 750000 },
     },
-  ], { defaultCols: 2 })
-const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
-const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
+  ],
+  { defaultCols: 2 },
+);
+const W_COLS_CLASS = {
+  1: "tw:grid-cols-1",
+  2: "tw:grid-cols-2",
+  3: "tw:grid-cols-3",
+  4: "tw:grid-cols-4",
+};
+const wColsClass = computed(
+  () => W_COLS_CLASS[wCols.value] ?? "tw:grid-cols-2",
+);
 
 const formatVnd = (value) =>
   new Intl.NumberFormat("vi-VN", {
@@ -229,8 +256,22 @@ const timeAgo = (dateStr) => {
 
 const todayRange = () => {
   const now = new Date();
-  const dateFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).toISOString();
-  const dateTo   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+  const dateFrom = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+  ).toISOString();
+  const dateTo = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+  ).toISOString();
   return { dateFrom, dateTo };
 };
 
@@ -282,7 +323,8 @@ const isValidDrop = (fromStatus, toStatus) => {
   if (NEXT_STATUS[fromStatus] === toStatus) return true;
   if (
     toStatus === ORDER_STATUS.CANCELLED &&
-    (fromStatus === ORDER_STATUS.PENDING || fromStatus === ORDER_STATUS.PROCESSING)
+    (fromStatus === ORDER_STATUS.PENDING ||
+      fromStatus === ORDER_STATUS.PROCESSING)
   )
     return true;
   return false;
@@ -532,12 +574,18 @@ onUnmounted(() => {
           Orders
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Order management</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted tw:flex tw:items-center tw:gap-1.5">
+        <p
+          class="tw:mt-2 tw:text-sm app-text-muted tw:flex tw:items-center tw:gap-1.5"
+        >
           <span
             class="tw:inline-block tw:h-2 tw:w-2 tw:rounded-full tw:shrink-0 tw:transition-colors"
-            :class="sseConnected ? 'tw:bg-emerald-400' : 'tw:bg-amber-400 tw:animate-pulse'"
+            :class="
+              sseConnected
+                ? 'tw:bg-emerald-400'
+                : 'tw:bg-amber-400 tw:animate-pulse'
+            "
           />
-          {{ sseConnected ? 'Live — updates instantly' : 'Connecting...' }}
+          {{ sseConnected ? "Live — updates instantly" : "Connecting..." }}
         </p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
@@ -665,154 +713,193 @@ onUnmounted(() => {
             <div
               v-for="i in 2"
               :key="i"
-              class="app-card tw:rounded-xl tw:border tw:p-4 tw:animate-pulse tw:space-y-3"
+              :pt="{
+                root: {
+                  class: `${appCard} ${cardRing} tw:p-4 tw:animate-pulse tw:space-y-3`,
+                },
+              }"
             >
-              <div class="tw:h-3 tw:rounded tw:bg-white/10 tw:w-2/3" />
-              <div class="tw:h-3 tw:rounded tw:bg-white/10 tw:w-1/2" />
-              <div class="tw:h-3 tw:rounded tw:bg-white/10 tw:w-3/4" />
+              <prime-skeleton
+                class="tw:h-3 tw:rounded tw:bg-white/10 tw:w-3/4"
+              />
+              <prime-skeleton
+                class="tw:h-3 tw:rounded tw:bg-white/10 tw:w-3/4"
+              />
+              <prime-skeleton
+                class="tw:h-3 tw:rounded tw:bg-white/10 tw:w-3/4"
+              />
+              <prime-skeleton
+                class="tw:h-3 tw:rounded tw:bg-white/10 tw:w-3/4"
+              />
             </div>
           </template>
 
           <!-- Empty state -->
-          <div
+          <prime-card
             v-else-if="!loading && ordersByStatus[col.key].length === 0"
-            class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-dashed tw:py-10 app-text-muted tw:text-sm tw:text-center tw:opacity-50"
+            :pt="{ 
+              root: { class: `${appCard} tw:border-dashed! tw:py-10 ` },
+             }"
           >
-            <iconify icon="ph:tray-bold" class="tw:text-2xl tw:mb-2" />
-            No orders
-          </div>
+            <template #content>
+              <div
+                class="tw:flex tw:flex-col tw:items-center tw:justify-center app-text-muted tw:text-sm tw:text-center tw:opacity-50"
+              >
+                <iconify icon="ph:tray-bold" class="tw:text-2xl tw:mb-2" />
+                <span>No orders</span>
+              </div>
+            </template>
+          </prime-card>
 
           <!-- Order cards -->
-          <div
+          <prime-card
             v-for="order in ordersByStatus[col.key]"
             :key="order.id"
-            class="app-card tw:rounded-xl tw:border tw:p-4 tw:space-y-3 tw:transition-all"
             :class="[
               updatingId === order.id ? 'tw:opacity-50' : '',
               draggingOrder?.id === order.id ? 'tw:opacity-40 tw:scale-95' : '',
-              col.key === ORDER_STATUS.PENDING || col.key === ORDER_STATUS.PROCESSING
+              col.key === ORDER_STATUS.PENDING ||
+              col.key === ORDER_STATUS.PROCESSING
                 ? 'tw:cursor-grab active:tw:cursor-grabbing'
                 : '',
             ]"
-            :draggable="col.key === ORDER_STATUS.PENDING || col.key === ORDER_STATUS.PROCESSING"
+            :draggable="
+              col.key === ORDER_STATUS.PENDING ||
+              col.key === ORDER_STATUS.PROCESSING
+            "
             @dragstart="handleDragStart(order)"
             @dragend="handleDragEnd"
+            :pt="{ 
+              root: { class: `${appCard} ${cardRing} tw:p-4 tw:space-y-3 tw:transition-all` },
+              body: { class: 'tw:p-0!' } }"
           >
-            <!-- Order header -->
-            <div class="tw:flex tw:items-start tw:justify-between tw:gap-2">
-              <div>
-                <p
-                  class="tw:text-xs tw:font-mono tw:font-semibold"
-                  :class="col.color"
-                >
-                  {{ order.orderNumber }}
-                </p>
-                <p class="tw:text-xs app-text-muted tw:mt-0.5">
-                  {{ timeAgo(order.orderDate) }}
-                </p>
+            <template #header>
+              <div class="tw:flex tw:items-start tw:justify-between tw:gap-2">
+                <div>
+                  <p
+                    class="tw:text-xs tw:font-mono tw:font-semibold"
+                    :class="col.color"
+                  >
+                    {{ order.orderNumber }}
+                  </p>
+                  <p class="tw:text-xs app-text-muted tw:mt-0.5">
+                    {{ timeAgo(order.orderDate) }}
+                  </p>
+                </div>
+                <div class="tw:flex tw:flex-col tw:items-end tw:gap-1">
+                  <p class="tw:text-sm tw:font-semibold tw:whitespace-nowrap">
+                    {{ formatVnd(order.totalAmount) }}
+                  </p>
+                  <prime-tag
+                    :value="
+                      paymentTag(order.paymentStatus, order.paymentMethod).label
+                    "
+                    :severity="
+                      paymentTag(order.paymentStatus, order.paymentMethod)
+                        .severity
+                    "
+                    class="tw:text-[10px]"
+                  />
+                </div>
               </div>
-              <div class="tw:flex tw:flex-col tw:items-end tw:gap-1">
-                <p class="tw:text-sm tw:font-semibold tw:whitespace-nowrap">
-                  {{ formatVnd(order.totalAmount) }}
-                </p>
-                <prime-tag
-                  :value="
-                    paymentTag(order.paymentStatus, order.paymentMethod).label
-                  "
-                  :severity="
-                    paymentTag(order.paymentStatus, order.paymentMethod)
-                      .severity
-                  "
-                  class="tw:text-[10px]"
-                />
-              </div>
-            </div>
+            </template>
+            <template #content>
+              <!-- Order header -->
 
-            <!-- Items -->
-            <ul class="tw:space-y-1">
-              <li
-                v-for="item in order.items"
-                :key="item.productId"
-                class="tw:flex tw:items-center tw:justify-between tw:text-xs app-text-muted"
-              >
-                <span class="tw:truncate tw:max-w-30">{{
-                  item.productName
-                }}</span>
-                <span class="tw:font-medium tw:shrink-0"
-                  >×{{ item.quantity }}</span
+              <!-- Items -->
+              <ul class="tw:space-y-1">
+                <li
+                  v-for="item in order.items"
+                  :key="item.productId"
+                  class="tw:flex tw:items-center tw:justify-between tw:text-xs app-text-muted"
                 >
-              </li>
-            </ul>
+                  <span class="tw:truncate tw:max-w-30">{{
+                    item.productName
+                  }}</span>
+                  <span class="tw:font-medium tw:shrink-0"
+                    >×{{ item.quantity }}</span
+                  >
+                </li>
+              </ul>
 
-            <!-- Actions -->
-            <div class="tw:flex tw:flex-col tw:gap-2 tw:pt-1">
-              <div class="tw:flex tw:gap-2">
+              <!-- Actions -->
+              <div class="tw:flex tw:flex-col tw:gap-2 tw:pt-1">
+                <div class="tw:flex tw:gap-2">
+                  <prime-button
+                    v-if="NEXT_STATUS[col.key]"
+                    :label="NEXT_LABEL[col.key]"
+                    severity="success"
+                    size="small"
+                    class="tw:flex-1"
+                    :loading="updatingId === order.id"
+                    @click="moveOrder(order, NEXT_STATUS[col.key])"
+                  />
+                  <prime-button
+                    v-if="
+                      col.key === ORDER_STATUS.PENDING ||
+                      col.key === ORDER_STATUS.PROCESSING
+                    "
+                    severity="danger"
+                    size="small"
+                    outlined
+                    :class="NEXT_STATUS[col.key] ? 'tw:w-1/4' : 'tw:flex-1'"
+                    :loading="updatingId === order.id"
+                    @click="
+                      (e) =>
+                        confirm.require({
+                          target: e.currentTarget,
+                          message: `Cancel order ${order.orderNumber}?`,
+                          icon: 'ph:warning-bold',
+                          rejectProps: {
+                            label: 'Keep',
+                            severity: 'secondary',
+                            outlined: true,
+                            size: 'small',
+                          },
+                          acceptProps: {
+                            label: 'Yes, cancel',
+                            severity: 'danger',
+                            size: 'small',
+                          },
+                          accept: () => cancelOrder(order),
+                        })
+                    "
+                  >
+                    <iconify icon="ph:x-circle" />
+                    <span>Cancel</span>
+                  </prime-button>
+                </div>
                 <prime-button
-                  v-if="NEXT_STATUS[col.key]"
-                  :label="NEXT_LABEL[col.key]"
-                  severity="success"
-                  size="small"
-                  class="tw:flex-1"
-                  :loading="updatingId === order.id"
-                  @click="moveOrder(order, NEXT_STATUS[col.key])"
-                />
-                <prime-button
-                  v-if="col.key === ORDER_STATUS.PENDING || col.key === ORDER_STATUS.PROCESSING"
-                  severity="danger"
+                  v-if="
+                    order.paymentStatus === PAYMENT_STATUS.UNPAID &&
+                    col.key !== ORDER_STATUS.CANCELLED
+                  "
+                  severity="warn"
                   size="small"
                   outlined
-                  :class="NEXT_STATUS[col.key] ? 'tw:w-1/4' : 'tw:flex-1'"
-                  :loading="updatingId === order.id"
+                  class="tw:w-full"
+                  @click="openPayDialog(order)"
+                >
+                  <iconify icon="ph:money-bold" />
+                  <span>Mark paid</span>
+                </prime-button>
+                <prime-button
+                  severity="secondary"
+                  size="small"
+                  class="tw:w-full"
                   @click="
-                    (e) =>
-                      confirm.require({
-                        target: e.currentTarget,
-                        message: `Cancel order ${order.orderNumber}?`,
-                        icon: 'ph:warning-bold',
-                        rejectProps: {
-                          label: 'Keep',
-                          severity: 'secondary',
-                          outlined: true,
-                          size: 'small',
-                        },
-                        acceptProps: {
-                          label: 'Yes, cancel',
-                          severity: 'danger',
-                          size: 'small',
-                        },
-                        accept: () => cancelOrder(order),
-                      })
+                    router.push({
+                      name: 'ordersDetail',
+                      params: { id: order.id },
+                    })
                   "
                 >
-                  <iconify icon="ph:x-circle" />
-                  <span>Cancel</span>
+                  <iconify icon="ph:arrow-square-out-bold" />
+                  <span>View detail</span>
                 </prime-button>
               </div>
-              <prime-button
-                v-if="
-                  order.paymentStatus === PAYMENT_STATUS.UNPAID && col.key !== ORDER_STATUS.CANCELLED
-                "
-                severity="warn"
-                size="small"
-                outlined
-                class="tw:w-full"
-                @click="openPayDialog(order)"
-              >
-                <iconify icon="ph:money-bold" />
-                <span>Mark paid</span>
-              </prime-button>
-              <prime-button
-                severity="secondary"
-                size="small"
-                text
-                class="tw:w-full"
-                @click="router.push({ name: 'ordersDetail', params: { id: order.id } })"
-              >
-                <iconify icon="ph:arrow-square-out-bold" />
-                <span>View detail</span>
-              </prime-button>
-            </div>
-          </div>
+            </template>
+          </prime-card>
         </div>
       </div>
     </div>
