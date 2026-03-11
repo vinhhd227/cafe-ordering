@@ -1,0 +1,42 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "menu": "Menu",
+    "staff": "Staff"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "loading": "Loading...",
+    "search": "Search",
+    "export": "Export"
+  },
+  "auth": {
+    "login": "Sign in",
+    "logout": "Logout",
+    "register": "Create an account",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "keepSignedIn": "Keep me signed in"
+  },
+  "layout": {
+    "brand": "Cafe Ordering",
+    "adminPanel": "Admin Panel",
+    "adminWorkspace": "Admin workspace",
+    "greeting": "Good shift, team.",
+    "shiftLead": "Shift lead"
+  },
+  "order": {
+    "title": "Orders",
+    "newOrder": "New order",
+    "revenue": "Revenue",
+    "avgTicket": "Avg ticket",
+    "liveQueue": "Live queue",
+    "inPrep": "In prep",
+    "queued": "Queued"
+  }
+}

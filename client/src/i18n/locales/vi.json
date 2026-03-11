@@ -1,0 +1,42 @@
+{
+  "nav": {
+    "dashboard": "Tổng quan",
+    "orders": "Đơn hàng",
+    "menu": "Thực đơn",
+    "staff": "Nhân viên"
+  },
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "close": "Đóng",
+    "loading": "Đang tải...",
+    "search": "Tìm kiếm",
+    "export": "Xuất"
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "register": "Tạo tài khoản",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "forgotPassword": "Quên mật khẩu?",
+    "keepSignedIn": "Ghi nhớ đăng nhập"
+  },
+  "layout": {
+    "brand": "Cafe Ordering",
+    "adminPanel": "Quản trị",
+    "adminWorkspace": "Khu vực quản trị",
+    "greeting": "Ca làm tốt lành, team.",
+    "shiftLead": "Trưởng ca"
+  },
+  "order": {
+    "title": "Đơn hàng",
+    "newOrder": "Đơn mới",
+    "revenue": "Doanh thu",
+    "avgTicket": "Trung bình/đơn",
+    "liveQueue": "Hàng đợi",
+    "inPrep": "Đang pha",
+    "queued": "Chờ xử lý"
+  }
+}

@@ -6,7 +6,6 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import AutoImport from 'unplugin-auto-import/vite'
 
 import tailwindcss from '@tailwindcss/vite'
-import Unfonts from 'unplugin-fonts/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -18,11 +17,12 @@ export default defineConfig({
                 'vue',
                 'vue-router',
                 'vee-validate',
+                'vue-i18n',
                 {
                     pinia: ['useStore'],
                 },
                 {
-                    '@/layout/ui': ['btnIcon', 'inputCustom', 'labelCustom', 'passwordCustom'],
+                    '@/layout/ui': ['btnIcon', 'inputCustom', 'labelCustom', 'passwordCustom', 'appCard', 'cardRing'],
                 },
                 {
                     'primevue/usetoast': ['useToast'],
@@ -38,11 +38,6 @@ export default defineConfig({
             dirs: ['src/composables', 'src/stores', 'src/constants'],
             vueTemplate: true,
             dts: 'src/auto-imports.d.ts',
-        }),
-        Unfonts({
-            google: {
-                families: ['Figtree'],
-            },
         }),],
     resolve: {
         alias: {

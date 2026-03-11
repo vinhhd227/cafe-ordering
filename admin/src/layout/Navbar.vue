@@ -6,6 +6,8 @@ import { useThemeStore } from "@/stores/theme";
 import { navGroups } from "@/layout/nav";
 import { useSidebar } from "@/composables/useSidebar";
 
+const { locale, locales, setLocale } = useLocale()
+
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
@@ -164,6 +166,26 @@ const toggleProfileMenu = (event) => {
         </div>
       </div>
     </nav>
+
+    <!-- Language toggle -->
+    <div
+      v-if="!isCollapsed"
+      class="tw:shrink-0 tw:border-t tw:px-4 tw:py-2 tw:flex tw:gap-1"
+      style="border-color: var(--app-border)"
+    >
+      <button
+        v-for="l in locales"
+        :key="l.code"
+        type="button"
+        class="tw:flex-1 tw:rounded-lg tw:py-1 tw:text-xs tw:font-semibold tw:transition-all tw:duration-150"
+        :class="locale === l.code
+          ? 'tw:bg-emerald-500/15 tw:text-emerald-400'
+          : 'app-text-subtle hover:tw:bg-white/5 hover:tw:text-white'"
+        @click="setLocale(l.code)"
+      >
+        {{ l.label }}
+      </button>
+    </div>
 
     <!-- User profile footer -->
     <div class="tw:shrink-0 tw:border-t tw:p-3" style="border-color: var(--app-border)">

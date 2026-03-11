@@ -6,7 +6,6 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import AutoImport from 'unplugin-auto-import/vite'
 
 import tailwindcss from '@tailwindcss/vite'
-import Unfonts from 'unplugin-fonts/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -16,16 +15,14 @@ export default defineConfig({
         AutoImport({
             imports: [
                 'vue',
+                'vue-i18n',
                 {
                     pinia: ['useStore'],
                 },
             ],
+            dirs: ['src/composables'],
+            vueTemplate: true,
             dts: 'src/auto-imports.d.ts',
-        }),
-        Unfonts({
-            google: {
-                families: ['Figtree'],
-            },
         }),],
     resolve: {
         alias: {

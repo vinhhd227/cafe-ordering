@@ -1,0 +1,79 @@
+{
+  "nav": {
+    "dashboard": "Tổng quan",
+    "orders": "Đơn hàng",
+    "expenses": "Chi phí",
+    "tables": "Bàn",
+    "menu": "Thực đơn",
+    "products": "Sản phẩm",
+    "categories": "Danh mục",
+    "promotions": "Khuyến mãi",
+    "staff": "Nhân viên",
+    "customers": "Khách hàng",
+    "users": "Người dùng",
+    "roles": "Vai trò",
+    "groups": {
+      "overview": "Tổng quan",
+      "operations": "Vận hành",
+      "people": "Nhân sự"
+    }
+  },
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "create": "Tạo mới",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "reset": "Đặt lại",
+    "confirm": "Xác nhận",
+    "close": "Đóng",
+    "active": "Hoạt động",
+    "inactive": "Không hoạt động",
+    "status": "Trạng thái",
+    "actions": "Thao tác",
+    "loading": "Đang tải...",
+    "noData": "Không có dữ liệu."
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "username": "Tên đăng nhập",
+    "password": "Mật khẩu",
+    "profile": "Hồ sơ",
+    "settings": "Cài đặt",
+    "switchToLight": "Chuyển sáng",
+    "switchToDark": "Chuyển tối",
+    "helpSupport": "Hỗ trợ"
+  },
+  "login": {
+    "title": "Đăng nhập",
+    "subtitle": "Dùng tài khoản nhân viên để truy cập hệ thống.",
+    "usernamePlaceholder": "tên-đăng-nhập",
+    "passwordPlaceholder": "Mật khẩu",
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "forgotPassword": "Quên mật khẩu?",
+    "submit": "Vào trang quản trị",
+    "newUser": "Chưa có tài khoản?",
+    "register": "Tạo tài khoản",
+    "validation": {
+      "usernameRequired": "Vui lòng nhập tên đăng nhập.",
+      "passwordRequired": "Vui lòng nhập mật khẩu."
+    },
+    "toast": {
+      "successTitle": "Đăng nhập thành công",
+      "successDetail": "Chào mừng trở lại! Đang chuyển hướng...",
+      "errorTitle": "Đăng nhập thất bại",
+      "errorFallback": "Đăng nhập thất bại. Vui lòng thử lại."
+    },
+    "shiftTip": {
+      "label": "Mẹo ca làm",
+      "text": "Chuẩn bị sẵn espresso trước giờ cao điểm buổi sáng."
+    }
+  },
+  "sidebar": {
+    "brand": "Cafe Ordering",
+    "title": "Quản trị"
+  }
+}

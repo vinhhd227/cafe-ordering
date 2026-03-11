@@ -1,3 +1,7 @@
+<script setup>
+const { locale, locales, setLocale } = useLocale()
+</script>
+
 <template>
   <div class="tw:min-h-screen tw:bg-slate-950 tw:text-slate-100">
     <div class="tw:flex tw:min-h-screen">
@@ -52,6 +56,21 @@
             <h2 class="tw:text-lg tw:font-semibold">Good shift, team.</h2>
           </div>
           <div class="tw:flex tw:items-center tw:gap-4">
+            <!-- Language toggle -->
+            <div class="tw:flex tw:gap-1">
+              <button
+                v-for="l in locales"
+                :key="l.code"
+                type="button"
+                class="tw:rounded-lg tw:px-2.5 tw:py-1 tw:text-xs tw:font-semibold tw:transition"
+                :class="locale === l.code
+                  ? 'tw:bg-emerald-500/20 tw:text-emerald-300'
+                  : 'tw:text-slate-400 hover:tw:bg-white/5 hover:tw:text-white'"
+                @click="setLocale(l.code)"
+              >
+                {{ l.label }}
+              </button>
+            </div>
             <button
               type="button"
               class="tw:rounded-xl tw:border tw:border-white/10 tw:px-4 tw:py-2 tw:text-sm tw:text-slate-200 tw:transition hover:tw:bg-white/5"
