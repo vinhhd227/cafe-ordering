@@ -9,7 +9,7 @@ const { isOpen, isCollapsed, close } = useSidebar();
 <template>
   <div class="app-shell tw:min-h-screen">
     <prime-toast position="top-right" />
-
+    <div class="app-background tw:fixed tw:inset-0 tw:z-0" />
     <!-- Mobile overlay: click to close sidebar -->
     <transition
       enter-active-class="tw:transition-opacity tw:duration-300"
@@ -35,7 +35,7 @@ const { isOpen, isCollapsed, close } = useSidebar();
     >
       <admin-header />
 
-      <main class="tw:flex-1 tw:px-8 tw:py-8">
+      <main class="tw:flex-1 tw:px-8 tw:py-8 tw:z-10">
         <div class="tw:max-w-9xl tw:mx-auto tw:w-full">
           <router-view />
         </div>
