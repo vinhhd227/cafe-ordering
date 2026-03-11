@@ -42,7 +42,7 @@ public class List(IMediator mediator) : Ep.Req<ListProductsRequest>.Res<PagedRes
   public override void Configure()
   {
     Get("/api/products");
-    AllowAnonymous();
+    Policies("product.read");
     DontAutoTag();
     Description(b => b.WithTags("Products"));
   }

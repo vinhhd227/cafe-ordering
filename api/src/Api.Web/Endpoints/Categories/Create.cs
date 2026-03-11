@@ -27,7 +27,7 @@ public class Create : Endpoint<CreateCategoryRequest>
   public override void Configure()
   {
     Post("/api/categories");
-    AllowAnonymous();
+    Policies("category.create");
     DontAutoTag();
     Description(b => b.WithTags("Categories"));
   }

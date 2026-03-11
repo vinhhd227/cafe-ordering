@@ -18,7 +18,7 @@ public class Get(IMediator mediator) : Ep.Req<GetProductRequest>.Res<ProductDto>
   public override void Configure()
   {
     Get("/api/products/{ProductId}");
-    AllowAnonymous();
+    Policies("product.read");
     DontAutoTag();
     Description(b => b.WithTags("Products"));
   }

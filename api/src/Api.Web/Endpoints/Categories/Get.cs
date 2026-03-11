@@ -25,7 +25,7 @@ public class Get : Endpoint<GetCategoryRequest, CategoryDto>
   public override void Configure()
   {
     Get("/api/categories/{CategoryId}");
-    AllowAnonymous();
+    Policies("category.read");
     DontAutoTag();
     Description(b => b.WithTags("Categories"));
   }

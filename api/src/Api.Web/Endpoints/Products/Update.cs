@@ -54,7 +54,7 @@ public class Update : Endpoint<UpdateProductRequest>
   public override void Configure()
   {
     Put("/api/products/{ProductId}");
-    AllowAnonymous();
+    Policies("product.update");
     DontAutoTag();
     Description(b => b.WithTags("Products"));
   }

@@ -18,7 +18,7 @@ public class Delete(IMediator mediator) : Ep.Req<DeleteProductRequest>.NoRes
   public override void Configure()
   {
     Delete("/api/products/{ProductId}");
-    AllowAnonymous();
+    Policies("product.delete");
     DontAutoTag();
     Description(b => b.WithTags("Products"));
   }

@@ -47,7 +47,7 @@ public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
   public override void Configure()
   {
     Post("/api/products");
-    AllowAnonymous();
+    Policies("product.create");
     DontAutoTag();
     Description(b => b.WithTags("Products"));
   }

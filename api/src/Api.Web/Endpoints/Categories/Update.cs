@@ -36,7 +36,7 @@ public class Update : Endpoint<UpdateCategoryRequest>
   public override void Configure()
   {
     Put("/api/categories/{CategoryId}");
-    AllowAnonymous();
+    Policies("category.update");
     DontAutoTag();
     Description(b => b.WithTags("Categories"));
   }

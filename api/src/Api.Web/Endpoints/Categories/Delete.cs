@@ -25,7 +25,7 @@ public class Delete : Endpoint<DeleteCategoryRequest>
   public override void Configure()
   {
     Delete("/api/categories/{CategoryId}");
-    AllowAnonymous();
+    Policies("category.delete");
     DontAutoTag();
     Description(b => b.WithTags("Categories"));
   }
