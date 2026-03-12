@@ -4,7 +4,6 @@ import { onBeforeRouteLeave } from "vue-router";
 import { usePermission } from "@/composables/usePermission";
 import { useTableCache } from "@/composables/useTableCache";
 import AppTable from "@/components/AppTable.vue";
-import StatCard from "@/components/widgets/StatCard.vue";
 import WidgetSettingsButton from "@/components/widgets/WidgetSettingsButton.vue";
 import {
   listTables,
@@ -296,6 +295,14 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
   ], { defaultCols: 4 })
 const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
 const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
+
+const columns = [
+  { field: 'code',            header: 'Code',    width: '8rem' },
+  { field: 'status',          header: 'Status',  width: '8rem' },
+  { field: 'isActive',        header: 'Active',  width: '7rem' },
+  { field: 'activeSessionId', header: 'Session', width: '8rem' },
+  { key: 'actions',           header: 'Actions', width: '18rem', toggleable: false },
+]
 </script>
 
 <template>
@@ -445,10 +452,10 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 
     <!-- ── Summary stats ─────────────────────────────────────────── -->
     <div :class="['tw:grid tw:gap-3', wColsClass]">
-      <stat-card v-if="wVisible('total')"     label="Total"     :value="summary.total" />
-      <stat-card v-if="wVisible('available')" label="Available" :value="summary.available" label-class="tw:text-emerald-400" />
-      <stat-card v-if="wVisible('occupied')"  label="Occupied"  :value="summary.occupied"  label-class="tw:text-blue-400" />
-      <stat-card v-if="wVisible('cleaning')"  label="Cleaning"  :value="summary.cleaning"  label-class="tw:text-yellow-400" />
+      <widget-stat v-if="wVisible('total')"     label="Total"     :value="summary.total" />
+      <widget-stat v-if="wVisible('available')" label="Available" :value="summary.available" label-class="tw:text-emerald-400" />
+      <widget-stat v-if="wVisible('occupied')"  label="Occupied"  :value="summary.occupied"  label-class="tw:text-blue-400" />
+      <widget-stat v-if="wVisible('cleaning')"  label="Cleaning"  :value="summary.cleaning"  label-class="tw:text-yellow-400" />
     </div>
 
     <!-- ── Error ──────────────────────────────────────────────────── -->
@@ -469,6 +476,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
       :loading="loading"
       :totalRecords="filtered.length"
       :rowsPerPageOptions="[10, 20, 50]"
+      :columns="columns"
       @page="(e) => (first = e.first)"
     >
       <template #toolbar-left>
@@ -543,133 +551,103 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
         </div>
       </template>
 
-      <!-- Code (primary identifier) -->
-      <prime-column field="code" header="Code" style="min-width: 8rem">
-        <template #body="{ data }">
-          <span class="tw:font-mono tw:font-semibold tw:text-sm">{{
-            data.code
-          }}</span>
-        </template>
-      </prime-column>
+      <template #col-code="{ data }">
+        <span class="tw:font-mono tw:font-semibold tw:text-sm">{{ data.code }}</span>
+      </template>
 
-      <prime-column field="status" header="Status" style="min-width: 8rem">
-        <template #body="{ data }">
-          <prime-tag
-            :value="statusTag(data.status).label"
-            :severity="statusTag(data.status).severity"
-          />
-        </template>
-      </prime-column>
+      <template #col-status="{ data }">
+        <prime-tag
+          :value="statusTag(data.status).label"
+          :severity="statusTag(data.status).severity"
+        />
+      </template>
 
-      <prime-column field="isActive" header="Active" style="min-width: 7rem">
-        <template #body="{ data }">
-          <prime-tag
-            :value="activeTag(data.isActive).label"
-            :severity="activeTag(data.isActive).severity"
-          />
-        </template>
-      </prime-column>
+      <template #col-isActive="{ data }">
+        <prime-tag
+          :value="activeTag(data.isActive).label"
+          :severity="activeTag(data.isActive).severity"
+        />
+      </template>
 
-      <prime-column
-        field="activeSessionId"
-        header="Session"
-        style="min-width: 8rem"
-      >
-        <template #body="{ data }">
-          <span
-            v-if="data.activeSessionId"
-            class="tw:text-xs app-text-muted tw:font-mono"
+      <template #col-activeSessionId="{ data }">
+        <span v-if="data.activeSessionId" class="tw:text-xs app-text-muted tw:font-mono">
+          {{ data.activeSessionId.slice(0, 8) }}…
+        </span>
+        <span v-else class="app-text-subtle">—</span>
+      </template>
+
+      <template #col-actions="{ data }">
+        <div class="tw:flex tw:justify-end tw:flex-wrap tw:gap-2">
+          <prime-button
+            v-show="data.status === 'Occupied' && data.activeSessionId"
+            severity="info"
+            outlined
+            size="small"
+            v-tooltip.top="'Close session'"
+            @click="handleCloseSession(data)"
+            :class="btnIcon"
           >
-            {{ data.activeSessionId.slice(0, 8) }}…
-          </span>
-          <span v-else class="app-text-subtle">—</span>
-        </template>
-      </prime-column>
+            <iconify icon="ph:x-circle-bold" />
+          </prime-button>
 
-      <prime-column header="Actions" style="min-width: 18rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:justify-end tw:flex-wrap tw:gap-2">
-            <!-- Close session -->
-            <prime-button
-              v-show="data.status === 'Occupied' && data.activeSessionId"
-              severity="info"
-              outlined
-              size="small"
-              v-tooltip.top="'Close session'"
-              @click="handleCloseSession(data)"
-              :class="btnIcon"
-            >
-              <iconify icon="ph:x-circle-bold" />
-            </prime-button>
+          <prime-button
+            v-show="data.status === 'Cleaning'"
+            severity="success"
+            outlined
+            size="small"
+            v-tooltip.top="'Mark as available'"
+            @click="handleMarkAvailable(data)"
+          >
+            <iconify icon="ph:check-circle-bold" />
+          </prime-button>
 
-            <!-- Mark available -->
-            <prime-button
-              v-show="data.status === 'Cleaning'"
-              severity="success"
-              outlined
-              size="small"
-              v-tooltip.top="'Mark as available'"
-              @click="handleMarkAvailable(data)"
-            >
-              <iconify icon="ph:check-circle-bold" />
-            </prime-button>
+          <prime-button
+            v-if="can('table.create')"
+            severity="secondary"
+            outlined
+            size="small"
+            v-tooltip.top="'Edit table'"
+            @click="openEditDialog(data)"
+            :class="btnIcon"
+          >
+            <iconify icon="ph:pencil-bold" />
+          </prime-button>
 
-            <!-- Edit -->
-            <prime-button
-              v-if="can('table.create')"
-              severity="secondary"
-              outlined
-              size="small"
-              v-tooltip.top="'Edit table'"
-              @click="openEditDialog(data)"
-              :class="[btnIcon]"
-            >
-              <iconify icon="ph:pencil-bold" />
-            </prime-button>
+          <prime-button
+            severity="warn"
+            outlined
+            size="small"
+            v-tooltip.top="'Show QR code'"
+            @click="openQrDialog(data)"
+            :class="btnIcon"
+          >
+            <iconify icon="ph:qr-code-bold" />
+          </prime-button>
 
-            <!-- QR -->
-            <prime-button
-              severity="warn"
-              outlined
-              size="small"
-              v-tooltip.top="'Show QR code'"
-              @click="openQrDialog(data)"
-              :class="btnIcon"
-            >
-              <iconify icon="ph:qr-code-bold" />
-            </prime-button>
+          <prime-button
+            :disabled="data.status == 'Occupied'"
+            :severity="data.status == 'Occupied' ? 'secondary' : data.isActive ? 'danger' : 'success'"
+            outlined
+            size="small"
+            @click="handleToggleActive(data)"
+            :class="btnIcon"
+          >
+            <iconify :icon="data.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
+          </prime-button>
 
-            <!-- Toggle active -->
-            <prime-button
-              :disabled="data.status == 'Occupied'"
-              :severity=" data.status == 'Occupied' ? 'secondary' : data.isActive ? 'danger' : 'success' "
-              outlined
-              size="small"
-              @click="handleToggleActive(data)"
-              :class="btnIcon"
-            >
-              <iconify
-                :icon="
-                  data.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'
-                "
-              />
-            </prime-button>
-
-            <!-- Delete -->
-            <prime-button
-              :disabled="data.status == 'Occupied' || !can('table.delete')"
-              :severity="data.status !== 'Occupied' ? 'danger' : 'secondary'"
-              outlined
-              size="small"
-              v-tooltip.top="'Delete table'"
-              @click="handleDelete(data)"
-              :class="btnIcon"
-            >
-              <iconify icon="ph:trash-bold" />
-            </prime-button>
-          </div>
-        </template>
-      </prime-column>
+          <prime-button
+            :disabled="data.status == 'Occupied' || !can('table.delete')"
+            :severity="data.status !== 'Occupied' ? 'danger' : 'secondary'"
+            outlined
+            size="small"
+            v-tooltip.top="'Delete table'"
+            @click="handleDelete(data)"
+            :class="btnIcon"
+          >
+            <iconify icon="ph:trash-bold" />
+          </prime-button>
+        </div>
+      </template>
     </AppTable>
   </section>
 </template>

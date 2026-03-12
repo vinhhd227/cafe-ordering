@@ -144,6 +144,14 @@ watch([search, statusFilter], () => {
 onBeforeUnmount(() => {
   clearTimeout(searchTimer.value);
 });
+
+const columns = [
+  { field: 'id',          header: 'ID',          width: '4rem' },
+  { field: 'name',        header: 'Name',         width: '12rem' },
+  { field: 'description', header: 'Description',  width: '16rem' },
+  { field: 'isActive',    header: 'Status',       width: '8rem' },
+  { key: 'actions',       header: 'Actions',      width: '12rem', toggleable: false },
+]
 </script>
 
 <template>
@@ -216,6 +224,7 @@ onBeforeUnmount(() => {
       :loading="loading"
       :totalRecords="totalRecords"
       :rowsPerPageOptions="[5, 10, 20, 50]"
+      :columns="columns"
       @page="(e) => (first = e.first)"
     >
       <template #toolbar-left>
@@ -277,55 +286,42 @@ onBeforeUnmount(() => {
         </div>
       </template>
 
-      <prime-column field="id" header="ID" style="min-width: 4rem" />
-      <prime-column field="name" header="Name" style="min-width: 12rem" />
-      <prime-column header="Description" style="min-width: 16rem">
-        <template #body="{ data }">
-          <span
-            v-if="data.description"
-            class="tw:text-sm app-text-muted tw:line-clamp-1"
-          >{{ data.description }}</span>
-          <span v-else class="tw:text-sm app-text-subtle">—</span>
-        </template>
-      </prime-column>
-      <prime-column field="isActive" header="Status" style="min-width: 8rem">
-        <template #body="{ data }">
-          <prime-tag
-            :value="statusTag(data.isActive).label"
-            :severity="statusTag(data.isActive).severity"
-          />
-        </template>
-      </prime-column>
-      <prime-column header="Actions" style="min-width: 12rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:justify-end tw:gap-2">
-            <!-- Toggle active -->
-            <prime-button
-              :severity="data.isActive ? 'danger' : 'success'"
-              outlined
-              size="small"
-              :class="btnIcon"
-              v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
-              @click="handleToggleActive(data)"
-            >
-              <iconify
-                :icon="data.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold' "
-              />
-            </prime-button>
-            <!-- View detail -->
-            <prime-button
-              severity="secondary"
-              outlined
-              size="small"
-              v-tooltip.top="'View detail'"
-              @click="router.push({ name: 'categoriesDetail', params: { id: data.id } })"
-              :class="btnIcon"
-            >
-              <iconify icon="ph:arrow-right-bold" />
-            </prime-button>
-          </div>
-        </template>
-      </prime-column>
+      <template #col-description="{ data }">
+        <span v-if="data.description" class="tw:text-sm app-text-muted tw:line-clamp-1">{{ data.description }}</span>
+        <span v-else class="tw:text-sm app-text-subtle">—</span>
+      </template>
+
+      <template #col-isActive="{ data }">
+        <prime-tag
+          :value="statusTag(data.isActive).label"
+          :severity="statusTag(data.isActive).severity"
+        />
+      </template>
+
+      <template #col-actions="{ data }">
+        <div class="tw:flex tw:justify-end tw:gap-2">
+          <prime-button
+            :severity="data.isActive ? 'danger' : 'success'"
+            outlined
+            size="small"
+            :class="btnIcon"
+            v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
+            @click="handleToggleActive(data)"
+          >
+            <iconify :icon="data.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
+          </prime-button>
+          <prime-button
+            severity="secondary"
+            outlined
+            size="small"
+            v-tooltip.top="'View detail'"
+            @click="router.push({ name: 'categoriesDetail', params: { id: data.id } })"
+            :class="btnIcon"
+          >
+            <iconify icon="ph:arrow-right-bold" />
+          </prime-button>
+        </div>
+      </template>
     </AppTable>
 
   </section>

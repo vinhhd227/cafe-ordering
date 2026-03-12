@@ -8,7 +8,6 @@ import {
   deactivateUser,
 } from '@/services/user.service'
 import AppTable from '@/components/AppTable.vue'
-import StatCard from '@/components/widgets/StatCard.vue'
 import WidgetSettingsButton from '@/components/widgets/WidgetSettingsButton.vue'
 import { useTableCache } from '@/composables/useTableCache'
 import { usePermission } from '@/composables/usePermission'
@@ -257,6 +256,15 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
   ], { defaultCols: 4 })
 const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
 const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
+
+const columns = [
+  { key: 'user',        header: 'User',    width: '14rem' },
+  { field: 'email',     header: 'Email' },
+  { field: 'roles',     header: 'Role',    width: '8rem' },
+  { field: 'isActive',  header: 'Status' },
+  { field: 'createdAt', header: 'Created' },
+  { key: 'actions',     header: 'Actions', width: '8rem', toggleable: false },
+]
 </script>
 
 <template>
@@ -293,10 +301,10 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 
     <!-- ── Summary Stats ─────────────────────────────────────────── -->
     <div :class="['tw:grid tw:gap-3', wColsClass]">
-      <stat-card v-if="wVisible('total')"  label="Total users" :value="stats.total" />
-      <stat-card v-if="wVisible('active')" label="Active"      :value="stats.active" label-class="tw:text-emerald-400" />
-      <stat-card v-if="wVisible('admins')" label="Admins"      :value="stats.admins" label-class="tw:text-red-400" />
-      <stat-card v-if="wVisible('staff')"  label="Staff"       :value="stats.staff"  label-class="tw:text-blue-400" />
+      <widget-stat v-if="wVisible('total')"  label="Total users" :value="stats.total" />
+      <widget-stat v-if="wVisible('active')" label="Active"      :value="stats.active" label-class="tw:text-emerald-400" />
+      <widget-stat v-if="wVisible('admins')" label="Admins"      :value="stats.admins" label-class="tw:text-red-400" />
+      <widget-stat v-if="wVisible('staff')"  label="Staff"       :value="stats.staff"  label-class="tw:text-blue-400" />
     </div>
 
     <!-- ── Error Banner ──────────────────────────────────────────── -->
@@ -316,6 +324,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
       :loading="loading"
       :totalRecords="totalRecords"
       :rowsPerPageOptions="[10, 20, 50]"
+      :columns="columns"
       @page="(e) => loadUsers(e.page + 1)"
     >
       <template #toolbar-left>
@@ -390,99 +399,72 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
         </div>
       </template>
 
-      <!-- User: avatar + username + fullName -->
-      <prime-column header="User" style="min-width: 14rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:items-center tw:gap-3">
-            <div
-              class="tw:h-9 tw:w-9 tw:rounded-full tw:flex tw:items-center tw:justify-center
-                     tw:bg-emerald-500/20 tw:text-emerald-300 tw:text-xs tw:font-bold tw:flex-shrink-0"
-            >
-              {{ initials(data.fullName) }}
-            </div>
-            <div>
-              <p class="tw:text-sm tw:font-medium">{{ data.username }}</p>
-              <p class="tw:text-xs app-text-muted">{{ data.fullName }}</p>
-            </div>
+      <template #col-user="{ data }">
+        <div class="tw:flex tw:items-center tw:gap-3">
+          <div
+            class="tw:h-9 tw:w-9 tw:rounded-full tw:flex tw:items-center tw:justify-center
+                   tw:bg-emerald-500/20 tw:text-emerald-300 tw:text-xs tw:font-bold tw:flex-shrink-0"
+          >
+            {{ initials(data.fullName) }}
           </div>
-        </template>
-      </prime-column>
-
-      <!-- Email -->
-      <prime-column header="Email">
-        <template #body="{ data }">
-          <span class="tw:text-sm app-text-muted">{{ data.email || '—' }}</span>
-        </template>
-      </prime-column>
-
-      <!-- Role -->
-      <prime-column header="Role" style="min-width: 8rem">
-        <template #body="{ data }">
-          <prime-tag
-            v-for="role in data.roles"
-            :key="role"
-            :value="role"
-            :severity="roleSeverity(role)"
-            class="tw:mr-1"
-          />
-          <span v-if="!data.roles?.length" class="app-text-muted tw:text-xs">—</span>
-        </template>
-      </prime-column>
-
-      <!-- Status -->
-      <prime-column header="Status">
-        <template #body="{ data }">
-          <prime-tag
-            :value="data.isActive ? 'Active' : 'Inactive'"
-            :severity="data.isActive ? 'success' : 'danger'"
-          />
-        </template>
-      </prime-column>
-
-      <!-- Created date -->
-      <prime-column header="Created">
-        <template #body="{ data }">
-          <span class="tw:text-xs app-text-muted">{{ formatDate(data.createdAt) }}</span>
-        </template>
-      </prime-column>
-
-      <!-- Actions -->
-      <prime-column header="Actions" style="min-width: 8rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:justify-end tw:gap-2">
-           
-
-            <!-- Quick toggle active -->
-            <prime-button
-              v-if="can('user.deactivate')"
-              :severity="data.isActive ? 'danger' : 'success'"
-              outlined
-              size="small"
-              v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
-              @click="handleToggleActive(data)"
-               :class="btnIcon"
-            >
-            <iconify
-                :icon="
-                  data.isActive
-                    ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'
-                "
-              />
-            </prime-button>
-             <!-- View / Edit detail -->
-            <prime-button
-              severity="secondary"
-              outlined
-              size="small"
-              v-tooltip.top="'View / Edit'"
-              @click="router.push({ name: 'userDetail', params: { id: data.id } })"
-              :class="btnIcon"
-            >
-              <iconify icon="ph:arrow-right-bold" />
-            </prime-button>
+          <div>
+            <p class="tw:text-sm tw:font-medium">{{ data.username }}</p>
+            <p class="tw:text-xs app-text-muted">{{ data.fullName }}</p>
           </div>
-        </template>
-      </prime-column>
+        </div>
+      </template>
+
+      <template #col-email="{ data }">
+        <span class="tw:text-sm app-text-muted">{{ data.email || '—' }}</span>
+      </template>
+
+      <template #col-roles="{ data }">
+        <prime-tag
+          v-for="role in data.roles"
+          :key="role"
+          :value="role"
+          :severity="roleSeverity(role)"
+          class="tw:mr-1"
+        />
+        <span v-if="!data.roles?.length" class="app-text-muted tw:text-xs">—</span>
+      </template>
+
+      <template #col-isActive="{ data }">
+        <prime-tag
+          :value="data.isActive ? 'Active' : 'Inactive'"
+          :severity="data.isActive ? 'success' : 'danger'"
+        />
+      </template>
+
+      <template #col-createdAt="{ data }">
+        <span class="tw:text-xs app-text-muted">{{ formatDate(data.createdAt) }}</span>
+      </template>
+
+      <template #col-actions="{ data }">
+        <div class="tw:flex tw:justify-end tw:gap-2">
+          <prime-button
+            v-if="can('user.deactivate')"
+            :severity="data.isActive ? 'danger' : 'success'"
+            outlined
+            size="small"
+            v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
+            @click="handleToggleActive(data)"
+            :class="btnIcon"
+          >
+            <iconify :icon="data.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
+          </prime-button>
+          <prime-button
+            severity="secondary"
+            outlined
+            size="small"
+            v-tooltip.top="'View / Edit'"
+            @click="router.push({ name: 'userDetail', params: { id: data.id } })"
+            :class="btnIcon"
+          >
+            <iconify icon="ph:arrow-right-bold" />
+          </prime-button>
+        </div>
+      </template>
     </AppTable>
 
     <!-- ===== Add User Dialog ===== -->

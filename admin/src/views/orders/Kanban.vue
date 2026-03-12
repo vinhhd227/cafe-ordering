@@ -4,8 +4,8 @@ import {
   updateOrderStatus,
   updatePayment,
 } from "@/services/order.service";
-import RevenueCard from "@/components/widgets/orders/RevenueCard.vue";
-import OrdersSummaryCard from "@/components/widgets/orders/OrdersSummaryCard.vue";
+import WidgetOrdersRevenue from "@/components/widgets/orders/WidgetOrdersRevenue.vue";
+import WidgetOrdersSummary from "@/components/widgets/orders/WidgetOrdersSummary.vue";
 import WidgetSettingsButton from "@/components/widgets/WidgetSettingsButton.vue";
 
 const router = useRouter();
@@ -208,7 +208,7 @@ const {
       id: "summary",
       label: "Orders summary",
       description: "Tổng số đơn hàng hôm nay theo từng trạng thái.",
-      previewComponent: OrdersSummaryCard,
+      previewComponent: WidgetOrdersSummary,
       previewProps: {
         total: 34,
         pending: 8,
@@ -221,7 +221,7 @@ const {
       id: "revenue",
       label: "Total revenue",
       description: "Tổng doanh thu hôm nay, gồm tiền mặt và chuyển khoản.",
-      previewComponent: RevenueCard,
+      previewComponent: WidgetOrdersRevenue,
       previewProps: { total: 1750000, cash: 1000000, bank: 750000 },
     },
   ],
@@ -645,7 +645,7 @@ onUnmounted(() => {
 
     <!-- Summary stats -->
     <div :class="['tw:grid tw:gap-3', wColsClass]">
-      <orders-summary-card
+      <widget-orders-summary
         v-if="wVisible('summary')"
         :total="summary.total"
         :pending="summary.pending"
@@ -653,7 +653,7 @@ onUnmounted(() => {
         :completed="summary.completed"
         :cancelled="summary.cancelled"
       />
-      <revenue-card
+      <widget-orders-revenue
         v-if="wVisible('revenue')"
         :total="summary.revenue"
         :cash="summary.cash"

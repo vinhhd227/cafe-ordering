@@ -289,6 +289,19 @@ const submitForm = async () => {
   }
 };
 
+// ── Column definitions ────────────────────────────────────────────
+const columns = [
+  { field: 'name',   header: 'Name',     width: '14rem' },
+  { key: 'type',     header: 'Type',     width: '10rem' },
+  { key: 'scope',    header: 'Scope',    width: '10rem' },
+  { key: 'discount', header: 'Discount', width: '9rem' },
+  { key: 'validity', header: 'Validity', width: '12rem' },
+  { key: 'usage',    header: 'Usage',    width: '7rem' },
+  { key: 'stack',    header: 'Stack',    width: '8rem' },
+  { key: 'isActive', header: 'Active',   width: '6rem' },
+  { key: 'actions',  header: 'Actions',  width: '8rem', toggleable: false },
+];
+
 // ── Toggle active ──────────────────────────────────────────────────
 const togglingId = ref(null);
 
@@ -680,6 +693,7 @@ const handleDelete = (promo) => {
       :loading="loading"
       :totalRecords="totalRecords"
       :rowsPerPageOptions="[10, 20, 50]"
+      :columns="columns"
       @page="onPage"
     >
       <template #toolbar-left>
@@ -778,125 +792,98 @@ const handleDelete = (promo) => {
         </div>
       </template>
 
-      <!-- Name + Code -->
-      <prime-column field="name" header="Name" style="min-width: 14rem">
-        <template #body="{ data }">
-          <div>
-            <p class="tw:font-semibold tw:text-sm">{{ data.name }}</p>
-            <p v-if="data.code" class="tw:text-xs tw:font-mono app-text-muted">{{ data.code }}</p>
-            <p v-else class="tw:text-xs app-text-subtle tw:italic">auto-apply</p>
-          </div>
-        </template>
-      </prime-column>
+      <template #col-name="{ data }">
+        <div>
+          <p class="tw:font-semibold tw:text-sm">{{ data.name }}</p>
+          <p v-if="data.code" class="tw:text-xs tw:font-mono app-text-muted">{{ data.code }}</p>
+          <p v-else class="tw:text-xs app-text-subtle tw:italic">auto-apply</p>
+        </div>
+      </template>
 
-      <!-- Discount type -->
-      <prime-column header="Type" style="min-width: 10rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:items-center tw:gap-1.5">
-            <iconify
-              :icon="PROMOTION_DISCOUNT_TYPE_MAP[data.discountType]?.icon ?? 'ph:tag-bold'"
-              class="tw:text-sm app-text-muted"
-            />
-            <prime-tag
-              :value="PROMOTION_DISCOUNT_TYPE_MAP[data.discountType]?.label ?? data.discountType"
-              :severity="PROMOTION_DISCOUNT_TYPE_MAP[data.discountType]?.severity ?? 'secondary'"
-            />
-          </div>
-        </template>
-      </prime-column>
-
-      <!-- Scope -->
-      <prime-column header="Scope" style="min-width: 10rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:items-center tw:gap-1.5">
-            <iconify
-              :icon="PROMOTION_SCOPE_MAP[data.scope]?.icon ?? 'ph:tag-bold'"
-              class="tw:text-sm app-text-muted"
-            />
-            <prime-tag
-              :value="PROMOTION_SCOPE_MAP[data.scope]?.label ?? data.scope"
-              :severity="PROMOTION_SCOPE_MAP[data.scope]?.severity ?? 'secondary'"
-            />
-          </div>
-        </template>
-      </prime-column>
-
-      <!-- Discount value -->
-      <prime-column header="Discount" style="min-width: 9rem">
-        <template #body="{ data }">
-          <span class="tw:font-semibold tw:text-sm">{{ discountValueLabel(data) }}</span>
-        </template>
-      </prime-column>
-
-      <!-- Validity -->
-      <prime-column header="Validity" style="min-width: 12rem">
-        <template #body="{ data }">
-          <div class="tw:text-sm">
-            <span class="app-text-muted">{{ formatDate(data.startDate) }}</span>
-            <span class="app-text-muted tw:mx-1">–</span>
-            <span class="app-text-muted">{{ data.endDate ? formatDate(data.endDate) : '∞' }}</span>
-          </div>
-        </template>
-      </prime-column>
-
-      <!-- Usage -->
-      <prime-column header="Usage" style="min-width: 7rem">
-        <template #body="{ data }">
-          <span class="tw:text-sm">
-            {{ data.currentUsage }}
-            <span class="app-text-muted">/ {{ data.maxUsage ?? '∞' }}</span>
-          </span>
-        </template>
-      </prime-column>
-
-      <!-- Stack policy -->
-      <prime-column header="Stack" style="min-width: 8rem">
-        <template #body="{ data }">
+      <template #col-type="{ data }">
+        <div class="tw:flex tw:items-center tw:gap-1.5">
+          <iconify
+            :icon="PROMOTION_DISCOUNT_TYPE_MAP[data.discountType]?.icon ?? 'ph:tag-bold'"
+            class="tw:text-sm app-text-muted"
+          />
           <prime-tag
-            :value="STACK_POLICY_MAP[data.stackPolicy]?.label ?? data.stackPolicy"
-            :severity="STACK_POLICY_MAP[data.stackPolicy]?.severity ?? 'secondary'"
+            :value="PROMOTION_DISCOUNT_TYPE_MAP[data.discountType]?.label ?? data.discountType"
+            :severity="PROMOTION_DISCOUNT_TYPE_MAP[data.discountType]?.severity ?? 'secondary'"
           />
-        </template>
-      </prime-column>
+        </div>
+      </template>
 
-      <!-- Active toggle -->
-      <prime-column header="Active" style="min-width: 6rem">
-        <template #body="{ data }">
-          <prime-toggle-switch
-            :model-value="data.isActive"
-            :disabled="togglingId === data.id"
-            @change="handleToggle(data)"
+      <template #col-scope="{ data }">
+        <div class="tw:flex tw:items-center tw:gap-1.5">
+          <iconify
+            :icon="PROMOTION_SCOPE_MAP[data.scope]?.icon ?? 'ph:tag-bold'"
+            class="tw:text-sm app-text-muted"
           />
-        </template>
-      </prime-column>
+          <prime-tag
+            :value="PROMOTION_SCOPE_MAP[data.scope]?.label ?? data.scope"
+            :severity="PROMOTION_SCOPE_MAP[data.scope]?.severity ?? 'secondary'"
+          />
+        </div>
+      </template>
 
-      <!-- Actions -->
-      <prime-column header="Actions" style="min-width: 8rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:justify-end tw:items-center tw:gap-2">
-            <prime-button
-              severity="secondary"
-              outlined
-              size="small"
-              v-tooltip.top="'Edit'"
-              :class="btnIcon"
-              @click="openEditDialog(data)"
-            >
-              <iconify icon="ph:pencil-bold" />
-            </prime-button>
-            <prime-button
-              severity="danger"
-              outlined
-              size="small"
-              v-tooltip.top="'Delete'"
-              :class="btnIcon"
-              @click="handleDelete(data)"
-            >
-              <iconify icon="ph:trash-bold" />
-            </prime-button>
-          </div>
-        </template>
-      </prime-column>
+      <template #col-discount="{ data }">
+        <span class="tw:font-semibold tw:text-sm">{{ discountValueLabel(data) }}</span>
+      </template>
+
+      <template #col-validity="{ data }">
+        <div class="tw:text-sm">
+          <span class="app-text-muted">{{ formatDate(data.startDate) }}</span>
+          <span class="app-text-muted tw:mx-1">–</span>
+          <span class="app-text-muted">{{ data.endDate ? formatDate(data.endDate) : '∞' }}</span>
+        </div>
+      </template>
+
+      <template #col-usage="{ data }">
+        <span class="tw:text-sm">
+          {{ data.currentUsage }}
+          <span class="app-text-muted">/ {{ data.maxUsage ?? '∞' }}</span>
+        </span>
+      </template>
+
+      <template #col-stack="{ data }">
+        <prime-tag
+          :value="STACK_POLICY_MAP[data.stackPolicy]?.label ?? data.stackPolicy"
+          :severity="STACK_POLICY_MAP[data.stackPolicy]?.severity ?? 'secondary'"
+        />
+      </template>
+
+      <template #col-isActive="{ data }">
+        <prime-toggle-switch
+          :model-value="data.isActive"
+          :disabled="togglingId === data.id"
+          @change="handleToggle(data)"
+        />
+      </template>
+
+      <template #col-actions="{ data }">
+        <div class="tw:flex tw:justify-end tw:items-center tw:gap-2">
+          <prime-button
+            severity="secondary"
+            outlined
+            size="small"
+            v-tooltip.top="'Edit'"
+            :class="btnIcon"
+            @click="openEditDialog(data)"
+          >
+            <iconify icon="ph:pencil-bold" />
+          </prime-button>
+          <prime-button
+            severity="danger"
+            outlined
+            size="small"
+            v-tooltip.top="'Delete'"
+            :class="btnIcon"
+            @click="handleDelete(data)"
+          >
+            <iconify icon="ph:trash-bold" />
+          </prime-button>
+        </div>
+      </template>
     </AppTable>
   </section>
 </template>

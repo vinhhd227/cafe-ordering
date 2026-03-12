@@ -1,6 +1,5 @@
 <script setup>
 import AppTable from "@/components/AppTable.vue";
-import StatCard from "@/components/widgets/StatCard.vue";
 import {
   getExpenses,
   createExpense,
@@ -44,17 +43,16 @@ const errorMessage = ref("");
 
 // ── Column visibility ────────────────────────────────────────────
 const colDefs = ref([
-  { field: "purchaseDate", header: "Date", visible: true },
-  { field: "name", header: "Item", visible: true },
-  { field: "category", header: "Category", visible: true },
-  { field: "paymentMethod", header: "Payment", visible: true },
-  { field: "qty", header: "Qty", visible: true },
-  { field: "unitPrice", header: "Unit price", visible: true },
-  { field: "totalAmount", header: "Total", visible: true },
-  { field: "notes", header: "Notes", visible: true },
+  { field: 'purchaseDate', header: 'Date',       width: '8rem',  visible: true },
+  { field: 'name',         header: 'Item',        width: '12rem', visible: true },
+  { field: 'category',     header: 'Category',   width: '9rem',  visible: true },
+  { field: 'paymentMethod', header: 'Payment',   width: '9rem',  visible: true },
+  { key:   'qty',           header: 'Qty',        width: '7rem',  visible: true },
+  { field: 'unitPrice',    header: 'Unit price', width: '9rem',  visible: true },
+  { field: 'totalAmount',  header: 'Total',      width: '9rem',  visible: true },
+  { field: 'notes',        header: 'Notes',      width: '10rem', visible: true },
+  { key:   'actions',      header: 'Actions',    width: '8rem',  toggleable: false },
 ]);
-const colVisible = (field) =>
-  colDefs.value.find((c) => c.field === field)?.visible !== false;
 
 // ── Filters ────────────────────────────────────────────────────────
 const todayMidnight = () => {
@@ -89,7 +87,15 @@ if (_cached) {
       _cached.dateTo ? new Date(_cached.dateTo) : null,
     ];
   }
-  if (_cached.colDefs) colDefs.value = _cached.colDefs;
+  if (_cached.colDefs) {
+    // Merge cached visibility states while preserving the new column structure
+    const cachedVis = {};
+    for (const c of _cached.colDefs) cachedVis[c.key ?? c.field] = c.visible !== false;
+    colDefs.value = colDefs.value.map((c) => {
+      const id = c.key ?? c.field;
+      return id in cachedVis ? { ...c, visible: cachedVis[id] } : c;
+    });
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -623,7 +629,7 @@ const handleDelete = (expense) => {
     <!-- P&L summary cards -->
     <div class="tw:grid tw:grid-cols-3 tw:gap-3 sm:tw:grid-cols-3">
       <!-- Revenue -->
-      <stat-card
+      <widget-stat
         label="Revenue"
         label-class="tw:text-emerald-400"
         :value="summaryLoading ? '…' : formatVnd(revenue.total)"
@@ -652,10 +658,10 @@ const handleDelete = (expense) => {
             >
           </div>
         </template>
-      </stat-card>
+      </widget-stat>
 
       <!-- Expenses -->
-      <stat-card
+      <widget-stat
         label="Expenses"
         label-class="tw:text-red-400"
         :value="summaryLoading ? '…' : formatVnd(expenseBreakdown.total)"
@@ -684,10 +690,10 @@ const handleDelete = (expense) => {
             >
           </div>
         </template>
-      </stat-card>
+      </widget-stat>
 
       <!-- Profit -->
-      <stat-card
+      <widget-stat
         label="Profit"
         :label-class="profit >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'"
         :value="summaryLoading ? '…' : formatVnd(profit)"
@@ -718,7 +724,7 @@ const handleDelete = (expense) => {
             <span v-else>—</span>
           </div>
         </template>
-      </stat-card>
+      </widget-stat>
     </div>
 
     <!-- Error -->
@@ -742,6 +748,7 @@ const handleDelete = (expense) => {
       :loading="loading"
       :totalRecords="totalRecords"
       :rowsPerPageOptions="[10, 20, 50]"
+      :show-column-toggle="true"
       @page="onPage"
     >
       <template #toolbar-left>
@@ -808,177 +815,81 @@ const handleDelete = (expense) => {
         </div>
       </template>
 
-      <!-- Date -->
-      <prime-column
-        v-if="colVisible('purchaseDate')"
-        field="purchaseDate"
-        header="Date"
-        style="min-width: 8rem"
-      >
-        <template #body="{ data }">
-          <span class="tw:text-sm app-text-muted">{{
-            formatDate(data.purchaseDate)
-          }}</span>
-        </template>
-      </prime-column>
+      <template #col-purchaseDate="{ data }">
+        <span class="tw:text-sm app-text-muted">{{ formatDate(data.purchaseDate) }}</span>
+      </template>
 
-      <!-- Item name -->
-      <prime-column
-        v-if="colVisible('name')"
-        field="name"
-        header="Item"
-        style="min-width: 12rem"
-      >
-        <template #body="{ data }">
-          <span class="tw:font-semibold tw:text-sm">{{ data.name }}</span>
-        </template>
-      </prime-column>
+      <template #col-name="{ data }">
+        <span class="tw:font-semibold tw:text-sm">{{ data.name }}</span>
+      </template>
 
-      <!-- Category -->
-      <prime-column
-        v-if="colVisible('category')"
-        field="category"
-        header="Category"
-        style="min-width: 9rem"
-      >
-        <template #body="{ data }">
-          <div class="tw:flex tw:items-center tw:gap-1.5">
-            <prime-tag :severity="categoryMeta(data.category).severity">
-              <iconify
-                :icon="categoryMeta(data.category).icon"
-                class="tw:text-sm app-text-muted"
-              />
-              <span>
-                {{ categoryMeta(data.category).label }}
-              </span>
-            </prime-tag>
-          </div>
-        </template>
-      </prime-column>
+      <template #col-category="{ data }">
+        <div class="tw:flex tw:items-center tw:gap-1.5">
+          <prime-tag :severity="categoryMeta(data.category).severity">
+            <iconify :icon="categoryMeta(data.category).icon" class="tw:text-sm app-text-muted" />
+            <span>{{ categoryMeta(data.category).label }}</span>
+          </prime-tag>
+        </div>
+      </template>
 
-      <!-- Payment method -->
-      <prime-column
-        v-if="colVisible('paymentMethod')"
-        field="paymentMethod"
-        header="Payment"
-        class="tw:min-w-36"
-      >
-        <template #body="{ data }">
-          <div class="tw:flex tw:items-center tw:gap-1.5">
-            <prime-tag
-              :severity="
-                EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.severity ??
-                'secondary'
-              "
-            >
-              <iconify
-                :icon="
-                  EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.icon ??
-                  'ph:money-bold'
-                "
-                class="tw:text-sm app-text-muted"
-              />
-              <span>
-                {{
-                  EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.label ??
-                  data.paymentMethod
-                }}
-              </span>
-            </prime-tag>
-          </div>
-        </template>
-      </prime-column>
+      <template #col-paymentMethod="{ data }">
+        <div class="tw:flex tw:items-center tw:gap-1.5">
+          <prime-tag :severity="EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.severity ?? 'secondary'">
+            <iconify
+              :icon="EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.icon ?? 'ph:money-bold'"
+              class="tw:text-sm app-text-muted"
+            />
+            <span>{{ EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.label ?? data.paymentMethod }}</span>
+          </prime-tag>
+        </div>
+      </template>
 
-      <!-- Qty + Unit -->
-      <prime-column
-        v-if="colVisible('qty')"
-        header="Qty"
-        style="min-width: 7rem"
-      >
-        <template #body="{ data }">
-          <span class="tw:text-sm">
-            {{ data.quantity }}
-            <span v-if="data.unit" class="app-text-muted tw:ml-0.5">{{
-              data.unit
-            }}</span>
-          </span>
-        </template>
-      </prime-column>
+      <template #col-qty="{ data }">
+        <span class="tw:text-sm">
+          {{ data.quantity }}
+          <span v-if="data.unit" class="app-text-muted tw:ml-0.5">{{ data.unit }}</span>
+        </span>
+      </template>
 
-      <!-- Unit price -->
-      <prime-column
-        v-if="colVisible('unitPrice')"
-        field="unitPrice"
-        header="Unit price"
-        style="min-width: 9rem"
-      >
-        <template #body="{ data }">
-          <span class="tw:text-sm app-text-muted">{{
-            formatVnd(data.unitPrice)
-          }}</span>
-        </template>
-      </prime-column>
+      <template #col-unitPrice="{ data }">
+        <span class="tw:text-sm app-text-muted">{{ formatVnd(data.unitPrice) }}</span>
+      </template>
 
-      <!-- Total -->
-      <prime-column
-        v-if="colVisible('totalAmount')"
-        field="totalAmount"
-        header="Total"
-        style="min-width: 9rem"
-      >
-        <template #body="{ data }">
-          <span class="tw:font-semibold tw:text-sm">{{
-            formatVnd(data.totalAmount)
-          }}</span>
-        </template>
-      </prime-column>
+      <template #col-totalAmount="{ data }">
+        <span class="tw:font-semibold tw:text-sm">{{ formatVnd(data.totalAmount) }}</span>
+      </template>
 
-      <!-- Notes -->
-      <prime-column
-        v-if="colVisible('notes')"
-        field="notes"
-        header="Notes"
-        style="min-width: 10rem"
-      >
-        <template #body="{ data }">
-          <span
-            v-if="data.notes"
-            class="tw:text-sm app-text-muted tw:line-clamp-1"
-            >{{ data.notes }}</span
+      <template #col-notes="{ data }">
+        <span v-if="data.notes" class="tw:text-sm app-text-muted tw:line-clamp-1">{{ data.notes }}</span>
+        <span v-else class="app-text-subtle">—</span>
+      </template>
+
+      <template #col-actions="{ data }">
+        <div class="tw:flex tw:justify-end tw:items-center tw:gap-2">
+          <prime-button
+            v-if="can('expense.update')"
+            severity="secondary"
+            outlined
+            size="small"
+            v-tooltip.top="'Edit'"
+            :class="btnIcon"
+            @click="openEditDialog(data)"
           >
-          <span v-else class="app-text-subtle">—</span>
-        </template>
-      </prime-column>
-
-      <!-- Actions -->
-      <prime-column header="Actions" class="tw:min-w-32">
-        <template #body="{ data }">
-          <div class="tw:flex tw:justify-end tw:items-center tw:gap-2">
-            <prime-button
-              v-if="can('expense.update')"
-              severity="secondary"
-              outlined
-              size="small"
-              v-tooltip.top="'Edit'"
-              :class="btnIcon"
-              @click="openEditDialog(data)"
-            >
-              <iconify icon="ph:pencil-bold" />
-            </prime-button>
-            <prime-button
-              v-if="can('expense.delete')"
-              severity="danger"
-              outlined
-              size="small"
-              v-tooltip.top="'Delete'"
-              :class="btnIcon"
-              @click="handleDelete(data)"
-            >
-              <iconify icon="ph:trash-bold" />
-            </prime-button>
-          </div>
-        </template>
-      </prime-column>
+            <iconify icon="ph:pencil-bold" />
+          </prime-button>
+          <prime-button
+            v-if="can('expense.delete')"
+            severity="danger"
+            outlined
+            size="small"
+            v-tooltip.top="'Delete'"
+            :class="btnIcon"
+            @click="handleDelete(data)"
+          >
+            <iconify icon="ph:trash-bold" />
+          </prime-button>
+        </div>
+      </template>
     </AppTable>
   </section>
 </template>

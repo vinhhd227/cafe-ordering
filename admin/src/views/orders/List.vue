@@ -2,9 +2,9 @@
 import { useRouter } from "vue-router";
 import { getOrders, updatePayment } from "@/services/order.service";
 import AppTable from "@/components/AppTable.vue";
-import StatCard from "@/components/widgets/StatCard.vue";
-import RevenueCard from "@/components/widgets/orders/RevenueCard.vue";
-import OrdersSummaryCard from "@/components/widgets/orders/OrdersSummaryCard.vue";
+import WidgetStat from "@/components/widgets/WidgetStat.vue";
+import WidgetOrdersRevenue from "@/components/widgets/orders/WidgetOrdersRevenue.vue";
+import WidgetOrdersSummary from "@/components/widgets/orders/WidgetOrdersSummary.vue";
 import WidgetSettingsButton from "@/components/widgets/WidgetSettingsButton.vue";
 import { btnIcon } from "@/layout/ui";
 import { ORDER_STATUS, ORDER_STATUS_MAP } from "@/constants/orderStatus";
@@ -78,28 +78,28 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
       id: 'total',
       label: 'Total orders',
       description: 'Tổng số đơn hàng trong khoảng thời gian được chọn.',
-      previewComponent: OrdersSummaryCard,
+      previewComponent: WidgetOrdersSummary,
       previewProps: { total: 128, pending: 18, processing: 8, completed: 98, cancelled: 4 },
     },
     {
       id: 'revenue',
       label: 'Total revenue',
       description: 'Tổng doanh thu đã thu, gồm tiền mặt và chuyển khoản.',
-      previewComponent: RevenueCard,
+      previewComponent: WidgetOrdersRevenue,
       previewProps: { total: 4250000, cash: 2400000, bank: 1850000 },
     },
     {
       id: 'cash',
       label: 'Cash collected',
       description: 'Tổng tiền mặt đã thu từ các đơn đã thanh toán.',
-      previewComponent: StatCard,
+      previewComponent: WidgetStat,
       previewProps: { label: 'Cash collected', value: '2,400,000 ₫', labelClass: 'tw:text-emerald-400' },
     },
     {
       id: 'bank',
       label: 'Bank transfer',
       description: 'Tổng chuyển khoản ngân hàng từ các đơn đã thanh toán.',
-      previewComponent: StatCard,
+      previewComponent: WidgetStat,
       previewProps: { label: 'Bank transfer', value: '1,850,000 ₫', labelClass: 'tw:text-blue-400' },
     },
   ], { defaultCols: 4 })
@@ -264,6 +264,16 @@ const onPage = (e) => {
   rows.value = e.rows;
   loadOrders();
 };
+
+const columns = [
+  { field: 'orderNumber',   header: 'Order #',  width: '9rem' },
+  { field: 'orderDate',     header: 'Date',     width: '10rem' },
+  { field: 'status',        header: 'Status',   width: '8rem' },
+  { field: 'paymentStatus', header: 'Payment',  width: '10rem' },
+  { key: 'items',           header: 'Items',    width: '5rem' },
+  { field: 'totalAmount',   header: 'Total',    width: '9rem' },
+  { key: 'actions',         header: 'Actions',  width: '12rem', toggleable: false },
+]
 
 // ── Payment dialog ────────────────────────────────────────────────
 const payDialog = ref(false);
@@ -511,7 +521,7 @@ const confirmPayment = async () => {
 
     <!-- Summary stats -->
     <div :class="['tw:grid tw:gap-3', wColsClass]">
-      <orders-summary-card
+      <widget-orders-summary
         v-if="wVisible('total')"
         :total="summary.total"
         :pending="summary.pending"
@@ -519,13 +529,13 @@ const confirmPayment = async () => {
         :completed="summary.completed"
         :cancelled="summary.cancelled"
       />
-      <revenue-card
+      <widget-orders-revenue
         v-if="wVisible('revenue')"
         :total="summary.revenue"
         :cash="summary.cash"
         :bank="summary.bank"
       />
-      <stat-card
+      <widget-stat
         v-if="wVisible('cash')"
         label="Cash collected"
         label-class="tw:text-emerald-400"
@@ -534,8 +544,8 @@ const confirmPayment = async () => {
         <template #icon>
           <iconify icon="ph:money-bold" class="tw:text-emerald-400 tw:opacity-60" />
         </template>
-      </stat-card>
-      <stat-card
+      </widget-stat>
+      <widget-stat
         v-if="wVisible('bank')"
         label="Bank transfer"
         label-class="tw:text-blue-400"
@@ -544,7 +554,7 @@ const confirmPayment = async () => {
         <template #icon>
           <iconify icon="ph:bank-bold" class="tw:text-blue-400 tw:opacity-60" />
         </template>
-      </stat-card>
+      </widget-stat>
     </div>
 
     <!-- Error -->
@@ -567,6 +577,7 @@ const confirmPayment = async () => {
       :loading="loading"
       :totalRecords="totalRecords"
       :rowsPerPageOptions="[10, 20, 50]"
+      :columns="columns"
       @page="onPage"
     >
       <template #toolbar-left>
@@ -733,110 +744,76 @@ const confirmPayment = async () => {
         </div>
       </template>
 
-      <prime-column
-        field="orderNumber"
-        header="Order #"
-        style="min-width: 9rem"
-      >
-        <template #body="{ data }">
-          <span class="tw:font-mono tw:text-sm tw:font-semibold">{{
-            data.orderNumber
+      <template #col-orderNumber="{ data }">
+        <span class="tw:font-mono tw:text-sm tw:font-semibold">{{ data.orderNumber }}</span>
+      </template>
+
+      <template #col-orderDate="{ data }">
+        <span class="tw:text-sm app-text-muted">{{ formatDate(data.orderDate) }}</span>
+      </template>
+
+      <template #col-status="{ data }">
+        <prime-tag
+          :value="statusTag(data.status).label"
+          :severity="statusTag(data.status).severity"
+        />
+      </template>
+
+      <template #col-paymentStatus="{ data }">
+        <prime-tag
+          :value="paymentTag(data.paymentStatus, data.paymentMethod).label"
+          :severity="paymentTag(data.paymentStatus, data.paymentMethod).severity"
+        />
+      </template>
+
+      <template #col-items="{ data }">
+        <span class="tw:text-sm app-text-muted">{{ data.items?.length ?? 0 }} item(s)</span>
+      </template>
+
+      <template #col-totalAmount="{ data }">
+        <div>
+          <span
+            v-if="data.totalDiscount > 0"
+            class="tw:text-xs app-text-muted tw:line-through tw:block"
+          >{{ formatVnd(data.totalAmount) }}</span>
+          <span class="tw:font-semibold tw:text-sm">{{
+            formatVnd(data.totalDiscount > 0 ? data.finalAmount : data.totalAmount)
           }}</span>
-        </template>
-      </prime-column>
+          <div v-if="data.promotions?.length" class="tw:flex tw:flex-wrap tw:gap-1 tw:mt-1">
+            <prime-tag
+              v-for="p in data.promotions"
+              :key="p.promotionId"
+              :value="p.promoCode"
+              severity="success"
+              class="tw:text-[10px]!"
+            />
+          </div>
+        </div>
+      </template>
 
-      <prime-column field="orderDate" header="Date" style="min-width: 10rem">
-        <template #body="{ data }">
-          <span class="tw:text-sm app-text-muted">{{
-            formatDate(data.orderDate)
-          }}</span>
-        </template>
-      </prime-column>
-
-      <prime-column field="status" header="Status" style="min-width: 8rem">
-        <template #body="{ data }">
-          <prime-tag
-            :value="statusTag(data.status).label"
-            :severity="statusTag(data.status).severity"
-          />
-        </template>
-      </prime-column>
-
-      <prime-column
-        field="paymentStatus"
-        header="Payment"
-        style="min-width: 10rem"
-      >
-        <template #body="{ data }">
-          <prime-tag
-            :value="paymentTag(data.paymentStatus, data.paymentMethod).label"
-            :severity="
-              paymentTag(data.paymentStatus, data.paymentMethod).severity
-            "
-          />
-        </template>
-      </prime-column>
-
-      <prime-column header="Items" style="min-width: 5rem">
-        <template #body="{ data }">
-          <span class="tw:text-sm app-text-muted"
-            >{{ data.items?.length ?? 0 }} item(s)</span
+      <template #col-actions="{ data }">
+        <div class="tw:flex tw:justify-end tw:items-center tw:gap-2">
+          <prime-button
+            v-if="data.paymentStatus === PAYMENT_STATUS.UNPAID && data.status !== ORDER_STATUS.CANCELLED"
+            severity="warn"
+            size="small"
+            outlined
+            @click="openPayDialog(data)"
           >
-        </template>
-      </prime-column>
-
-      <prime-column field="totalAmount" header="Total" style="min-width: 9rem">
-        <template #body="{ data }">
-          <div>
-            <span
-              v-if="data.totalDiscount > 0"
-              class="tw:text-xs app-text-muted tw:line-through tw:block"
-            >{{ formatVnd(data.totalAmount) }}</span>
-            <span class="tw:font-semibold tw:text-sm">{{
-              formatVnd(data.totalDiscount > 0 ? data.finalAmount : data.totalAmount)
-            }}</span>
-            <div v-if="data.promotions?.length" class="tw:flex tw:flex-wrap tw:gap-1 tw:mt-1">
-              <prime-tag
-                v-for="p in data.promotions"
-                :key="p.promotionId"
-                :value="p.promoCode"
-                severity="success"
-                class="tw:text-[10px]!"
-              />
-            </div>
-          </div>
-        </template>
-      </prime-column>
-
-      <prime-column header="Actions" style="min-width: 12rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:justify-end tw:items-center tw:gap-2">
-            <prime-button
-              v-if="
-                data.paymentStatus === PAYMENT_STATUS.UNPAID && data.status !== ORDER_STATUS.CANCELLED
-              "
-              severity="warn"
-              size="small"
-              outlined
-              @click="openPayDialog(data)"
-            >
-              <iconify icon="ph:money-bold" />
-              <span>Mark paid</span>
-            </prime-button>
-            <prime-button
-              severity="secondary"
-              outlined
-              size="small"
-              @click="
-                router.push({ name: 'ordersDetail', params: { id: data.id } })
-              "
-              :class="btnIcon"
-            >
-              <iconify icon="ph:arrow-right-bold" />
-            </prime-button>
-          </div>
-        </template>
-      </prime-column>
+            <iconify icon="ph:money-bold" />
+            <span>Mark paid</span>
+          </prime-button>
+          <prime-button
+            severity="secondary"
+            outlined
+            size="small"
+            @click="router.push({ name: 'ordersDetail', params: { id: data.id } })"
+            :class="btnIcon"
+          >
+            <iconify icon="ph:arrow-right-bold" />
+          </prime-button>
+        </div>
+      </template>
     </AppTable>
   </section>
 </template>

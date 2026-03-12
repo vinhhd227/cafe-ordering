@@ -34,6 +34,14 @@ const search = ref("");
 // --- Summary stats ---
 const stats = ref({ total: 0 });
 
+// --- Column definitions ---
+const columns = [
+  { key: 'role',    header: 'Role',    width: '14rem' },
+  { key: 'users',   header: 'Users',   width: '7rem' },
+  { key: 'created', header: 'Created' },
+  { key: 'actions', header: 'Actions', width: '13rem', toggleable: false },
+];
+
 // --- Dialog: Add Role ---
 const showAddDialog = ref(false);
 const addForm = ref({ name: "", description: "" });
@@ -91,7 +99,13 @@ const groupIcon = (name) => {
     order: "ph:receipt-bold",
     product: "ph:package-bold",
     staff: "ph:users-bold",
-    table: "ph:table-bold",
+    table: "ic:round-table-bar",
+    user: "ph:user-bold",
+    role: "ph:shield-bold",
+    permission: "ph:key-bold",
+    expense: "ph:shopping-cart-bold",
+    category: "ph:tag-bold",
+    promotion: "ph:gift-bold",
   };
   return map[name] ?? "ph:key-bold";
 };
@@ -375,6 +389,7 @@ const savePermissions = async () => {
       :loading="loading"
       :totalRecords="totalRecords"
       :rowsPerPageOptions="[10, 20, 50]"
+      :columns="columns"
       @page="(e) => loadRoles(e.page + 1)"
     >
       <template #toolbar-left>
@@ -385,84 +400,66 @@ const savePermissions = async () => {
         />
       </template>
 
-      <!-- Role name + icon -->
-      <prime-column header="Role" style="min-width: 14rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:items-center tw:gap-3">
-            <div
-              :class="[
-                'tw:h-9 tw:w-9 tw:rounded-full tw:flex tw:items-center tw:justify-center tw:flex-shrink-0',
-                roleBg(data.name),
-                roleColor(data.name),
-              ]"
-            >
-              <iconify :icon="roleIcon(data.name)" class="tw:text-base" />
-            </div>
-            <div>
-              <p class="tw:text-sm tw:font-medium">{{ data.name }}</p>
-              <p class="tw:text-xs app-text-muted">
-                {{ data.description || "—" }}
-              </p>
-            </div>
+      <template #col-role="{ data }">
+        <div class="tw:flex tw:items-center tw:gap-3">
+          <div
+            :class="[
+              'tw:h-9 tw:w-9 tw:rounded-full tw:flex tw:items-center tw:justify-center tw:flex-shrink-0',
+              roleBg(data.name),
+              roleColor(data.name),
+            ]"
+          >
+            <iconify :icon="roleIcon(data.name)" class="tw:text-base" />
           </div>
-        </template>
-      </prime-column>
-
-      <!-- User count -->
-      <prime-column header="Users" style="min-width: 7rem">
-        <template #body="{ data }">
-          <span class="tw:text-sm">{{ data.userCount ?? "—" }}</span>
-        </template>
-      </prime-column>
-
-      <!-- Created date -->
-      <prime-column header="Created">
-        <template #body="{ data }">
-          <span class="tw:text-xs app-text-muted">{{
-            formatDate(data.createdAt)
-          }}</span>
-        </template>
-      </prime-column>
-
-      <!-- Actions -->
-      <prime-column header="Actions" style="min-width: 13rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:justify-end tw:gap-2">
-            <prime-button
-              severity="secondary"
-              outlined
-              size="small"
-              v-tooltip.top="'Permissions'"
-              @click="openPermissionsDialog(data)"
-              :class="btnIcon"
-            >
-              <iconify icon="ph:key-bold" />
-            </prime-button>
-
-            <prime-button
-              severity="secondary"
-              outlined
-              size="small"
-              v-tooltip.top="'Edit'"
-              @click="openEditDialog(data)"
-              :class="btnIcon"
-            >
-              <iconify icon="ph:pencil-bold" />
-            </prime-button>
-
-            <prime-button
-              severity="danger"
-              outlined
-              size="small"
-              v-tooltip.top="'Delete'"
-              @click="confirmDeleteRole = data"
-              :class="btnIcon"
-            >
-              <iconify icon="ph:trash-bold" />
-            </prime-button>
+          <div>
+            <p class="tw:text-sm tw:font-medium">{{ data.name }}</p>
+            <p class="tw:text-xs app-text-muted">{{ data.description || "—" }}</p>
           </div>
-        </template>
-      </prime-column>
+        </div>
+      </template>
+
+      <template #col-users="{ data }">
+        <span class="tw:text-sm">{{ data.userCount ?? "—" }}</span>
+      </template>
+
+      <template #col-created="{ data }">
+        <span class="tw:text-xs app-text-muted">{{ formatDate(data.createdAt) }}</span>
+      </template>
+
+      <template #col-actions="{ data }">
+        <div class="tw:flex tw:justify-end tw:gap-2">
+          <prime-button
+            severity="secondary"
+            outlined
+            size="small"
+            v-tooltip.top="'Permissions'"
+            @click="openPermissionsDialog(data)"
+            :class="btnIcon"
+          >
+            <iconify icon="ph:key-bold" />
+          </prime-button>
+          <prime-button
+            severity="secondary"
+            outlined
+            size="small"
+            v-tooltip.top="'Edit'"
+            @click="openEditDialog(data)"
+            :class="btnIcon"
+          >
+            <iconify icon="ph:pencil-bold" />
+          </prime-button>
+          <prime-button
+            severity="danger"
+            outlined
+            size="small"
+            v-tooltip.top="'Delete'"
+            @click="confirmDeleteRole = data"
+            :class="btnIcon"
+          >
+            <iconify icon="ph:trash-bold" />
+          </prime-button>
+        </div>
+      </template>
     </AppTable>
 
     <!-- ===== Add Role Dialog ===== -->

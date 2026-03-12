@@ -45,7 +45,8 @@ const props = defineProps({
   first: { type: Number, default: 0 },
   totalRecords: { type: Number, default: 0 },
   rowsPerPageOptions: { type: Array, default: () => [10, 20, 50] },
-  columns: { type: Array, default: null },
+  columns: { type: Array, default: () => [] },
+  showColumnToggle: { type: Boolean, default: false },
 });
 
 const emit = defineEmits([
@@ -106,13 +107,19 @@ const pageTokens = computed(() => {
 const colDialogVisible = ref(false);
 
 const localColumns = ref(
-  props.columns
-    ? props.columns.map((c) => ({ ...c, visible: c.visible !== false }))
-    : [],
+  props.columns.map((c) => ({ ...c, visible: c.visible !== false })),
 );
 
-const setColVisibility = (field, visible) => {
-  const col = localColumns.value.find((c) => c.field === field);
+const visibleColumns = computed(() =>
+  localColumns.value.filter((c) => c.visible !== false),
+);
+
+const toggleableColumns = computed(() =>
+  localColumns.value.filter((c) => c.toggleable !== false),
+);
+
+const setColVisibility = (id, visible) => {
+  const col = localColumns.value.find((c) => (c.key ?? c.field) === id);
   if (col) {
     col.visible = visible;
     emit(
@@ -126,7 +133,7 @@ const setColVisibility = (field, visible) => {
 watch(
   () => props.columns,
   (newVal) => {
-    if (!newVal) return;
+    if (!newVal?.length) return;
     localColumns.value = newVal.map((c) => ({
       ...c,
       visible: c.visible !== false,
@@ -162,7 +169,7 @@ watch(
       <!-- ── Data Table ─────────────────────────────────────────── -->
       <prime-data-table
         :pt="{
-          bodyCell: { class: 'tw:bg-transparent'}
+          bodyRow: { class: 'tw:bg-transparent!' },
         }"
         :value="value"
         :loading="loading"
@@ -170,7 +177,25 @@ watch(
         :paginator="false"
         responsiveLayout="scroll"
       >
-        <slot />
+        <prime-column
+          :pt="{
+            headerCell: { class: 'tw:bg-transparent!' },
+            bodyCell: { class: 'tw:bg-transparent!' },
+          }"
+          v-for="col in visibleColumns"
+          :key="col.key ?? col.field"
+          :field="col.field"
+          :header="col.header"
+          :style="col.width ? `min-width: ${col.width}` : undefined"
+          :sortable="col.sortable ?? false"
+        >
+          <template
+            v-if="$slots[`col-${col.key ?? col.field}`]"
+            #body="slotProps"
+          >
+            <slot :name="`col-${col.key ?? col.field}`" v-bind="slotProps" />
+          </template>
+        </prime-column>
       </prime-data-table>
     </template>
     <template #footer>
@@ -268,7 +293,7 @@ watch(
             @update:model-value="onRowsChange"
           />
           <prime-button
-            v-if="columns"
+            v-if="showColumnToggle"
             severity="secondary"
             outlined
             v-tooltip.top="'Toggle columns'"
@@ -281,7 +306,7 @@ watch(
       </div>
       <!-- ── Column toggle dialog ───────────────────────────────── -->
       <prime-dialog
-        v-if="columns"
+        v-if="showColumnToggle"
         v-model:visible="colDialogVisible"
         header="Columns"
         :modal="true"
@@ -289,18 +314,20 @@ watch(
       >
         <div class="tw:flex tw:flex-col tw:gap-3">
           <div
-            v-for="col in localColumns"
-            :key="col.field"
+            v-for="col in toggleableColumns"
+            :key="col.key ?? col.field"
             class="tw:flex tw:items-center tw:gap-2"
           >
             <prime-checkbox
-              :inputId="`col-toggle-${col.field}`"
+              :inputId="`col-toggle-${col.key ?? col.field}`"
               :model-value="col.visible"
               binary
-              @update:model-value="(val) => setColVisibility(col.field, val)"
+              @update:model-value="
+                (val) => setColVisibility(col.key ?? col.field, val)
+              "
             />
             <label
-              :for="`col-toggle-${col.field}`"
+              :for="`col-toggle-${col.key ?? col.field}`"
               class="tw:text-sm tw:cursor-pointer tw:select-none"
               >{{ col.header }}</label
             >

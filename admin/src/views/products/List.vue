@@ -5,7 +5,6 @@ import { usePermission } from "@/composables/usePermission";
 import { getProducts, toggleProductActive } from "@/services/product.service";
 import { getCategory } from "@/services/category.service";
 import AppTable from "@/components/AppTable.vue";
-import StatCard from "@/components/widgets/StatCard.vue";
 import WidgetSettingsButton from "@/components/widgets/WidgetSettingsButton.vue";
 import { useTableCache } from "@/composables/useTableCache";
 import { btnIcon } from "@/layout/ui";
@@ -24,14 +23,13 @@ const first = ref(0);
 
 // ── Column visibility ────────────────────────────────────────────────
 const colDefs = ref([
-  { field: "id", header: "ID", visible: true },
-  { field: "product", header: "Product", visible: true },
-  { field: "category", header: "Category", visible: true },
-  { field: "price", header: "Price", visible: true },
-  { field: "status", header: "Status", visible: true },
+  { field: 'id',       header: 'ID',       width: '4rem',  visible: true },
+  { key: 'product',    header: 'Product',  width: '14rem', visible: true },
+  { field: 'category', header: 'Category',                 visible: true },
+  { field: 'price',    header: 'Price',                    visible: true },
+  { field: 'status',   header: 'Status',                   visible: true },
+  { key: 'actions',    header: 'Actions',  width: '12rem', toggleable: false },
 ]);
-const colVisible = (field) =>
-  colDefs.value.find((c) => c.field === field)?.visible !== false;
 const totalRecords = ref(0);
 const summary = ref({ total: 0, active: 0, low: 0, inactive: 0 });
 const searchTimer = ref(null);
@@ -270,23 +268,23 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 
     <!-- ── Summary Stats ─────────────────────────────────────────── -->
     <div :class="['tw:grid tw:gap-3', wColsClass]">
-      <stat-card
+      <widget-stat
         v-if="wVisible('total')"
         label="Total items"
         :value="summary.total"
       />
-      <stat-card
+      <widget-stat
         v-if="wVisible('active')"
         label="Active"
         label-class="tw:text-emerald-400"
         :value="summary.active"
       />
-      <stat-card
+      <widget-stat
         v-if="wVisible('low')"
         label="Low stock"
         :value="summary.low"
       />
-      <stat-card
+      <widget-stat
         v-if="wVisible('inactive')"
         label="Inactive"
         label-class="tw:text-red-400"
@@ -313,6 +311,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
       :loading="loading"
       :totalRecords="totalRecords"
       :rowsPerPageOptions="[5, 10, 20, 50]"
+      :show-column-toggle="true"
       @page="(e) => loadProducts(e.page + 1)"
     >
       <template #toolbar-left>
@@ -427,93 +426,59 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
         </div>
       </template>
 
-      <prime-column
-        v-if="colVisible('id')"
-        field="id"
-        header="ID"
-        style="min-width: 4rem"
-      />
-      <prime-column
-        v-if="colVisible('product')"
-        header="Product"
-        style="min-width: 14rem"
-      >
-        <template #body="{ data }">
-          <div class="tw:flex tw:items-center tw:gap-3">
-            <img
-              v-if="data.imageUrl"
-              :src="data.imageUrl"
-              :alt="data.name"
-              class="tw:h-9 tw:w-9 tw:rounded-lg tw:object-cover tw:flex-shrink-0"
-            />
-            <div
-              v-else
-              class="tw:h-9 tw:w-9 tw:rounded-lg tw:bg-white/10 tw:flex-shrink-0 tw:flex tw:items-center tw:justify-center"
-            >
-              <iconify
-                icon="ph:coffee-bold"
-                class="tw:text-sm app-text-muted"
-              />
-            </div>
-            <span class="tw:font-medium tw:text-sm">{{ data.name }}</span>
-          </div>
-        </template>
-      </prime-column>
-      <prime-column
-        v-if="colVisible('category')"
-        field="category"
-        header="Category"
-      />
-      <prime-column v-if="colVisible('price')" field="price" header="Price">
-        <template #body="{ data }">{{ formatVnd(data.price) }}</template>
-      </prime-column>
-      <prime-column v-if="colVisible('status')" field="status" header="Status">
-        <template #body="{ data }">
-          <prime-tag
-            :value="statusTag(data.status).label"
-            :severity="statusTag(data.status).severity"
+      <template #col-product="{ data }">
+        <div class="tw:flex tw:items-center tw:gap-3">
+          <img
+            v-if="data.imageUrl"
+            :src="data.imageUrl"
+            :alt="data.name"
+            class="tw:h-9 tw:w-9 tw:rounded-lg tw:object-cover tw:flex-shrink-0"
           />
-        </template>
-      </prime-column>
-      <prime-column header="Actions" style="min-width: 12rem">
-        <template #body="{ data }">
-          <div class="tw:flex tw:justify-end tw:gap-2">
-            <!-- Toggle active -->
-            <prime-button
-            v-if="can('product.update')"
-              :severity="data.status === 'active' ? 'danger' :'success' "
-              outlined
-              size="small"
-              :class="btnIcon"
-              v-tooltip.top="
-                data.status === 'active' ? 'Deactivate' : 'Activate'
-              "
-              @click="handleToggleActive(data)"
-            >
-              <iconify
-                :icon="
-                  data.status === 'active'
-                    ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'
-                "
-              />
-            </prime-button>
-            <!-- View detail -->
-            <prime-button
-            v-if="can('product.view')"
-              severity="secondary"
-              outlined
-              size="small"
-              v-tooltip.top="'View detail'"
-              @click="
-                router.push({ name: 'productsDetail', params: { id: data.id } })
-              "
-              :class="btnIcon"
-            >
-              <iconify icon="ph:arrow-right-bold" />
-            </prime-button>
+          <div
+            v-else
+            class="tw:h-9 tw:w-9 tw:rounded-lg tw:bg-white/10 tw:flex-shrink-0 tw:flex tw:items-center tw:justify-center"
+          >
+            <iconify icon="ph:coffee-bold" class="tw:text-sm app-text-muted" />
           </div>
-        </template>
-      </prime-column>
+          <span class="tw:font-medium tw:text-sm">{{ data.name }}</span>
+        </div>
+      </template>
+
+      <template #col-price="{ data }">{{ formatVnd(data.price) }}</template>
+
+      <template #col-status="{ data }">
+        <prime-tag
+          :value="statusTag(data.status).label"
+          :severity="statusTag(data.status).severity"
+        />
+      </template>
+
+      <template #col-actions="{ data }">
+        <div class="tw:flex tw:justify-end tw:gap-2">
+          <prime-button
+            v-if="can('product.update')"
+            :severity="data.status === 'active' ? 'danger' : 'success'"
+            outlined
+            size="small"
+            :class="btnIcon"
+            v-tooltip.top="data.status === 'active' ? 'Deactivate' : 'Activate'"
+            @click="handleToggleActive(data)"
+          >
+            <iconify :icon="data.status === 'active' ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
+          </prime-button>
+          <prime-button
+            v-if="can('product.view')"
+            severity="secondary"
+            outlined
+            size="small"
+            v-tooltip.top="'View detail'"
+            @click="router.push({ name: 'productsDetail', params: { id: data.id } })"
+            :class="btnIcon"
+          >
+            <iconify icon="ph:arrow-right-bold" />
+          </prime-button>
+        </div>
+      </template>
     </AppTable>
   </section>
 </template>
