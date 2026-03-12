@@ -1,11 +1,16 @@
 <script setup>
+import { ref } from 'vue'
+import { btnIcon } from '@/layout/ui'
+
 defineProps({
   widgets: Array,  // [{ id, label, description, visible, previewComponent, previewProps }]
   hiddenCount: { type: Number, default: 0 },
   colsPerRow: { type: Number, default: 2 },
 })
 
-const emit = defineEmits(['toggle', 'update:colsPerRow'])
+// Use kebab-case for update events because listeners are typically written in
+// kebab-case in templates: `@update:cols-per-row="..."`.
+const emit = defineEmits(['toggle', 'update:cols-per-row'])
 
 const visible = ref(false)
 </script>
@@ -47,7 +52,7 @@ const visible = ref(false)
             :outlined="colsPerRow !== n"
             size="small"
             :class="btnIcon"
-            @click="emit('update:colsPerRow', n)"
+            @click="emit('update:cols-per-row', n)"
           >
             {{ n }}
           </prime-button>
