@@ -8,6 +8,7 @@
     "products": "Products",
     "categories": "Categories",
     "promotions": "Promotions",
+    "reports": "Reports",
     "staff": "Staff",
     "customers": "Customers",
     "users": "Users",
@@ -75,5 +76,71 @@
   "sidebar": {
     "brand": "Cafe Ordering",
     "title": "Admin Panel"
+  },
+  "widget": {
+    "revenue": {
+      "label": "Total revenue",
+      "cash": "Cash",
+      "bank": "Bank transfer"
+    },
+    "orders": {
+      "label": "Total orders",
+      "pending": "Pending",
+      "processing": "Processing",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    }
+  },
+  "report": {
+    "title": "Reports",
+    "subtitle": "Aggregated revenue and orders for a selected period.",
+    "breadcrumb": "Overview",
+    "refresh": "Refresh",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "presets": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "last7days": "Last 7 days",
+      "thisMonth": "This month",
+      "lastMonth": "Last month"
+    },
+    "chart": {
+      "title": "Daily Revenue",
+      "cash": "Cash",
+      "bank": "Bank Transfer",
+      "total": "Total"
+    },
+    "table": {
+      "title": "Daily Details",
+      "date": "Date",
+      "revenue": "Revenue",
+      "cash": "Cash",
+      "bank": "Bank Transfer",
+      "orders": "Orders",
+      "completed": "Completed",
+      "items": "Items"
+    },
+    "widgets": {
+      "totalTips": "Total Tips",
+      "tipsSubtitle": "Tips received",
+      "avgOrder": "Avg / Order",
+      "avgSubtitle": "Based on {n} completed orders",
+      "itemsSold": "Drinks sold",
+      "itemsSubtitle": "~{n} customers",
+      "avgDrinks": "Avg drinks / day",
+      "avgDrinksSubtitle": "Average drinks sold per day",
+      "avgRevPerDay": "Avg rev / day",
+      "avgRevPerDaySubtitle": "Average daily revenue"
+    },
+    "itemsChart": {
+      "title": "Drinks sold per day",
+      "label": "Drinks"
+    },
+    "error": "Failed to load report data.",
+    "empty": "No orders in the selected period.",
+    "export": "Export",
+    "exportPng": "Download as PNG",
+    "exportPdf": "Download as PDF"
   }
 }

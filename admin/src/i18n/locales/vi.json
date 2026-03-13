@@ -8,6 +8,7 @@
     "products": "Sản phẩm",
     "categories": "Danh mục",
     "promotions": "Khuyến mãi",
+    "reports": "Báo cáo",
     "staff": "Nhân viên",
     "customers": "Khách hàng",
     "users": "Người dùng",
@@ -75,5 +76,71 @@
   "sidebar": {
     "brand": "Cafe Ordering",
     "title": "Quản trị"
+  },
+  "widget": {
+    "revenue": {
+      "label": "Tổng doanh thu",
+      "cash": "Tiền mặt",
+      "bank": "Chuyển khoản"
+    },
+    "orders": {
+      "label": "Tổng đơn hàng",
+      "pending": "Chờ xử lý",
+      "processing": "Đang pha",
+      "cancelled": "Đã hủy",
+      "completed": "Hoàn thành"
+    }
+  },
+  "report": {
+    "title": "Báo cáo",
+    "subtitle": "Tổng hợp doanh thu và đơn hàng theo khoảng thời gian.",
+    "breadcrumb": "Tổng quan",
+    "refresh": "Làm mới",
+    "dateFrom": "Từ",
+    "dateTo": "Đến",
+    "presets": {
+      "today": "Hôm nay",
+      "yesterday": "Hôm qua",
+      "last7days": "7 ngày qua",
+      "thisMonth": "Tháng này",
+      "lastMonth": "Tháng trước"
+    },
+    "chart": {
+      "title": "Doanh thu theo ngày",
+      "cash": "Tiền mặt",
+      "bank": "Chuyển khoản",
+      "total": "Tổng"
+    },
+    "table": {
+      "title": "Chi tiết từng ngày",
+      "date": "Ngày",
+      "revenue": "Doanh thu",
+      "cash": "Tiền mặt",
+      "bank": "Chuyển khoản",
+      "orders": "Số đơn",
+      "completed": "Hoàn thành",
+      "items": "Ly bán"
+    },
+    "widgets": {
+      "totalTips": "Tổng tiền tip",
+      "tipsSubtitle": "Tổng tiền tip đã nhận",
+      "avgOrder": "TB / Đơn",
+      "avgSubtitle": "Trên {n} đơn hoàn thành",
+      "itemsSold": "Ly bán ra",
+      "itemsSubtitle": "~{n} lượt khách",
+      "avgDrinks": "TB ly / ngày",
+      "avgDrinksSubtitle": "Trung bình ly bán mỗi ngày",
+      "avgRevPerDay": "Doanh thu / ngày",
+      "avgRevPerDaySubtitle": "Doanh thu trung bình mỗi ngày"
+    },
+    "itemsChart": {
+      "title": "Ly bán theo ngày",
+      "label": "Ly"
+    },
+    "error": "Không thể tải dữ liệu báo cáo.",
+    "empty": "Không có đơn hàng trong khoảng thời gian này.",
+    "export": "Xuất",
+    "exportPng": "Tải ảnh PNG",
+    "exportPdf": "Tải file PDF"
   }
 }

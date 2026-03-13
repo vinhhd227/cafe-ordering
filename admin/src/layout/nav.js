@@ -7,6 +7,12 @@ export const navGroups = [
         icon: "ph:squares-four-bold",
         to: { name: "dashboard" },
       },
+      {
+        label: "Reports",
+        icon: "ph:chart-bar-bold",
+        to: { name: "reports" },
+        requiredClaim: "report.read",
+      },
     ],
   },
   {

@@ -61,6 +61,7 @@ import ProgressSpinner from "primevue/progressspinner";
 import ConfirmDialog from "primevue/confirmdialog";
 
 import ConfirmationService from "primevue/confirmationservice";
+import Chart from "primevue/chart";
 
 // Theme
 const coffeePreset = definePreset(Aura, {
@@ -186,5 +187,6 @@ export default {
     app.component("prime-date-picker", DatePicker);
     app.component("prime-progress-spinner", ProgressSpinner);
     app.component("prime-confirm-dialog", ConfirmDialog);
+    app.component("prime-chart", Chart);
   },
 };

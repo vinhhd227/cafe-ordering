@@ -38,6 +38,12 @@ const routes = [
         meta: { requiresAuth: true },
       },
       {
+        path: "reports",
+        name: "reports",
+        component: () => import("@/views/reports/Index.vue"),
+        meta: { requiresAuth: true, requiredClaim: "report.read" },
+      },
+      {
         path: "orders",
         meta: { requiresAuth: true, requiredClaim: "order.read" },
         children: [
