@@ -29,7 +29,7 @@ public class UpdatePromotion(IMediator mediator) : Endpoint<UpdatePromotionReque
   public override void Configure()
   {
     Put("/api/admin/promotions/{id}");
-    Policies("Admin");
+    Policies("promotion.update");
     DontAutoTag();
     Description(b => b.WithTags("Promotions"));
   }

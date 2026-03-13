@@ -14,7 +14,7 @@ public class DeletePromotion(IMediator mediator) : Endpoint<DeletePromotionReque
   public override void Configure()
   {
     Delete("/api/admin/promotions/{id}");
-    Policies("Admin");
+    Policies("promotion.delete");
     DontAutoTag();
     Description(b => b.WithTags("Promotions"));
   }

@@ -15,7 +15,7 @@ public class TogglePromotion(IMediator mediator) : Endpoint<TogglePromotionReque
   public override void Configure()
   {
     Put("/api/admin/promotions/{id}/toggle");
-    Policies("Admin");
+    Policies("promotion.update");
     DontAutoTag();
     Description(b => b.WithTags("Promotions"));
   }

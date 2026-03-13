@@ -28,7 +28,7 @@ public class CreatePromotion(IMediator mediator) : Endpoint<CreatePromotionReque
   public override void Configure()
   {
     Post("/api/admin/promotions");
-    Policies("Admin");
+    Policies("promotion.create");
     DontAutoTag();
     Description(b => b.WithTags("Promotions"));
   }

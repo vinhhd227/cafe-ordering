@@ -14,7 +14,7 @@ public class ValidatePromotion(IMediator mediator) : Endpoint<ValidatePromotionR
   public override void Configure()
   {
     Get("/api/promotions/validate/{code}");
-    AllowAnonymous();
+    Policies("promotion.read");
     DontAutoTag();
     Description(b => b.WithTags("Promotions"));
   }

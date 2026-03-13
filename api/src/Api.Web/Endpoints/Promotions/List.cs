@@ -17,7 +17,7 @@ public class ListPromotions(IMediator mediator) : Endpoint<ListPromotionsRequest
   public override void Configure()
   {
     Get("/api/admin/promotions");
-    Policies("StaffOrAdmin");
+    Policies("promotion.read");
     DontAutoTag();
     Description(b => b.WithTags("Promotions"));
   }

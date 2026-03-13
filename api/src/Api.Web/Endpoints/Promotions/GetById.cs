@@ -14,7 +14,7 @@ public class GetPromotionById(IMediator mediator) : Endpoint<GetPromotionByIdReq
   public override void Configure()
   {
     Get("/api/admin/promotions/{id}");
-    Policies("StaffOrAdmin");
+    Policies("promotion.read");
     DontAutoTag();
     Description(b => b.WithTags("Promotions"));
   }
