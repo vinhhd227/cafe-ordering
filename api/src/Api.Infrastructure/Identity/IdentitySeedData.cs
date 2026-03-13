@@ -21,6 +21,8 @@ public static class IdentitySeedData
       "staff.create", "staff.read", "staff.update", "staff.deactivate",
       "table.create", "table.read", "table.update",
       "expense.read", "expense.create", "expense.update", "expense.delete",
+      "promotion.create", "promotion.read", "promotion.update", "promotion.delete",
+      "report.read"
     ],
     ["Staff"] =
     [

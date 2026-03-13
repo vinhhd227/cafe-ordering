@@ -54,6 +54,15 @@ public static class PermissionRegistry
       ["expense.create"]     = "Record new expenses",
       ["expense.update"]     = "Edit expense records",
       ["expense.delete"]     = "Delete expense records",
+      
+      // Promotions
+      ["promotion.read"]     = "View promotion list",
+      ["promotion.create"]   = "Create new promotions",
+      ["promotion.update"]   = "Edit promotion information",
+      ["promotion.delete"]   = "Delete promotions",
+
+      // Reports
+      ["report.read"]        = "View reports and analytics",
     };
 
   /// <summary>Returns the description for a permission value, or null if unknown.</summary>
