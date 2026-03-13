@@ -62,6 +62,12 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
     builder.HasIndex(o => o.CustomerId)
       .HasDatabaseName("IX_Orders_CustomerId");
 
+    // OrderItems — explicit config (EF auto-discovers _items backing field via convention)
+    builder.HasMany(o => o.Items)
+      .WithOne()
+      .HasForeignKey(i => i.OrderId)
+      .OnDelete(DeleteBehavior.Cascade);
+
     // OrderPromotions — use public property (EF auto-discovers _promotions backing field via convention)
     builder.HasMany(o => o.Promotions)
       .WithOne()

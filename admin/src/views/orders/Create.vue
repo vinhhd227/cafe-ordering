@@ -1,7 +1,8 @@
 <script setup>
 import { getAdminMenu } from "@/services/menu.service";
-import { createOrder } from "@/services/order.service";
+import { createOrder, applyPromotionAdmin, autoApplyPromotions } from "@/services/order.service";
 import { listTables, getOrCreateSession } from "@/services/table.service";
+import { validatePromotion, getPromotions } from "@/services/promotion.service";
 
 const router = useRouter();
 const toast = useToast();
@@ -43,6 +44,45 @@ const toggleCategory = (id) => {
 // ── Submit ───────────────────────────────────────────────────────
 const placing = ref(false);
 const errorMessage = ref("");
+
+// ── Promotion state ──────────────────────────────────────────────
+const promoCode = ref("");
+const promoInfo = ref(null);
+const promoLoading = ref(false);
+const promoError = ref("");
+
+// ── Auto-apply promotions preview ────────────────────────────────
+const autoPromosPanel = ref();
+const autoPromos = ref([]);
+const autoPromosLoading = ref(false);
+const autoPromosLoaded = ref(false);
+
+const loadAutoPromos = async () => {
+  if (autoPromosLoaded.value) return;
+  autoPromosLoading.value = true;
+  try {
+    const res = await getPromotions({ isActive: true, pageSize: 100 });
+    autoPromos.value = (res.data?.items ?? []).filter((p) => !p.code);
+    autoPromosLoaded.value = true;
+  } catch {
+    autoPromos.value = [];
+  } finally {
+    autoPromosLoading.value = false;
+  }
+};
+
+const toggleAutoPromos = async (event) => {
+  await loadAutoPromos();
+  autoPromosPanel.value.toggle(event);
+};
+
+const formatPromotionValue = (promo) => {
+  if (promo.discountType === "PERCENTAGE") return `${promo.discountValue}% off`;
+  if (promo.discountType === "FIXED")
+    return `-${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(promo.discountValue)}`;
+  if (promo.discountType === "BUY_X_GET_Y") return `Buy ${promo.buyQuantity} get ${promo.getQuantity}`;
+  return "";
+};
 
 // ── Helpers ──────────────────────────────────────────────────────
 const formatVnd = (val) =>
@@ -109,6 +149,48 @@ const canPlaceOrder = computed(
 const orderLabel = computed(() => {
   const t = tables.value.find((t) => t.id === selectedTableId.value);
   return t ? `Table ${t.code}` : "";
+});
+
+// ── Promotion computeds + logic ───────────────────────────────────
+const cartDiscount = computed(() => promoInfo.value?.estimatedDiscount ?? 0);
+const cartFinal = computed(() => cartTotal.value - cartDiscount.value);
+
+const applyPromoCode = async () => {
+  const code = promoCode.value.trim();
+  if (!code) return;
+  promoError.value = "";
+  promoInfo.value = null;
+  promoLoading.value = true;
+  try {
+    const res = await validatePromotion(code, cartTotal.value);
+    const data = res.data;
+    if (!data.isApplicable) {
+      promoError.value = data.message || "Promotion not applicable.";
+    } else {
+      promoInfo.value = data;
+    }
+  } catch (err) {
+    promoError.value = err?.response?.data?.message || "Invalid promotion code.";
+  } finally {
+    promoLoading.value = false;
+  }
+};
+
+const clearPromo = () => {
+  promoCode.value = "";
+  promoInfo.value = null;
+  promoError.value = "";
+};
+
+watch(cartTotal, async (newVal) => {
+  if (!promoInfo.value) return;
+  try {
+    const res = await validatePromotion(promoCode.value.trim(), newVal);
+    if (res.data.isApplicable) promoInfo.value = res.data;
+    else clearPromo();
+  } catch {
+    clearPromo();
+  }
 });
 
 // ── Cart helpers ──────────────────────────────────────────────────
@@ -221,6 +303,25 @@ const placeOrder = async () => {
       })),
     );
     const { orderId } = res.data;
+
+    // Auto-apply no-code promotions
+    try {
+      await autoApplyPromotions(orderId);
+    } catch { /* silently ignore */ }
+
+    // Apply manual promo code if entered
+    if (promoCode.value.trim()) {
+      try {
+        await applyPromotionAdmin(orderId, promoCode.value.trim());
+      } catch (promoErr) {
+        const msg =
+          promoErr?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
+          promoErr?.response?.data?.message ||
+          "Could not apply promotion.";
+        toast.add({ severity: "warn", summary: "Promotion not applied", detail: msg, life: 5000 });
+      }
+    }
+
     toast.add({
       severity: "success",
       summary: "Order placed",
@@ -607,16 +708,127 @@ onMounted(async () => {
                 class="tw:border-t tw:pt-2"
                 style="border-color: var(--app-border)"
               >
+                <!-- Discount row -->
+                <div
+                  v-if="promoInfo"
+                  class="tw:flex tw:items-center tw:justify-between tw:text-xs tw:mb-1.5"
+                >
+                  <span class="tw:flex tw:items-center tw:gap-1 app-text-muted">
+                    <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
+                    {{ promoInfo.code }}
+                  </span>
+                  <span v-if="promoInfo.estimatedDiscount" class="tw:text-emerald-400 tw:font-medium">
+                    -{{ formatVnd(promoInfo.estimatedDiscount) }}
+                  </span>
+                  <span v-else class="app-text-muted tw:italic">will be applied</span>
+                </div>
                 <div
                   class="tw:flex tw:items-center tw:justify-between tw:font-bold"
                 >
                   <span>Total</span>
-                  <span class="tw:text-emerald-400 tw:text-base">{{
-                    formatVnd(cartTotal)
-                  }}</span>
+                  <div class="tw:text-right">
+                    <span
+                      v-if="promoInfo?.estimatedDiscount"
+                      class="app-text-muted tw:line-through tw:text-xs tw:font-normal tw:mr-1"
+                    >{{ formatVnd(cartTotal) }}</span>
+                    <span class="tw:text-emerald-400 tw:text-base">{{
+                      formatVnd(cartFinal)
+                    }}</span>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Auto-apply promotions preview -->
+          <div class="tw:flex tw:items-center tw:justify-between tw:mt-4 tw:mb-1">
+            <span class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs app-text-muted">
+              <iconify icon="ph:lightning-bold" class="tw:text-emerald-400" />
+              Auto-apply promotions
+            </span>
+            <prime-button
+              size="small"
+              text
+              severity="secondary"
+              class="tw:text-xs tw:h-6! tw:px-2!"
+              @click="toggleAutoPromos"
+            >
+              <iconify icon="ph:eye-bold" class="tw:text-xs" />
+              <span>Check</span>
+            </prime-button>
+          </div>
+          <prime-popover ref="autoPromosPanel">
+            <div class="tw:min-w-56 tw:max-w-xs tw:text-sm">
+              <div v-if="autoPromosLoading" class="tw:flex tw:items-center tw:gap-2 app-text-muted tw:py-1">
+                <iconify icon="prime:spinner" class="tw:animate-spin" />
+                <span>Loading...</span>
+              </div>
+              <div v-else-if="autoPromos.length === 0" class="tw:text-xs app-text-muted tw:py-1">
+                No active auto-apply promotions.
+              </div>
+              <div v-else class="tw:space-y-2.5">
+                <div
+                  v-for="promo in autoPromos"
+                  :key="promo.id"
+                  class="tw:flex tw:flex-col tw:gap-0.5"
+                >
+                  <div class="tw:flex tw:items-center tw:justify-between tw:gap-3">
+                    <span class="tw:font-medium tw:text-sm tw:leading-snug">{{ promo.name }}</span>
+                    <span class="tw:text-emerald-400 tw:font-semibold tw:shrink-0 tw:text-xs">
+                      {{ formatPromotionValue(promo) }}
+                    </span>
+                  </div>
+                  <div class="tw:flex tw:flex-wrap tw:gap-1.5">
+                    <span v-if="promo.minOrderAmount" class="tw:text-xs app-text-muted">
+                      Min {{ new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(promo.minOrderAmount) }}
+                    </span>
+                    <span v-if="promo.endDate" class="tw:text-xs app-text-muted">
+                      · Until {{ new Date(promo.endDate).toLocaleDateString('vi-VN') }}
+                    </span>
+                    <span v-if="promo.maxUsage" class="tw:text-xs app-text-muted">
+                      · {{ promo.maxUsage - promo.currentUsage }} left
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </prime-popover>
+
+          <!-- Promo code -->
+          <div v-if="cart.length > 0" class="tw:mt-3">
+            <!-- Applied: show tag with remove -->
+            <div
+              v-if="promoInfo"
+              class="tw:flex tw:items-center tw:justify-between tw:rounded-xl tw:border tw:border-emerald-500/30 tw:bg-emerald-500/10 tw:px-3 tw:py-2"
+            >
+              <div class="tw:flex tw:items-center tw:gap-2 tw:min-w-0">
+                <iconify icon="ph:tag-bold" class="tw:text-emerald-400 tw:shrink-0" />
+                <span class="tw:font-medium tw:text-sm tw:text-emerald-300">{{ promoInfo.code }}</span>
+                <span class="tw:text-xs app-text-muted tw:truncate">{{ promoInfo.name }}</span>
+              </div>
+              <prime-button size="small" text severity="secondary" :class="btnIcon" @click="clearPromo">
+                <iconify icon="prime:times" class="tw:text-xs" />
+              </prime-button>
+            </div>
+            <!-- Not applied: input + button -->
+            <template v-else>
+              <div class="tw:flex tw:gap-2">
+                <prime-input-text
+                  v-model="promoCode"
+                  placeholder="Promo code"
+                  class="tw:flex-1"
+                  @keyup.enter="applyPromoCode"
+                />
+                <prime-button
+                  severity="secondary"
+                  outlined
+                  :loading="promoLoading"
+                  :disabled="!promoCode.trim()"
+                  @click="applyPromoCode"
+                >Apply</prime-button>
+              </div>
+              <p v-if="promoError" class="tw:text-xs tw:text-red-400 tw:mt-1.5">{{ promoError }}</p>
+            </template>
           </div>
 
           <!-- Error -->

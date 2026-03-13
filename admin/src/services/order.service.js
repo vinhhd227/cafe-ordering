@@ -30,3 +30,12 @@ export const updateOrderItem = (orderId, productId, quantity) =>
 
 export const createOrder = (sessionId, items) =>
   api.post('/orders', { sessionId, items })
+
+export const applyPromotionAdmin = (orderId, code) =>
+  api.post(`/admin/orders/${orderId}/promotions`, { code })
+
+export const removePromotionAdmin = (orderId, promotionId) =>
+  api.delete(`/admin/orders/${orderId}/promotions/${promotionId}`, {})
+
+export const autoApplyPromotions = (orderId) =>
+  api.post(`/admin/orders/${orderId}/promotions/auto`, {})

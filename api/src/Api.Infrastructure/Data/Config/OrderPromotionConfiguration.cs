@@ -15,7 +15,7 @@ public class OrderPromotionConfiguration : IEntityTypeConfiguration<OrderPromoti
     builder.Property(op => op.PromotionId).IsRequired();
 
     builder.Property(op => op.PromoCode)
-      .HasMaxLength(50)
+      .HasMaxLength(200)
       .IsRequired();
 
     builder.Property(op => op.DiscountAmount)

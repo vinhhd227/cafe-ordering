@@ -138,7 +138,7 @@ const PAYMENT_METHODS = [
 
 const payChange = computed(() => {
   if (payAmountReceived.value == null || !order.value) return null;
-  return payAmountReceived.value - order.value.totalAmount;
+  return payAmountReceived.value - order.value.finalAmount;
 });
 
 const payReturn = computed(() => {
@@ -183,9 +183,12 @@ const setItemQty = async (productId, newQty) => {
   errorMessage.value = "";
   try {
     const res = await updateOrderItem(orderId, productId, newQty);
-    // Update local order with returned items + total
+    // Update local order with returned items + totals
     order.value.items = res.data.items;
     order.value.totalAmount = res.data.totalAmount;
+    order.value.totalDiscount = res.data.totalDiscount;
+    order.value.finalAmount = res.data.finalAmount;
+    order.value.promotions = res.data.promotions;
   } catch (err) {
     errorMessage.value =
       err?.response?.data?.errors?.join(", ") ||
@@ -264,7 +267,9 @@ const openMergeDialog = async () => {
   try {
     const res = await getOrders({ paymentStatus: PAYMENT_STATUS.UNPAID, pageSize: 100 });
     const all = res?.data?.items ?? [];
-    mergeOrders_.value = all.filter((o) => o.id !== orderId);
+    mergeOrders_.value = all.filter(
+      (o) => o.id !== orderId && o.status !== ORDER_STATUS.CANCELLED,
+    );
   } catch {
     mergeOrders_.value = [];
   } finally {
@@ -425,7 +430,7 @@ const confirmSplit = async () => {
         <label
           v-for="o in mergeOrders_"
           :key="o.id"
-          class="tw:flex tw:items-center tw:gap-3 tw:rounded-xl tw:border tw:px-4 tw:py-3 tw:cursor-pointer tw:transition-colors app-card"
+          class="tw:flex tw:items-start tw:gap-3 tw:rounded-xl tw:border tw:px-4 tw:py-3 tw:cursor-pointer tw:transition-colors app-card"
           :class="
             mergeSelected.includes(o.id)
               ? 'tw:border-emerald-500/50 tw:bg-emerald-500/10'
@@ -434,22 +439,30 @@ const confirmSplit = async () => {
         >
           <input
             type="checkbox"
-            class="tw:accent-emerald-500"
+            class="tw:accent-emerald-500 tw:mt-0.5"
             :value="o.id"
             v-model="mergeSelected"
           />
           <div class="tw:flex-1 tw:min-w-0">
-            <p class="tw:font-mono tw:font-semibold tw:text-sm">
+            <p class="tw:font-mono tw:font-semibold tw:text-sm tw:flex tw:items-center tw:gap-1.5">
               {{ o.orderNumber }}
-            </p>
-            <p class="tw:text-xs app-text-muted">
-              {{ o.items?.length ?? 0 }} item(s)
-              <span v-if="o.tableCode" class="tw:ml-1">
+              <span v-if="o.tableCode" class="tw:text-xs tw:font-normal app-text-muted">
                 · <iconify icon="ph:table-bold" class="tw:inline tw:text-[10px]" />
                 {{ o.tableCode }}
               </span>
-              <span v-else class="tw:ml-1 tw:italic">· No table</span>
+              <span v-else class="tw:text-xs tw:font-normal tw:italic app-text-muted">· No table</span>
             </p>
+            <ul class="tw:mt-0.5 tw:space-y-0.5">
+              <li
+                v-for="item in o.items"
+                :key="item.productId"
+                class="tw:text-xs app-text-muted tw:flex tw:items-center tw:gap-1"
+              >
+                <iconify icon="ph:circle-fill" class="tw:text-[5px] tw:shrink-0" />
+                {{ item.productName }}
+                <span class="tw:font-semibold tw:text-foreground">×{{ item.quantity }}</span>
+              </li>
+            </ul>
           </div>
           <div class="tw:text-right tw:shrink-0">
             <prime-tag
@@ -802,11 +815,24 @@ const confirmSplit = async () => {
                   >
                 </div>
                 <prime-divider />
+                <div v-if="order.totalDiscount > 0" class="tw:flex tw:justify-between tw:text-xs tw:mb-1">
+                  <span class="tw:flex tw:items-center tw:gap-1 app-text-muted">
+                    <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
+                    Discount
+                  </span>
+                  <span class="tw:text-emerald-400">-{{ formatVnd(order.totalDiscount) }}</span>
+                </div>
                 <div class="tw:flex tw:justify-between tw:text-sm">
                   <span class="tw:font-medium">Total</span>
-                  <span class="tw:font-semibold tw:text-base">{{
-                    formatVnd(order.totalAmount)
-                  }}</span>
+                  <div class="tw:text-right">
+                    <span
+                      v-if="order.totalDiscount > 0"
+                      class="app-text-muted tw:line-through tw:text-xs tw:mr-1"
+                    >{{ formatVnd(order.totalAmount) }}</span>
+                    <span class="tw:font-semibold tw:text-base" :class="order.totalDiscount > 0 ? 'tw:text-emerald-400' : ''">
+                      {{ formatVnd(order.finalAmount) }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </template>
@@ -1042,14 +1068,32 @@ const confirmSplit = async () => {
                 />
               </div>
               <prime-divider />
-              <!-- Subtotal row -->
-              <div
-                class="tw:flex tw:justify-between tw:items-center tw:text-sm"
-              >
+              <!-- Promotions applied -->
+              <div v-if="order.totalDiscount > 0" class="tw:space-y-1.5 tw:mb-2">
+                <div
+                  v-for="promo in order.promotions"
+                  :key="promo.promotionId"
+                  class="tw:flex tw:justify-between tw:items-center tw:text-xs"
+                >
+                  <span class="tw:flex tw:items-center tw:gap-1 app-text-muted">
+                    <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
+                    {{ promo.promoCode }}
+                  </span>
+                  <span class="tw:text-emerald-400 tw:font-medium">-{{ formatVnd(promo.discountAmount) }}</span>
+                </div>
+              </div>
+              <!-- Total row -->
+              <div class="tw:flex tw:justify-between tw:items-center tw:text-sm">
                 <span class="tw:font-medium">Total</span>
-                <span class="tw:font-semibold tw:text-base">{{
-                  formatVnd(order.totalAmount)
-                }}</span>
+                <div class="tw:text-right">
+                  <span
+                    v-if="order.totalDiscount > 0"
+                    class="app-text-muted tw:line-through tw:text-xs tw:mr-1"
+                  >{{ formatVnd(order.totalAmount) }}</span>
+                  <span class="tw:font-semibold tw:text-base" :class="order.totalDiscount > 0 ? 'tw:text-emerald-400' : ''">
+                    {{ formatVnd(order.finalAmount) }}
+                  </span>
+                </div>
               </div>
             </template>
           </prime-card>
@@ -1098,10 +1142,17 @@ const confirmSplit = async () => {
                     }}</span>
                   </div>
                   <prime-divider />
+                  <div v-if="order.totalDiscount > 0" class="tw:flex tw:justify-between tw:text-xs tw:mb-1">
+                    <span class="tw:flex tw:items-center tw:gap-1 app-text-muted">
+                      <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
+                      Discount
+                    </span>
+                    <span class="tw:text-emerald-400">-{{ formatVnd(order.totalDiscount) }}</span>
+                  </div>
                   <div class="tw:flex tw:justify-between tw:text-sm">
                     <span class="tw:font-medium">Order total</span>
                     <span class="tw:font-semibold">{{
-                      formatVnd(order.totalAmount)
+                      formatVnd(order.finalAmount)
                     }}</span>
                   </div>
                 </div>
@@ -1127,7 +1178,7 @@ const confirmSplit = async () => {
                       v-model="payAmountReceived"
                       :min="0"
                       :use-grouping="true"
-                      :placeholder="String(order.totalAmount)"
+                      :placeholder="String(order.finalAmount)"
                       class="app-input tw:w-full"
                       suffix=" ₫"
                       @input="(e) => (payAmountReceived = e.value)"
