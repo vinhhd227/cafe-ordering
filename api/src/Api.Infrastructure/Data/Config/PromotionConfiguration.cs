@@ -16,7 +16,15 @@ public class PromotionConfiguration : IEntityTypeConfiguration<Promotion>
 
     builder.Property(p => p.Code)
       .HasMaxLength(50)
-      .IsRequired(false);
+      .IsRequired();
+
+    builder.Property(p => p.CodeVisibility)
+      .HasConversion(
+        v => v.Name.ToUpperInvariant(),
+        v => CodeVisibility.FromName(v, true))
+      .HasMaxLength(20)
+      .HasDefaultValueSql("'PUBLIC'")
+      .IsRequired();
 
     builder.Property(p => p.Description)
       .HasMaxLength(500)
@@ -33,19 +41,15 @@ public class PromotionConfiguration : IEntityTypeConfiguration<Promotion>
       .HasPrecision(18, 2)
       .IsRequired();
 
+    builder.Property(p => p.MaxDiscountAmount)
+      .HasPrecision(18, 2)
+      .IsRequired(false);
+
     builder.Property(p => p.Scope)
       .HasConversion(
         v => v.Name.ToUpperInvariant(),
         v => PromotionScope.FromName(v, true))
       .HasMaxLength(20)
-      .IsRequired();
-
-    builder.Property(p => p.StackPolicy)
-      .HasConversion(
-        v => v.Name.ToUpperInvariant(),
-        v => StackPolicy.FromName(v, true))
-      .HasMaxLength(20)
-      .HasDefaultValueSql("'EXCLUSIVE'")
       .IsRequired();
 
     // Store list<int> as jsonb in PostgreSQL
@@ -57,6 +61,14 @@ public class PromotionConfiguration : IEntityTypeConfiguration<Promotion>
       .HasColumnType("jsonb")
       .IsRequired();
 
+    builder.Property(p => p.GetFromProductIds)
+      .HasColumnType("jsonb")
+      .IsRequired(false);
+
+    builder.Property(p => p.GetFromCategoryIds)
+      .HasColumnType("jsonb")
+      .IsRequired(false);
+
     builder.Property(p => p.MinOrderAmount)
       .HasPrecision(18, 2)
       .IsRequired(false);
@@ -67,11 +79,13 @@ public class PromotionConfiguration : IEntityTypeConfiguration<Promotion>
     builder.Property(p => p.CurrentUsage).IsRequired().HasDefaultValue(0);
     builder.Property(p => p.IsActive).IsRequired().HasDefaultValue(true);
 
-    // Code is unique when not null (partial unique index)
+    // Code is always required and unique
     builder.HasIndex(p => p.Code)
       .IsUnique()
-      .HasFilter("\"Code\" IS NOT NULL")
       .HasDatabaseName("IX_Promotions_Code_Unique");
+
+    builder.HasIndex(p => p.CodeVisibility)
+      .HasDatabaseName("IX_Promotions_CodeVisibility");
 
     builder.HasIndex(p => p.IsActive)
       .HasDatabaseName("IX_Promotions_IsActive");

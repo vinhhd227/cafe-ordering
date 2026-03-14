@@ -1,5 +1,3 @@
-using Api.Core.Aggregates.PromotionAggregate;
-
 namespace Api.Core.Aggregates.OrderAggregate;
 
 /// <summary>
@@ -19,15 +17,11 @@ public class OrderPromotion : BaseEntity<int>
   /// <summary>Số tiền đã giảm thực tế.</summary>
   public decimal DiscountAmount { get; private set; }
 
-  /// <summary>Snapshot StackPolicy tại thời điểm áp dụng — dùng để enforce rule khi apply promo khác.</summary>
-  public StackPolicy StackPolicy { get; private set; } = StackPolicy.Exclusive;
-
   internal static OrderPromotion Create(
     int orderId,
     int promotionId,
     string promoCode,
-    decimal discountAmount,
-    StackPolicy stackPolicy)
+    decimal discountAmount)
   {
     return new OrderPromotion
     {
@@ -35,7 +29,6 @@ public class OrderPromotion : BaseEntity<int>
       PromotionId    = Guard.Against.NegativeOrZero(promotionId),
       PromoCode      = promoCode ?? string.Empty,
       DiscountAmount = Guard.Against.Negative(discountAmount),
-      StackPolicy    = stackPolicy,
     };
   }
 }

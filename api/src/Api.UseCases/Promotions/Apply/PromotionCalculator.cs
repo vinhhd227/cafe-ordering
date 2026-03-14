@@ -17,7 +17,7 @@ public static class PromotionCalculator
 {
   /// <param name="promo">Promotion đã được validate (active, valid, applicable).</param>
   /// <param name="items">Các OrderItem của order.</param>
-  /// <param name="productCategoryMap">productId → categoryId, cần thiết khi Scope = CATEGORY.</param>
+  /// <param name="productCategoryMap">productId → categoryId, cần thiết khi Scope = CATEGORY hoặc GetFromCategoryIds set.</param>
   public static DiscountResult Calculate(
     Promotion promo,
     IReadOnlyCollection<OrderItem> items,
@@ -25,7 +25,7 @@ public static class PromotionCalculator
   {
     var scopedItems = GetScopedItems(promo, items, productCategoryMap);
 
-    if (scopedItems.Count == 0)
+    if (promo.DiscountType != DiscountType.BuyXGetY && scopedItems.Count == 0)
       return new DiscountResult(0, new());
 
     if (promo.DiscountType == DiscountType.Percentage)
@@ -35,7 +35,7 @@ public static class PromotionCalculator
       return CalculateFixed(promo, items, scopedItems);
 
     if (promo.DiscountType == DiscountType.BuyXGetY)
-      return CalculateBuyXGetY(promo, scopedItems);
+      return CalculateBuyXGetY(promo, scopedItems, items, productCategoryMap);
 
     return new DiscountResult(0, new());
   }
@@ -75,6 +75,10 @@ public static class PromotionCalculator
       totalDiscount += discountPerUnit * item.Quantity;
     }
 
+    // Apply MaxDiscountAmount cap if set
+    if (promo.MaxDiscountAmount.HasValue && totalDiscount > promo.MaxDiscountAmount.Value)
+      totalDiscount = promo.MaxDiscountAmount.Value;
+
     return new DiscountResult(totalDiscount, itemDiscounts);
   }
 
@@ -85,54 +89,71 @@ public static class PromotionCalculator
     IReadOnlyCollection<OrderItem> allItems,
     List<OrderItem> scopedItems)
   {
-    if (promo.Scope == PromotionScope.Order)
-    {
-      var orderTotal = allItems.Sum(i => i.TotalPrice);
-      var discount = Math.Min(promo.DiscountValue, orderTotal);
-      return new DiscountResult(discount, new());
-    }
+    // Discount = min(discountValue, eligibleSubtotal) for all scopes
+    var eligibleSubtotal = promo.Scope == PromotionScope.Order
+      ? allItems.Sum(i => i.TotalPrice)
+      : scopedItems.Sum(i => i.TotalPrice);
 
-    // Item-level fixed discount (per unit, capped at unit price)
-    var itemDiscounts = new Dictionary<int, decimal>();
-    decimal totalDiscount = 0;
-
-    foreach (var item in scopedItems)
-    {
-      var discountPerUnit = Math.Min(promo.DiscountValue, item.UnitPrice);
-      itemDiscounts[item.ProductId] = discountPerUnit;
-      totalDiscount += discountPerUnit * item.Quantity;
-    }
-
-    return new DiscountResult(totalDiscount, itemDiscounts);
+    var discount = Math.Min(promo.DiscountValue, eligibleSubtotal);
+    return new DiscountResult(discount, new());
   }
 
   // ── Buy X Get Y ──────────────────────────────────────────────────
 
-  private static DiscountResult CalculateBuyXGetY(Promotion promo, List<OrderItem> scopedItems)
+  private static DiscountResult CalculateBuyXGetY(
+    Promotion promo,
+    List<OrderItem> scopedItems,
+    IReadOnlyCollection<OrderItem> allItems,
+    Dictionary<int, int>? productCategoryMap)
   {
     if (promo.BuyQuantity == null || promo.GetQuantity == null)
       return new DiscountResult(0, new());
 
-    var buyQty   = promo.BuyQuantity.Value;
-    var getQty   = promo.GetQuantity.Value;
+    var buyQty    = promo.BuyQuantity.Value;
+    var getQty    = promo.GetQuantity.Value;
     var groupSize = buyQty + getQty;
 
+    // Trigger: count qty of scoped items (buy side)
     var totalScopedQty = scopedItems.Sum(i => i.Quantity);
-    if (totalScopedQty < groupSize)
+    if (totalScopedQty < buyQty)
       return new DiscountResult(0, new());
 
-    var groups            = totalScopedQty / groupSize;
-    var freeUnitsRemaining = groups * getQty;
+    var groups             = totalScopedQty / groupSize;
+    var freeUnitsRemaining = groups > 0 ? groups * getQty : getQty;
+
+    // Determine which pool of items can be given for free
+    List<OrderItem> freePool;
+
+    if (promo.GetFromProductIds is { Count: > 0 })
+    {
+      freePool = allItems
+        .Where(i => promo.GetFromProductIds.Contains(i.ProductId))
+        .ToList();
+    }
+    else if (promo.GetFromCategoryIds is { Count: > 0 } && productCategoryMap != null)
+    {
+      freePool = allItems
+        .Where(i => productCategoryMap.TryGetValue(i.ProductId, out var catId)
+                 && promo.GetFromCategoryIds.Contains(catId))
+        .ToList();
+    }
+    else
+    {
+      // Default: free items come from scoped items themselves (cheapest)
+      freePool = scopedItems;
+    }
+
+    if (freePool.Count == 0)
+      return new DiscountResult(0, new());
 
     // Cheapest items free — sort by UnitPrice ASC
-    var sortedItems = scopedItems.OrderBy(i => i.UnitPrice).ToList();
-
+    var sortedPool    = freePool.OrderBy(i => i.UnitPrice).ToList();
     decimal totalDiscount = 0;
 
-    foreach (var item in sortedItems)
+    foreach (var item in sortedPool)
     {
       if (freeUnitsRemaining <= 0) break;
-      var freeFromItem = Math.Min(item.Quantity, freeUnitsRemaining);
+      var freeFromItem    = Math.Min(item.Quantity, freeUnitsRemaining);
       totalDiscount      += freeFromItem * item.UnitPrice;
       freeUnitsRemaining -= freeFromItem;
     }

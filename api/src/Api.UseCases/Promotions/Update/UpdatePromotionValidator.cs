@@ -4,9 +4,9 @@ namespace Api.UseCases.Promotions.Update;
 
 public class UpdatePromotionValidator : AbstractValidator<UpdatePromotionCommand>
 {
-  private static readonly string[] ValidDiscountTypes = ["PERCENTAGE", "FIXED", "BUY_X_GET_Y"];
-  private static readonly string[] ValidScopes        = ["ORDER", "PRODUCT", "CATEGORY"];
-  private static readonly string[] ValidStackPolicies = ["EXCLUSIVE", "STACKABLE"];
+  private static readonly string[] ValidDiscountTypes   = ["PERCENTAGE", "FIXED", "BUY_X_GET_Y"];
+  private static readonly string[] ValidScopes          = ["ORDER", "PRODUCT", "CATEGORY"];
+  private static readonly string[] ValidCodeVisibilities = ["PUBLIC", "PRIVATE"];
 
   public UpdatePromotionValidator()
   {
@@ -29,10 +29,15 @@ public class UpdatePromotionValidator : AbstractValidator<UpdatePromotionCommand
       .Must(v => ValidScopes.Contains(v?.ToUpperInvariant()))
       .WithMessage($"Scope must be one of: {string.Join(", ", ValidScopes)}");
 
-    RuleFor(x => x.StackPolicy)
+    RuleFor(x => x.CodeVisibility)
       .NotEmpty()
-      .Must(v => ValidStackPolicies.Contains(v?.ToUpperInvariant()))
-      .WithMessage($"StackPolicy must be one of: {string.Join(", ", ValidStackPolicies)}");
+      .Must(v => ValidCodeVisibilities.Contains(v?.ToUpperInvariant()))
+      .WithMessage($"CodeVisibility must be one of: {string.Join(", ", ValidCodeVisibilities)}");
+
+    RuleFor(x => x.MaxDiscountAmount)
+      .GreaterThan(0)
+      .When(x => x.MaxDiscountAmount.HasValue)
+      .WithMessage("MaxDiscountAmount must be greater than 0.");
 
     RuleFor(x => x.StartDate).NotEmpty();
 

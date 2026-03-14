@@ -13,8 +13,11 @@ public class Promotion : SoftDeletableEntity<int>, IAggregateRoot
 
   public string Name { get; private set; } = string.Empty;
 
-  /// <summary>Mã khuyến mãi. Null = không cần nhập code, tự động áp dụng.</summary>
-  public string? Code { get; private set; }
+  /// <summary>Mã khuyến mãi. Bắt buộc — tự động sinh nếu không nhập.</summary>
+  public string Code { get; private set; } = string.Empty;
+
+  /// <summary>Phân loại hiển thị mã: PUBLIC (duyệt danh sách) / PRIVATE (nhập thủ công).</summary>
+  public CodeVisibility CodeVisibility { get; private set; } = CodeVisibility.Public;
 
   public string? Description { get; private set; }
 
@@ -27,6 +30,9 @@ public class Promotion : SoftDeletableEntity<int>, IAggregateRoot
   ///   - BUY_X_GET_Y: không dùng (= 0)
   /// </summary>
   public decimal DiscountValue { get; private set; }
+
+  /// <summary>Giới hạn số tiền giảm tối đa. Chỉ áp dụng với PERCENTAGE. Null = không giới hạn.</summary>
+  public decimal? MaxDiscountAmount { get; private set; }
 
   /// <summary>Số lượng cần mua. Chỉ dùng khi DiscountType = BUY_X_GET_Y.</summary>
   public int? BuyQuantity { get; private set; }
@@ -42,7 +48,17 @@ public class Promotion : SoftDeletableEntity<int>, IAggregateRoot
   /// <summary>Danh sách CategoryId áp dụng. Chỉ dùng khi Scope = CATEGORY. Lưu dạng JSON.</summary>
   public List<int> ApplicableCategoryIds { get; private set; } = new();
 
-  public StackPolicy StackPolicy { get; private set; } = StackPolicy.Exclusive;
+  /// <summary>
+  ///   Danh sách ProductId của item được tặng miễn phí (BUY_X_GET_Y cross-product).
+  ///   Null = item tặng lấy từ chính scope.
+  /// </summary>
+  public List<int>? GetFromProductIds { get; private set; }
+
+  /// <summary>
+  ///   Danh sách CategoryId của item được tặng miễn phí (BUY_X_GET_Y cross-category).
+  ///   Null = item tặng lấy từ chính scope.
+  /// </summary>
+  public List<int>? GetFromCategoryIds { get; private set; }
 
   /// <summary>Tổng tiền tối thiểu của order để áp dụng. Null = không yêu cầu.</summary>
   public decimal? MinOrderAmount { get; private set; }
@@ -63,22 +79,26 @@ public class Promotion : SoftDeletableEntity<int>, IAggregateRoot
 
   public static Promotion Create(
     string name,
-    string? code,
+    string code,
+    CodeVisibility codeVisibility,
     string? description,
     DiscountType discountType,
     decimal discountValue,
+    decimal? maxDiscountAmount,
     int? buyQuantity,
     int? getQuantity,
     PromotionScope scope,
     List<int>? applicableProductIds,
     List<int>? applicableCategoryIds,
-    StackPolicy stackPolicy,
+    List<int>? getFromProductIds,
+    List<int>? getFromCategoryIds,
     decimal? minOrderAmount,
     DateTime startDate,
     DateTime? endDate,
     int? maxUsage)
   {
     Guard.Against.NullOrWhiteSpace(name);
+    Guard.Against.NullOrWhiteSpace(code);
 
     if (discountType == DiscountType.Percentage)
       Guard.Against.OutOfRange(discountValue, nameof(discountValue), 0, 100);
@@ -92,28 +112,29 @@ public class Promotion : SoftDeletableEntity<int>, IAggregateRoot
       Guard.Against.NegativeOrZero(getQuantity!.Value, nameof(getQuantity));
     }
 
-    var promo = new Promotion
+    return new Promotion
     {
-      Name                   = name.Trim(),
-      Code                   = code?.Trim().ToUpperInvariant() is { Length: > 0 } c ? c : null,
-      Description            = description?.Trim() is { Length: > 0 } d ? d : null,
-      DiscountType           = discountType,
-      DiscountValue          = discountValue,
-      BuyQuantity            = buyQuantity,
-      GetQuantity            = getQuantity,
-      Scope                  = scope,
-      ApplicableProductIds   = applicableProductIds  ?? new(),
-      ApplicableCategoryIds  = applicableCategoryIds ?? new(),
-      StackPolicy            = stackPolicy,
-      MinOrderAmount         = minOrderAmount,
-      StartDate              = startDate,
-      EndDate                = endDate,
-      MaxUsage               = maxUsage,
-      CurrentUsage           = 0,
-      IsActive               = true,
+      Name                  = name.Trim(),
+      Code                  = code.Trim().ToUpperInvariant(),
+      CodeVisibility        = codeVisibility,
+      Description           = description?.Trim() is { Length: > 0 } d ? d : null,
+      DiscountType          = discountType,
+      DiscountValue         = discountValue,
+      MaxDiscountAmount     = maxDiscountAmount > 0 ? maxDiscountAmount : null,
+      BuyQuantity           = buyQuantity,
+      GetQuantity           = getQuantity,
+      Scope                 = scope,
+      ApplicableProductIds  = applicableProductIds  ?? new(),
+      ApplicableCategoryIds = applicableCategoryIds ?? new(),
+      GetFromProductIds     = getFromProductIds  is { Count: > 0 } gp ? gp : null,
+      GetFromCategoryIds    = getFromCategoryIds is { Count: > 0 } gc ? gc : null,
+      MinOrderAmount        = minOrderAmount,
+      StartDate             = startDate,
+      EndDate               = endDate,
+      MaxUsage              = maxUsage,
+      CurrentUsage          = 0,
+      IsActive              = true,
     };
-
-    return promo;
   }
 
   // ── Behaviors ───────────────────────────────────────────────────
@@ -129,33 +150,40 @@ public class Promotion : SoftDeletableEntity<int>, IAggregateRoot
 
   public void Update(
     string name,
-    string? code,
+    string code,
+    CodeVisibility codeVisibility,
     string? description,
     DiscountType discountType,
     decimal discountValue,
+    decimal? maxDiscountAmount,
     int? buyQuantity,
     int? getQuantity,
     PromotionScope scope,
     List<int>? applicableProductIds,
     List<int>? applicableCategoryIds,
-    StackPolicy stackPolicy,
+    List<int>? getFromProductIds,
+    List<int>? getFromCategoryIds,
     decimal? minOrderAmount,
     DateTime startDate,
     DateTime? endDate,
     int? maxUsage)
   {
     Guard.Against.NullOrWhiteSpace(name);
+    Guard.Against.NullOrWhiteSpace(code);
     Name                  = name.Trim();
-    Code                  = code?.Trim().ToUpperInvariant() is { Length: > 0 } c ? c : null;
+    Code                  = code.Trim().ToUpperInvariant();
+    CodeVisibility        = codeVisibility;
     Description           = description?.Trim() is { Length: > 0 } d ? d : null;
     DiscountType          = discountType;
     DiscountValue         = discountValue;
+    MaxDiscountAmount     = maxDiscountAmount > 0 ? maxDiscountAmount : null;
     BuyQuantity           = buyQuantity;
     GetQuantity           = getQuantity;
     Scope                 = scope;
     ApplicableProductIds  = applicableProductIds  ?? new();
     ApplicableCategoryIds = applicableCategoryIds ?? new();
-    StackPolicy           = stackPolicy;
+    GetFromProductIds     = getFromProductIds  is { Count: > 0 } gp ? gp : null;
+    GetFromCategoryIds    = getFromCategoryIds is { Count: > 0 } gc ? gc : null;
     MinOrderAmount        = minOrderAmount;
     StartDate             = startDate;
     EndDate               = endDate;

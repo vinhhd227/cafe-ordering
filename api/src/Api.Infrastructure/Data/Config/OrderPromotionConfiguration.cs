@@ -1,5 +1,4 @@
 using Api.Core.Aggregates.OrderAggregate;
-using Api.Core.Aggregates.PromotionAggregate;
 
 namespace Api.Infrastructure.Data.Config;
 
@@ -20,13 +19,6 @@ public class OrderPromotionConfiguration : IEntityTypeConfiguration<OrderPromoti
 
     builder.Property(op => op.DiscountAmount)
       .HasPrecision(18, 2)
-      .IsRequired();
-
-    builder.Property(op => op.StackPolicy)
-      .HasConversion(
-        v => v.Name.ToUpperInvariant(),
-        v => StackPolicy.FromName(v, true))
-      .HasMaxLength(20)
       .IsRequired();
 
     builder.HasIndex(op => op.OrderId)

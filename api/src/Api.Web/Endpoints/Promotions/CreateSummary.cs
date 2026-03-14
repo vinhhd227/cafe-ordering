@@ -9,7 +9,8 @@ public class CreatePromotionSummary : Summary<CreatePromotion>
     Summary = "Create a new promotion";
     Description =
       "Creates a promotion with a specified discount type (PERCENTAGE, FIXED, BUY_X_GET_Y), " +
-      "scope (ORDER, PRODUCT, CATEGORY), and stack policy. Requires Admin role.";
+      "scope (ORDER, PRODUCT, CATEGORY), and visibility (PUBLIC/PRIVATE). " +
+      "Code is auto-generated (CAFE-XXXXXX) if not provided. Requires Admin role.";
 
     Response<PromotionDto>(200, "Promotion created successfully.");
     Response(400, "Validation failed (invalid discount type, scope, missing required fields, etc.).");

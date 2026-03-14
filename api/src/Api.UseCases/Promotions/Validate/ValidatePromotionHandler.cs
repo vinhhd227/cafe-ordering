@@ -18,17 +18,17 @@ public class ValidatePromotionHandler(IReadRepositoryBase<Promotion> repo)
     if (!promo.IsValidAt(now))
       return Result.Success(new ValidatePromotionResult(
         promo.Id, promo.Name, promo.Code,
-        promo.DiscountType.Name, promo.DiscountValue,
-        promo.Scope.Name, promo.StackPolicy.Name,
-        promo.MinOrderAmount, promo.StartDate, promo.EndDate,
+        promo.CodeVisibility.Name.ToUpperInvariant(),
+        promo.DiscountType.Name, promo.DiscountValue, promo.MaxDiscountAmount,
+        promo.Scope.Name, promo.MinOrderAmount, promo.StartDate, promo.EndDate,
         null, false, "Promotion is not active or has expired."));
 
     if (!promo.HasUsageLeft())
       return Result.Success(new ValidatePromotionResult(
         promo.Id, promo.Name, promo.Code,
-        promo.DiscountType.Name, promo.DiscountValue,
-        promo.Scope.Name, promo.StackPolicy.Name,
-        promo.MinOrderAmount, promo.StartDate, promo.EndDate,
+        promo.CodeVisibility.Name.ToUpperInvariant(),
+        promo.DiscountType.Name, promo.DiscountValue, promo.MaxDiscountAmount,
+        promo.Scope.Name, promo.MinOrderAmount, promo.StartDate, promo.EndDate,
         null, false, "Promotion has reached its usage limit."));
 
     // Check MinOrderAmount if orderAmount provided
@@ -47,16 +47,17 @@ public class ValidatePromotionHandler(IReadRepositoryBase<Promotion> repo)
       {
         // Estimate ORDER scope discount (PRODUCT/CATEGORY requires item info)
         estimatedDiscount = promo.DiscountType == DiscountType.Percentage
-          ? Math.Round(request.OrderAmount.Value * promo.DiscountValue / 100, 0)
+          ? Math.Min(Math.Round(request.OrderAmount.Value * promo.DiscountValue / 100, 0),
+                     promo.MaxDiscountAmount ?? decimal.MaxValue)
           : Math.Min(promo.DiscountValue, request.OrderAmount.Value);
       }
     }
 
     return Result.Success(new ValidatePromotionResult(
       promo.Id, promo.Name, promo.Code,
-      promo.DiscountType.Name, promo.DiscountValue,
-      promo.Scope.Name, promo.StackPolicy.Name,
-      promo.MinOrderAmount, promo.StartDate, promo.EndDate,
+      promo.CodeVisibility.Name.ToUpperInvariant(),
+      promo.DiscountType.Name, promo.DiscountValue, promo.MaxDiscountAmount,
+      promo.Scope.Name, promo.MinOrderAmount, promo.StartDate, promo.EndDate,
       estimatedDiscount, isApplicable, message));
   }
 }

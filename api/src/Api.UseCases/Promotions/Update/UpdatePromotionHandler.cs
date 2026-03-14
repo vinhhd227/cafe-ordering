@@ -22,15 +22,22 @@ public class UpdatePromotionHandler(IRepositoryBase<Promotion> repo)
         return Result.Invalid(new ValidationError("Code", "A promotion with this code already exists."));
     }
 
-    DiscountType  discountType = DiscountType.FromName(cmd.DiscountType, true);
-    PromotionScope scope       = PromotionScope.FromName(cmd.Scope, true);
-    StackPolicy   stackPolicy  = StackPolicy.FromName(cmd.StackPolicy, true);
+    DiscountType   discountType   = DiscountType.FromName(cmd.DiscountType, true);
+    PromotionScope scope          = PromotionScope.FromName(cmd.Scope, true);
+    CodeVisibility codeVisibility = CodeVisibility.FromName(cmd.CodeVisibility, true);
+
+    // Keep current code if not provided; otherwise use new code
+    var code = !string.IsNullOrWhiteSpace(cmd.Code)
+      ? cmd.Code.Trim().ToUpperInvariant()
+      : promo.Code;
 
     promo.Update(
-      cmd.Name, cmd.Code, cmd.Description,
-      discountType, cmd.DiscountValue, cmd.BuyQuantity, cmd.GetQuantity,
+      cmd.Name, code, codeVisibility, cmd.Description,
+      discountType, cmd.DiscountValue, cmd.MaxDiscountAmount,
+      cmd.BuyQuantity, cmd.GetQuantity,
       scope, cmd.ApplicableProductIds, cmd.ApplicableCategoryIds,
-      stackPolicy, cmd.MinOrderAmount,
+      cmd.GetFromProductIds, cmd.GetFromCategoryIds,
+      cmd.MinOrderAmount,
       DateTime.SpecifyKind(cmd.StartDate, DateTimeKind.Utc),
       cmd.EndDate.HasValue ? DateTime.SpecifyKind(cmd.EndDate.Value, DateTimeKind.Utc) : null,
       cmd.MaxUsage);

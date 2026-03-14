@@ -2,7 +2,6 @@
 
 using Api.Core.Aggregates.OrderAggregate.Events;
 using Api.Core.Aggregates.OrderAggregate;
-using Api.Core.Aggregates.PromotionAggregate;
 using Api.Core.Exceptions;
 
 namespace Api.Core.Aggregates.OrderAggregate;
@@ -124,24 +123,17 @@ public class Order : AuditableEntity<int>, IAggregateRoot
 
   /// <summary>
   ///   Áp dụng một chương trình khuyến mãi vào order.
-  ///   Enforce StackPolicy: EXCLUSIVE không thể kết hợp với bất kỳ promo nào khác.
-  ///   Chỉ áp dụng được khi order đang PENDING.
+  ///   Mỗi order chỉ được dùng 1 voucher. Chỉ áp dụng được khi order đang PENDING.
   /// </summary>
-  public void ApplyPromotion(int promotionId, string promoCode, decimal discountAmount, StackPolicy stackPolicy)
+  public void ApplyPromotion(int promotionId, string promoCode, decimal discountAmount)
   {
     if (Status != OrderStatus.Pending)
       throw new DomainException("Promotions can only be applied to Pending orders.");
 
-    if (_promotions.Any(p => p.PromotionId == promotionId))
-      throw new DomainException("This promotion has already been applied to the order.");
+    if (_promotions.Any())
+      throw new DomainException("Order already has a promotion applied. Remove it before applying another.");
 
-    if (_promotions.Any(p => p.StackPolicy == StackPolicy.Exclusive))
-      throw new DomainException("Cannot combine with an existing exclusive promotion.");
-
-    if (stackPolicy == StackPolicy.Exclusive && _promotions.Any())
-      throw new DomainException("An exclusive promotion cannot be combined with existing promotions.");
-
-    _promotions.Add(OrderPromotion.Create(Id, promotionId, promoCode, discountAmount, stackPolicy));
+    _promotions.Add(OrderPromotion.Create(Id, promotionId, promoCode, discountAmount));
     RegisterDomainEvent(new OrderPromotionAppliedEvent(this, promotionId));
   }
 

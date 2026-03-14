@@ -62,7 +62,10 @@ public class ApplyPromotionHandler(
     // 5. Calculate discount
     Dictionary<int, int>? productCategoryMap = null;
 
-    if (promo.Scope == PromotionScope.Category && promo.ApplicableCategoryIds.Any())
+    var needsCategoryMap = (promo.Scope == PromotionScope.Category && promo.ApplicableCategoryIds.Any())
+                        || (promo.GetFromCategoryIds is { Count: > 0 });
+
+    if (needsCategoryMap)
     {
       var productIds = order.Items.Select(i => i.ProductId).ToList();
       var products   = await productRepo.ListAsync(new ProductsByIdsSpec(productIds), ct);
@@ -78,7 +81,7 @@ public class ApplyPromotionHandler(
     // 6. Apply to domain
     try
     {
-      order.ApplyPromotion(promo.Id, promo.Code ?? promo.Name, discountResult.TotalDiscount, promo.StackPolicy);
+      order.ApplyPromotion(promo.Id, promo.Code, discountResult.TotalDiscount);
     }
     catch (Exception ex)
     {
