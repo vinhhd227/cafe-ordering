@@ -81,7 +81,8 @@
     "revenue": {
       "label": "Tổng doanh thu",
       "cash": "Tiền mặt",
-      "bank": "Chuyển khoản"
+      "bank": "Chuyển khoản",
+      "tip": "Tiền tip"
     },
     "orders": {
       "label": "Tổng đơn hàng",

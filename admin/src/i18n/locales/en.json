@@ -81,7 +81,8 @@
     "revenue": {
       "label": "Total revenue",
       "cash": "Cash",
-      "bank": "Bank transfer"
+      "bank": "Bank transfer",
+      "tip": "Tips"
     },
     "orders": {
       "label": "Total orders",

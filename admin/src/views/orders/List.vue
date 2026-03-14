@@ -21,6 +21,7 @@ const orders = ref([]);             // current page only
 const totalRecords = ref(0);        // from server
 const cashTotal = ref(0);           // tổng tiền mặt đã thu (PAID + CASH)
 const bankTransferTotal = ref(0);   // tổng chuyển khoản đã thu (PAID + BANK_TRANSFER)
+const tipTotal = ref(0);            // tổng tiền tip đã nhận (PAID)
 const pendingCount = ref(0);
 const processingCount = ref(0);
 const completedCount = ref(0);
@@ -86,7 +87,7 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
       label: 'Total revenue',
       description: 'Tổng doanh thu đã thu, gồm tiền mặt và chuyển khoản.',
       previewComponent: WidgetOrdersRevenue,
-      previewProps: { total: 4250000, cash: 2400000, bank: 1850000 },
+      previewProps: { total: 4250000, cash: 2400000, bank: 1650000, tip: 200000 },
     },
     {
       id: 'cash',
@@ -154,6 +155,7 @@ const summary = computed(() => ({
   total: totalRecords.value,
   cash: cashTotal.value,
   bank: bankTransferTotal.value,
+  tip: tipTotal.value,
   revenue: cashTotal.value + bankTransferTotal.value,
   pending: pendingCount.value,
   processing: processingCount.value,
@@ -234,6 +236,7 @@ const loadOrders = async () => {
     totalRecords.value = data?.totalCount ?? 0;
     cashTotal.value = data?.cashTotal ?? 0;
     bankTransferTotal.value = data?.bankTransferTotal ?? 0;
+    tipTotal.value = data?.tipTotal ?? 0;
     pendingCount.value = data?.pendingCount ?? 0;
     processingCount.value = data?.processingCount ?? 0;
     completedCount.value = data?.completedCount ?? 0;
@@ -266,13 +269,14 @@ const onPage = (e) => {
 };
 
 const columns = [
-  { field: 'orderNumber',   header: 'Order #',  width: '9rem' },
-  { field: 'orderDate',     header: 'Date',     width: '10rem' },
-  { field: 'status',        header: 'Status',   width: '8rem' },
-  { field: 'paymentStatus', header: 'Payment',  width: '10rem' },
-  { key: 'items',           header: 'Items',    width: '5rem' },
-  { field: 'totalAmount',   header: 'Total',    width: '9rem' },
-  { key: 'actions',         header: 'Actions',  width: '12rem', toggleable: false },
+  { field: 'orderNumber',   header: 'Order #',   width: '9rem' },
+  { field: 'orderDate',     header: 'Date',      width: '10rem' },
+  { field: 'status',        header: 'Status',    width: '8rem' },
+  { field: 'paymentStatus', header: 'Payment',   width: '10rem' },
+  { key: 'items',           header: 'Items',     width: '14rem' },
+  { key: 'promos',          header: 'Discount',  width: '11rem' },
+  { field: 'totalAmount',   header: 'Total',     width: '9rem' },
+  { key: 'actions',         header: 'Actions',   width: '12rem', toggleable: false },
 ]
 
 // ── Payment dialog ────────────────────────────────────────────────
@@ -534,6 +538,7 @@ const confirmPayment = async () => {
         :total="summary.revenue"
         :cash="summary.cash"
         :bank="summary.bank"
+        :tip="summary.tip"
       />
       <widget-stat
         v-if="wVisible('cash')"
@@ -767,26 +772,65 @@ const confirmPayment = async () => {
       </template>
 
       <template #col-items="{ data }">
-        <span class="tw:text-sm app-text-muted">{{ data.items?.length ?? 0 }} item(s)</span>
+        <div class="tw:space-y-0.5">
+          <div
+            v-for="(item, idx) in (data.items ?? []).slice(0, 3)"
+            :key="idx"
+            class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs"
+          >
+            <span class="tw:shrink-0 tw:font-semibold tw:text-emerald-400 tw:w-4 tw:text-right">
+              {{ item.quantity }}×
+            </span>
+            <span class="tw:truncate app-text-muted" style="max-width: 9rem">
+              {{ item.productName }}
+            </span>
+          </div>
+          <span
+            v-if="(data.items?.length ?? 0) > 3"
+            class="tw:text-[10px] app-text-subtle tw:italic"
+          >
+            +{{ data.items.length - 3 }} more
+          </span>
+        </div>
+      </template>
+
+      <template #col-promos="{ data }">
+        <div v-if="data.promotions?.length" class="tw:space-y-0.5">
+          <div
+            v-for="p in data.promotions"
+            :key="p.promotionId"
+            class="tw:flex tw:items-center tw:gap-1.5"
+          >
+            <prime-tag
+              :value="p.promoCode"
+              severity="success"
+              class="tw:text-[10px]! tw:shrink-0"
+            />
+            <span class="tw:text-xs tw:text-emerald-400 tw:font-medium tw:shrink-0">
+              –{{ formatVnd(p.discountAmount) }}
+            </span>
+          </div>
+        </div>
+        <span v-else class="tw:text-xs app-text-subtle">—</span>
       </template>
 
       <template #col-totalAmount="{ data }">
-        <div>
-          <span
-            v-if="data.totalDiscount > 0"
-            class="tw:text-xs app-text-muted tw:line-through tw:block"
-          >{{ formatVnd(data.totalAmount) }}</span>
-          <span class="tw:font-semibold tw:text-sm">{{
-            formatVnd(data.totalDiscount > 0 ? data.finalAmount : data.totalAmount)
-          }}</span>
-          <div v-if="data.promotions?.length" class="tw:flex tw:flex-wrap tw:gap-1 tw:mt-1">
-            <prime-tag
-              v-for="p in data.promotions"
-              :key="p.promotionId"
-              :value="p.promoCode"
-              severity="success"
-              class="tw:text-[10px]!"
-            />
+        <div class="tw:space-y-0.5">
+          <div class="tw:flex tw:items-baseline tw:gap-1.5 tw:flex-wrap">
+            <span
+              v-if="data.totalDiscount > 0"
+              class="tw:text-xs app-text-muted tw:line-through"
+            >{{ formatVnd(data.totalAmount) }}</span>
+            <span class="tw:font-semibold tw:text-sm">{{
+              formatVnd(data.totalDiscount > 0 ? data.finalAmount : data.totalAmount)
+            }}</span>
+          </div>
+          <div
+            v-if="data.tipAmount > 0"
+            class="tw:flex tw:items-center tw:gap-1 tw:text-xs tw:text-amber-400"
+          >
+            <iconify icon="ph:heart-fill" class="tw:text-[10px]" />
+            <span>{{ formatVnd(data.tipAmount) }}</span>
           </div>
         </div>
       </template>
