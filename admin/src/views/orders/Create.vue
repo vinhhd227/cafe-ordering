@@ -1,6 +1,6 @@
 <script setup>
 import { getAdminMenu } from "@/services/menu.service";
-import { createOrder, applyPromotionAdmin, autoApplyPromotions } from "@/services/order.service";
+import { createOrder, applyPromotionAdmin } from "@/services/order.service";
 import { listTables, getOrCreateSession } from "@/services/table.service";
 import { validatePromotion, getPromotions } from "@/services/promotion.service";
 
@@ -51,30 +51,11 @@ const promoInfo = ref(null);
 const promoLoading = ref(false);
 const promoError = ref("");
 
-// ── Auto-apply promotions preview ────────────────────────────────
-const autoPromosPanel = ref();
-const autoPromos = ref([]);
-const autoPromosLoading = ref(false);
-const autoPromosLoaded = ref(false);
-
-const loadAutoPromos = async () => {
-  if (autoPromosLoaded.value) return;
-  autoPromosLoading.value = true;
-  try {
-    const res = await getPromotions({ isActive: true, pageSize: 100 });
-    autoPromos.value = (res.data?.items ?? []).filter((p) => !p.code);
-    autoPromosLoaded.value = true;
-  } catch {
-    autoPromos.value = [];
-  } finally {
-    autoPromosLoading.value = false;
-  }
-};
-
-const toggleAutoPromos = async (event) => {
-  await loadAutoPromos();
-  autoPromosPanel.value.toggle(event);
-};
+// ── Find promotions dialog ────────────────────────────────────────
+const findPromosVisible = ref(false);
+const publicPromos = ref([]);
+const publicPromosLoading = ref(false);
+const lastAppliedPromo = ref(null); // stores full promo object for client-side discount estimate
 
 const formatPromotionValue = (promo) => {
   if (promo.discountType === "PERCENTAGE") return `${promo.discountValue}% off`;
@@ -82,6 +63,125 @@ const formatPromotionValue = (promo) => {
     return `-${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(promo.discountValue)}`;
   if (promo.discountType === "BUY_X_GET_Y") return `Buy ${promo.buyQuantity} get ${promo.getQuantity}`;
   return "";
+};
+
+// Build productId → categoryId lookup from loaded menu
+const productCategoryMap = computed(() => {
+  const map = {};
+  for (const cat of menuCategories.value) {
+    for (const p of (cat.products ?? [])) {
+      map[p.id] = cat.id;
+    }
+  }
+  return map;
+});
+
+const promoDisableReason = (promo) => {
+  const now = new Date();
+  if (!promo.isActive) return "Inactive";
+  if (new Date(promo.startDate) > now) return "Not started yet";
+  if (promo.endDate && new Date(promo.endDate) < now) return "Expired";
+  if (promo.maxUsage && promo.currentUsage >= promo.maxUsage) return "No uses left";
+  if (promo.minOrderAmount && cartTotal.value < promo.minOrderAmount) return "Order total too low";
+
+  const cartProductIds = new Set(cart.value.map((i) => i.productId));
+
+  if (promo.scope === "PRODUCT") {
+    const applicable = promo.applicableProductIds ?? [];
+    if (applicable.length > 0 && !applicable.some((id) => cartProductIds.has(id)))
+      return "No matching products in cart";
+  } else if (promo.scope === "CATEGORY") {
+    const applicable = promo.applicableCategoryIds ?? [];
+    if (applicable.length > 0) {
+      const cartCatIds = new Set(
+        cart.value.map((i) => productCategoryMap.value[i.productId]).filter(Boolean)
+      );
+      if (!applicable.some((id) => cartCatIds.has(id)))
+        return "No matching category in cart";
+    }
+  }
+  return null;
+};
+
+const isPromoAvailable = (promo) => promoDisableReason(promo) === null;
+
+const openFindPromosDialog = async () => {
+  findPromosVisible.value = true;
+  if (publicPromos.value.length > 0) return;
+  publicPromosLoading.value = true;
+  try {
+    const res = await getPromotions({ pageSize: 200 });
+    publicPromos.value = (res.data?.items ?? []).filter(
+      (p) => p.codeVisibility === "PUBLIC"
+    );
+  } catch {
+    publicPromos.value = [];
+  } finally {
+    publicPromosLoading.value = false;
+  }
+};
+
+// Estimate discount client-side for PRODUCT/CATEGORY scope
+// (backend validate only calculates ORDER scope without item details)
+const estimateClientDiscount = (promo) => {
+  const type  = promo.discountType;
+  const scope = promo.scope;
+
+  let eligibleSubtotal = 0;
+
+  if (scope === "ORDER") {
+    eligibleSubtotal = cartTotal.value;
+  } else if (scope === "PRODUCT") {
+    const ids = new Set(promo.applicableProductIds ?? []);
+    eligibleSubtotal = cart.value
+      .filter((i) => ids.size === 0 || ids.has(i.productId))
+      .reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+  } else if (scope === "CATEGORY") {
+    const catIds = new Set(promo.applicableCategoryIds ?? []);
+    eligibleSubtotal = cart.value
+      .filter((i) => catIds.size === 0 || catIds.has(productCategoryMap.value[i.productId]))
+      .reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+  }
+
+  if (eligibleSubtotal <= 0) return null;
+
+  if (type === "PERCENTAGE") {
+    const disc = Math.round((eligibleSubtotal * promo.discountValue) / 100);
+    return promo.maxDiscountAmount ? Math.min(disc, promo.maxDiscountAmount) : disc;
+  }
+  if (type === "FIXED") {
+    return Math.min(promo.discountValue, eligibleSubtotal);
+  }
+  return null; // BUY_X_GET_Y needs server-side calculation
+};
+
+// Returns true if a cart item is within the discount scope of the applied promo
+const isItemDiscounted = (item) => {
+  const promo = lastAppliedPromo.value;
+  if (!promo || !promoInfo.value) return false;
+  const scope = promo.scope;
+  if (scope === "ORDER") return true;
+  if (scope === "PRODUCT") {
+    const ids = promo.applicableProductIds ?? [];
+    return ids.length === 0 || ids.includes(item.productId);
+  }
+  if (scope === "CATEGORY") {
+    const catIds = new Set(promo.applicableCategoryIds ?? []);
+    return catIds.size === 0 || catIds.has(productCategoryMap.value[item.productId]);
+  }
+  return false;
+};
+
+const selectPromo = async (promo) => {
+  findPromosVisible.value = false;
+  lastAppliedPromo.value = promo;
+  promoCode.value = promo.code;
+  await applyPromoCode();
+  // Patch estimatedDiscount for non-ORDER scope (backend returns null without item info)
+  if (promoInfo.value && promoInfo.value.estimatedDiscount == null) {
+    const est = estimateClientDiscount(promo);
+    if (est != null) promoInfo.value = { ...promoInfo.value, estimatedDiscount: est };
+  }
 };
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -180,14 +280,20 @@ const clearPromo = () => {
   promoCode.value = "";
   promoInfo.value = null;
   promoError.value = "";
+  lastAppliedPromo.value = null;
 };
 
 watch(cartTotal, async (newVal) => {
   if (!promoInfo.value) return;
   try {
     const res = await validatePromotion(promoCode.value.trim(), newVal);
-    if (res.data.isApplicable) promoInfo.value = res.data;
-    else clearPromo();
+    if (res.data.isApplicable) {
+      promoInfo.value = res.data;
+      if (promoInfo.value.estimatedDiscount == null && lastAppliedPromo.value) {
+        const est = estimateClientDiscount(lastAppliedPromo.value);
+        if (est != null) promoInfo.value = { ...promoInfo.value, estimatedDiscount: est };
+      }
+    } else clearPromo();
   } catch {
     clearPromo();
   }
@@ -304,12 +410,7 @@ const placeOrder = async () => {
     );
     const { orderId } = res.data;
 
-    // Auto-apply no-code promotions
-    try {
-      await autoApplyPromotions(orderId);
-    } catch { /* silently ignore */ }
-
-    // Apply manual promo code if entered
+    // Apply promo code if entered
     if (promoCode.value.trim()) {
       try {
         await applyPromotionAdmin(orderId, promoCode.value.trim());
@@ -630,14 +731,24 @@ onMounted(async () => {
             <div
               v-for="item in cart"
               :key="item._key"
-              class="tw:rounded-xl tw:border tw:p-3"
-              style="border-color: var(--app-border)"
+              class="tw:rounded-xl tw:border tw:p-3 tw:transition-colors"
+              :class="isItemDiscounted(item) ? 'tw:border-emerald-500/60 tw:bg-emerald-500/5' : ''"
+              :style="isItemDiscounted(item) ? '' : 'border-color: var(--app-border)'"
             >
               <div class="tw:flex tw:items-start tw:gap-2">
                 <div class="tw:flex-1 tw:min-w-0">
-                  <p class="tw:text-sm tw:font-medium tw:leading-snug">
-                    {{ item.productName }}
-                  </p>
+                  <div class="tw:flex tw:items-center tw:gap-1.5 tw:flex-wrap">
+                    <p class="tw:text-sm tw:font-medium tw:leading-snug">
+                      {{ item.productName }}
+                    </p>
+                    <span
+                      v-if="isItemDiscounted(item)"
+                      class="tw:inline-flex tw:items-center tw:gap-0.5 tw:text-xs tw:px-1.5 tw:py-0.5 tw:rounded tw:bg-emerald-500/15 tw:text-emerald-400 tw:font-medium"
+                    >
+                      <iconify icon="ph:tag-simple-fill" class="tw:text-[10px]" />
+                      Khuyến mãi
+                    </span>
+                  </div>
                   <p class="tw:text-xs tw:text-emerald-400 tw:mt-0.5">
                     {{ formatVnd(item.unitPrice) }}
                   </p>
@@ -740,59 +851,23 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- Auto-apply promotions preview -->
+          <!-- Find promotions -->
           <div class="tw:flex tw:items-center tw:justify-between tw:mt-4 tw:mb-1">
             <span class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs app-text-muted">
-              <iconify icon="ph:lightning-bold" class="tw:text-emerald-400" />
-              Auto-apply promotions
+              <iconify icon="ph:ticket-bold" class="tw:text-emerald-400" />
+              Find promotions
             </span>
             <prime-button
               size="small"
               text
               severity="secondary"
               class="tw:text-xs tw:h-6! tw:px-2!"
-              @click="toggleAutoPromos"
+              @click="openFindPromosDialog"
             >
-              <iconify icon="ph:eye-bold" class="tw:text-xs" />
-              <span>Check</span>
+              <iconify icon="ph:magnifying-glass-bold" class="tw:text-xs" />
+              <span>Browse</span>
             </prime-button>
           </div>
-          <prime-popover ref="autoPromosPanel">
-            <div class="tw:min-w-56 tw:max-w-xs tw:text-sm">
-              <div v-if="autoPromosLoading" class="tw:flex tw:items-center tw:gap-2 app-text-muted tw:py-1">
-                <iconify icon="prime:spinner" class="tw:animate-spin" />
-                <span>Loading...</span>
-              </div>
-              <div v-else-if="autoPromos.length === 0" class="tw:text-xs app-text-muted tw:py-1">
-                No active auto-apply promotions.
-              </div>
-              <div v-else class="tw:space-y-2.5">
-                <div
-                  v-for="promo in autoPromos"
-                  :key="promo.id"
-                  class="tw:flex tw:flex-col tw:gap-0.5"
-                >
-                  <div class="tw:flex tw:items-center tw:justify-between tw:gap-3">
-                    <span class="tw:font-medium tw:text-sm tw:leading-snug">{{ promo.name }}</span>
-                    <span class="tw:text-emerald-400 tw:font-semibold tw:shrink-0 tw:text-xs">
-                      {{ formatPromotionValue(promo) }}
-                    </span>
-                  </div>
-                  <div class="tw:flex tw:flex-wrap tw:gap-1.5">
-                    <span v-if="promo.minOrderAmount" class="tw:text-xs app-text-muted">
-                      Min {{ new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(promo.minOrderAmount) }}
-                    </span>
-                    <span v-if="promo.endDate" class="tw:text-xs app-text-muted">
-                      · Until {{ new Date(promo.endDate).toLocaleDateString('vi-VN') }}
-                    </span>
-                    <span v-if="promo.maxUsage" class="tw:text-xs app-text-muted">
-                      · {{ promo.maxUsage - promo.currentUsage }} left
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </prime-popover>
 
           <!-- Promo code -->
           <div v-if="cart.length > 0" class="tw:mt-3">
@@ -862,6 +937,59 @@ onMounted(async () => {
       </aside>
     </div>
   </section>
+
+  <!-- ── Find Promotions Dialog ────────────────────────────────── -->
+  <prime-dialog
+    v-model:visible="findPromosVisible"
+    header="Find promotions"
+    modal
+    :style="{ width: '30rem' }"
+  >
+    <div class="tw:space-y-2">
+      <div v-if="publicPromosLoading" class="tw:flex tw:items-center tw:justify-center tw:gap-2 tw:py-8 app-text-muted">
+        <iconify icon="prime:spinner" class="tw:animate-spin" />
+        <span class="tw:text-sm">Loading...</span>
+      </div>
+      <div v-else-if="publicPromos.length === 0" class="tw:py-8 tw:text-center tw:text-sm app-text-muted">
+        No public promotions available.
+      </div>
+      <div
+        v-else
+        v-for="promo in publicPromos"
+        :key="promo.id"
+        class="tw:rounded-xl tw:border tw:p-3 tw:transition-colors"
+        :class="isPromoAvailable(promo)
+          ? 'tw:cursor-pointer hover:tw:border-emerald-500/50 hover:tw:bg-emerald-500/5'
+          : 'tw:opacity-40 tw:cursor-not-allowed'"
+        style="border-color: var(--app-border)"
+        @click="isPromoAvailable(promo) && selectPromo(promo)"
+      >
+        <div class="tw:flex tw:items-start tw:justify-between tw:gap-3">
+          <div class="tw:min-w-0">
+            <p class="tw:text-sm tw:font-semibold tw:leading-snug">{{ promo.name }}</p>
+            <p class="tw:text-xs tw:font-mono app-text-muted tw:mt-0.5">{{ promo.code }}</p>
+            <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:mt-1.5">
+              <span v-if="promo.minOrderAmount" class="tw:text-xs app-text-muted">
+                Min {{ formatVnd(promo.minOrderAmount) }}
+              </span>
+              <span v-if="promo.endDate" class="tw:text-xs app-text-muted">
+                Until {{ new Date(promo.endDate).toLocaleDateString('vi-VN') }}
+              </span>
+              <span v-if="promo.maxUsage" class="tw:text-xs app-text-muted">
+                {{ promo.maxUsage - promo.currentUsage }} uses left
+              </span>
+              <span v-if="!isPromoAvailable(promo)" class="tw:text-xs tw:text-red-400">
+                {{ promoDisableReason(promo) }}
+              </span>
+            </div>
+          </div>
+          <span class="tw:shrink-0 tw:text-emerald-400 tw:font-semibold tw:text-sm">
+            {{ formatPromotionValue(promo) }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </prime-dialog>
 
   <!-- ── Options Dialog ─────────────────────────────────────────── -->
   <prime-dialog
