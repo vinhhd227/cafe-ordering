@@ -59,6 +59,8 @@ import SelectButton from "primevue/selectbutton";
 import DatePicker from "primevue/datepicker";
 import ProgressSpinner from "primevue/progressspinner";
 import ConfirmDialog from "primevue/confirmdialog";
+import MultiSelect from 'primevue/multiselect';
+import TreeSelect from "primevue/treeselect";
 
 import ConfirmationService from "primevue/confirmationservice";
 import Chart from "primevue/chart";
@@ -188,5 +190,7 @@ export default {
     app.component("prime-progress-spinner", ProgressSpinner);
     app.component("prime-confirm-dialog", ConfirmDialog);
     app.component("prime-chart", Chart);
+    app.component("prime-multi-select", MultiSelect);
+    app.component("prime-tree-select", TreeSelect);
   },
 };

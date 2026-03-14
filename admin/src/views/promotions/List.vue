@@ -18,11 +18,13 @@ import {
   PROMOTION_SCOPE_OPTIONS,
 } from "@/constants/promotionScope";
 import {
-  STACK_POLICY,
-  STACK_POLICY_MAP,
-  STACK_POLICY_OPTIONS,
-} from "@/constants/stackPolicy";
+  CODE_VISIBILITY,
+  CODE_VISIBILITY_MAP,
+  CODE_VISIBILITY_OPTIONS,
+} from "@/constants/codeVisibility";
 import { btnIcon } from "@/layout/ui";
+import { getCategory } from "@/services/category.service";
+import { getProductTree } from "@/services/product.service";
 
 // ── Cache ──────────────────────────────────────────────────────────
 const { save: saveCache, restore: restoreCache } = useTableCache("promotions-list");
@@ -150,18 +152,85 @@ const editingPromotion = ref(null);
 const formLoading      = ref(false);
 const formError        = ref("");
 
+// ── Lookup data — lazy loaded by scope ────────────────────────────
+// Category options (for CATEGORY scope + BUY_X_GET_Y GetFrom)
+const categoryOptions   = ref([]);
+const categoryLoaded    = ref(false);
+const categoryLoading   = ref(false);
+
+const loadCategoryOptions = async () => {
+  if (categoryLoaded.value || categoryLoading.value) return;
+  categoryLoading.value = true;
+  try {
+    const res = await getCategory();
+    const d = res.data;
+    categoryOptions.value = Array.isArray(d) ? d : (d?.items ?? []);
+    categoryLoaded.value  = true;
+  } catch { /* silent */ }
+  finally { categoryLoading.value = false; }
+};
+
+// Product tree (for PRODUCT scope + BUY_X_GET_Y GetFrom products)
+const productTreeNodes  = ref([]);
+const productTreeLoaded = ref(false);
+const productTreeLoading = ref(false);
+
+const loadProductTree = async () => {
+  if (productTreeLoaded.value || productTreeLoading.value) return;
+  productTreeLoading.value = true;
+  try {
+    const res = await getProductTree();
+    const categories = res.data ?? [];
+    productTreeNodes.value = categories.map(cat => ({
+      key:      `cat-${cat.id}`,
+      label:    cat.name,
+      children: cat.products.map(p => ({ key: String(p.id), label: p.name })),
+    }));
+    productTreeLoaded.value = true;
+  } catch { /* silent */ }
+  finally { productTreeLoading.value = false; }
+};
+
+// Convert array of IDs → TreeSelect selection object
+const idsToTreeSel = (ids) => {
+  const sel = {};
+  ids.forEach(id => { sel[String(id)] = { checked: true, partialChecked: false }; });
+  productTreeNodes.value.forEach(cat => {
+    const total   = cat.children.length;
+    const checked = cat.children.filter(c => sel[c.key]?.checked).length;
+    if (checked === total && total > 0)
+      sel[cat.key] = { checked: true,  partialChecked: false };
+    else if (checked > 0)
+      sel[cat.key] = { checked: false, partialChecked: true  };
+  });
+  return sel;
+};
+
+// Extract product IDs from TreeSelect selection (skip cat- keys)
+const treeSelToIds = (sel) =>
+  Object.entries(sel)
+    .filter(([k, v]) => v.checked && !k.startsWith('cat-'))
+    .map(([k]) => parseInt(k));
+
+// TreeSelect v-models for product fields
+const fApplicableProductTree = ref({});
+const fGetFromProductTree     = ref({});
+
 // Form fields
 const fName              = ref("");
 const fCode              = ref("");
+const fCodeVisibility    = ref(CODE_VISIBILITY.PUBLIC);
 const fDescription       = ref("");
 const fDiscountType      = ref(PROMOTION_DISCOUNT_TYPE.PERCENTAGE);
 const fDiscountValue     = ref(null);
+const fMaxDiscountAmount = ref(null);
 const fBuyQuantity       = ref(null);
 const fGetQuantity       = ref(null);
 const fScope             = ref(PROMOTION_SCOPE.ORDER);
-const fApplicableProductIds  = ref("");  // comma-separated input
-const fApplicableCategoryIds = ref("");  // comma-separated input
-const fStackPolicy       = ref(STACK_POLICY.EXCLUSIVE);
+const fApplicableProductIds  = ref([]);
+const fApplicableCategoryIds = ref([]);
+const fGetFromProductIds     = ref([]);
+const fGetFromCategoryIds    = ref([]);
 const fMinOrderAmount    = ref(null);
 const fStartDate         = ref(new Date());
 const fEndDate           = ref(null);
@@ -173,22 +242,28 @@ const dialogHeader = computed(() =>
   isEditMode.value ? "Edit promotion" : "New promotion"
 );
 
-const isBuyXGetY = computed(() => fDiscountType.value === PROMOTION_DISCOUNT_TYPE.BUY_X_GET_Y);
+const isBuyXGetY      = computed(() => fDiscountType.value === PROMOTION_DISCOUNT_TYPE.BUY_X_GET_Y);
+const isPercentage    = computed(() => fDiscountType.value === PROMOTION_DISCOUNT_TYPE.PERCENTAGE);
 const isProductScope  = computed(() => fScope.value === PROMOTION_SCOPE.PRODUCT);
 const isCategoryScope = computed(() => fScope.value === PROMOTION_SCOPE.CATEGORY);
 
 const resetForm = () => {
   fName.value              = "";
   fCode.value              = "";
+  fCodeVisibility.value    = CODE_VISIBILITY.PUBLIC;
   fDescription.value       = "";
   fDiscountType.value      = PROMOTION_DISCOUNT_TYPE.PERCENTAGE;
   fDiscountValue.value     = null;
+  fMaxDiscountAmount.value = null;
   fBuyQuantity.value       = null;
   fGetQuantity.value       = null;
   fScope.value             = PROMOTION_SCOPE.ORDER;
-  fApplicableProductIds.value  = "";
-  fApplicableCategoryIds.value = "";
-  fStackPolicy.value       = STACK_POLICY.EXCLUSIVE;
+  fApplicableProductIds.value  = [];
+  fApplicableProductTree.value = {};
+  fApplicableCategoryIds.value = [];
+  fGetFromProductIds.value     = [];
+  fGetFromProductTree.value    = {};
+  fGetFromCategoryIds.value    = [];
   fMinOrderAmount.value    = null;
   fStartDate.value         = new Date();
   fEndDate.value           = null;
@@ -200,6 +275,7 @@ const resetForm = () => {
 const openCreateDialog = () => {
   editingPromotion.value = null;
   resetForm();
+  // No pre-load needed — default scope is ORDER (no tree/category selects visible)
   dialogVisible.value = true;
 };
 
@@ -207,30 +283,53 @@ const openEditDialog = (promo) => {
   editingPromotion.value = promo;
   fName.value              = promo.name;
   fCode.value              = promo.code ?? "";
+  fCodeVisibility.value    = promo.codeVisibility ?? CODE_VISIBILITY.PUBLIC;
   fDescription.value       = promo.description ?? "";
   fDiscountType.value      = promo.discountType;
   fDiscountValue.value     = promo.discountValue ?? null;
+  fMaxDiscountAmount.value = promo.maxDiscountAmount ?? null;
   fBuyQuantity.value       = promo.buyQuantity ?? null;
   fGetQuantity.value       = promo.getQuantity ?? null;
   fScope.value             = promo.scope;
-  fApplicableProductIds.value  = (promo.applicableProductIds ?? []).join(", ");
-  fApplicableCategoryIds.value = (promo.applicableCategoryIds ?? []).join(", ");
-  fStackPolicy.value       = promo.stackPolicy;
+  fApplicableProductIds.value  = promo.applicableProductIds ?? [];
+  fApplicableCategoryIds.value = promo.applicableCategoryIds ?? [];
+  fGetFromProductIds.value     = promo.getFromProductIds ?? [];
+  fGetFromCategoryIds.value    = promo.getFromCategoryIds ?? [];
   fMinOrderAmount.value    = promo.minOrderAmount ?? null;
   fStartDate.value         = new Date(promo.startDate);
   fEndDate.value           = promo.endDate ? new Date(promo.endDate) : null;
   fMaxUsage.value          = promo.maxUsage ?? null;
   fIsActive.value          = promo.isActive;
   formError.value          = "";
-  dialogVisible.value      = true;
+
+  const needsTree = promo.scope === PROMOTION_SCOPE.PRODUCT
+    || promo.discountType === PROMOTION_DISCOUNT_TYPE.BUY_X_GET_Y;
+  const needsCategories = promo.scope === PROMOTION_SCOPE.CATEGORY
+    || promo.discountType === PROMOTION_DISCOUNT_TYPE.BUY_X_GET_Y;
+
+  if (needsTree) {
+    loadProductTree().then(() => {
+      fApplicableProductTree.value = idsToTreeSel(fApplicableProductIds.value);
+      fGetFromProductTree.value    = idsToTreeSel(fGetFromProductIds.value);
+    });
+  }
+  if (needsCategories) loadCategoryOptions();
+
+  dialogVisible.value = true;
 };
 
-const parseIds = (str) => {
-  if (!str || !str.trim()) return [];
-  return str.split(",")
-    .map((s) => parseInt(s.trim()))
-    .filter((n) => !isNaN(n));
-};
+// Watch scope/type changes inside the open dialog to lazy-load
+watch(fScope, (scope) => {
+  if (!dialogVisible.value) return;
+  if (scope === PROMOTION_SCOPE.PRODUCT) loadProductTree();
+  if (scope === PROMOTION_SCOPE.CATEGORY) loadCategoryOptions();
+});
+
+watch(isBuyXGetY, (val) => {
+  if (!dialogVisible.value || !val) return;
+  loadProductTree();
+  loadCategoryOptions();
+});
 
 const submitForm = async () => {
   formError.value = "";
@@ -252,15 +351,18 @@ const submitForm = async () => {
     const payload = {
       name:              fName.value.trim(),
       code:              fCode.value.trim() || null,
+      codeVisibility:    fCodeVisibility.value,
       description:       fDescription.value.trim() || null,
       discountType:      fDiscountType.value,
       discountValue:     fDiscountValue.value ?? 0,
+      maxDiscountAmount: fMaxDiscountAmount.value ?? null,
       buyQuantity:       fBuyQuantity.value ?? null,
       getQuantity:       fGetQuantity.value ?? null,
+      getFromProductIds:   treeSelToIds(fGetFromProductTree.value),
+      getFromCategoryIds:  fGetFromCategoryIds.value,
       scope:             fScope.value,
-      applicableProductIds:  parseIds(fApplicableProductIds.value),
-      applicableCategoryIds: parseIds(fApplicableCategoryIds.value),
-      stackPolicy:       fStackPolicy.value,
+      applicableProductIds:  treeSelToIds(fApplicableProductTree.value),
+      applicableCategoryIds: fApplicableCategoryIds.value,
       minOrderAmount:    fMinOrderAmount.value ?? null,
       startDate:         fStartDate.value?.toISOString?.() ?? fStartDate.value,
       endDate:           fEndDate.value?.toISOString?.() ?? null,
@@ -297,7 +399,7 @@ const columns = [
   { key: 'discount', header: 'Discount', width: '9rem' },
   { key: 'validity', header: 'Validity', width: '12rem' },
   { key: 'usage',    header: 'Usage',    width: '7rem' },
-  { key: 'stack',    header: 'Stack',    width: '8rem' },
+  { key: 'visibility', header: 'Visibility', width: '8rem' },
   { key: 'isActive', header: 'Active',   width: '6rem' },
   { key: 'actions',  header: 'Actions',  width: '8rem', toggleable: false },
 ];
@@ -377,12 +479,12 @@ const handleDelete = (promo) => {
         />
       </div>
 
-      <!-- Code + Description -->
+      <!-- Code + Visibility -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
             Promo code
-            <span class="tw:normal-case tw:opacity-60">(leave blank for auto-apply)</span>
+            <span class="tw:normal-case tw:opacity-60">(blank = auto-generate)</span>
           </label>
           <prime-input-text
             v-model="fCode"
@@ -392,11 +494,11 @@ const handleDelete = (promo) => {
         </div>
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Stack policy
+            Visibility
           </label>
           <prime-select
-            v-model="fStackPolicy"
-            :options="STACK_POLICY_OPTIONS"
+            v-model="fCodeVisibility"
+            :options="CODE_VISIBILITY_OPTIONS"
             option-label="label"
             option-value="value"
             class="app-input tw:w-full"
@@ -409,8 +511,8 @@ const handleDelete = (promo) => {
             </template>
             <template #value="{ value }">
               <div v-if="value" class="tw:flex tw:items-center tw:gap-2">
-                <iconify :icon="STACK_POLICY_MAP[value]?.icon" />
-                <span>{{ STACK_POLICY_MAP[value]?.label }}</span>
+                <iconify :icon="CODE_VISIBILITY_MAP[value]?.icon" />
+                <span>{{ CODE_VISIBILITY_MAP[value]?.label }}</span>
               </div>
             </template>
           </prime-select>
@@ -492,6 +594,23 @@ const handleDelete = (promo) => {
         />
       </div>
 
+      <!-- Max discount amount (only for PERCENTAGE) -->
+      <div v-if="isPercentage" class="tw:space-y-1.5">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          Max discount amount
+          <span class="tw:normal-case tw:opacity-60">(blank = no cap)</span>
+        </label>
+        <prime-input-number
+          v-model="fMaxDiscountAmount"
+          :min="0"
+          :use-grouping="true"
+          suffix=" ₫"
+          placeholder="No cap"
+          class="app-input tw:w-full"
+          @input="(e) => (fMaxDiscountAmount = e.value)"
+        />
+      </div>
+
       <!-- Buy qty + Get qty (only for BUY_X_GET_Y) -->
       <div v-if="isBuyXGetY" class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
@@ -520,30 +639,68 @@ const handleDelete = (promo) => {
         </div>
       </div>
 
-      <!-- Applicable product IDs (only for PRODUCT scope) -->
-      <div v-if="isProductScope" class="tw:space-y-1.5">
+      <!-- Applicable products (only for PRODUCT scope) -->
+      <div v-show="isProductScope" class="tw:space-y-1.5">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-          Applicable product IDs
-          <span class="tw:normal-case tw:opacity-60">(comma-separated)</span>
+          Applicable products
         </label>
-        <prime-input-text
-          v-model="fApplicableProductIds"
-          placeholder="1, 2, 5, 12"
+        <prime-tree-select
+          v-model="fApplicableProductTree"
+          :options="productTreeNodes"
+          selection-mode="checkbox"
+          placeholder="Select products…"
           class="app-input tw:w-full"
         />
       </div>
 
-      <!-- Applicable category IDs (only for CATEGORY scope) -->
+      <!-- Applicable categories (only for CATEGORY scope) -->
       <div v-if="isCategoryScope" class="tw:space-y-1.5">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-          Applicable category IDs
-          <span class="tw:normal-case tw:opacity-60">(comma-separated)</span>
+          Applicable categories
         </label>
-        <prime-input-text
+        <prime-multi-select
           v-model="fApplicableCategoryIds"
-          placeholder="3, 7"
+          :options="categoryOptions"
+          option-label="name"
+          option-value="id"
+          placeholder="Select categories…"
+          filter
+          display="chip"
           class="app-input tw:w-full"
         />
+      </div>
+
+      <!-- GetFrom product/category (only for BUY_X_GET_Y) -->
+      <div v-show="isBuyXGetY" class="tw:space-y-4">
+        <div class="tw:space-y-1.5">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+            Free item from products
+            <span class="tw:normal-case tw:opacity-60">(blank = same as trigger)</span>
+          </label>
+          <prime-tree-select
+            v-model="fGetFromProductTree"
+            :options="productTreeNodes"
+            selection-mode="checkbox"
+            placeholder="Select products…"
+            class="app-input tw:w-full"
+          />
+        </div>
+        <div class="tw:space-y-1.5">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+            Free item from categories
+            <span class="tw:normal-case tw:opacity-60">(blank = same as trigger)</span>
+          </label>
+          <prime-multi-select
+            v-model="fGetFromCategoryIds"
+            :options="categoryOptions"
+            option-label="name"
+            option-value="id"
+            placeholder="Select categories…"
+            filter
+            display="chip"
+            class="app-input tw:w-full"
+          />
+        </div>
       </div>
 
       <!-- Min order amount + Max usage -->
@@ -795,8 +952,7 @@ const handleDelete = (promo) => {
       <template #col-name="{ data }">
         <div>
           <p class="tw:font-semibold tw:text-sm">{{ data.name }}</p>
-          <p v-if="data.code" class="tw:text-xs tw:font-mono app-text-muted">{{ data.code }}</p>
-          <p v-else class="tw:text-xs app-text-subtle tw:italic">auto-apply</p>
+          <p class="tw:text-xs tw:font-mono app-text-muted">{{ data.code }}</p>
         </div>
       </template>
 
@@ -845,11 +1001,17 @@ const handleDelete = (promo) => {
         </span>
       </template>
 
-      <template #col-stack="{ data }">
-        <prime-tag
-          :value="STACK_POLICY_MAP[data.stackPolicy]?.label ?? data.stackPolicy"
-          :severity="STACK_POLICY_MAP[data.stackPolicy]?.severity ?? 'secondary'"
-        />
+      <template #col-visibility="{ data }">
+        <div class="tw:flex tw:items-center tw:gap-1.5">
+          <iconify
+            :icon="CODE_VISIBILITY_MAP[data.codeVisibility]?.icon ?? 'ph:eye-bold'"
+            class="tw:text-sm app-text-muted"
+          />
+          <prime-tag
+            :value="CODE_VISIBILITY_MAP[data.codeVisibility]?.label ?? data.codeVisibility"
+            :severity="CODE_VISIBILITY_MAP[data.codeVisibility]?.severity ?? 'secondary'"
+          />
+        </div>
       </template>
 
       <template #col-isActive="{ data }">
