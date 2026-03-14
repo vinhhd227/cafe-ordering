@@ -44,6 +44,7 @@ public record PagedOrdersDto(
   int PageSize,
   decimal CashTotal,
   decimal BankTransferTotal,
+  decimal TipTotal,
   int PendingCount,
   int ProcessingCount,
   int CompletedCount,

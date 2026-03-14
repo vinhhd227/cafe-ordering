@@ -1,13 +1,12 @@
 namespace Api.Core.Aggregates.OrderAggregate.Specifications;
 
 /// <summary>
-///   Projection spec: lấy TotalAmount của các orders đã PAID theo phương thức thanh toán,
-///   áp dụng cùng bộ filter như OrdersCountSpec (trừ paymentStatus — luôn là PAID).
+///   Projection spec: lấy TipAmount của các orders đã PAID,
+///   áp dụng cùng bộ filter như PaidOrdersTotalSpec (không cần filter theo paymentMethod vì tip là tổng).
 /// </summary>
-public class PaidOrdersTotalSpec : Specification<Order, decimal>
+public class PaidTipTotalSpec : Specification<Order, decimal>
 {
-  public PaidOrdersTotalSpec(
-    PaymentMethod method,
+  public PaidTipTotalSpec(
     string? status = null,
     DateTime? dateFrom = null,
     DateTime? dateTo = null,
@@ -17,22 +16,16 @@ public class PaidOrdersTotalSpec : Specification<Order, decimal>
     string? orderNumber = null,
     string? paymentMethod = null)
   {
-    // Phải dùng local variable thay vì static field (PaymentStatus.Paid) trong lambda
-    // EF Core không thể translate static member access trong expression tree khi dùng HasConversion
     var paid = PaymentStatus.Paid;
 
     Query
-      .Where(o => o.PaymentStatus == paid && o.PaymentMethod == method)
-      .Select(o => o.Items.Sum(i => (i.UnitPrice - i.Discount) * i.Quantity)
-                   - o.Promotions.Sum(p => p.DiscountAmount)
-                   + o.TipAmount);
+      .Where(o => o.PaymentStatus == paid)
+      .Select(o => o.TipAmount);
 
-    // Nếu user filter theo paymentMethod mà không khớp với method của spec → kết quả rỗng
     if (!string.IsNullOrWhiteSpace(paymentMethod))
     {
       var userMethod = PaymentMethod.FromName(paymentMethod, true);
-      if (userMethod != method)
-        Query.Where(_ => false);
+      Query.Where(o => o.PaymentMethod == userMethod);
     }
 
     if (!string.IsNullOrWhiteSpace(status))

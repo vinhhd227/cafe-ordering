@@ -60,6 +60,10 @@ public class ListOrdersHandler(
       request.Status, dateFrom, dateTo,
       filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
 
+    var tipSpec = new PaidTipTotalSpec(
+      request.Status, dateFrom, dateTo,
+      filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
+
     var pendingSpec    = new OrdersCountSpec("PENDING",    null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
     var processingSpec = new OrdersCountSpec("PROCESSING", null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
     var completedSpec  = new OrdersCountSpec("COMPLETED",  null, dateFrom, dateTo, filteredSessionIds, request.MinAmount, request.MaxAmount, request.OrderNumber, request.PaymentMethod);
@@ -74,6 +78,7 @@ public class ListOrdersHandler(
     var orders         = await repository.ListAsync(spec, ct);
     var cashAmounts    = await repository.ListAsync(cashSpec, ct);
     var bankAmounts    = await repository.ListAsync(bankSpec, ct);
+    var tipAmounts     = await repository.ListAsync(tipSpec, ct);
 
     // Build sessionId → tableId map (chỉ load sessions cho trang hiện tại)
     var sessionIds = orders.Select(o => o.SessionId).Distinct().ToList();
@@ -123,8 +128,9 @@ public class ListOrdersHandler(
 
     var cashTotal         = cashAmounts.Sum();
     var bankTransferTotal = bankAmounts.Sum();
+    var tipTotal          = tipAmounts.Sum();
 
     return Result.Success(new PagedOrdersDto(dtos, totalCount, request.Page, request.PageSize,
-      cashTotal, bankTransferTotal, pendingCount, processingCount, completedCount, cancelledCount));
+      cashTotal, bankTransferTotal, tipTotal, pendingCount, processingCount, completedCount, cancelledCount));
   }
 }
