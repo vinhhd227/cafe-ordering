@@ -9,6 +9,7 @@ import WidgetOrdersSummary from "@/components/widgets/orders/WidgetOrdersSummary
 import WidgetSettingsButton from "@/components/widgets/WidgetSettingsButton.vue";
 
 const router = useRouter();
+const { t } = useI18n();
 
 const orders = ref([]);
 const cashTotal = ref(0);
@@ -35,7 +36,7 @@ const isToday = (dateStr) => {
 
 const { connected: sseConnected } = useOrderSse({
   onOrderCreated(order) {
-    // Chỉ thêm nếu order thuộc ngày hôm nay và chưa có trong danh sách
+    // Only add if the order belongs to today and is not already in the list
     if (!isToday(order.orderDate)) return;
     const exists = orders.value.some((o) => o.id === order.id);
     if (!exists) orders.value.unshift(order);
@@ -43,7 +44,7 @@ const { connected: sseConnected } = useOrderSse({
   onOrderUpdated(order) {
     const idx = orders.value.findIndex((o) => o.id === order.id);
     if (idx !== -1) {
-      // Giữ lại pending drag-and-drop nếu đang trong quá trình undo
+      // Preserve pending drag-and-drop if an undo is in progress
       if (pendingMoves.value.has(order.id)) return;
       orders.value[idx] = order;
     }
@@ -57,7 +58,7 @@ const { connected: sseConnected } = useOrderSse({
 const payDialog = ref(false);
 const payOrder = ref(null); // order being paid
 const payMethod = ref("Cash"); // selected PaymentMethod
-const payAmountReceived = ref(null); // số tiền thực nhận
+const payAmountReceived = ref(null); // actual amount received from customer
 const payLoading = ref(false);
 
 const payChange = computed(() => {
@@ -71,7 +72,7 @@ const payReturn = computed(() => {
   return payChange.value - (payTip.value ?? 0);
 });
 
-// Clamp tip nếu change giảm xuống dưới tip hiện tại
+// Clamp tip if change drops below the current tip value
 watch(payChange, (val) => {
   if (val !== null && val >= 0 && payTip.value > val) {
     payTip.value = val;
@@ -79,21 +80,28 @@ watch(payChange, (val) => {
 });
 
 // Exclude UNKNOWN from payment dialog options
-const PAYMENT_METHODS = PAYMENT_METHOD_OPTIONS.filter(
-  (o) => o.value !== PAYMENT_METHOD.UNKNOWN,
+const PAYMENT_METHODS = computed(() =>
+  PAYMENT_METHOD_OPTIONS.filter(
+    (o) => o.value !== PAYMENT_METHOD.UNKNOWN,
+  ).map((o) => ({
+    ...o,
+    label: t(`orders.paymentMethod.${o.value}`, o.label),
+  })),
 );
 
 const paymentTag = (status, method) => {
   if (status === PAYMENT_STATUS.PAID) {
-    const m = PAYMENT_METHOD_MAP[method]?.label ?? "";
+    const m = t(`orders.paymentMethod.${method}`, "");
     return {
-      label: m ? `Paid · ${m}` : "Paid",
+      label: m ? t("orders.pay.paidWith", { method: m }) : t("orders.paymentStatus.PAID"),
       severity: PAYMENT_STATUS_MAP[PAYMENT_STATUS.PAID].severity,
     };
   }
-  return (
-    PAYMENT_STATUS_MAP[status] ?? PAYMENT_STATUS_MAP[PAYMENT_STATUS.UNPAID]
-  );
+  const meta = PAYMENT_STATUS_MAP[status] ?? PAYMENT_STATUS_MAP[PAYMENT_STATUS.UNPAID];
+  return {
+    ...meta,
+    label: t(`orders.paymentStatus.${status}`, meta.label ?? status),
+  };
 };
 
 const openPayDialog = (order) => {
@@ -131,7 +139,6 @@ const confirmPayment = async () => {
 const STATUSES = [
   {
     key: ORDER_STATUS.PENDING,
-    label: "Pending",
     icon: "ph:clock-bold",
     color: "tw:text-amber-400",
     bg: "tw:bg-amber-400/10 tw:border-amber-400/20",
@@ -139,7 +146,6 @@ const STATUSES = [
   },
   {
     key: ORDER_STATUS.PROCESSING,
-    label: "Processing",
     icon: "ph:fire-bold",
     color: "tw:text-blue-400",
     bg: "tw:bg-blue-400/10 tw:border-blue-400/20",
@@ -147,7 +153,6 @@ const STATUSES = [
   },
   {
     key: ORDER_STATUS.COMPLETED,
-    label: "Completed",
     icon: "ph:check-circle-bold",
     color: "tw:text-emerald-400",
     bg: "tw:bg-emerald-400/10 tw:border-emerald-400/20",
@@ -155,7 +160,6 @@ const STATUSES = [
   },
   {
     key: ORDER_STATUS.CANCELLED,
-    label: "Cancelled",
     icon: "ph:x-circle-bold",
     color: "tw:text-red-400",
     bg: "tw:bg-red-400/10 tw:border-red-400/20",
@@ -168,10 +172,10 @@ const NEXT_STATUS = {
   [ORDER_STATUS.PROCESSING]: ORDER_STATUS.COMPLETED,
 };
 
-const NEXT_LABEL = {
-  [ORDER_STATUS.PENDING]: "Start preparing",
-  [ORDER_STATUS.PROCESSING]: "Mark complete",
-};
+const NEXT_LABEL = computed(() => ({
+  [ORDER_STATUS.PENDING]: t("orders.kanban.startPreparing"),
+  [ORDER_STATUS.PROCESSING]: t("orders.kanban.markComplete"),
+}));
 
 const ordersByStatus = computed(() => {
   const map = {};
@@ -206,8 +210,8 @@ const {
   [
     {
       id: "summary",
-      label: "Orders summary",
-      description: "Tổng số đơn hàng hôm nay theo từng trạng thái.",
+      label: t("orders.widgets.totalOrders"),
+      description: t("orders.widgets.totalOrdersKanbanDesc"),
       previewComponent: WidgetOrdersSummary,
       previewProps: {
         total: 34,
@@ -219,8 +223,8 @@ const {
     },
     {
       id: "revenue",
-      label: "Total revenue",
-      description: "Tổng doanh thu hôm nay, gồm tiền mặt và chuyển khoản.",
+      label: t("orders.widgets.totalRevenue"),
+      description: t("orders.widgets.totalRevenueKanbanDesc"),
       previewComponent: WidgetOrdersRevenue,
       previewProps: { total: 1750000, cash: 1000000, bank: 750000 },
     },
@@ -403,11 +407,11 @@ const handleDrop = (colKey) => {
 
 onMounted(() => {
   loadOrders();
-  // SSE connection được quản lý bởi useOrderSse (onMounted/onUnmounted bên trong composable)
+  // SSE connection is managed by useOrderSse (onMounted/onUnmounted inside the composable)
 });
 
 onUnmounted(() => {
-  // Clear tất cả pending drag-drop timers để tránh API call sau khi unmount
+  // Clear all pending drag-drop timers to avoid API calls after unmount
   pendingMoves.value.forEach(({ timeoutId }) => clearTimeout(timeoutId));
 });
 </script>
@@ -418,13 +422,13 @@ onUnmounted(() => {
   <!-- Payment dialog -->
   <prime-dialog
     v-model:visible="payDialog"
-    header="Mark as Paid"
+    :header="t('orders.pay.title')"
     :modal="true"
     :style="{ width: '22rem' }"
   >
     <div class="tw:space-y-4">
       <p class="tw:text-sm app-text-muted">
-        Order
+        {{ t('orders.pay.order') }}
         <span class="tw:font-mono tw:font-semibold tw:text-white">{{
           payOrder?.orderNumber
         }}</span>
@@ -432,7 +436,7 @@ onUnmounted(() => {
       <!-- Amount received -->
       <div class="tw:space-y-1.5">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
-          >Amount received</label
+          >{{ t('orders.pay.amountReceived') }}</label
         >
         <prime-input-number
           v-model="payAmountReceived"
@@ -448,7 +452,7 @@ onUnmounted(() => {
           v-if="payChange !== null && payChange < 0"
           class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5"
         >
-          <span class="app-text-muted">Short</span>
+          <span class="app-text-muted">{{ t('orders.pay.short') }}</span>
           <span class="tw:text-red-400 tw:font-semibold">{{
             formatVnd(Math.abs(payChange))
           }}</span>
@@ -459,14 +463,14 @@ onUnmounted(() => {
           <div
             class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5"
           >
-            <span class="app-text-muted">Change</span>
+            <span class="app-text-muted">{{ t('orders.pay.change') }}</span>
             <span class="tw:font-semibold">{{ formatVnd(payChange) }}</span>
           </div>
           <div class="tw:space-y-1">
             <label
               for="tip"
               class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
-              >Tip</label
+              >{{ t('orders.pay.tip') }}</label
             >
             <div class="tw:flex tw:gap-2">
               <prime-input-number
@@ -482,7 +486,7 @@ onUnmounted(() => {
               <prime-button
                 severity="secondary"
                 outlined
-                v-tooltip.top="'Keep all as tip'"
+                v-tooltip.top="t('orders.pay.keepAllAsTip')"
                 @click="payTip = payChange"
               >
                 <iconify icon="ph:heart-bold" />
@@ -490,7 +494,7 @@ onUnmounted(() => {
             </div>
           </div>
           <div class="tw:flex tw:items-center tw:justify-between tw:text-sm">
-            <span class="app-text-muted">Return to customer</span>
+            <span class="app-text-muted">{{ t('orders.pay.returnToCustomer') }}</span>
             <span
               :class="
                 payReturn === 0
@@ -506,7 +510,7 @@ onUnmounted(() => {
 
       <div class="tw:space-y-2">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
-          >Payment method</label
+          >{{ t('orders.pay.paymentMethod') }}</label
         >
         <prime-select-button
           v-model="payMethod"
@@ -527,7 +531,7 @@ onUnmounted(() => {
     </div>
     <template #footer>
       <prime-button severity="secondary" outlined @click="payDialog = false"
-        >Cancel</prime-button
+        >{{ t('orders.cancel') }}</prime-button
       >
       <prime-button
         severity="success"
@@ -535,7 +539,7 @@ onUnmounted(() => {
         @click="confirmPayment"
       >
         <iconify icon="ph:check-bold" />
-        <span>Confirm payment</span>
+        <span>{{ t('orders.pay.confirmPayment') }}</span>
       </prime-button>
     </template>
   </prime-dialog>
@@ -553,7 +557,7 @@ onUnmounted(() => {
           <p class="tw:text-xs app-text-muted">{{ message.detail }}</p>
         </div>
         <prime-button
-          label="Undo"
+          :label="t('orders.kanban.undo')"
           size="small"
           severity="secondary"
           outlined
@@ -566,29 +570,17 @@ onUnmounted(() => {
 
   <section class="tw:space-y-6">
     <!-- Header -->
-    <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
-      <div>
-        <p
-          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
-        >
-          Orders
-        </p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Order management</h1>
-        <p
-          class="tw:mt-2 tw:text-sm app-text-muted tw:flex tw:items-center tw:gap-1.5"
-        >
+    <page-header>
+      <template #subtitle>
+        <p class="tw:text-sm app-text-muted tw:flex tw:items-center tw:gap-1.5">
           <span
             class="tw:inline-block tw:h-2 tw:w-2 tw:rounded-full tw:shrink-0 tw:transition-colors"
-            :class="
-              sseConnected
-                ? 'tw:bg-emerald-400'
-                : 'tw:bg-amber-400 tw:animate-pulse'
-            "
+            :class="sseConnected ? 'tw:bg-emerald-400' : 'tw:bg-amber-400 tw:animate-pulse'"
           />
-          {{ sseConnected ? "Live — updates instantly" : "Connecting..." }}
+          {{ sseConnected ? t('orders.kanban.live') : t('orders.kanban.connecting') }}
         </p>
-      </div>
-      <div class="tw:flex tw:items-center tw:gap-2">
+      </template>
+      <template #default>
         <!-- New Order -->
         <prime-button
           severity="success"
@@ -596,7 +588,7 @@ onUnmounted(() => {
           @click="router.push({ name: 'ordersCreate' })"
         >
           <iconify icon="ph:plus-bold" class="tw:mr-1" />
-          <span>New Order</span>
+          <span>{{ t('orders.newOrder') }}</span>
         </prime-button>
         <!-- View toggle -->
         <div
@@ -638,10 +630,10 @@ onUnmounted(() => {
           @click="loadOrders"
         >
           <iconify icon="ph:arrows-clockwise-bold" class="tw:mr-1" />
-          <span>Refresh</span>
+          <span>{{ t('orders.refresh') }}</span>
         </prime-button>
-      </div>
-    </div>
+      </template>
+    </page-header>
 
     <!-- Summary stats -->
     <div :class="['tw:grid tw:gap-3', wColsClass]">
@@ -691,7 +683,7 @@ onUnmounted(() => {
             :class="col.dot"
           />
           <span class="tw:font-semibold tw:text-sm" :class="col.color">{{
-            col.label
+            t(`orders.status.${col.key}`, col.key)
           }}</span>
           <span
             class="tw:ml-auto tw:rounded-full tw:px-2 tw:py-0.5 tw:text-xs tw:font-medium"
@@ -737,7 +729,7 @@ onUnmounted(() => {
           <!-- Empty state -->
           <prime-card
             v-else-if="!loading && ordersByStatus[col.key].length === 0"
-            :pt="{ 
+            :pt="{
               root: { class: `${appCard} tw:border-dashed! tw:py-10 ` },
              }"
           >
@@ -746,7 +738,7 @@ onUnmounted(() => {
                 class="tw:flex tw:flex-col tw:items-center tw:justify-center app-text-muted tw:text-sm tw:text-center tw:opacity-50"
               >
                 <iconify icon="ph:tray-bold" class="tw:text-2xl tw:mb-2" />
-                <span>No orders</span>
+                <span>{{ t('orders.kanban.noOrders') }}</span>
               </div>
             </template>
           </prime-card>
@@ -769,7 +761,7 @@ onUnmounted(() => {
             "
             @dragstart="handleDragStart(order)"
             @dragend="handleDragEnd"
-            :pt="{ 
+            :pt="{
               root: { class: `${appCard} ${cardRing} tw:p-4 tw:space-y-3 tw:transition-all` },
               body: { class: 'tw:p-0!' } }"
           >
@@ -848,16 +840,16 @@ onUnmounted(() => {
                       (e) =>
                         confirm.require({
                           target: e.currentTarget,
-                          message: `Cancel order ${order.orderNumber}?`,
+                          message: t('orders.kanban.cancelTitle', { orderNumber: order.orderNumber }),
                           icon: 'ph:warning-bold',
                           rejectProps: {
-                            label: 'Keep',
+                            label: t('orders.kanban.keepOrder'),
                             severity: 'secondary',
                             outlined: true,
                             size: 'small',
                           },
                           acceptProps: {
-                            label: 'Yes, cancel',
+                            label: t('orders.kanban.confirmCancel'),
                             severity: 'danger',
                             size: 'small',
                           },
@@ -866,7 +858,7 @@ onUnmounted(() => {
                     "
                   >
                     <iconify icon="ph:x-circle" />
-                    <span>Cancel</span>
+                    <span>{{ t('orders.cancel') }}</span>
                   </prime-button>
                 </div>
                 <prime-button
@@ -881,7 +873,7 @@ onUnmounted(() => {
                   @click="openPayDialog(order)"
                 >
                   <iconify icon="ph:money-bold" />
-                  <span>Mark paid</span>
+                  <span>{{ t('orders.kanban.markPaid') }}</span>
                 </prime-button>
                 <prime-button
                   severity="secondary"
@@ -895,7 +887,7 @@ onUnmounted(() => {
                   "
                 >
                   <iconify icon="ph:arrow-square-out-bold" />
-                  <span>View detail</span>
+                  <span>{{ t('orders.kanban.viewDetail') }}</span>
                 </prime-button>
               </div>
             </template>

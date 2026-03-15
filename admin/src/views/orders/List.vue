@@ -12,6 +12,7 @@ import { PAYMENT_STATUS, PAYMENT_STATUS_MAP } from "@/constants/paymentStatus";
 import { PAYMENT_METHOD, PAYMENT_METHOD_MAP } from "@/constants/paymentMethod";
 
 const router = useRouter();
+const { t } = useI18n()
 
 // ── Table state cache ─────────────────────────────────────────────
 const { save: saveCache, restore: restoreCache } = useTableCache("orders-list");
@@ -19,9 +20,9 @@ const { save: saveCache, restore: restoreCache } = useTableCache("orders-list");
 // ── Data ──────────────────────────────────────────────────────────
 const orders = ref([]);             // current page only
 const totalRecords = ref(0);        // from server
-const cashTotal = ref(0);           // tổng tiền mặt đã thu (PAID + CASH)
-const bankTransferTotal = ref(0);   // tổng chuyển khoản đã thu (PAID + BANK_TRANSFER)
-const tipTotal = ref(0);            // tổng tiền tip đã nhận (PAID)
+const cashTotal = ref(0);           // total cash collected (PAID + CASH)
+const bankTransferTotal = ref(0);   // total bank transfers collected (PAID + BANK_TRANSFER)
+const tipTotal = ref(0);            // total tips received (PAID)
 const pendingCount = ref(0);
 const processingCount = ref(0);
 const completedCount = ref(0);
@@ -41,8 +42,8 @@ const todayMidnight = () => {
 };
 
 // Server-side: trigger API reload
-const dateFrom = ref(todayMidnight());  // mặc định: hôm nay
-const dateTo = ref(todayMidnight());    // mặc định: hôm nay
+const dateFrom = ref(todayMidnight());  // default: today
+const dateTo = ref(todayMidnight());    // default: today
 const statusFilter = ref(null);
 
 // Client-side: filter within current page
@@ -53,7 +54,7 @@ const minTotal = ref(null);
 const maxTotal = ref(null);
 const tableCodeFilter = ref("");
 
-// ── Restore cached state (trước khi watchers kích hoạt) ──────────
+// ── Restore cached state (before watchers fire) ───────────────────
 const _cached = restoreCache();
 if (_cached) {
   if (_cached.rows !== undefined)              rows.value              = _cached.rows;
@@ -65,7 +66,7 @@ if (_cached) {
   if (_cached.tableCodeFilter !== undefined)   tableCodeFilter.value   = _cached.tableCodeFilter;
   if (_cached.minTotal !== undefined)          minTotal.value          = _cached.minTotal;
   if (_cached.maxTotal !== undefined)          maxTotal.value          = _cached.maxTotal;
-  // Date được lưu dạng ISO string → khôi phục thành Date object
+  // Dates are stored as ISO strings → restore as Date objects
   if (_cached.dateFrom) dateFrom.value = new Date(_cached.dateFrom);
   if (_cached.dateTo)   dateTo.value   = new Date(_cached.dateTo);
 }
@@ -77,29 +78,29 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
   useWidgetSettings('orders-list', [
     {
       id: 'total',
-      label: 'Total orders',
-      description: 'Tổng số đơn hàng trong khoảng thời gian được chọn.',
+      label: t('orders.widgets.totalOrders'),
+      description: t('orders.widgets.totalOrdersListDesc'),
       previewComponent: WidgetOrdersSummary,
       previewProps: { total: 128, pending: 18, processing: 8, completed: 98, cancelled: 4 },
     },
     {
       id: 'revenue',
-      label: 'Total revenue',
-      description: 'Tổng doanh thu đã thu, gồm tiền mặt và chuyển khoản.',
+      label: t('orders.widgets.totalRevenue'),
+      description: t('orders.widgets.totalRevenueListDesc'),
       previewComponent: WidgetOrdersRevenue,
       previewProps: { total: 4250000, cash: 2400000, bank: 1650000, tip: 200000 },
     },
     {
       id: 'cash',
-      label: 'Cash collected',
-      description: 'Tổng tiền mặt đã thu từ các đơn đã thanh toán.',
+      label: t('orders.widgets.cashCollected'),
+      description: t('orders.widgets.cashCollected'),
       previewComponent: WidgetStat,
       previewProps: { label: 'Cash collected', value: '2,400,000 ₫', labelClass: 'tw:text-emerald-400' },
     },
     {
       id: 'bank',
-      label: 'Bank transfer',
-      description: 'Tổng chuyển khoản ngân hàng từ các đơn đã thanh toán.',
+      label: t('orders.widgets.bankTransfer'),
+      description: t('orders.widgets.bankTransfer'),
       previewComponent: WidgetStat,
       previewProps: { label: 'Bank transfer', value: '1,850,000 ₫', labelClass: 'tw:text-blue-400' },
     },
@@ -107,20 +108,20 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
 const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
 const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 
-const statusOptions = Object.entries(ORDER_STATUS_MAP).map(([value, meta]) => ({
-  label: meta.label,
+const statusOptions = computed(() => Object.entries(ORDER_STATUS_MAP).map(([value]) => ({
+  label: t(`orders.status.${value}`),
   value,
-}));
+})))
 
-const paymentStatusOptions = Object.entries(PAYMENT_STATUS_MAP).map(([value, meta]) => ({
-  label: meta.label,
+const paymentStatusOptions = computed(() => Object.entries(PAYMENT_STATUS_MAP).map(([value]) => ({
+  label: t(`orders.paymentStatus.${value}`),
   value,
-}));
+})))
 
-const paymentMethodOptions = [
-  { label: PAYMENT_METHOD_MAP[PAYMENT_METHOD.CASH].label, value: PAYMENT_METHOD.CASH },
-  { label: PAYMENT_METHOD_MAP[PAYMENT_METHOD.BANK_TRANSFER].label, value: PAYMENT_METHOD.BANK_TRANSFER },
-];
+const paymentMethodOptions = computed(() => [
+  { label: t('orders.paymentMethod.CASH'), value: PAYMENT_METHOD.CASH },
+  { label: t('orders.paymentMethod.BANK_TRANSFER'), value: PAYMENT_METHOD.BANK_TRANSFER },
+])
 
 const activeFilterCount = computed(() => {
   let n = 0;
@@ -185,16 +186,19 @@ const formatDate = (dateStr) =>
     minute: "2-digit",
   }).format(new Date(dateStr));
 
-const statusTag = (status) =>
-  ORDER_STATUS_MAP[status] ?? { severity: "secondary", label: status };
+const statusTag = (status) => {
+  const meta = ORDER_STATUS_MAP[status] ?? { severity: 'secondary' }
+  return { ...meta, label: t(`orders.status.${status}`, status) }
+}
 
 const paymentTag = (status, method) => {
   if (status === PAYMENT_STATUS.PAID) {
-    const m = PAYMENT_METHOD_MAP[method]?.label ?? "";
-    return { label: m ? `Paid · ${m}` : "Paid", severity: "success" };
+    const m = t(`orders.paymentMethod.${method}`, '')
+    return { label: m ? t('orders.pay.paidWith', { method: m }) : t('orders.paymentStatus.PAID'), severity: 'success' }
   }
-  return PAYMENT_STATUS_MAP[status] ?? { label: "Unpaid", severity: "warn" };
-};
+  const meta = PAYMENT_STATUS_MAP[status] ?? { severity: 'warn' }
+  return { ...meta, label: t(`orders.paymentStatus.${status}`, meta.label ?? status) }
+}
 
 // ── Load ──────────────────────────────────────────────────────────
 const saveCurrentState = () => {
@@ -252,7 +256,7 @@ const loadOrders = async () => {
 
 onMounted(loadOrders);
 
-// Re-fetch khi bất kỳ filter nào thay đổi — reset về trang 1
+// Re-fetch whenever any filter changes — reset to page 1
 watch(
   [statusFilter, paymentStatusFilter, paymentMethodFilter, dateFrom, dateTo, searchOrder, tableCodeFilter, minTotal, maxTotal],
   () => {
@@ -268,16 +272,16 @@ const onPage = (e) => {
   loadOrders();
 };
 
-const columns = [
-  { field: 'orderNumber',   header: 'Order #',   width: '9rem' },
-  { field: 'orderDate',     header: 'Date',      width: '10rem' },
-  { field: 'status',        header: 'Status',    width: '8rem' },
-  { field: 'paymentStatus', header: 'Payment',   width: '10rem' },
-  { key: 'items',           header: 'Items',     width: '14rem' },
-  { key: 'promos',          header: 'Discount',  width: '11rem' },
-  { field: 'totalAmount',   header: 'Total',     width: '9rem' },
-  { key: 'actions',         header: 'Actions',   width: '12rem', toggleable: false },
-]
+const columns = computed(() => [
+  { field: 'orderNumber',   header: t('orders.list.col.orderNumber'), width: '9rem' },
+  { field: 'orderDate',     header: t('orders.list.col.date'),        width: '10rem' },
+  { field: 'status',        header: t('orders.list.col.status'),      width: '8rem' },
+  { field: 'paymentStatus', header: t('orders.list.col.payment'),     width: '10rem' },
+  { key: 'items',           header: t('orders.list.col.items'),       width: '14rem' },
+  { key: 'promos',          header: t('orders.list.col.discount'),    width: '11rem' },
+  { field: 'totalAmount',   header: t('orders.list.col.total'),       width: '9rem' },
+  { key: 'actions',         header: t('orders.list.col.actions'),     width: '12rem', toggleable: false },
+])
 
 // ── Payment dialog ────────────────────────────────────────────────
 const payDialog = ref(false);
@@ -286,10 +290,10 @@ const payMethod = ref(PAYMENT_METHOD.CASH);
 const payAmountReceived = ref(null);
 const payLoading = ref(false);
 
-const PAYMENT_METHODS = [
-  { label: "Cash", value: PAYMENT_METHOD.CASH, icon: "ph:money-bold" },
-  { label: "Bank Transfer", value: PAYMENT_METHOD.BANK_TRANSFER, icon: "ph:bank-bold" },
-];
+const PAYMENT_METHODS = computed(() => [
+  { label: t('orders.paymentMethod.CASH'), value: PAYMENT_METHOD.CASH, icon: 'ph:money-bold' },
+  { label: t('orders.paymentMethod.BANK_TRANSFER'), value: PAYMENT_METHOD.BANK_TRANSFER, icon: 'ph:bank-bold' },
+])
 
 const payChange = computed(() => {
   if (payAmountReceived.value == null || !payOrder.value) return null;
@@ -343,13 +347,13 @@ const confirmPayment = async () => {
   <!-- Payment dialog -->
   <prime-dialog
     v-model:visible="payDialog"
-    header="Mark as Paid"
+    :header="t('orders.pay.title')"
     :modal="true"
     :style="{ width: '22rem' }"
   >
     <div class="tw:space-y-4">
       <p class="tw:text-sm app-text-muted">
-        Order
+        {{ t('orders.pay.order') }}
         <span class="tw:font-mono tw:font-semibold tw:text-white">{{
           payOrder?.orderNumber
         }}</span>
@@ -357,7 +361,7 @@ const confirmPayment = async () => {
       <!-- Amount received -->
       <div class="tw:space-y-1.5">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
-          >Amount received</label
+          >{{ t('orders.pay.amountReceived') }}</label
         >
         <prime-input-number
           v-model="payAmountReceived"
@@ -372,7 +376,7 @@ const confirmPayment = async () => {
           v-if="payChange !== null && payChange < 0"
           class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5"
         >
-          <span class="app-text-muted">Short</span>
+          <span class="app-text-muted">{{ t('orders.pay.short') }}</span>
           <span class="tw:text-red-400 tw:font-semibold">{{
             formatVnd(Math.abs(payChange))
           }}</span>
@@ -381,13 +385,13 @@ const confirmPayment = async () => {
           <div
             class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5"
           >
-            <span class="app-text-muted">Change</span>
+            <span class="app-text-muted">{{ t('orders.pay.change') }}</span>
             <span class="tw:font-semibold">{{ formatVnd(payChange) }}</span>
           </div>
           <div class="tw:space-y-1">
             <label
               class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
-              >Tip</label
+              >{{ t('orders.pay.tip') }}</label
             >
             <div class="tw:flex tw:gap-2">
               <prime-input-number
@@ -402,7 +406,7 @@ const confirmPayment = async () => {
               <prime-button
                 severity="secondary"
                 outlined
-                v-tooltip.top="'Keep all as tip'"
+                v-tooltip.top="t('orders.pay.keepAllAsTip')"
                 @click="payTip = payChange"
               >
                 <iconify icon="ph:heart-bold" />
@@ -410,7 +414,7 @@ const confirmPayment = async () => {
             </div>
           </div>
           <div class="tw:flex tw:items-center tw:justify-between tw:text-sm">
-            <span class="app-text-muted">Return to customer</span>
+            <span class="app-text-muted">{{ t('orders.pay.returnToCustomer') }}</span>
             <span
               :class="
                 payReturn === 0
@@ -425,7 +429,7 @@ const confirmPayment = async () => {
       </div>
       <div class="tw:space-y-2">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
-          >Payment method</label
+          >{{ t('orders.pay.paymentMethod') }}</label
         >
         <prime-select-button
           v-model="payMethod"
@@ -446,7 +450,7 @@ const confirmPayment = async () => {
     </div>
     <template #footer>
       <prime-button severity="secondary" outlined @click="payDialog = false"
-        >Cancel</prime-button
+        >{{ t('orders.cancel') }}</prime-button
       >
       <prime-button
         severity="success"
@@ -454,74 +458,61 @@ const confirmPayment = async () => {
         @click="confirmPayment"
       >
         <iconify icon="ph:check-bold" />
-        <span>Confirm payment</span>
+        <span>{{ t('orders.pay.confirmPayment') }}</span>
       </prime-button>
     </template>
   </prime-dialog>
 
   <section class="tw:space-y-8">
     <!-- Header -->
-    <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
-      <div>
-        <p
-          class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
-        >
-          Orders
-        </p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Order management</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
-          Full order history with payment status.
-        </p>
-      </div>
-      <div class="tw:flex tw:items-center tw:gap-2">
-        <!-- New Order -->
-        <prime-button
-          severity="success"
-          size="small"
-          @click="router.push({ name: 'ordersCreate' })"
-        >
-          <iconify icon="ph:plus-bold" class="tw:mr-1" />
-          <span>New Order</span>
-        </prime-button>
-        <!-- View toggle -->
-        <div
-          class="tw:flex tw:items-center tw:rounded-lg tw:border tw:border-white/10 tw:p-1 tw:gap-1"
-        >
-          <prime-button
-            severity="secondary"
-            text
-            size="small"
-            v-tooltip.top="'Kanban'"
-            :class="btnIcon"
-            @click="router.push({ name: 'orders' })"
-          >
-            <iconify icon="ph:kanban-bold" />
-          </prime-button>
-          <prime-button severity="primary" size="small" v-tooltip.top="'List'" :class="btnIcon">
-            <iconify icon="ph:list-bold" />
-          </prime-button>
-        </div>
-        <!-- Widget settings -->
-        <widget-settings-button
-          :widgets="wDefs"
-          :hidden-count="wHidden"
-          :cols-per-row="wCols"
-          @toggle="wToggle"
-          @update:cols-per-row="wSetCols"
-        />
-        <!-- Refresh -->
+    <page-header :subtitle="t('orders.list.subtitle')">
+      <!-- New Order -->
+      <prime-button
+        severity="success"
+        size="small"
+        @click="router.push({ name: 'ordersCreate' })"
+      >
+        <iconify icon="ph:plus-bold" class="tw:mr-1" />
+        <span>{{ t('orders.newOrder') }}</span>
+      </prime-button>
+      <!-- View toggle -->
+      <div
+        class="tw:flex tw:items-center tw:rounded-lg tw:border tw:border-white/10 tw:p-1 tw:gap-1"
+      >
         <prime-button
           severity="secondary"
-          outlined
+          text
           size="small"
-          :loading="loading"
-          @click="loadOrders"
+          v-tooltip.top="'Kanban'"
+          :class="btnIcon"
+          @click="router.push({ name: 'orders' })"
         >
-          <iconify icon="ph:arrows-clockwise-bold" class="tw:mr-1" />
-          <span>Refresh</span>
+          <iconify icon="ph:kanban-bold" />
+        </prime-button>
+        <prime-button severity="primary" size="small" v-tooltip.top="'List'" :class="btnIcon">
+          <iconify icon="ph:list-bold" />
         </prime-button>
       </div>
-    </div>
+      <!-- Widget settings -->
+      <widget-settings-button
+        :widgets="wDefs"
+        :hidden-count="wHidden"
+        :cols-per-row="wCols"
+        @toggle="wToggle"
+        @update:cols-per-row="wSetCols"
+      />
+      <!-- Refresh -->
+      <prime-button
+        severity="secondary"
+        outlined
+        size="small"
+        :loading="loading"
+        @click="loadOrders"
+      >
+        <iconify icon="ph:arrows-clockwise-bold" class="tw:mr-1" />
+        <span>{{ t('orders.refresh') }}</span>
+      </prime-button>
+    </page-header>
 
     <!-- Summary stats -->
     <div :class="['tw:grid tw:gap-3', wColsClass]">
@@ -542,7 +533,7 @@ const confirmPayment = async () => {
       />
       <widget-stat
         v-if="wVisible('cash')"
-        label="Cash collected"
+        :label="t('orders.widgets.cashCollected')"
         label-class="tw:text-emerald-400"
         :value="formatVnd(summary.cash)"
       >
@@ -552,7 +543,7 @@ const confirmPayment = async () => {
       </widget-stat>
       <widget-stat
         v-if="wVisible('bank')"
-        label="Bank transfer"
+        :label="t('orders.widgets.bankTransfer')"
         label-class="tw:text-blue-400"
         :value="formatVnd(summary.bank)"
       >
@@ -590,7 +581,7 @@ const confirmPayment = async () => {
           <!-- Search by order number (server-side) -->
           <prime-input-text
             v-model="searchOrder"
-            placeholder="Search order #…"
+            :placeholder="t('orders.filter.searchOrder')"
             class="app-input tw:w-48"
           />
 
@@ -598,12 +589,12 @@ const confirmPayment = async () => {
           <prime-button
             :severity="hasActiveFilters ? 'success' : 'secondary'"
             :outlined="!hasActiveFilters"
-            v-tooltip.top="'Filters'"
+            v-tooltip.top="t('orders.filter.filters')"
             @click="filterPanel.toggle($event)"
             :class="!hasActiveFilters ? btnIcon : ''"
           >
             <iconify icon="ph:funnel-bold" />
-            <span>Filters</span>
+            <span>{{ t('orders.filter.filters') }}</span>
             <prime-badge
               v-if="activeFilterCount > 0"
               :value="activeFilterCount"
@@ -615,20 +606,20 @@ const confirmPayment = async () => {
           <!-- Filter popover -->
           <prime-popover ref="filterPanel">
             <div class="tw:flex tw:flex-col tw:gap-4 tw:w-full">
-              <p class="tw:text-sm tw:font-semibold">Filter orders</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('orders.filter.title') }}</p>
 
               <!-- Date range (server-side) -->
               <div class="tw:space-y-1.5">
                 <label
                   for="dateFrom"
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
-                  >Date range</label
+                  >{{ t('orders.filter.dateRange') }}</label
                 >
                 <div class="tw:flex tw:items-center tw:gap-2">
                   <prime-date-picker
                     id="dateFrom"
                     v-model="dateFrom"
-                    placeholder="From"
+                    :placeholder="t('orders.filter.dateFrom')"
                     date-format="dd/mm/yy"
                     show-button-bar
                     class="app-input tw:flex-1"
@@ -636,7 +627,7 @@ const confirmPayment = async () => {
                   <span class="app-text-muted tw:text-sm">–</span>
                   <prime-date-picker
                     v-model="dateTo"
-                    placeholder="To"
+                    :placeholder="t('orders.filter.dateTo')"
                     date-format="dd/mm/yy"
                     show-button-bar
                     class="app-input tw:flex-1"
@@ -648,14 +639,14 @@ const confirmPayment = async () => {
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
-                  >Order status</label
+                  >{{ t('orders.filter.orderStatus') }}</label
                 >
                 <prime-select
                   v-model="statusFilter"
                   :options="statusOptions"
                   option-label="label"
                   option-value="value"
-                  placeholder="All statuses"
+                  :placeholder="t('orders.filter.allStatuses')"
                   show-clear
                   class="app-input tw:w-full"
                 />
@@ -665,14 +656,14 @@ const confirmPayment = async () => {
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
-                  >Payment status</label
+                  >{{ t('orders.filter.paymentStatus') }}</label
                 >
                 <prime-select
                   v-model="paymentStatusFilter"
                   :options="paymentStatusOptions"
                   option-label="label"
                   option-value="value"
-                  placeholder="All payments"
+                  :placeholder="t('orders.filter.allPayments')"
                   show-clear
                   class="app-input tw:w-full"
                 />
@@ -682,14 +673,14 @@ const confirmPayment = async () => {
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
-                  >Payment method</label
+                  >{{ t('orders.filter.paymentMethod') }}</label
                 >
                 <prime-select
                   v-model="paymentMethodFilter"
                   :options="paymentMethodOptions"
                   option-label="label"
                   option-value="value"
-                  placeholder="All methods"
+                  :placeholder="t('orders.filter.allMethods')"
                   show-clear
                   class="app-input tw:w-full"
                 />
@@ -699,12 +690,12 @@ const confirmPayment = async () => {
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
-                  >Total (VND)</label
+                  >{{ t('orders.filter.total') }}</label
                 >
                 <div class="tw:flex tw:items-center tw:gap-2">
                   <prime-input-number
                     v-model="minTotal"
-                    placeholder="Min"
+                    :placeholder="t('orders.filter.min')"
                     :min="0"
                     :use-grouping="true"
                     class="app-input tw:flex-1"
@@ -712,7 +703,7 @@ const confirmPayment = async () => {
                   <span class="app-text-muted tw:text-sm">–</span>
                   <prime-input-number
                     v-model="maxTotal"
-                    placeholder="Max"
+                    :placeholder="t('orders.filter.max')"
                     :min="0"
                     :use-grouping="true"
                     class="app-input tw:flex-1"
@@ -724,11 +715,11 @@ const confirmPayment = async () => {
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
-                  >Table</label
+                  >{{ t('orders.filter.table') }}</label
                 >
                 <prime-input-text
                   v-model="tableCodeFilter"
-                  placeholder="Table code…"
+                  :placeholder="t('orders.filter.tableCode')"
                   class="app-input tw:w-full"
                 />
               </div>
@@ -742,7 +733,7 @@ const confirmPayment = async () => {
                 @click="clearFilters"
               >
                 <iconify icon="ph:x-bold" />
-                <span>Clear filters</span>
+                <span>{{ t('orders.filter.clearFilters') }}</span>
               </prime-button>
             </div>
           </prime-popover>
@@ -789,7 +780,7 @@ const confirmPayment = async () => {
             v-if="(data.items?.length ?? 0) > 3"
             class="tw:text-[10px] app-text-subtle tw:italic"
           >
-            +{{ data.items.length - 3 }} more
+            {{ t('orders.list.moreItems', { n: data.items.length - 3 }) }}
           </span>
         </div>
       </template>
@@ -845,7 +836,7 @@ const confirmPayment = async () => {
             @click="openPayDialog(data)"
           >
             <iconify icon="ph:money-bold" />
-            <span>Mark paid</span>
+            <span>{{ t('orders.list.markPaid') }}</span>
           </prime-button>
           <prime-button
             severity="secondary"

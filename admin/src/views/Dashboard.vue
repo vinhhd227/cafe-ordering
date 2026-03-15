@@ -1,7 +1,14 @@
 <script setup>
-import { useRouter } from "vue-router";
-
 const router = useRouter();
+const { t, locale } = useI18n()
+
+// ── Dynamic date subtitle ──────────────────────────────────────────
+const todayLabel = computed(() => {
+  return new Intl.DateTimeFormat(
+    locale.value === 'vi' ? 'vi-VN' : 'en-US',
+    { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }
+  ).format(new Date())
+})
 
 // ── Fake data ─────────────────────────────────────────────────────
 
@@ -128,18 +135,18 @@ const tablesOccupancy = computed(() =>
   Math.round((kpi.tables.occupied / kpi.tables.total) * 100)
 )
 
-const tableStatusMeta = {
-  AVAILABLE: { label: "Trống",      color: "tw:bg-emerald-500/80", ring: "tw:ring-emerald-500/30", dot: "tw:bg-emerald-500", icon: "ph:coffee-bold"  },
-  OCCUPIED:  { label: "Có khách",   color: "tw:bg-blue-500/80",    ring: "tw:ring-blue-500/30",    dot: "tw:bg-blue-500",    icon: "ph:user-bold"    },
-  CLEANING:  { label: "Đang order", color: "tw:bg-amber-400/80",   ring: "tw:ring-amber-400/30",   dot: "tw:bg-amber-400",   icon: "ph:receipt-bold" },
-};
+const tableStatusMeta = computed(() => ({
+  AVAILABLE: { label: t('dashboard.tableStatus.available'), color: "tw:bg-emerald-500/80", ring: "tw:ring-emerald-500/30", dot: "tw:bg-emerald-500", icon: "ph:coffee-bold"  },
+  OCCUPIED:  { label: t('dashboard.tableStatus.occupied'),  color: "tw:bg-blue-500/80",    ring: "tw:ring-blue-500/30",    dot: "tw:bg-blue-500",    icon: "ph:user-bold"    },
+  CLEANING:  { label: t('dashboard.tableStatus.ordering'),  color: "tw:bg-amber-400/80",   ring: "tw:ring-amber-400/30",   dot: "tw:bg-amber-400",   icon: "ph:receipt-bold" },
+}))
 
-const orderStatusMeta = {
-  PENDING:    { label: "Pending",    severity: "warn"      },
-  PROCESSING: { label: "Processing", severity: "info"      },
-  COMPLETED:  { label: "Completed",  severity: "success"   },
-  CANCELLED:  { label: "Cancelled",  severity: "danger"    },
-};
+const orderStatusMeta = computed(() => ({
+  PENDING:    { label: t('orders.status.PENDING'),    severity: "warn"    },
+  PROCESSING: { label: t('orders.status.PROCESSING'), severity: "info"    },
+  COMPLETED:  { label: t('orders.status.COMPLETED'),  severity: "success" },
+  CANCELLED:  { label: t('orders.status.CANCELLED'),  severity: "danger"  },
+}))
 
 // ── SVG Revenue Chart ─────────────────────────────────────────────
 // viewBox 560 × 120, padding left 0, right 0
@@ -186,27 +193,19 @@ const expensesArea = buildArea("expenses");
   <section class="tw:space-y-6">
 
     <!-- ── Header ──────────────────────────────────────────────────── -->
-    <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
-      <div>
-        <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
-          Overview
-        </p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Dashboard</h1>
-        <p class="tw:mt-1 tw:text-sm app-text-muted">
-          Thứ Hai, 10/03/2026 &mdash; Snapshot hôm nay
-        </p>
-      </div>
-      <div class="tw:flex tw:items-center tw:gap-2">
-        <prime-button severity="secondary" outlined size="small" @click="router.push({ name: 'orders' })">
-          <iconify icon="ph:receipt-bold" class="tw:mr-1" />
-          <span>Xem đơn hàng</span>
-        </prime-button>
-        <prime-button severity="success" size="small" @click="router.push({ name: 'orders-create' })">
-          <iconify icon="ph:plus-bold" class="tw:mr-1" />
-          <span>Tạo đơn mới</span>
-        </prime-button>
-      </div>
-    </div>
+    <page-header>
+      <template #subtitle>
+        <p class="tw:text-sm app-text-muted">{{ todayLabel }} &mdash; {{ t('dashboard.snapshotToday') }}</p>
+      </template>
+      <prime-button severity="secondary" outlined size="small" @click="router.push({ name: 'orders' })">
+        <iconify icon="ph:receipt-bold" class="tw:mr-1" />
+        <span>{{ t('dashboard.viewOrders') }}</span>
+      </prime-button>
+      <prime-button severity="success" size="small" @click="router.push({ name: 'ordersCreate' })">
+        <iconify icon="ph:plus-bold" class="tw:mr-1" />
+        <span>{{ t('dashboard.newOrder') }}</span>
+      </prime-button>
+    </page-header>
 
     <!-- ── KPI Row ──────────────────────────────────────────────────── -->
     <div class="tw:grid tw:grid-cols-2 tw:gap-4 tw:lg:grid-cols-4">
@@ -215,7 +214,7 @@ const expensesArea = buildArea("expenses");
       <prime-card class="app-card tw:rounded-2xl tw:border">
         <template #content>
           <div class="tw:flex tw:items-start tw:justify-between">
-            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">Revenue</p>
+            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">{{ t('dashboard.kpi.revenue') }}</p>
             <iconify icon="ph:trend-up-bold" class="tw:text-emerald-400 tw:opacity-60 tw:text-lg" />
           </div>
           <p class="tw:mt-3 tw:text-2xl tw:font-bold tw:tracking-tight">{{ fmt(kpi.revenue.total) }}</p>
@@ -229,11 +228,11 @@ const expensesArea = buildArea("expenses");
               <iconify :icon="revenueDelta.up ? 'ph:trend-up-bold' : 'ph:trend-down-bold'" />
               {{ revenueDelta.up ? '+' : '' }}{{ revenueDelta.pct }}%
             </span>
-            <span class="tw:text-xs app-text-subtle">so với hôm qua</span>
+            <span class="tw:text-xs app-text-subtle">{{ t('dashboard.kpi.vsYesterday') }}</span>
           </div>
           <div class="tw:mt-2 tw:flex tw:gap-x-3 tw:text-xs app-text-muted tw:flex-wrap">
-            <span>Tiền mặt <span class="tw:text-white/70 tw:font-medium">{{ fmtK(kpi.revenue.cash) }}₫</span></span>
-            <span>CK <span class="tw:text-white/70 tw:font-medium">{{ fmtK(kpi.revenue.bank) }}₫</span></span>
+            <span>{{ t('dashboard.kpi.cash') }} <span class="tw:text-white/70 tw:font-medium">{{ fmtK(kpi.revenue.cash) }}₫</span></span>
+            <span>{{ t('dashboard.kpi.bank') }} <span class="tw:text-white/70 tw:font-medium">{{ fmtK(kpi.revenue.bank) }}₫</span></span>
           </div>
         </template>
       </prime-card>
@@ -242,33 +241,33 @@ const expensesArea = buildArea("expenses");
       <prime-card class="app-card tw:rounded-2xl tw:border">
         <template #content>
           <div class="tw:flex tw:items-start tw:justify-between">
-            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">Orders</p>
+            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">{{ t('dashboard.kpi.orders') }}</p>
             <iconify icon="ph:receipt-bold" class="tw:text-blue-400 tw:opacity-60 tw:text-lg" />
           </div>
           <p class="tw:mt-3 tw:text-2xl tw:font-bold tw:tracking-tight">{{ kpi.orders.total }}</p>
           <div class="tw:mt-3 tw:flex tw:gap-x-2 tw:flex-wrap">
             <prime-tag v-if="kpi.orders.pending"    severity="warn"    class="tw:text-[10px]! tw:inline-flex tw:items-center tw:gap-1">
-              <iconify icon="ph:hourglass-bold" class="tw:text-[11px]" /> Pending {{ kpi.orders.pending }}
+              <iconify icon="ph:hourglass-bold" class="tw:text-[11px]" /> {{ t('orders.status.PENDING') }} {{ kpi.orders.pending }}
             </prime-tag>
             <prime-tag v-if="kpi.orders.processing" severity="info"    class="tw:text-[10px]! tw:inline-flex tw:items-center tw:gap-1">
-              <iconify icon="ph:arrows-clockwise-bold" class="tw:text-[11px]" /> Processing {{ kpi.orders.processing }}
+              <iconify icon="ph:arrows-clockwise-bold" class="tw:text-[11px]" /> {{ t('orders.status.PROCESSING') }} {{ kpi.orders.processing }}
             </prime-tag>
             <prime-tag v-if="kpi.orders.completed"  severity="success" class="tw:text-[10px]! tw:inline-flex tw:items-center tw:gap-1">
-              <iconify icon="ph:check-circle-bold" class="tw:text-[11px]" /> Completed {{ kpi.orders.completed }}
+              <iconify icon="ph:check-circle-bold" class="tw:text-[11px]" /> {{ t('orders.status.COMPLETED') }} {{ kpi.orders.completed }}
             </prime-tag>
           </div>
           <div class="tw:mt-2 tw:flex tw:gap-x-3 tw:text-xs app-text-muted tw:flex-wrap">
             <span class="tw:inline-flex tw:items-center tw:gap-1">
               <iconify icon="ph:calculator-bold" />
-              Avg <span class="tw:text-white/70 tw:font-medium">{{ fmtK(kpi.orders.avgOrder) }}₫</span>
+              {{ t('dashboard.kpi.avg') }} <span class="tw:text-white/70 tw:font-medium">{{ fmtK(kpi.orders.avgOrder) }}₫</span>
             </span>
             <span class="tw:inline-flex tw:items-center tw:gap-1">
               <iconify icon="ph:bag-bold" />
-              Takeaway <span class="tw:text-white/70 tw:font-medium">{{ kpi.orders.takeaway }}</span>
+              {{ t('orders.serving.takeaway') }} <span class="tw:text-white/70 tw:font-medium">{{ kpi.orders.takeaway }}</span>
             </span>
             <span class="tw:inline-flex tw:items-center tw:gap-1">
               <iconify icon="ph:fork-knife-bold" />
-              Dine-in <span class="tw:text-white/70 tw:font-medium">{{ kpi.orders.dineIn }}</span>
+              {{ t('orders.serving.dineIn') }} <span class="tw:text-white/70 tw:font-medium">{{ kpi.orders.dineIn }}</span>
             </span>
           </div>
         </template>
@@ -278,13 +277,13 @@ const expensesArea = buildArea("expenses");
       <prime-card class="app-card tw:rounded-2xl tw:border">
         <template #content>
           <div class="tw:flex tw:items-start tw:justify-between">
-            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">Tables</p>
+            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">{{ t('dashboard.kpi.tables') }}</p>
             <iconify icon="ph:table-bold" class="tw:text-purple-400 tw:opacity-60 tw:text-lg" />
           </div>
           <!-- Occupancy rate -->
           <div class="tw:mt-3 tw:flex tw:items-end tw:justify-between">
             <p class="tw:text-2xl tw:font-bold tw:tracking-tight">{{ tablesOccupancy }}%</p>
-            <p class="tw:text-xs app-text-muted tw:mb-0.5">{{ kpi.tables.total }} tables</p>
+            <p class="tw:text-xs app-text-muted tw:mb-0.5">{{ t('dashboard.kpi.tablesCount', { n: kpi.tables.total }) }}</p>
           </div>
           <!-- Progress bar -->
           <div class="tw:mt-2 tw:h-1.5 tw:rounded-full tw:bg-white/10 tw:overflow-hidden">
@@ -293,20 +292,20 @@ const expensesArea = buildArea("expenses");
               :style="{ width: tablesOccupancy + '%' }"
             />
           </div>
-          <p class="tw:mt-1 tw:text-[10px] app-text-subtle">Occupancy rate</p>
+          <p class="tw:mt-1 tw:text-[10px] app-text-subtle">{{ t('dashboard.kpi.occupancyRate') }}</p>
           <!-- Breakdown -->
           <div class="tw:mt-3 tw:flex tw:gap-x-3 tw:text-xs app-text-muted">
             <span class="tw:inline-flex tw:items-center tw:gap-1">
               <iconify icon="ph:user-bold" class="tw:text-blue-400" />
-              Occupied <span class="tw:text-white/70 tw:font-medium">{{ kpi.tables.occupied }}</span>
+              {{ t('dashboard.kpi.occupied') }} <span class="tw:text-white/70 tw:font-medium">{{ kpi.tables.occupied }}</span>
             </span>
             <span class="tw:inline-flex tw:items-center tw:gap-1">
               <iconify icon="ph:check-bold" class="tw:text-emerald-400" />
-              Free <span class="tw:text-white/70 tw:font-medium">{{ kpi.tables.available }}</span>
+              {{ t('dashboard.kpi.free') }} <span class="tw:text-white/70 tw:font-medium">{{ kpi.tables.available }}</span>
             </span>
             <span class="tw:inline-flex tw:items-center tw:gap-1">
               <iconify icon="ph:clock-bold" class="tw:text-amber-400" />
-              Ordering <span class="tw:text-white/70 tw:font-medium">{{ kpi.tables.ordering }}</span>
+              {{ t('dashboard.kpi.ordering') }} <span class="tw:text-white/70 tw:font-medium">{{ kpi.tables.ordering }}</span>
             </span>
           </div>
         </template>
@@ -317,9 +316,9 @@ const expensesArea = buildArea("expenses");
         <template #content>
           <div class="tw:flex tw:items-start tw:justify-between">
             <div class="tw:flex tw:items-center tw:gap-1.5">
-              <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">Est. Profit</p>
+              <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">{{ t('dashboard.kpi.profit') }}</p>
               <span
-                v-tooltip.bottom="'Chưa bao gồm: nhân sự, điện nước, thuê mặt bằng'"
+                v-tooltip.bottom="t('dashboard.kpi.profitTooltip')"
                 class="tw:inline-flex tw:items-center tw:justify-center tw:size-3.5 tw:rounded-full tw:bg-white/10 tw:cursor-help"
               >
                 <iconify icon="ph:question-bold" class="tw:text-[8px] app-text-muted" />
@@ -331,10 +330,10 @@ const expensesArea = buildArea("expenses");
             {{ fmt(kpi.profit.amount) }}
           </p>
           <div class="tw:mt-2 tw:text-xs app-text-muted">
-            Margin
+            {{ t('dashboard.kpi.margin') }}
             <span class="tw:text-emerald-400 tw:font-semibold tw:ml-1">{{ kpi.profit.margin }}%</span>
           </div>
-          <p class="tw:mt-2 tw:text-[10px] app-text-subtle tw:italic">* chưa gồm nhân sự, điện nước</p>
+          <p class="tw:mt-2 tw:text-[10px] app-text-subtle tw:italic">{{ t('dashboard.kpi.profitNote') }}</p>
         </template>
       </prime-card>
     </div>
@@ -347,17 +346,17 @@ const expensesArea = buildArea("expenses");
         <template #content>
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <div>
-              <p class="tw:text-sm tw:font-semibold">Doanh thu & Chi phí</p>
-              <p class="tw:text-xs app-text-muted">7 ngày gần nhất</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.charts.revExpenses') }}</p>
+              <p class="tw:text-xs app-text-muted">{{ t('dashboard.charts.last7days') }}</p>
             </div>
             <div class="tw:flex tw:items-center tw:gap-4 tw:text-xs app-text-muted">
               <span class="tw:flex tw:items-center tw:gap-1.5">
                 <span class="tw:inline-block tw:size-2 tw:rounded-full tw:bg-emerald-400"></span>
-                Revenue
+                {{ t('dashboard.charts.revenue') }}
               </span>
               <span class="tw:flex tw:items-center tw:gap-1.5">
                 <span class="tw:inline-block tw:size-2 tw:rounded-full tw:bg-red-400"></span>
-                Expenses
+                {{ t('dashboard.charts.expenses') }}
               </span>
             </div>
           </div>
@@ -416,8 +415,8 @@ const expensesArea = buildArea("expenses");
       <prime-card class="app-card tw:rounded-2xl tw:border">
         <template #content>
           <div class="tw:mb-4">
-            <p class="tw:text-sm tw:font-semibold">Đơn theo giờ</p>
-            <p class="tw:text-xs app-text-muted">Hôm nay — Peak: 12h ({{ maxOrdersHour }} đơn)</p>
+            <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.charts.ordersByHour') }}</p>
+            <p class="tw:text-xs app-text-muted">{{ t('dashboard.charts.todayPeakOrders', { h: '12h', n: maxOrdersHour }) }}</p>
           </div>
 
           <div class="tw:flex tw:items-end tw:gap-1 tw:h-24">
@@ -455,10 +454,10 @@ const expensesArea = buildArea("expenses");
           <div class="tw:mb-3">
             <p class="tw:text-sm tw:font-semibold tw:flex tw:items-center tw:gap-1.5">
               <iconify icon="ph:fire-bold" class="tw:text-emerald-400" />
-              Giờ vàng doanh thu
+              {{ t('dashboard.charts.heatmap') }}
             </p>
             <p class="tw:text-xs app-text-muted">
-              Hôm nay — Peak: {{ peakHour.h }} ({{ fmtK(peakHour.rev) }}₫)
+              {{ t('dashboard.charts.todayPeakRev', { h: peakHour.h, rev: fmtK(peakHour.rev) + '₫' }) }}
             </p>
           </div>
 
@@ -478,7 +477,7 @@ const expensesArea = buildArea("expenses");
 
           <!-- Intensity legend -->
           <div class="tw:mt-2.5 tw:flex tw:items-center tw:gap-1.5 tw:text-[10px] app-text-subtle">
-            <span>Thấp</span>
+            <span>{{ t('dashboard.charts.low') }}</span>
             <div class="tw:flex tw:gap-0.5 tw:flex-1">
               <div
                 v-for="c in heatLegend" :key="c"
@@ -486,17 +485,17 @@ const expensesArea = buildArea("expenses");
                 :style="{ backgroundColor: c }"
               />
             </div>
-            <span>Cao</span>
+            <span>{{ t('dashboard.charts.high') }}</span>
           </div>
 
           <!-- Peak insight -->
           <div class="tw:mt-3 tw:pt-3 tw:border-t tw:border-white/10">
             <p class="tw:text-xs tw:text-emerald-400 tw:font-semibold tw:flex tw:items-center tw:gap-1">
               <iconify icon="ph:lightning-bold" />
-              Peak {{ peakHour.h }} · {{ fmtK(peakHour.rev) }}₫
+              {{ t('dashboard.charts.peakLabel', { h: peakHour.h, rev: fmtK(peakHour.rev) + '₫' }) }}
             </p>
             <p class="tw:mt-1 tw:text-[11px] app-text-muted tw:leading-relaxed">
-              Chuẩn bị đá, topping, sữa trước
+              {{ t('dashboard.charts.prepareBefore') }}
               <span class="tw:text-white/70 tw:font-medium">11h45</span>
             </p>
           </div>
@@ -512,22 +511,22 @@ const expensesArea = buildArea("expenses");
         <template #content>
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <div>
-              <p class="tw:text-sm tw:font-semibold">Trạng thái bàn</p>
-              <p class="tw:text-xs app-text-muted">{{ kpi.tables.occupied }} đang có khách</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.tableStatus.title') }}</p>
+              <p class="tw:text-xs app-text-muted">{{ t('dashboard.tableStatus.occupiedCount', { n: kpi.tables.occupied }) }}</p>
             </div>
           </div>
 
           <div class="tw:grid tw:grid-cols-6 tw:gap-2">
             <button
-              v-for="t in tables"
-              :key="t.id"
+              v-for="tbl in tables"
+              :key="tbl.id"
               class="tw:aspect-square tw:rounded-xl tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-0.5 tw:ring-1 tw:transition-transform tw:hover:scale-105 tw:text-white"
-              :class="[tableStatusMeta[t.status].color, tableStatusMeta[t.status].ring]"
-              v-tooltip.top="tableStatusMeta[t.status].label"
+              :class="[tableStatusMeta[tbl.status].color, tableStatusMeta[tbl.status].ring]"
+              v-tooltip.top="tableStatusMeta[tbl.status].label"
               @click="router.push({ name: 'tables' })"
             >
-              <iconify :icon="tableStatusMeta[t.status].icon" class="tw:text-sm tw:opacity-90" />
-              <span class="tw:text-[9px] tw:font-semibold tw:opacity-90">{{ t.number }}</span>
+              <iconify :icon="tableStatusMeta[tbl.status].icon" class="tw:text-sm tw:opacity-90" />
+              <span class="tw:text-[9px] tw:font-semibold tw:opacity-90">{{ tbl.number }}</span>
             </button>
           </div>
 
@@ -548,8 +547,8 @@ const expensesArea = buildArea("expenses");
         <template #content>
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <div>
-              <p class="tw:text-sm tw:font-semibold">Đơn hàng gần đây</p>
-              <p class="tw:text-xs app-text-muted">Cập nhật liên tục</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.recentOrders.title') }}</p>
+              <p class="tw:text-xs app-text-muted">{{ t('dashboard.recentOrders.subtitle') }}</p>
             </div>
             <prime-button
               severity="secondary"
@@ -558,7 +557,7 @@ const expensesArea = buildArea("expenses");
               @click="router.push({ name: 'orders-kanban' })"
             >
               <iconify icon="ph:arrow-right-bold" class="tw:mr-1 tw:text-xs" />
-              <span>Kanban</span>
+              <span>{{ t('dashboard.recentOrders.viewKanban') }}</span>
             </prime-button>
           </div>
 
@@ -599,8 +598,8 @@ const expensesArea = buildArea("expenses");
         <template #content>
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-3">
             <div>
-              <p class="tw:text-sm tw:font-semibold">Top sản phẩm</p>
-              <p class="tw:text-xs app-text-muted">Theo số lượng bán</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.topProducts.title') }}</p>
+              <p class="tw:text-xs app-text-muted">{{ t('dashboard.topProducts.subtitle') }}</p>
             </div>
             <iconify icon="ph:ranking-bold" class="tw:text-emerald-400 tw:opacity-60 tw:text-lg" />
           </div>
@@ -621,7 +620,7 @@ const expensesArea = buildArea("expenses");
               <div class="tw:flex-1 tw:min-w-0">
                 <div class="tw:flex tw:items-center tw:justify-between tw:mb-0.5">
                   <span class="tw:text-xs tw:font-medium tw:truncate">{{ p.name }}</span>
-                  <span class="tw:text-[11px] app-text-muted tw:ml-2 tw:flex-shrink-0">{{ p.qty }} ly</span>
+                  <span class="tw:text-[11px] app-text-muted tw:ml-2 tw:flex-shrink-0">{{ p.qty }} {{ t('dashboard.topProducts.unit') }}</span>
                 </div>
                 <div class="tw:h-1 tw:w-full tw:rounded-full tw:bg-white/8">
                   <div class="tw:h-full tw:rounded-full tw:bg-emerald-400/70" :style="{ width: p.pct + '%' }" />
@@ -639,9 +638,9 @@ const expensesArea = buildArea("expenses");
             <div>
               <p class="tw:text-sm tw:font-semibold tw:flex tw:items-center tw:gap-1.5">
                 <iconify icon="ph:currency-circle-dollar-bold" class="tw:text-emerald-400" />
-                Revenue Drivers
+                {{ t('dashboard.revenueDrivers.title') }}
               </p>
-              <p class="tw:text-xs app-text-muted">Kéo doanh thu hôm nay</p>
+              <p class="tw:text-xs app-text-muted">{{ t('dashboard.revenueDrivers.subtitle') }}</p>
             </div>
           </div>
 
@@ -661,7 +660,7 @@ const expensesArea = buildArea("expenses");
                     <span
                       v-if="i + 1 < p.qtyRank"
                       class="tw:flex-shrink-0 tw:text-[9px] tw:font-bold tw:px-1 tw:py-0.5 tw:rounded tw:bg-emerald-500/20 tw:text-emerald-400"
-                    >↑ upsell</span>
+                    >{{ t('dashboard.revenueDrivers.upsell') }}</span>
                   </div>
                   <span class="tw:text-[11px] tw:font-semibold tw:text-white/80 tw:ml-1 tw:flex-shrink-0">
                     {{ fmtK(p.rev) }}₫
@@ -681,8 +680,8 @@ const expensesArea = buildArea("expenses");
           <!-- Insight footer -->
           <div class="tw:mt-3 tw:pt-3 tw:border-t tw:border-white/10 tw:text-[11px] app-text-muted tw:leading-relaxed">
             <iconify icon="ph:lightbulb-bold" class="tw:text-amber-400 tw:mr-1" />
-            Món <span class="tw:text-white/70 tw:font-medium">↑ upsell</span>
-            bán ít nhưng doanh thu cao — ưu tiên push menu & combo.
+            {{ t('dashboard.revenueDrivers.insightPre') }} <span class="tw:text-white/70 tw:font-medium">{{ t('dashboard.revenueDrivers.upsell') }}</span>
+            {{ t('dashboard.revenueDrivers.insightPost') }}
           </div>
         </template>
       </prime-card>
@@ -692,8 +691,8 @@ const expensesArea = buildArea("expenses");
         <template #content>
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <div>
-              <p class="tw:text-sm tw:font-semibold">Top danh mục</p>
-              <p class="tw:text-xs app-text-muted">Theo doanh thu hôm nay</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.topCategories.title') }}</p>
+              <p class="tw:text-xs app-text-muted">{{ t('dashboard.topCategories.subtitle') }}</p>
             </div>
             <iconify icon="ph:tag-bold" class="tw:text-amber-400 tw:opacity-60 tw:text-lg" />
           </div>
@@ -723,8 +722,8 @@ const expensesArea = buildArea("expenses");
         <template #content>
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <div>
-              <p class="tw:text-sm tw:font-semibold">Tỉ lệ thanh toán</p>
-              <p class="tw:text-xs app-text-muted">Hôm nay</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.paymentRatio.title') }}</p>
+              <p class="tw:text-xs app-text-muted">{{ t('dashboard.paymentRatio.today') }}</p>
             </div>
             <iconify icon="ph:credit-card-bold" class="tw:text-blue-400 tw:opacity-60 tw:text-lg" />
           </div>
@@ -750,7 +749,7 @@ const expensesArea = buildArea("expenses");
               <span class="tw:flex tw:items-center tw:gap-2 tw:text-sm">
                 <span class="tw:size-2.5 tw:rounded-full tw:bg-emerald-500 tw:flex-shrink-0" />
                 <iconify icon="ph:money-bold" class="app-text-muted" />
-                Tiền mặt
+                {{ t('dashboard.paymentRatio.cash') }}
               </span>
               <div class="tw:text-right">
                 <span class="tw:text-sm tw:font-semibold">{{ fmtK(kpi.revenue.cash) }}₫</span>
@@ -761,7 +760,7 @@ const expensesArea = buildArea("expenses");
               <span class="tw:flex tw:items-center tw:gap-2 tw:text-sm">
                 <span class="tw:size-2.5 tw:rounded-full tw:bg-blue-500 tw:flex-shrink-0" />
                 <iconify icon="ph:bank-bold" class="app-text-muted" />
-                Chuyển khoản
+                {{ t('dashboard.paymentRatio.bank') }}
               </span>
               <div class="tw:text-right">
                 <span class="tw:text-sm tw:font-semibold">{{ fmtK(kpi.revenue.bank) }}₫</span>

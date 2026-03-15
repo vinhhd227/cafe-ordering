@@ -92,6 +92,78 @@
       "completed": "Hoàn thành"
     }
   },
+  "dashboard": {
+    "title": "Dashboard",
+    "snapshotToday": "Tổng quan hôm nay",
+    "viewOrders": "Xem đơn hàng",
+    "newOrder": "Tạo đơn mới",
+    "kpi": {
+      "revenue": "Doanh thu",
+      "orders": "Đơn hàng",
+      "tables": "Bàn",
+      "tablesCount": "{n} bàn",
+      "profit": "Lợi nhuận ước tính",
+      "profitTooltip": "Chưa bao gồm: nhân sự, điện nước, thuê mặt bằng",
+      "vsYesterday": "so với hôm qua",
+      "cash": "Tiền mặt",
+      "bank": "CK",
+      "avg": "Avg",
+      "occupancyRate": "Tỷ lệ lấp đầy",
+      "occupied": "Có khách",
+      "free": "Trống",
+      "ordering": "Đang order",
+      "margin": "Biên lợi nhuận",
+      "profitNote": "* chưa gồm nhân sự, điện nước"
+    },
+    "charts": {
+      "revExpenses": "Doanh thu & Chi phí",
+      "last7days": "7 ngày gần nhất",
+      "revenue": "Doanh thu",
+      "expenses": "Chi phí",
+      "ordersByHour": "Đơn theo giờ",
+      "todayPeakOrders": "Hôm nay \u2014 Peak: {h} ({n} đơn)",
+      "heatmap": "Giờ vàng doanh thu",
+      "todayPeakRev": "Hôm nay \u2014 Peak: {h} ({rev})",
+      "low": "Thấp",
+      "high": "Cao",
+      "peakLabel": "Peak {h} \u00b7 {rev}",
+      "prepareBefore": "Chuẩn bị đá, topping, sữa trước"
+    },
+    "tableStatus": {
+      "title": "Trạng thái bàn",
+      "occupiedCount": "{n} đang có khách",
+      "available": "Trống",
+      "occupied": "Có khách",
+      "ordering": "Đang order"
+    },
+    "recentOrders": {
+      "title": "Đơn hàng gần đây",
+      "subtitle": "Cập nhật liên tục",
+      "viewKanban": "Kanban"
+    },
+    "topProducts": {
+      "title": "Top sản phẩm",
+      "subtitle": "Theo số lượng bán",
+      "unit": "ly"
+    },
+    "revenueDrivers": {
+      "title": "Revenue Drivers",
+      "subtitle": "Kéo doanh thu hôm nay",
+      "upsell": "\u2191 upsell",
+      "insightPre": "Món",
+      "insightPost": "bán ít nhưng doanh thu cao \u2014 ưu tiên push menu & combo."
+    },
+    "topCategories": {
+      "title": "Top danh mục",
+      "subtitle": "Theo doanh thu hôm nay"
+    },
+    "paymentRatio": {
+      "title": "Tỉ lệ thanh toán",
+      "today": "Hôm nay",
+      "cash": "Tiền mặt",
+      "bank": "Chuyển khoản"
+    }
+  },
   "report": {
     "title": "Báo cáo",
     "subtitle": "Tổng hợp doanh thu và đơn hàng theo khoảng thời gian.",
@@ -143,5 +215,230 @@
     "export": "Xuất",
     "exportPng": "Tải ảnh PNG",
     "exportPdf": "Tải file PDF"
+  },
+  "orders": {
+    "breadcrumb": "Đơn hàng",
+    "title": "Quản lý đơn hàng",
+    "newOrder": "Tạo đơn",
+    "refresh": "Tải lại",
+    "cancel": "Huỷ",
+
+    "status": {
+      "PENDING": "Chờ xử lý",
+      "PROCESSING": "Đang pha",
+      "COMPLETED": "Hoàn thành",
+      "CANCELLED": "Đã huỷ"
+    },
+    "paymentStatus": {
+      "UNPAID": "Chưa thanh toán",
+      "PAID": "Đã thanh toán",
+      "REFUNDED": "Đã hoàn tiền",
+      "VOIDED": "Đã huỷ phiếu"
+    },
+    "paymentMethod": {
+      "CASH": "Tiền mặt",
+      "BANK_TRANSFER": "Chuyển khoản",
+      "UNKNOWN": "Không xác định"
+    },
+    "temperature": {
+      "HOT": "Nóng",
+      "COLD": "Lạnh"
+    },
+    "iceLevel": {
+      "LESS": "Ít đá",
+      "NORMAL": "Bình thường",
+      "MORE": "Nhiều đá"
+    },
+    "sugarLevel": {
+      "LESS": "Ít đường",
+      "NORMAL": "Bình thường",
+      "MORE": "Nhiều đường"
+    },
+    "serving": {
+      "dineIn": "Tại quán",
+      "takeaway": "Mang đi"
+    },
+
+    "pay": {
+      "title": "Xác nhận thanh toán",
+      "order": "Đơn hàng",
+      "amountReceived": "Số tiền nhận",
+      "short": "Thiếu",
+      "change": "Tiền thối",
+      "tip": "Tiền tip",
+      "keepAllAsTip": "Giữ tất cả làm tip",
+      "returnToCustomer": "Trả lại khách",
+      "paymentMethod": "Phương thức thanh toán",
+      "confirmPayment": "Xác nhận thanh toán",
+      "paidWith": "Đã thanh toán · {method}"
+    },
+
+    "filter": {
+      "title": "Lọc đơn hàng",
+      "filters": "Bộ lọc",
+      "searchOrder": "Tìm mã đơn\u2026",
+      "dateRange": "Khoảng ngày",
+      "dateFrom": "Từ ngày",
+      "dateTo": "Đến ngày",
+      "orderStatus": "Trạng thái đơn",
+      "allStatuses": "Tất cả trạng thái",
+      "paymentStatus": "Trạng thái thanh toán",
+      "allPayments": "Tất cả",
+      "paymentMethod": "Phương thức",
+      "allMethods": "Tất cả",
+      "total": "Tổng tiền (VND)",
+      "min": "Tối thiểu",
+      "max": "Tối đa",
+      "table": "Bàn",
+      "tableCode": "Mã bàn\u2026",
+      "clearFilters": "Xoá bộ lọc"
+    },
+
+    "widgets": {
+      "totalOrders": "Tổng đơn hàng",
+      "totalOrdersListDesc": "Tổng đơn hàng trong khoảng thời gian đã chọn.",
+      "totalOrdersKanbanDesc": "Tổng đơn hàng hôm nay theo trạng thái.",
+      "totalRevenue": "Tổng doanh thu",
+      "totalRevenueListDesc": "Doanh thu đã thu, bao gồm tiền mặt và chuyển khoản.",
+      "totalRevenueKanbanDesc": "Doanh thu hôm nay, bao gồm tiền mặt và chuyển khoản.",
+      "cashCollected": "Tiền mặt",
+      "bankTransfer": "Chuyển khoản"
+    },
+
+    "list": {
+      "subtitle": "Lịch sử đơn hàng với trạng thái thanh toán.",
+      "col": {
+        "orderNumber": "Mã đơn",
+        "date": "Ngày",
+        "status": "Trạng thái",
+        "payment": "Thanh toán",
+        "items": "Món",
+        "discount": "Giảm giá",
+        "total": "Tổng tiền",
+        "actions": "Thao tác"
+      },
+      "moreItems": "+{n} món khác",
+      "markPaid": "Thanh toán"
+    },
+
+    "kanban": {
+      "live": "Trực tiếp \u2014 cập nhật liên tục",
+      "connecting": "Đang kết nối...",
+      "noOrders": "Không có đơn",
+      "startPreparing": "Bắt đầu pha",
+      "markComplete": "Hoàn thành",
+      "keepOrder": "Giữ lại",
+      "confirmCancel": "Xác nhận huỷ",
+      "cancelTitle": "Huỷ đơn {orderNumber}?",
+      "markPaid": "Thanh toán",
+      "viewDetail": "Xem chi tiết",
+      "undo": "Hoàn tác"
+    },
+
+    "create": {
+      "title": "Tạo đơn hàng",
+      "selectTable": "Chọn bàn",
+      "connecting": "Đang kết nối...",
+      "existingSession": "Bàn đang có phiên. Đơn sẽ được thêm vào phiên đó.",
+      "sessionReady": "Sẵn sàng",
+      "search": "Tìm kiếm...",
+      "noProducts": "Không tìm thấy sản phẩm.",
+      "cart": "Giỏ hàng",
+      "cartEmpty": "Giỏ hàng trống",
+      "cartEmptyHint": "Chọn sản phẩm để thêm vào giỏ hàng.",
+      "subtotal": "Tạm tính",
+      "serviceCharge": "Phí dịch vụ",
+      "free": "Miễn phí",
+      "freeItem": "1 sp miễn phí",
+      "willBeApplied": "sẽ được áp dụng",
+      "total": "Tổng cộng",
+      "findPromotions": "Tìm khuyến mãi",
+      "browse": "Xem",
+      "promoCode": "Mã khuyến mãi",
+      "selectFreeGift": "Chọn 1 món tặng:",
+      "freeBadge": "Miễn phí",
+      "promoBadge": "KM",
+      "takeaway": "Mang đi",
+      "apply": "Áp dụng",
+      "submit": "Tạo đơn hàng",
+      "tableHint": "Chọn bàn ( dùng BAR cho đơn tại quầy )",
+      "promoDialog": {
+        "title": "Tìm khuyến mãi",
+        "loading": "Đang tải...",
+        "empty": "Không có khuyến mãi nào.",
+        "minAmount": "Tối thiểu {amount}",
+        "until": "Đến {date}",
+        "usesLeft": "Còn {n} lượt"
+      },
+      "optionsDialog": {
+        "quantity": "Số lượng",
+        "temperature": "Nhiệt độ",
+        "iceLevel": "Mức đá",
+        "sugarLevel": "Mức đường",
+        "serving": "Phục vụ",
+        "addToCart": "Thêm vào giỏ"
+      }
+    },
+
+    "detail": {
+      "backToList": "Quay lại danh sách",
+      "info": {
+        "title": "Thông tin đơn",
+        "orderNumber": "Mã đơn",
+        "date": "Ngày",
+        "status": "Trạng thái",
+        "table": "Bàn",
+        "session": "Phiên",
+        "discount": "Giảm giá",
+        "total": "Tổng tiền"
+      },
+      "actions": {
+        "title": "Thao tác",
+        "startPreparing": "Bắt đầu pha",
+        "markComplete": "Hoàn thành",
+        "cancel": "Huỷ đơn"
+      },
+      "merge": {
+        "title": "Gộp đơn",
+        "instruction": "Chọn đơn để gộp vào {orderNumber}. Các món sẽ được chuyển vào đây và các đơn kia sẽ bị huỷ.",
+        "empty": "Không có đơn chưa thanh toán nào khác.",
+        "confirm": "Gộp ({n})"
+      },
+      "split": {
+        "title": "Tách đơn",
+        "instruction": "Đặt số lượng từng món muốn chuyển sang đơn mới. Đơn hiện tại giữ phần còn lại.",
+        "itemDetail": "{n} trong đơn \u00b7 {price}/cái",
+        "toNew": "Sang đơn mới:",
+        "thisOrderKeeps": "Đơn này giữ",
+        "newOrderGets": "Đơn mới nhận",
+        "itemCount": "{n} món",
+        "error": "Không thể tách toàn bộ \u2014 phải giữ lại ít nhất 1 món trong đơn.",
+        "confirm": "Tách đơn",
+        "viewNew": "Xem"
+      },
+      "addItem": {
+        "title": "Thêm món",
+        "searchPlaceholder": "Tìm sản phẩm\u2026",
+        "noProducts": "Không tìm thấy sản phẩm.",
+        "quantity": "Số lượng",
+        "confirm": "Thêm vào đơn"
+      },
+      "noTable": "Không có bàn",
+      "mergeWith": "Gộp với đơn khác",
+      "items": "Món",
+      "orderNotFound": "Không tìm thấy đơn hàng.",
+      "removeTooltip": "Xoá",
+      "autoCancel": "Không còn món \u2014 đơn đã bị huỷ tự động.",
+      "mergeToastDetail": "Đã gộp {n} đơn vào {orderNumber}.",
+      "splitToastDetail": "Đã tạo đơn mới {orderNumber}.",
+      "removeItem": {
+        "lastItem": "Đây là món cuối cùng. Xoá sẽ huỷ đơn hàng này.",
+        "withFreeGift": "Xoá \"{name}\" sẽ xoá cả món tặng. Tiếp tục?",
+        "regular": "Xoá \"{name}\" khỏi đơn hàng?",
+        "keep": "Giữ lại",
+        "cancelOrder": "Huỷ đơn",
+        "remove": "Xoá"
+      }
+    }
   }
 }

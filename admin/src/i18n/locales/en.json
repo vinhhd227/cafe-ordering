@@ -92,6 +92,78 @@
       "completed": "Completed"
     }
   },
+  "dashboard": {
+    "title": "Dashboard",
+    "snapshotToday": "Snapshot for today",
+    "viewOrders": "View orders",
+    "newOrder": "New order",
+    "kpi": {
+      "revenue": "Revenue",
+      "orders": "Orders",
+      "tables": "Tables",
+      "tablesCount": "{n} tables",
+      "profit": "Est. Profit",
+      "profitTooltip": "Excludes: staff, utilities, rent",
+      "vsYesterday": "vs yesterday",
+      "cash": "Cash",
+      "bank": "Bank",
+      "avg": "Avg",
+      "occupancyRate": "Occupancy rate",
+      "occupied": "Occupied",
+      "free": "Free",
+      "ordering": "Ordering",
+      "margin": "Margin",
+      "profitNote": "* excl. staff, utilities"
+    },
+    "charts": {
+      "revExpenses": "Revenue & Expenses",
+      "last7days": "Last 7 days",
+      "revenue": "Revenue",
+      "expenses": "Expenses",
+      "ordersByHour": "Orders by hour",
+      "todayPeakOrders": "Today \u2014 Peak: {h} ({n} orders)",
+      "heatmap": "Peak Revenue Hours",
+      "todayPeakRev": "Today \u2014 Peak: {h} ({rev})",
+      "low": "Low",
+      "high": "High",
+      "peakLabel": "Peak {h} \u00b7 {rev}",
+      "prepareBefore": "Prepare ice, toppings, milk before"
+    },
+    "tableStatus": {
+      "title": "Table status",
+      "occupiedCount": "{n} tables occupied",
+      "available": "Available",
+      "occupied": "Occupied",
+      "ordering": "Ordering"
+    },
+    "recentOrders": {
+      "title": "Recent orders",
+      "subtitle": "Updates continuously",
+      "viewKanban": "Kanban"
+    },
+    "topProducts": {
+      "title": "Top products",
+      "subtitle": "By quantity sold",
+      "unit": "cups"
+    },
+    "revenueDrivers": {
+      "title": "Revenue Drivers",
+      "subtitle": "Driving today's revenue",
+      "upsell": "\u2191 upsell",
+      "insightPre": "Items marked",
+      "insightPost": "sell fewer but earn more \u2014 prioritize in menu & combos."
+    },
+    "topCategories": {
+      "title": "Top categories",
+      "subtitle": "By today's revenue"
+    },
+    "paymentRatio": {
+      "title": "Payment ratio",
+      "today": "Today",
+      "cash": "Cash",
+      "bank": "Bank transfer"
+    }
+  },
   "report": {
     "title": "Reports",
     "subtitle": "Aggregated revenue and orders for a selected period.",
@@ -143,5 +215,230 @@
     "export": "Export",
     "exportPng": "Download as PNG",
     "exportPdf": "Download as PDF"
+  },
+  "orders": {
+    "breadcrumb": "Orders",
+    "title": "Order management",
+    "newOrder": "New Order",
+    "refresh": "Refresh",
+    "cancel": "Cancel",
+
+    "status": {
+      "PENDING": "Pending",
+      "PROCESSING": "Processing",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "paymentStatus": {
+      "UNPAID": "Unpaid",
+      "PAID": "Paid",
+      "REFUNDED": "Refunded",
+      "VOIDED": "Voided"
+    },
+    "paymentMethod": {
+      "CASH": "Cash",
+      "BANK_TRANSFER": "Bank Transfer",
+      "UNKNOWN": "Unknown"
+    },
+    "temperature": {
+      "HOT": "Hot",
+      "COLD": "Cold"
+    },
+    "iceLevel": {
+      "LESS": "Less",
+      "NORMAL": "Normal",
+      "MORE": "More"
+    },
+    "sugarLevel": {
+      "LESS": "Less",
+      "NORMAL": "Normal",
+      "MORE": "More"
+    },
+    "serving": {
+      "dineIn": "Dine-in",
+      "takeaway": "Takeaway"
+    },
+
+    "pay": {
+      "title": "Mark as Paid",
+      "order": "Order",
+      "amountReceived": "Amount received",
+      "short": "Short",
+      "change": "Change",
+      "tip": "Tip",
+      "keepAllAsTip": "Keep all as tip",
+      "returnToCustomer": "Return to customer",
+      "paymentMethod": "Payment method",
+      "confirmPayment": "Confirm payment",
+      "paidWith": "Paid · {method}"
+    },
+
+    "filter": {
+      "title": "Filter orders",
+      "filters": "Filters",
+      "searchOrder": "Search order #\u2026",
+      "dateRange": "Date range",
+      "dateFrom": "From",
+      "dateTo": "To",
+      "orderStatus": "Order status",
+      "allStatuses": "All statuses",
+      "paymentStatus": "Payment status",
+      "allPayments": "All payments",
+      "paymentMethod": "Payment method",
+      "allMethods": "All methods",
+      "total": "Total (VND)",
+      "min": "Min",
+      "max": "Max",
+      "table": "Table",
+      "tableCode": "Table code\u2026",
+      "clearFilters": "Clear filters"
+    },
+
+    "widgets": {
+      "totalOrders": "Total orders",
+      "totalOrdersListDesc": "Total orders in the selected time range.",
+      "totalOrdersKanbanDesc": "Total orders today broken down by status.",
+      "totalRevenue": "Total revenue",
+      "totalRevenueListDesc": "Total revenue collected, including cash and bank transfers.",
+      "totalRevenueKanbanDesc": "Total revenue today, including cash and bank transfers.",
+      "cashCollected": "Cash collected",
+      "bankTransfer": "Bank transfer"
+    },
+
+    "list": {
+      "subtitle": "Full order history with payment status.",
+      "col": {
+        "orderNumber": "Order #",
+        "date": "Date",
+        "status": "Status",
+        "payment": "Payment",
+        "items": "Items",
+        "discount": "Discount",
+        "total": "Total",
+        "actions": "Actions"
+      },
+      "moreItems": "+{n} more",
+      "markPaid": "Mark paid"
+    },
+
+    "kanban": {
+      "live": "Live \u2014 updates instantly",
+      "connecting": "Connecting...",
+      "noOrders": "No orders",
+      "startPreparing": "Start preparing",
+      "markComplete": "Mark complete",
+      "keepOrder": "Keep",
+      "confirmCancel": "Yes, cancel",
+      "cancelTitle": "Cancel order {orderNumber}?",
+      "markPaid": "Mark paid",
+      "viewDetail": "View detail",
+      "undo": "Undo"
+    },
+
+    "create": {
+      "title": "Create order",
+      "selectTable": "Select a table",
+      "connecting": "Connecting...",
+      "existingSession": "Table has an existing session. Order will be added to it.",
+      "sessionReady": "Session ready",
+      "search": "Search...",
+      "noProducts": "No products found.",
+      "cart": "Cart",
+      "cartEmpty": "Cart is empty",
+      "cartEmptyHint": "Choose a product to add it to your cart.",
+      "subtotal": "Subtotal",
+      "serviceCharge": "Service Charge",
+      "free": "Free",
+      "freeItem": "1 free item",
+      "willBeApplied": "will be applied",
+      "total": "Total",
+      "findPromotions": "Find promotions",
+      "browse": "Browse",
+      "promoCode": "Promo code",
+      "selectFreeGift": "Select 1 free gift item:",
+      "freeBadge": "Free",
+      "promoBadge": "Promo",
+      "takeaway": "Takeaway",
+      "apply": "Apply",
+      "submit": "Create order",
+      "tableHint": "Select a table ( use BAR for orders at the bar )",
+      "promoDialog": {
+        "title": "Find promotions",
+        "loading": "Loading...",
+        "empty": "No public promotions available.",
+        "minAmount": "Min {amount}",
+        "until": "Until {date}",
+        "usesLeft": "{n} uses left"
+      },
+      "optionsDialog": {
+        "quantity": "Quantity",
+        "temperature": "Temperature",
+        "iceLevel": "Ice level",
+        "sugarLevel": "Sugar level",
+        "serving": "Serving",
+        "addToCart": "Add to cart"
+      }
+    },
+
+    "detail": {
+      "backToList": "Back to list",
+      "info": {
+        "title": "Order info",
+        "orderNumber": "Order #",
+        "date": "Date",
+        "status": "Status",
+        "table": "Table",
+        "session": "Session",
+        "discount": "Discount",
+        "total": "Total"
+      },
+      "actions": {
+        "title": "Actions",
+        "startPreparing": "Start preparing",
+        "markComplete": "Mark complete",
+        "cancel": "Cancel order"
+      },
+      "merge": {
+        "title": "Merge orders",
+        "instruction": "Select orders to merge into {orderNumber}. Their items will be added here and they will be cancelled.",
+        "empty": "No other Unpaid orders available.",
+        "confirm": "Merge ({n})"
+      },
+      "split": {
+        "title": "Split order",
+        "instruction": "Set how many of each item to move to the new order. The current order will keep the rest.",
+        "itemDetail": "{n} in order \u00b7 {price} ea.",
+        "toNew": "To new:",
+        "thisOrderKeeps": "This order keeps",
+        "newOrderGets": "New order gets",
+        "itemCount": "{n} item(s)",
+        "error": "Cannot split all items \u2014 at least one item must remain in this order.",
+        "confirm": "Split order",
+        "viewNew": "View"
+      },
+      "addItem": {
+        "title": "Add item",
+        "searchPlaceholder": "Search product\u2026",
+        "noProducts": "No products found.",
+        "quantity": "Quantity",
+        "confirm": "Add to order"
+      },
+      "noTable": "No table",
+      "mergeWith": "Merge with another",
+      "items": "Items",
+      "orderNotFound": "Order not found.",
+      "removeTooltip": "Remove",
+      "autoCancel": "No items remaining \u2014 order was automatically cancelled.",
+      "mergeToastDetail": "{n} order(s) merged into {orderNumber}.",
+      "splitToastDetail": "New order {orderNumber} created.",
+      "removeItem": {
+        "lastItem": "\"{name}\" is the last item. Removing it will cancel this order.",
+        "withFreeGift": "Removing \"{name}\" will also remove the free gift. Continue?",
+        "regular": "Remove \"{name}\" from this order?",
+        "keep": "Keep",
+        "cancelOrder": "Cancel Order",
+        "remove": "Remove"
+      }
+    }
   }
 }

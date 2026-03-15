@@ -309,40 +309,31 @@ onMounted(load)
 <template>
   <section class="tw:space-y-8">
     <!-- Header -->
-    <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
-      <div>
-        <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
-          {{ t('report.breadcrumb') }}
-        </p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('report.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('report.subtitle') }}</p>
-      </div>
-      <div class="tw:flex tw:items-center tw:gap-2">
-        <prime-button
-          severity="secondary"
-          outlined
-          size="small"
-          :loading="loading"
-          @click="load"
-        >
-          <iconify icon="ph:arrows-clockwise-bold" class="tw:mr-1.5" />
-          <span>{{ t('report.refresh') }}</span>
-        </prime-button>
-        <prime-button
-          severity="secondary"
-          outlined
-          size="small"
-          :loading="exporting"
-          :disabled="!data"
-          @click="exportMenu.toggle($event)"
-        >
-          <iconify icon="ph:download-simple-bold" class="tw:mr-1.5" />
-          <span>{{ t('report.export') }}</span>
-          <iconify icon="ph:caret-down-bold" class="tw:ml-1 tw:text-[10px]" />
-        </prime-button>
-        <prime-menu ref="exportMenu" :model="exportMenuItems" popup />
-      </div>
-    </div>
+    <page-header :subtitle="t('report.subtitle')">
+      <prime-button
+        severity="secondary"
+        outlined
+        size="small"
+        :loading="loading"
+        @click="load"
+      >
+        <iconify icon="ph:arrows-clockwise-bold" class="tw:mr-1.5" />
+        <span>{{ t('report.refresh') }}</span>
+      </prime-button>
+      <prime-button
+        severity="secondary"
+        outlined
+        size="small"
+        :loading="exporting"
+        :disabled="!data"
+        @click="exportMenu.toggle($event)"
+      >
+        <iconify icon="ph:download-simple-bold" class="tw:mr-1.5" />
+        <span>{{ t('report.export') }}</span>
+        <iconify icon="ph:caret-down-bold" class="tw:ml-1 tw:text-[10px]" />
+      </prime-button>
+      <prime-menu ref="exportMenu" :model="exportMenuItems" popup />
+    </page-header>
 
     <!-- Date range filter -->
     <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-2">

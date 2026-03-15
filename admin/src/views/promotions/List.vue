@@ -247,6 +247,14 @@ const isPercentage    = computed(() => fDiscountType.value === PROMOTION_DISCOUN
 const isProductScope  = computed(() => fScope.value === PROMOTION_SCOPE.PRODUCT);
 const isCategoryScope = computed(() => fScope.value === PROMOTION_SCOPE.CATEGORY);
 
+// Gift source options for BUY_X_GET_Y
+const GIFT_SOURCE = { SAME: 'SAME', SEPARATE: 'SEPARATE' };
+const GIFT_SOURCE_OPTIONS = [
+  { label: 'Same product(s) as X', value: GIFT_SOURCE.SAME,     icon: 'ph:repeat-bold' },
+  { label: 'Separate product(s)',   value: GIFT_SOURCE.SEPARATE, icon: 'ph:shuffle-bold' },
+];
+const fGiftSource = ref(GIFT_SOURCE.SAME);
+
 const resetForm = () => {
   fName.value              = "";
   fCode.value              = "";
@@ -264,6 +272,7 @@ const resetForm = () => {
   fGetFromProductIds.value     = [];
   fGetFromProductTree.value    = {};
   fGetFromCategoryIds.value    = [];
+  fGiftSource.value            = GIFT_SOURCE.SAME;
   fMinOrderAmount.value    = null;
   fStartDate.value         = new Date();
   fEndDate.value           = null;
@@ -295,6 +304,9 @@ const openEditDialog = (promo) => {
   fApplicableCategoryIds.value = promo.applicableCategoryIds ?? [];
   fGetFromProductIds.value     = promo.getFromProductIds ?? [];
   fGetFromCategoryIds.value    = promo.getFromCategoryIds ?? [];
+  fGiftSource.value = (fGetFromProductIds.value.length > 0 || fGetFromCategoryIds.value.length > 0)
+    ? GIFT_SOURCE.SEPARATE
+    : GIFT_SOURCE.SAME;
   fMinOrderAmount.value    = promo.minOrderAmount ?? null;
   fStartDate.value         = new Date(promo.startDate);
   fEndDate.value           = promo.endDate ? new Date(promo.endDate) : null;
@@ -327,8 +339,22 @@ watch(fScope, (scope) => {
 
 watch(isBuyXGetY, (val) => {
   if (!dialogVisible.value || !val) return;
+  // Always pre-load lookups so they're ready if user switches to SEPARATE
   loadProductTree();
   loadCategoryOptions();
+});
+
+watch(fGiftSource, (newVal) => {
+  if (!dialogVisible.value || !isBuyXGetY.value) return;
+  if (newVal === GIFT_SOURCE.SEPARATE) {
+    loadProductTree();
+    loadCategoryOptions();
+  } else {
+    // Clear GetFrom selections when switching back to SAME
+    fGetFromProductIds.value  = [];
+    fGetFromProductTree.value = {};
+    fGetFromCategoryIds.value = [];
+  }
 });
 
 const submitForm = async () => {
@@ -358,8 +384,8 @@ const submitForm = async () => {
       maxDiscountAmount: fMaxDiscountAmount.value ?? null,
       buyQuantity:       fBuyQuantity.value ?? null,
       getQuantity:       fGetQuantity.value ?? null,
-      getFromProductIds:   treeSelToIds(fGetFromProductTree.value),
-      getFromCategoryIds:  fGetFromCategoryIds.value,
+      getFromProductIds:   fGiftSource.value === GIFT_SOURCE.SEPARATE ? treeSelToIds(fGetFromProductTree.value) : null,
+      getFromCategoryIds:  fGiftSource.value === GIFT_SOURCE.SEPARATE ? fGetFromCategoryIds.value : null,
       scope:             fScope.value,
       applicableProductIds:  treeSelToIds(fApplicableProductTree.value),
       applicableCategoryIds: fApplicableCategoryIds.value,
@@ -670,37 +696,58 @@ const handleDelete = (promo) => {
         />
       </div>
 
-      <!-- GetFrom product/category (only for BUY_X_GET_Y) -->
-      <div v-show="isBuyXGetY" class="tw:space-y-4">
+      <!-- Gift source classification (only for BUY_X_GET_Y) -->
+      <div v-if="isBuyXGetY" class="tw:space-y-3">
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Free item from products
-            <span class="tw:normal-case tw:opacity-60">(blank = same as trigger)</span>
+            Free item (Y) is
           </label>
-          <prime-tree-select
-            v-model="fGetFromProductTree"
-            :options="productTreeNodes"
-            selection-mode="checkbox"
-            placeholder="Select products…"
-            class="app-input tw:w-full"
-          />
+          <prime-select-button
+            v-model="fGiftSource"
+            :options="GIFT_SOURCE_OPTIONS"
+            option-label="label"
+            option-value="value"
+            class="tw:w-full"
+          >
+            <template #option="{ option }">
+              <div class="tw:flex tw:items-center tw:gap-1.5">
+                <iconify :icon="option.icon" class="tw:text-base" />
+                <span class="tw:text-xs">{{ option.label }}</span>
+              </div>
+            </template>
+          </prime-select-button>
         </div>
-        <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Free item from categories
-            <span class="tw:normal-case tw:opacity-60">(blank = same as trigger)</span>
-          </label>
-          <prime-multi-select
-            v-model="fGetFromCategoryIds"
-            :options="categoryOptions"
-            option-label="name"
-            option-value="id"
-            placeholder="Select categories…"
-            filter
-            display="chip"
-            class="app-input tw:w-full"
-          />
-        </div>
+
+        <!-- GetFrom selectors — only shown when SEPARATE -->
+        <template v-if="fGiftSource === 'SEPARATE'">
+          <div class="tw:space-y-1.5">
+            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+              Free item from products
+            </label>
+            <prime-tree-select
+              v-model="fGetFromProductTree"
+              :options="productTreeNodes"
+              selection-mode="checkbox"
+              placeholder="Select products…"
+              class="app-input tw:w-full"
+            />
+          </div>
+          <div class="tw:space-y-1.5">
+            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+              Free item from categories
+            </label>
+            <prime-multi-select
+              v-model="fGetFromCategoryIds"
+              :options="categoryOptions"
+              option-label="name"
+              option-value="id"
+              placeholder="Select categories…"
+              filter
+              display="chip"
+              class="app-input tw:w-full"
+            />
+          </div>
+        </template>
       </div>
 
       <!-- Min order amount + Max usage -->
