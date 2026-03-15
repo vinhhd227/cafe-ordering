@@ -47,7 +47,7 @@ public class PlaceOrderHandler(
         ? SugarLevel.FromName(NormalizeSugarLevel(item.SugarLevel), true) : null;
 
       order.AddItem(item.ProductId, item.ProductName, item.UnitPrice, item.Quantity,
-        temp, iceLevel, sugarLevel, item.IsTakeaway);
+        temp, iceLevel, sugarLevel, item.IsTakeaway, item.IsFreeGift);
     }
 
     await orderRepository.UpdateAsync(order, ct); // Lưu items

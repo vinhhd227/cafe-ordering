@@ -60,6 +60,15 @@ public class UpdateOrderItemHandler(
     try
     {
       order.SetItemQuantity(request.ProductId, productName, unitPrice, request.Quantity);
+
+      // Removing a regular item invalidates any free gift — clean them up automatically.
+      if (request.Quantity == 0)
+      {
+        order.RemoveFreeGiftItems();
+        // Auto-cancel when the order has no items left.
+        if (!order.Items.Any())
+          order.Cancel();
+      }
     }
     catch (InvalidOperationException ex)
     {
@@ -92,7 +101,8 @@ public class UpdateOrderItemHandler(
         i.Temperature?.Name.ToUpperInvariant(),
         i.IceLevel?.Name.ToUpperInvariant(),
         i.SugarLevel?.Name.ToUpperInvariant(),
-        i.IsTakeaway
+        i.IsTakeaway,
+        i.IsFreeGift
       )).ToList(),
       order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList()
     );

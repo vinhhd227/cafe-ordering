@@ -8,7 +8,8 @@ public record PlaceOrderItemDto(
   string? Temperature = null,
   string? IceLevel = null,
   string? SugarLevel = null,
-  bool IsTakeaway = false);
+  bool IsTakeaway = false,
+  bool IsFreeGift = false);
 
 public record PlaceOrderResponseDto(
   int OrderId,

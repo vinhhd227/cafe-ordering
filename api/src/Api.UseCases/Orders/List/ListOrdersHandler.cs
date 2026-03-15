@@ -120,7 +120,8 @@ public class ListOrdersHandler(
           i.Temperature?.Name.ToUpperInvariant(),
           i.IceLevel?.Name.ToUpperInvariant(),
           i.SugarLevel?.Name.ToUpperInvariant(),
-          i.IsTakeaway
+          i.IsTakeaway,
+        i.IsFreeGift
         )).ToList(),
         o.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList()
       );

@@ -63,14 +63,14 @@ public class Order : AuditableEntity<int>, IAggregateRoot
 
   public void AddItem(int productId, string productName, decimal unitPrice, int quantity,
     DrinkTemperature? temperature = null, IceLevel? iceLevel = null, SugarLevel? sugarLevel = null,
-    bool isTakeaway = false)
+    bool isTakeaway = false, bool isFreeGift = false)
   {
     if (Status == OrderStatus.Completed)
     {
       throw new InvalidOperationException("Cannot add items to completed order");
     }
 
-    var item = OrderItem.Create(Id, productId, productName, unitPrice, quantity, temperature, iceLevel, sugarLevel, isTakeaway);
+    var item = OrderItem.Create(Id, productId, productName, unitPrice, quantity, temperature, iceLevel, sugarLevel, isTakeaway, isFreeGift);
     _items.Add(item);
 
     RegisterDomainEvent(new OrderItemAddedEvent(this, productId, quantity));
@@ -152,6 +152,15 @@ public class Order : AuditableEntity<int>, IAggregateRoot
 
     _promotions.Remove(promo);
     RegisterDomainEvent(new OrderPromotionRemovedEvent(this, promotionId));
+  }
+
+  /// <summary>
+  ///   Xóa toàn bộ free gift items khỏi order.
+  ///   Gọi khi một item thường bị xóa — điều kiện khuyến mãi có thể không còn thỏa.
+  /// </summary>
+  public void RemoveFreeGiftItems()
+  {
+    _items.RemoveAll(i => i.IsFreeGift);
   }
 
   /// <summary>

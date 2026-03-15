@@ -23,6 +23,7 @@ public class OrderItem : BaseEntity
   public IceLevel? IceLevel { get; private set; }
   public SugarLevel? SugarLevel { get; private set; }
   public bool IsTakeaway { get; private set; }
+  public bool IsFreeGift { get; private set; }
 
   // Calculated property
   public decimal TotalPrice => (UnitPrice - Discount) * Quantity;
@@ -33,20 +34,21 @@ public class OrderItem : BaseEntity
   internal static OrderItem Create(int orderId, int productId,
     string productName, decimal unitPrice, int quantity,
     DrinkTemperature? temperature = null, IceLevel? iceLevel = null, SugarLevel? sugarLevel = null,
-    bool isTakeaway = false)
+    bool isTakeaway = false, bool isFreeGift = false)
   {
     return new OrderItem
     {
       OrderId = Guard.Against.NegativeOrZero(orderId),
       ProductId = Guard.Against.NegativeOrZero(productId),
       ProductName = Guard.Against.NullOrEmpty(productName),
-      UnitPrice = Guard.Against.NegativeOrZero(unitPrice),
+      UnitPrice = Guard.Against.Negative(unitPrice),
       Quantity = Guard.Against.NegativeOrZero(quantity),
       Discount = 0,
       Temperature = temperature,
       IceLevel = iceLevel,
       SugarLevel = sugarLevel,
       IsTakeaway = isTakeaway,
+      IsFreeGift = isFreeGift,
     };
   }
 
@@ -55,6 +57,8 @@ public class OrderItem : BaseEntity
   /// </summary>
   internal void UpdateQuantity(int newQuantity)
   {
+    if (IsFreeGift)
+      throw new InvalidOperationException("Cannot change quantity of a free gift item.");
     Quantity = Guard.Against.NegativeOrZero(newQuantity);
   }
 

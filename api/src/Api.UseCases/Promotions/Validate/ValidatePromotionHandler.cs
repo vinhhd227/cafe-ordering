@@ -20,7 +20,10 @@ public class ValidatePromotionHandler(IReadRepositoryBase<Promotion> repo)
         promo.Id, promo.Name, promo.Code,
         promo.CodeVisibility.Name.ToUpperInvariant(),
         promo.DiscountType.Name, promo.DiscountValue, promo.MaxDiscountAmount,
-        promo.Scope.Name, promo.MinOrderAmount, promo.StartDate, promo.EndDate,
+        promo.BuyQuantity, promo.GetQuantity,
+        promo.Scope.Name, promo.ApplicableProductIds, promo.ApplicableCategoryIds,
+        promo.GetFromProductIds, promo.GetFromCategoryIds,
+        promo.MinOrderAmount, promo.StartDate, promo.EndDate,
         null, false, "Promotion is not active or has expired."));
 
     if (!promo.HasUsageLeft())
@@ -28,7 +31,10 @@ public class ValidatePromotionHandler(IReadRepositoryBase<Promotion> repo)
         promo.Id, promo.Name, promo.Code,
         promo.CodeVisibility.Name.ToUpperInvariant(),
         promo.DiscountType.Name, promo.DiscountValue, promo.MaxDiscountAmount,
-        promo.Scope.Name, promo.MinOrderAmount, promo.StartDate, promo.EndDate,
+        promo.BuyQuantity, promo.GetQuantity,
+        promo.Scope.Name, promo.ApplicableProductIds, promo.ApplicableCategoryIds,
+        promo.GetFromProductIds, promo.GetFromCategoryIds,
+        promo.MinOrderAmount, promo.StartDate, promo.EndDate,
         null, false, "Promotion has reached its usage limit."));
 
     // Check MinOrderAmount if orderAmount provided
@@ -57,7 +63,10 @@ public class ValidatePromotionHandler(IReadRepositoryBase<Promotion> repo)
       promo.Id, promo.Name, promo.Code,
       promo.CodeVisibility.Name.ToUpperInvariant(),
       promo.DiscountType.Name, promo.DiscountValue, promo.MaxDiscountAmount,
-      promo.Scope.Name, promo.MinOrderAmount, promo.StartDate, promo.EndDate,
+      promo.BuyQuantity, promo.GetQuantity,
+      promo.Scope.Name, promo.ApplicableProductIds, promo.ApplicableCategoryIds,
+      promo.GetFromProductIds, promo.GetFromCategoryIds,
+      promo.MinOrderAmount, promo.StartDate, promo.EndDate,
       estimatedDiscount, isApplicable, message));
   }
 }

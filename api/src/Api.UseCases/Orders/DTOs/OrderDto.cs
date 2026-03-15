@@ -10,7 +10,8 @@ public record OrderItemDto(
   string? Temperature,
   string? IceLevel,
   string? SugarLevel,
-  bool IsTakeaway
+  bool IsTakeaway,
+  bool IsFreeGift
 );
 
 public record AppliedPromotionDto(

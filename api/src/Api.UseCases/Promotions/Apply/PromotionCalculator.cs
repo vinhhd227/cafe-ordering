@@ -118,8 +118,9 @@ public static class PromotionCalculator
     if (totalScopedQty < buyQty)
       return new DiscountResult(0, new());
 
-    var groups             = totalScopedQty / groupSize;
-    var freeUnitsRemaining = groups > 0 ? groups * getQty : getQty;
+    var groups = totalScopedQty / groupSize;
+    if (groups == 0) return new DiscountResult(0, new());
+    var freeUnitsRemaining = groups * getQty;
 
     // Determine which pool of items can be given for free
     List<OrderItem> freePool;
