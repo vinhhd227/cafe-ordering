@@ -35,32 +35,35 @@ const routes = [
         path: "dashboard",
         name: "dashboard",
         component: () => import("@/views/Dashboard.vue"),
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, section: "nav.groups.overview", pageTitle: "dashboard.title" },
       },
       {
         path: "reports",
         name: "reports",
         component: () => import("@/views/reports/Index.vue"),
-        meta: { requiresAuth: true, requiredClaim: "report.read" },
+        meta: { requiresAuth: true, requiredClaim: "report.read", section: "nav.groups.overview", pageTitle: "report.title" },
       },
       {
         path: "orders",
-        meta: { requiresAuth: true, requiredClaim: "order.read" },
+        meta: { requiresAuth: true, requiredClaim: "order.read", section: "nav.groups.operations" },
         children: [
           {
             path: "",
             name: "orders",
             component: () => import("@/views/orders/Kanban.vue"),
+            meta: { pageTitle: "orders.title" },
           },
           {
             path: "list",
             name: "ordersList",
             component: () => import("@/views/orders/List.vue"),
+            meta: { pageTitle: "orders.title" },
           },
           {
             path: "create",
             name: "ordersCreate",
             component: () => import("@/views/orders/Create.vue"),
+            meta: { pageTitle: "orders.create.title" },
           },
           {
             path: ":id",
@@ -71,7 +74,7 @@ const routes = [
       },
       {
         path: "tables",
-        meta: { requiresAuth: true, requiredClaim: "table.read" },
+        meta: { requiresAuth: true, requiredClaim: "table.read", section: "nav.groups.operations" },
         children: [
           {
             path: "",
@@ -84,11 +87,11 @@ const routes = [
         path: "menu",
         name: "menu",
         component: () => import("@/views/Menu.vue"),
-        meta: { requiresAuth: true, requiredClaim: "menu.read" },
+        meta: { requiresAuth: true, requiredClaim: "menu.read", section: "nav.groups.operations" },
       },
       {
         path: "products",
-        meta: { requiresAuth: true, requiredClaim: "product.read" },
+        meta: { requiresAuth: true, requiredClaim: "product.read", section: "nav.groups.operations" },
         children: [
           {
             path: "",
@@ -109,7 +112,7 @@ const routes = [
       },
       {
         path: "categories",
-        meta: { requiresAuth: true, requiredClaim: "product.read" },
+        meta: { requiresAuth: true, requiredClaim: "product.read", section: "nav.groups.operations" },
         children: [
           {
             path: "",
@@ -132,43 +135,43 @@ const routes = [
         path: "staff",
         name: "staff",
         component: () => import("@/views/Staff.vue"),
-        meta: { requiresAuth: true, requiredClaim: "staff.read" },
+        meta: { requiresAuth: true, requiredClaim: "staff.read", section: "nav.groups.people" },
       },
       {
         path: "customer",
         name: "customer",
         component: () => import("@/views/Customer.vue"),
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, section: "nav.groups.people" },
       },
       {
         path: "user",
         name: "user",
         component: () => import("@/views/users/List.vue"),
-        meta: { requiresAuth: true, requiredClaim: "user.read" },
+        meta: { requiresAuth: true, requiredClaim: "user.read", section: "nav.groups.people" },
       },
       {
         path: "user/:id",
         name: "userDetail",
         component: () => import("@/views/users/Detail.vue"),
-        meta: { requiresAuth: true, requiredClaim: "user.read" },
+        meta: { requiresAuth: true, requiredClaim: "user.read", section: "nav.groups.people" },
       },
       {
         path: "roles",
         name: "roles",
         component: () => import("@/views/roles/List.vue"),
-        meta: { requiresAuth: true, adminOnly: true },
+        meta: { requiresAuth: true, adminOnly: true, section: "nav.groups.people" },
       },
       {
         path: "expenses",
         name: "expenses",
         component: () => import("@/views/expenses/List.vue"),
-        meta: { requiresAuth: true, requiredClaim: "expense.read" },
+        meta: { requiresAuth: true, requiredClaim: "expense.read", section: "nav.groups.operations" },
       },
       {
         path: "promotions",
         name: "promotions",
         component: () => import("@/views/promotions/List.vue"),
-        meta: { requiresAuth: true, requiredClaim: "promotion.read" },
+        meta: { requiresAuth: true, requiredClaim: "promotion.read", section: "nav.groups.operations" },
       },
       {
         path: "profile",
