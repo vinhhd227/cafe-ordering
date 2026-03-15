@@ -5,7 +5,22 @@
 
 @custom-variant dark (&:where(.app-dark, .app-dark *));
 
+@utility max-w-8xl {
+  max-width: 88rem;   /* 1408px */
+}
+@utility max-w-9xl {
+  max-width: 96rem;   /* 1536px */
+}
+@utility max-w-10xl {
+  max-width: 112rem;  /* 1792px */
+}
+@utility max-w-11xl {
+  max-width: 120rem;  /* 1920px */
+}
+
 html {
     font-size: 14px;
     font-family: "Figtree", sans-serif;
 }
+
+
