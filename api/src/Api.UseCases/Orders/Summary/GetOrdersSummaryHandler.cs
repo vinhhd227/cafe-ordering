@@ -1,10 +1,14 @@
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
+using Api.Core.Aggregates.ProductAggregate;
+using Api.Core.Aggregates.ProductAggregate.Specifications;
 using Api.UseCases.Orders.DTOs;
 
 namespace Api.UseCases.Orders.Summary;
 
-public class GetOrdersSummaryHandler(IReadRepositoryBase<Order> repository)
+public class GetOrdersSummaryHandler(
+  IReadRepositoryBase<Order> repository,
+  IReadRepositoryBase<Product> productRepository)
   : IQueryHandler<GetOrdersSummaryQuery, Result<OrdersSummaryDto>>
 {
   public async ValueTask<Result<OrdersSummaryDto>> Handle(
@@ -79,6 +83,48 @@ public class GetOrdersSummaryHandler(IReadRepositoryBase<Order> repository)
 
     var totalItemsSold = completedDailyItems.Sum(d => d.Count);
 
+    // ── Top products & Top categories ─────────────────────────────────────
+    var completedWithItemsSpec = new CompletedOrdersInRangeWithItemsSpec(dateFrom, dateTo);
+    var completedOrdersWithItems = await repository.ListAsync(completedWithItemsSpec, ct);
+
+    var totalGuestCount = completedOrdersWithItems.Sum(o => o.GuestCount ?? 0);
+
+    var itemsFlat = completedOrdersWithItems
+      .SelectMany(o => o.Items.Where(i => !i.IsFreeGift))
+      .ToList();
+
+    // Top 5 products by quantity sold
+    var productGroups = itemsFlat
+      .GroupBy(i => new { i.ProductId, i.ProductName })
+      .Select(g => new { g.Key.ProductName, TotalQty = g.Sum(i => i.Quantity) })
+      .OrderByDescending(x => x.TotalQty)
+      .Take(5)
+      .ToList();
+
+    var maxQty = productGroups.FirstOrDefault()?.TotalQty ?? 1;
+    var topProducts = productGroups
+      .Select(p => new TopProductDto(p.ProductName, p.TotalQty,
+        (int)Math.Round(p.TotalQty * 100.0 / maxQty)))
+      .ToList();
+
+    // Top categories by revenue share
+    List<TopCategoryDto> topCategories = [];
+    if (itemsFlat.Count > 0)
+    {
+      var productIds = itemsFlat.Select(i => i.ProductId).Distinct().ToList();
+      var products   = await productRepository.ListAsync(new ProductsByIdsWithCategorySpec(productIds), ct);
+      var catMap     = products.ToDictionary(p => p.Id, p => p.Category?.Name ?? "Khác");
+
+      var totalRev = itemsFlat.Sum(i => i.TotalPrice);
+      topCategories = itemsFlat
+        .GroupBy(i => catMap.GetValueOrDefault(i.ProductId, "Khác"))
+        .Select(g => new { Name = g.Key, Revenue = g.Sum(i => i.TotalPrice) })
+        .OrderByDescending(x => x.Revenue)
+        .Select(x => new TopCategoryDto(x.Name,
+          totalRev > 0 ? (int)Math.Round((double)(x.Revenue / totalRev * 100)) : 0))
+        .ToList();
+    }
+
     return Result.Success(new OrdersSummaryDto(
       cashRevenue,
       bankRevenue,
@@ -90,7 +136,10 @@ public class GetOrdersSummaryHandler(IReadRepositoryBase<Order> repository)
       pendingOrders,
       processingOrders,
       totalItemsSold,
-      dailyRevenue
+      totalGuestCount,
+      dailyRevenue,
+      topProducts,
+      topCategories
     ));
   }
 }

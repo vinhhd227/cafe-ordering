@@ -28,7 +28,18 @@ public class GetOrdersSummarySummary : Summary<GetOrdersSummary>
       PendingOrders: 1,
       ProcessingOrders: 1,
       TotalItemsSold: 95,
-      DailyRevenue: []
+      TotalGuestCount: 80,
+      DailyRevenue: [],
+      TopProducts:
+      [
+        new TopProductDto("Bạc xỉu", 28, 100),
+        new TopProductDto("Cà phê sữa đá", 22, 79),
+      ],
+      TopCategories:
+      [
+        new TopCategoryDto("Cafe", 60),
+        new TopCategoryDto("Trà", 40),
+      ]
     ));
     Response(401, "Authentication required.");
     Response(403, "Insufficient permissions — Admin role required.");

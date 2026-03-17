@@ -11,5 +11,8 @@ public record OrdersSummaryDto(
   int PendingOrders,
   int ProcessingOrders,
   int TotalItemsSold,
-  List<DailyRevenueDto> DailyRevenue
+  int TotalGuestCount,
+  List<DailyRevenueDto> DailyRevenue,
+  List<TopProductDto> TopProducts,
+  List<TopCategoryDto> TopCategories
 );
