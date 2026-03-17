@@ -3,6 +3,7 @@ import { getAdminMenu } from "@/services/menu.service";
 import { createOrder, applyPromotionAdmin } from "@/services/order.service";
 import { listTables, getOrCreateSession } from "@/services/table.service";
 import { validatePromotion, getPromotions } from "@/services/promotion.service";
+import { appCard } from "../../layout/ui";
 
 const router = useRouter();
 const toast = useToast();
@@ -42,6 +43,16 @@ const toggleCategory = (id) => {
   collapsedCategories.value[id] = !collapsedCategories.value[id];
 };
 
+// ── Guest count ──────────────────────────────────────────────────
+const guestCount = ref(null);
+
+// Mặc định = tổng qty đồ uống (bỏ qua free gift và đồ ăn kèm)
+const defaultGuestCount = computed(() =>
+  cart.value
+    .filter((i) => !i.isFreeGift && !i.isAccompaniment)
+    .reduce((acc, i) => acc + i.quantity, 0),
+);
+
 // ── Submit ───────────────────────────────────────────────────────
 const placing = ref(false);
 const errorMessage = ref("");
@@ -74,10 +85,18 @@ const freeItemPickerPool = computed(() => {
 
   const groupSize = buyQty + getQty;
   const scope = info.scope;
-  const applicableProductIds = info.applicableProductIds ?? lastAppliedPromo.value?.applicableProductIds ?? [];
-  const applicableCategoryIds = info.applicableCategoryIds ?? lastAppliedPromo.value?.applicableCategoryIds ?? [];
-  const getFromProductIds = info.getFromProductIds ?? lastAppliedPromo.value?.getFromProductIds ?? [];
-  const getFromCategoryIds = info.getFromCategoryIds ?? lastAppliedPromo.value?.getFromCategoryIds ?? [];
+  const applicableProductIds =
+    info.applicableProductIds ??
+    lastAppliedPromo.value?.applicableProductIds ??
+    [];
+  const applicableCategoryIds =
+    info.applicableCategoryIds ??
+    lastAppliedPromo.value?.applicableCategoryIds ??
+    [];
+  const getFromProductIds =
+    info.getFromProductIds ?? lastAppliedPromo.value?.getFromProductIds ?? [];
+  const getFromCategoryIds =
+    info.getFromCategoryIds ?? lastAppliedPromo.value?.getFromCategoryIds ?? [];
 
   // Exclude free gift items to avoid oscillation when gift is already in cart
   const regularItems = cart.value.filter((i) => !i.isFreeGift);
@@ -87,11 +106,14 @@ const freeItemPickerPool = computed(() => {
     scopedItems = [...regularItems];
   } else if (scope === "PRODUCT") {
     const ids = new Set(applicableProductIds);
-    scopedItems = regularItems.filter((i) => ids.size === 0 || ids.has(i.productId));
+    scopedItems = regularItems.filter(
+      (i) => ids.size === 0 || ids.has(i.productId),
+    );
   } else if (scope === "CATEGORY") {
     const catIds = new Set(applicableCategoryIds);
     scopedItems = regularItems.filter(
-      (i) => catIds.size === 0 || catIds.has(productCategoryMap.value[i.productId])
+      (i) =>
+        catIds.size === 0 || catIds.has(productCategoryMap.value[i.productId]),
     );
   } else {
     scopedItems = [...regularItems];
@@ -100,7 +122,8 @@ const freeItemPickerPool = computed(() => {
   const totalScopedQty = scopedItems.reduce((s, i) => s + i.quantity, 0);
   if (totalScopedQty < buyQty) return [];
 
-  const isSeparate = getFromProductIds.length > 0 || getFromCategoryIds.length > 0;
+  const isSeparate =
+    getFromProductIds.length > 0 || getFromCategoryIds.length > 0;
 
   // Always show picker once the user has enough qualifying items (totalScopedQty >= buyQty).
   // Staff explicitly chooses which item to give free, for both SAME and SEPARATE mode.
@@ -112,14 +135,24 @@ const freeItemPickerPool = computed(() => {
     freePool = menuCategories.value
       .flatMap((cat) => cat.products ?? [])
       .filter((p) => ids.has(p.id) && p.isActive)
-      .map((p) => ({ productId: p.id, productName: p.name, unitPrice: p.price, _key: `menu_gift_${p.id}` }));
+      .map((p) => ({
+        productId: p.id,
+        productName: p.name,
+        unitPrice: p.price,
+        _key: `menu_gift_${p.id}`,
+      }));
   } else if (getFromCategoryIds.length > 0) {
     // SEPARATE mode via category: show all active products in those categories
     const catIds = new Set(getFromCategoryIds);
     freePool = menuCategories.value
       .filter((cat) => catIds.has(cat.id) && cat.isActive)
       .flatMap((cat) => (cat.products ?? []).filter((p) => p.isActive))
-      .map((p) => ({ productId: p.id, productName: p.name, unitPrice: p.price, _key: `menu_gift_${p.id}` }));
+      .map((p) => ({
+        productId: p.id,
+        productName: p.name,
+        unitPrice: p.price,
+        _key: `menu_gift_${p.id}`,
+      }));
   } else {
     // SAME mode: use qualifying cart items (gift from what was already purchased)
     freePool = [...scopedItems];
@@ -135,7 +168,9 @@ watch(freeItemPickerPool, (pool) => {
 watch(freeItemSelection, (newItem, oldItem) => {
   // Remove previous free gift item from cart
   if (oldItem) {
-    const idx = cart.value.findIndex((i) => i._key === oldItem._key + "_free_gift");
+    const idx = cart.value.findIndex(
+      (i) => i._key === oldItem._key + "_free_gift",
+    );
     if (idx !== -1) cart.value.splice(idx, 1);
   }
   // Add new free gift item to cart with 0 price
@@ -157,7 +192,8 @@ const formatPromotionValue = (promo) => {
   if (promo.discountType === "PERCENTAGE") return `${promo.discountValue}% off`;
   if (promo.discountType === "FIXED")
     return `-${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(promo.discountValue)}`;
-  if (promo.discountType === "BUY_X_GET_Y") return `Buy ${promo.buyQuantity} get ${promo.getQuantity}`;
+  if (promo.discountType === "BUY_X_GET_Y")
+    return `Buy ${promo.buyQuantity} get ${promo.getQuantity}`;
   return "";
 };
 
@@ -165,7 +201,7 @@ const formatPromotionValue = (promo) => {
 const productCategoryMap = computed(() => {
   const map = {};
   for (const cat of menuCategories.value) {
-    for (const p of (cat.products ?? [])) {
+    for (const p of cat.products ?? []) {
       map[p.id] = cat.id;
     }
   }
@@ -177,20 +213,27 @@ const promoDisableReason = (promo) => {
   if (!promo.isActive) return "Inactive";
   if (new Date(promo.startDate) > now) return "Not started yet";
   if (promo.endDate && new Date(promo.endDate) < now) return "Expired";
-  if (promo.maxUsage && promo.currentUsage >= promo.maxUsage) return "No uses left";
-  if (promo.minOrderAmount && cartTotal.value < promo.minOrderAmount) return "Order total too low";
+  if (promo.maxUsage && promo.currentUsage >= promo.maxUsage)
+    return "No uses left";
+  if (promo.minOrderAmount && cartTotal.value < promo.minOrderAmount)
+    return "Order total too low";
 
   const cartProductIds = new Set(cart.value.map((i) => i.productId));
 
   if (promo.scope === "PRODUCT") {
     const applicable = promo.applicableProductIds ?? [];
-    if (applicable.length > 0 && !applicable.some((id) => cartProductIds.has(id)))
+    if (
+      applicable.length > 0 &&
+      !applicable.some((id) => cartProductIds.has(id))
+    )
       return "No matching products in cart";
   } else if (promo.scope === "CATEGORY") {
     const applicable = promo.applicableCategoryIds ?? [];
     if (applicable.length > 0) {
       const cartCatIds = new Set(
-        cart.value.map((i) => productCategoryMap.value[i.productId]).filter(Boolean)
+        cart.value
+          .map((i) => productCategoryMap.value[i.productId])
+          .filter(Boolean),
       );
       if (!applicable.some((id) => cartCatIds.has(id)))
         return "No matching category in cart";
@@ -208,7 +251,7 @@ const openFindPromosDialog = async () => {
   try {
     const res = await getPromotions({ pageSize: 200 });
     publicPromos.value = (res.data?.items ?? []).filter(
-      (p) => p.codeVisibility === "PUBLIC"
+      (p) => p.codeVisibility === "PUBLIC",
     );
   } catch {
     publicPromos.value = [];
@@ -220,7 +263,7 @@ const openFindPromosDialog = async () => {
 // Estimate discount client-side for PRODUCT/CATEGORY scope
 // (backend validate only calculates ORDER scope without item details)
 const estimateClientDiscount = (promo) => {
-  const type  = promo.discountType;
+  const type = promo.discountType;
   const scope = promo.scope;
 
   let eligibleSubtotal = 0;
@@ -235,7 +278,11 @@ const estimateClientDiscount = (promo) => {
   } else if (scope === "CATEGORY") {
     const catIds = new Set(promo.applicableCategoryIds ?? []);
     eligibleSubtotal = cart.value
-      .filter((i) => catIds.size === 0 || catIds.has(productCategoryMap.value[i.productId]))
+      .filter(
+        (i) =>
+          catIds.size === 0 ||
+          catIds.has(productCategoryMap.value[i.productId]),
+      )
       .reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   }
 
@@ -243,7 +290,9 @@ const estimateClientDiscount = (promo) => {
 
   if (type === "PERCENTAGE") {
     const disc = Math.round((eligibleSubtotal * promo.discountValue) / 100);
-    return promo.maxDiscountAmount ? Math.min(disc, promo.maxDiscountAmount) : disc;
+    return promo.maxDiscountAmount
+      ? Math.min(disc, promo.maxDiscountAmount)
+      : disc;
   }
   if (type === "FIXED") {
     return Math.min(promo.discountValue, eligibleSubtotal);
@@ -262,11 +311,15 @@ const estimateClientDiscount = (promo) => {
       scopedItems = [...cart.value];
     } else if (scope === "PRODUCT") {
       const ids = new Set(promo.applicableProductIds ?? []);
-      scopedItems = cart.value.filter((i) => ids.size === 0 || ids.has(i.productId));
+      scopedItems = cart.value.filter(
+        (i) => ids.size === 0 || ids.has(i.productId),
+      );
     } else if (scope === "CATEGORY") {
       const catIds = new Set(promo.applicableCategoryIds ?? []);
       scopedItems = cart.value.filter(
-        (i) => catIds.size === 0 || catIds.has(productCategoryMap.value[i.productId])
+        (i) =>
+          catIds.size === 0 ||
+          catIds.has(productCategoryMap.value[i.productId]),
       );
     } else {
       scopedItems = [...cart.value];
@@ -287,7 +340,9 @@ const estimateClientDiscount = (promo) => {
       freePool = cart.value.filter((i) => ids.has(i.productId));
     } else if (promo.getFromCategoryIds?.length > 0) {
       const catIds = new Set(promo.getFromCategoryIds);
-      freePool = cart.value.filter((i) => catIds.has(productCategoryMap.value[i.productId]));
+      freePool = cart.value.filter((i) =>
+        catIds.has(productCategoryMap.value[i.productId]),
+      );
     } else {
       freePool = [...scopedItems];
     }
@@ -313,21 +368,25 @@ const estimateClientDiscount = (promo) => {
 const isItemDiscounted = (item) => {
   if (item.isFreeGift) return false;
   if (!promoInfo.value) return false;
-  const scope = promoInfo.value.scope
-    ?? lastAppliedPromo.value?.scope;
+  const scope = promoInfo.value.scope ?? lastAppliedPromo.value?.scope;
   if (!scope) return false;
   if (scope === "ORDER") return true;
   if (scope === "PRODUCT") {
-    const ids = promoInfo.value.applicableProductIds
-      ?? lastAppliedPromo.value?.applicableProductIds ?? [];
+    const ids =
+      promoInfo.value.applicableProductIds ??
+      lastAppliedPromo.value?.applicableProductIds ??
+      [];
     return ids.length === 0 || ids.includes(item.productId);
   }
   if (scope === "CATEGORY") {
     const catIds = new Set(
-      promoInfo.value.applicableCategoryIds
-      ?? lastAppliedPromo.value?.applicableCategoryIds ?? []
+      promoInfo.value.applicableCategoryIds ??
+        lastAppliedPromo.value?.applicableCategoryIds ??
+        [],
     );
-    return catIds.size === 0 || catIds.has(productCategoryMap.value[item.productId]);
+    return (
+      catIds.size === 0 || catIds.has(productCategoryMap.value[item.productId])
+    );
   }
   return false;
 };
@@ -340,7 +399,8 @@ const selectPromo = async (promo) => {
   // Patch estimatedDiscount for non-ORDER scope (backend returns null without item info)
   if (promoInfo.value && promoInfo.value.estimatedDiscount == null) {
     const est = estimateClientDiscount(promo);
-    if (est != null) promoInfo.value = { ...promoInfo.value, estimatedDiscount: est };
+    if (est != null)
+      promoInfo.value = { ...promoInfo.value, estimatedDiscount: est };
   }
 };
 
@@ -357,26 +417,26 @@ const temperatureOptions = computed(() =>
   DRINK_TEMPERATURE_OPTIONS.map((opt) => ({
     ...opt,
     label: t(`orders.temperature.${opt.value}`),
-  }))
+  })),
 );
 
 const iceLevelOptions = computed(() =>
   ICE_LEVEL_OPTIONS.map((opt) => ({
     ...opt,
     label: t(`orders.iceLevel.${opt.value}`),
-  }))
+  })),
 );
 
 const sugarLevelOptions = computed(() =>
   SUGAR_LEVEL_OPTIONS.map((opt) => ({
     ...opt,
     label: t(`orders.sugarLevel.${opt.value}`),
-  }))
+  })),
 );
 
 const servingOptions = computed(() => [
-  { ...SERVING_TYPE_OPTIONS[0], label: t('orders.serving.dineIn') },
-  { ...SERVING_TYPE_OPTIONS[1], label: t('orders.serving.takeaway') },
+  { ...SERVING_TYPE_OPTIONS[0], label: t("orders.serving.dineIn") },
+  { ...SERVING_TYPE_OPTIONS[1], label: t("orders.serving.takeaway") },
 ]);
 
 const makeCartKey = (productId, opts) => {
@@ -391,8 +451,7 @@ const makeCartKey = (productId, opts) => {
 
 const optionsLabel = (item) => {
   const parts = [];
-  if (item.temperature)
-    parts.push(t(`orders.temperature.${item.temperature}`));
+  if (item.temperature) parts.push(t(`orders.temperature.${item.temperature}`));
   if (item.iceLevel && item.iceLevel !== ICE_LEVEL.NORMAL)
     parts.push(t(`orders.iceLevel.${item.iceLevel}`));
   if (item.sugarLevel && item.sugarLevel !== SUGAR_LEVEL.NORMAL)
@@ -437,7 +496,10 @@ const orderLabel = computed(() => {
 });
 
 // ── Promotion computeds + logic ───────────────────────────────────
-const cartDiscount = computed(() => promoInfo.value?.estimatedDiscount ?? 0);
+// BUY_X_GET_Y: free item đã được thêm vào cart ở unitPrice=0 → không trừ thêm lần nữa
+const cartDiscount = computed(() =>
+  freeItemSelection.value ? 0 : (promoInfo.value?.estimatedDiscount ?? 0),
+);
 const cartFinal = computed(() => cartTotal.value - cartDiscount.value);
 
 const applyPromoCode = async () => {
@@ -455,7 +517,8 @@ const applyPromoCode = async () => {
       promoInfo.value = data;
     }
   } catch (err) {
-    promoError.value = err?.response?.data?.message || "Invalid promotion code.";
+    promoError.value =
+      err?.response?.data?.message || "Invalid promotion code.";
   } finally {
     promoLoading.value = false;
   }
@@ -465,7 +528,7 @@ const clearPromo = () => {
   // Remove free gift item from cart before clearing state
   if (freeItemSelection.value) {
     const idx = cart.value.findIndex(
-      (i) => i._key === freeItemSelection.value._key + "_free_gift"
+      (i) => i._key === freeItemSelection.value._key + "_free_gift",
     );
     if (idx !== -1) cart.value.splice(idx, 1);
   }
@@ -488,14 +551,15 @@ watch(cartTotal, async (newVal) => {
       // Remove free gift and reset picker so user re-selects with new cart state
       if (freeItemSelection.value) {
         const idx = cart.value.findIndex(
-          (i) => i._key === freeItemSelection.value._key + "_free_gift"
+          (i) => i._key === freeItemSelection.value._key + "_free_gift",
         );
         if (idx !== -1) cart.value.splice(idx, 1);
         freeItemSelection.value = null;
       }
       if (promoInfo.value.estimatedDiscount == null && lastAppliedPromo.value) {
         const est = estimateClientDiscount(lastAppliedPromo.value);
-        if (est != null) promoInfo.value = { ...promoInfo.value, estimatedDiscount: est };
+        if (est != null)
+          promoInfo.value = { ...promoInfo.value, estimatedDiscount: est };
       }
     } else clearPromo();
   } catch {
@@ -565,6 +629,7 @@ const confirmAddToCart = () => {
       iceLevel: pendingOptions.value.iceLevel,
       sugarLevel: pendingOptions.value.sugarLevel,
       isTakeaway: pendingOptions.value.isTakeaway,
+      isAccompaniment: selectedProduct.value.isAccompaniment ?? false,
     });
   }
   showOptionsDialog.value = false;
@@ -612,6 +677,7 @@ const placeOrder = async () => {
         isTakeaway: item.isTakeaway ?? false,
         isFreeGift: item.isFreeGift ?? false,
       })),
+      guestCount.value != null ? Number(guestCount.value) : (defaultGuestCount.value || null),
     );
     const { orderId } = res.data;
 
@@ -621,16 +687,23 @@ const placeOrder = async () => {
         await applyPromotionAdmin(orderId, promoCode.value.trim());
       } catch (promoErr) {
         const msg =
-          promoErr?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
+          promoErr?.response?.data?.errors
+            ?.map((e) => e.errorMessage ?? e)
+            .join("; ") ||
           promoErr?.response?.data?.message ||
           "Could not apply promotion.";
-        toast.add({ severity: "warn", summary: t('orders.create.promoBadge'), detail: msg, life: 5000 });
+        toast.add({
+          severity: "warn",
+          summary: t("orders.create.promoBadge"),
+          detail: msg,
+          life: 5000,
+        });
       }
     }
 
     toast.add({
       severity: "success",
-      summary: t('orders.create.submit'),
+      summary: t("orders.create.submit"),
       detail: `#${res.data.orderNumber}`,
       life: 3000,
     });
@@ -673,66 +746,82 @@ onMounted(async () => {
         text
         @click="router.push({ name: 'orders' })"
       >
-    <iconify icon="ph:arrow-left-bold" />
-    </prime-button>
+        <iconify icon="ph:arrow-left-bold" />
+      </prime-button>
       <div>
         <p
           class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
         >
-          {{ t('orders.breadcrumb') }}
+          {{ t("orders.breadcrumb") }}
         </p>
-        <h1 class="tw:text-2xl tw:font-semibold">{{ t('orders.create.title') }}</h1>
+        <h1 class="tw:text-2xl tw:font-semibold">
+          {{ t("orders.create.title") }}
+        </h1>
       </div>
     </div>
 
-    <!-- Table / Session bar -->
+    <!-- Search / Table / Guest Count / Session bar -->
     <div
-      class="app-panel tw:rounded-2xl tw:border tw:px-4 tw:py-3 tw:flex tw:flex-wrap tw:items-center tw:gap-3"
+    :class="[appCard, cardRing, 'tw:px-4 tw:py-3', 'tw:rounded-md','tw:flex tw:justify-between tw:items-center']"
     >
-      <prime-select
-        v-model="selectedTableId"
-        :options="tables"
-        optionLabel="code"
-        optionValue="id"
-        :placeholder="t('orders.create.selectTable')"
-        :disabled="sessionLoading"
-        class="tw:w-40"
-        @change="(e) => onTableSelect(e.value)"
-      />
+      <div class="tw:flex tw:items-center tw:gap-3">
+        <div class="tw:flex tw:items-center tw:gap-1.5">
+          <iconify icon="prime:search" class="tw:text-lg tw:opacity-60" />
+          <prime-input-text
+            v-model="searchQuery"
+            :placeholder="t('orders.create.search')"
+            size="small"
+          />
+        </div>
+        <div class="tw:flex tw:items-center tw:gap-1.5">
+          <iconify icon="ic:round-table-bar" class="tw:text-lg tw:opacity-60" />
+          <prime-select
+            v-model="selectedTableId"
+            :options="tables"
+            optionLabel="code"
+            optionValue="id"
+            :placeholder="t('orders.create.selectTable')"
+            :disabled="sessionLoading"
+            class="tw:w-40"
+            @change="(e) => onTableSelect(e.value)"
+            size="small"
+          />
+        </div>
+        <div class="tw:flex tw:items-center tw:gap-1.5">
+          <iconify icon="ph:users" class="tw:text-base tw:opacity-60" />
+          <prime-input-number
+            v-model="guestCount"
+            :placeholder="defaultGuestCount > 0 ? String(defaultGuestCount) : t('orders.create.guestCountPlaceholder')"
+            :min="1"
+            :max="99"
+            :useGrouping="false"
+            inputClass="tw:text-sm tw:w-25"
+            size="small"
+          />
+        </div>
+      </div>
       <template v-if="sessionLoading">
         <prime-tag severity="secondary">
           <iconify icon="prime:spinner" />
-          <span>{{ t('orders.create.connecting') }}</span>
+          <span>{{ t("orders.create.connecting") }}</span>
         </prime-tag>
       </template>
       <template v-else-if="sessionId">
         <prime-tag v-if="sessionHadExisting" severity="info">
           <iconify icon="prime:info-circle" />
-          <span>{{ t('orders.create.existingSession') }}</span>
+          <span>{{ t("orders.create.existingSession") }}</span>
         </prime-tag>
         <prime-tag v-else severity="success">
           <iconify icon="prime:check" />
-          <span>{{ t('orders.create.sessionReady') }}</span>
+          <span>{{ t("orders.create.sessionReady") }}</span>
         </prime-tag>
       </template>
     </div>
 
     <!-- Main grid -->
-    <div class="tw:grid tw:gap-6 tw:lg:grid-cols-12">
+    <div class="tw:grid tw:gap-5 tw:lg:grid-cols-12">
       <!-- ── LEFT: Menu ──────────────────────────────────────── -->
       <section class="tw:lg:col-span-8 tw:space-y-4">
-        <!-- Search -->
-        <div class="tw:relative">
-          <i
-            class="pi pi-search tw:absolute tw:left-3 tw:top-1/2 tw:-translate-y-1/2 tw:text-sm app-text-subtle tw:pointer-events-none"
-          />
-          <prime-input-text
-            v-model="searchQuery"
-            :placeholder="t('orders.create.search')"
-            class="tw:w-full tw:pl-9"
-          />
-        </div>
-
         <!-- Loading skeleton -->
         <div v-if="loadingMenu" class="tw:space-y-6">
           <div v-for="n in 2" :key="n" class="tw:space-y-3">
@@ -774,7 +863,7 @@ onMounted(async () => {
             icon="ph:magnifying-glass-bold"
             class="tw:text-3xl tw:mb-3 tw:block tw:mx-auto tw:opacity-40"
           />
-          {{ t('orders.create.noProducts') }}
+          {{ t("orders.create.noProducts") }}
         </prime-panel>
 
         <prime-panel
@@ -783,6 +872,9 @@ onMounted(async () => {
           :key="category.id"
           :header="category.name"
           toggleable
+          :pt="{
+            root: { class: `${appCard} ${cardRing}` },
+          }"
         >
           <!-- Products grid -->
           <div
@@ -851,17 +943,17 @@ onMounted(async () => {
                   <span
                     v-if="product.hasTemperatureOption"
                     class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-orange-500/10 tw:text-orange-400"
-                    >{{ t('orders.create.optionsDialog.temperature') }}</span
+                    >{{ t("orders.create.optionsDialog.temperature") }}</span
                   >
                   <span
                     v-if="product.hasIceLevelOption"
                     class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-sky-500/10 tw:text-sky-400"
-                    >{{ t('orders.create.optionsDialog.iceLevel') }}</span
+                    >{{ t("orders.create.optionsDialog.iceLevel") }}</span
                   >
                   <span
                     v-if="product.hasSugarLevelOption"
                     class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-amber-500/10 tw:text-amber-400"
-                    >{{ t('orders.create.optionsDialog.sugarLevel') }}</span
+                    >{{ t("orders.create.optionsDialog.sugarLevel") }}</span
                   >
                 </div>
 
@@ -877,8 +969,8 @@ onMounted(async () => {
                     @click.stop="handleAddToCart(product)"
                     :class="btnIcon"
                   >
-                <iconify icon="prime:plus" />
-                </prime-button>
+                    <iconify icon="prime:plus" />
+                  </prime-button>
                 </div>
               </div>
             </article>
@@ -889,13 +981,15 @@ onMounted(async () => {
 
       <!-- ── RIGHT: Cart ────────────────────────────────────── -->
       <aside class="tw:lg:col-span-4 tw:lg:self-start tw:lg:sticky tw:lg:top-6">
-        <div class="app-panel tw:rounded-2xl tw:border tw:p-5">
+        <div 
+        :class="[appCard, cardRing, 'tw:p-5', 'tw:rounded-md']"
+       >
           <!-- Cart header -->
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <h2
               class="tw:text-base tw:font-semibold tw:flex tw:items-center tw:gap-2"
             >
-              {{ t('orders.create.cart') }}
+              {{ t("orders.create.cart") }}
               <prime-badge
                 v-if="cartItemCount > 0"
                 :value="cartItemCount"
@@ -927,9 +1021,9 @@ onMounted(async () => {
             class="tw:py-8 tw:text-center app-text-muted tw:text-sm tw:rounded-xl tw:border tw:border-dashed"
             style="border-color: var(--app-border)"
           >
-            {{ t('orders.create.cartEmpty') }}<br />
+            {{ t("orders.create.cartEmpty") }}<br />
             <span class="tw:text-xs tw:opacity-60">
-              {{ t('orders.create.cartEmptyHint') }}
+              {{ t("orders.create.cartEmptyHint") }}
             </span>
           </div>
 
@@ -939,10 +1033,18 @@ onMounted(async () => {
               v-for="item in cart"
               :key="item._key"
               class="tw:rounded-xl tw:border tw:p-3 tw:transition-colors"
-              :class="item.isFreeGift
-                ? 'tw:border-amber-500/40 tw:bg-amber-500/5'
-                : isItemDiscounted(item) ? 'tw:border-emerald-500/60 tw:bg-emerald-500/5' : ''"
-              :style="item.isFreeGift || isItemDiscounted(item) ? '' : 'border-color: var(--app-border)'"
+              :class="
+                item.isFreeGift
+                  ? 'tw:border-amber-500/40 tw:bg-amber-500/5'
+                  : isItemDiscounted(item)
+                    ? 'tw:border-emerald-500/60 tw:bg-emerald-500/5'
+                    : ''
+              "
+              :style="
+                item.isFreeGift || isItemDiscounted(item)
+                  ? ''
+                  : 'border-color: var(--app-border)'
+              "
             >
               <div class="tw:flex tw:items-start tw:gap-2">
                 <div class="tw:flex-1 tw:min-w-0">
@@ -956,23 +1058,39 @@ onMounted(async () => {
                       class="tw:inline-flex tw:items-center tw:gap-0.5 tw:text-xs tw:px-1.5 tw:py-0.5 tw:rounded tw:bg-amber-500/15 tw:text-amber-400 tw:font-medium"
                     >
                       <iconify icon="ph:gift-fill" class="tw:text-[10px]" />
-                      {{ t('orders.create.freeBadge') }}
+                      {{ t("orders.create.freeBadge") }}
                     </span>
                     <!-- Promotion badge for regular scoped items -->
                     <span
                       v-else-if="isItemDiscounted(item)"
                       class="tw:inline-flex tw:items-center tw:gap-0.5 tw:text-xs tw:px-1.5 tw:py-0.5 tw:rounded tw:bg-emerald-500/15 tw:text-emerald-400 tw:font-medium"
                     >
-                      <iconify icon="ph:tag-simple-fill" class="tw:text-[10px]" />
-                      {{ t('orders.create.promoBadge') }}
+                      <iconify
+                        icon="ph:tag-simple-fill"
+                        class="tw:text-[10px]"
+                      />
+                      {{ t("orders.create.promoBadge") }}
                     </span>
                   </div>
-                  <p class="tw:text-xs tw:mt-0.5"
-                    :class="item.isFreeGift ? 'tw:text-amber-400 tw:line-through tw:opacity-60' : 'tw:text-emerald-400'">
-                    {{ item.isFreeGift ? formatVnd(freeItemSelection?.unitPrice ?? 0) : formatVnd(item.unitPrice) }}
+                  <p
+                    class="tw:text-xs tw:mt-0.5"
+                    :class="
+                      item.isFreeGift
+                        ? 'tw:text-amber-400 tw:line-through tw:opacity-60'
+                        : 'tw:text-emerald-400'
+                    "
+                  >
+                    {{
+                      item.isFreeGift
+                        ? formatVnd(freeItemSelection?.unitPrice ?? 0)
+                        : formatVnd(item.unitPrice)
+                    }}
                   </p>
-                  <p v-if="item.isFreeGift" class="tw:text-xs tw:text-amber-400 tw:font-semibold">
-                    {{ t('orders.create.freeBadge') }}
+                  <p
+                    v-if="item.isFreeGift"
+                    class="tw:text-xs tw:text-amber-400 tw:font-semibold"
+                  >
+                    {{ t("orders.create.freeBadge") }}
                   </p>
                   <p
                     v-if="optionsLabel(item)"
@@ -984,7 +1102,7 @@ onMounted(async () => {
                   <span
                     v-if="item.isTakeaway"
                     class="tw:inline-block tw:mt-1 tw:text-xs tw:px-1.5 tw:py-0.5 tw:rounded tw:bg-sky-500/10 tw:text-sky-400"
-                    >{{ t('orders.create.takeaway') }}</span
+                    >{{ t("orders.create.takeaway") }}</span
                   >
                 </div>
                 <!-- Free gift: no qty controls, just remove -->
@@ -1001,7 +1119,10 @@ onMounted(async () => {
                   </prime-button>
                 </div>
                 <!-- Regular item: qty controls -->
-                <div v-else class="tw:flex tw:items-center tw:gap-1 tw:shrink-0">
+                <div
+                  v-else
+                  class="tw:flex tw:items-center tw:gap-1 tw:shrink-0"
+                >
                   <prime-button
                     size="small"
                     text
@@ -1028,9 +1149,19 @@ onMounted(async () => {
                 </div>
               </div>
               <div class="tw:flex tw:justify-end tw:mt-1.5">
-                <span class="tw:text-sm tw:font-semibold"
-                  :class="item.isFreeGift ? 'tw:text-amber-400' : 'tw:text-emerald-400'">
-                  {{ item.isFreeGift ? "0 ₫" : formatVnd(item.unitPrice * item.quantity) }}
+                <span
+                  class="tw:text-sm tw:font-semibold"
+                  :class="
+                    item.isFreeGift
+                      ? 'tw:text-amber-400'
+                      : 'tw:text-emerald-400'
+                  "
+                >
+                  {{
+                    item.isFreeGift
+                      ? "0 ₫"
+                      : formatVnd(item.unitPrice * item.quantity)
+                  }}
                 </span>
               </div>
             </div>
@@ -1043,14 +1174,20 @@ onMounted(async () => {
               <div
                 class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:mb-1"
               >
-                <span class="app-text-muted">{{ t('orders.create.subtotal') }}</span>
+                <span class="app-text-muted">{{
+                  t("orders.create.subtotal")
+                }}</span>
                 <span class="tw:font-medium">{{ formatVnd(cartTotal) }}</span>
               </div>
               <div
                 class="tw:flex tw:items-center tw:justify-between tw:text-xs tw:mb-2"
               >
-                <span class="app-text-muted">{{ t('orders.create.serviceCharge') }}</span>
-                <span class="app-text-muted">{{ t('orders.create.free') }}</span>
+                <span class="app-text-muted">{{
+                  t("orders.create.serviceCharge")
+                }}</span>
+                <span class="app-text-muted">{{
+                  t("orders.create.free")
+                }}</span>
               </div>
               <div
                 class="tw:border-t tw:pt-2"
@@ -1066,25 +1203,34 @@ onMounted(async () => {
                     {{ promoInfo.code }}
                   </span>
                   <!-- Free gift selected: show gift label -->
-                  <span v-if="freeItemSelection" class="tw:flex tw:items-center tw:gap-1 tw:text-amber-400 tw:font-medium">
+                  <span
+                    v-if="freeItemSelection"
+                    class="tw:flex tw:items-center tw:gap-1 tw:text-amber-400 tw:font-medium"
+                  >
                     <iconify icon="ph:gift-bold" class="tw:text-xs" />
-                    {{ t('orders.create.freeItem') }}
+                    {{ t("orders.create.freeItem") }}
                   </span>
                   <!-- Numeric discount (PERCENTAGE / FIXED) -->
-                  <span v-else-if="promoInfo.estimatedDiscount" class="tw:text-emerald-400 tw:font-medium">
+                  <span
+                    v-else-if="promoInfo.estimatedDiscount"
+                    class="tw:text-emerald-400 tw:font-medium"
+                  >
                     -{{ formatVnd(promoInfo.estimatedDiscount) }}
                   </span>
-                  <span v-else class="app-text-muted tw:italic">{{ t('orders.create.willBeApplied') }}</span>
+                  <span v-else class="app-text-muted tw:italic">{{
+                    t("orders.create.willBeApplied")
+                  }}</span>
                 </div>
                 <div
                   class="tw:flex tw:items-center tw:justify-between tw:font-bold"
                 >
-                  <span>{{ t('orders.create.total') }}</span>
+                  <span>{{ t("orders.create.total") }}</span>
                   <div class="tw:text-right">
                     <span
                       v-if="promoInfo?.estimatedDiscount && !freeItemSelection"
                       class="app-text-muted tw:line-through tw:text-xs tw:font-normal tw:mr-1"
-                    >{{ formatVnd(cartTotal) }}</span>
+                      >{{ formatVnd(cartTotal) }}</span
+                    >
                     <span class="tw:text-emerald-400 tw:text-base">{{
                       formatVnd(cartFinal)
                     }}</span>
@@ -1095,10 +1241,14 @@ onMounted(async () => {
           </div>
 
           <!-- Find promotions -->
-          <div class="tw:flex tw:items-center tw:justify-between tw:mt-4 tw:mb-1">
-            <span class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs app-text-muted">
+          <div
+            class="tw:flex tw:items-center tw:justify-between tw:mt-4 tw:mb-1"
+          >
+            <span
+              class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs app-text-muted"
+            >
               <iconify icon="ph:ticket-bold" class="tw:text-emerald-400" />
-              {{ t('orders.create.findPromotions') }}
+              {{ t("orders.create.findPromotions") }}
             </span>
             <prime-button
               size="small"
@@ -1108,7 +1258,7 @@ onMounted(async () => {
               @click="openFindPromosDialog"
             >
               <iconify icon="ph:magnifying-glass-bold" class="tw:text-xs" />
-              <span>{{ t('orders.create.browse') }}</span>
+              <span>{{ t("orders.create.browse") }}</span>
             </prime-button>
           </div>
 
@@ -1120,11 +1270,24 @@ onMounted(async () => {
               class="tw:flex tw:items-center tw:justify-between tw:rounded-xl tw:border tw:border-emerald-500/30 tw:bg-emerald-500/10 tw:px-3 tw:py-2"
             >
               <div class="tw:flex tw:items-center tw:gap-2 tw:min-w-0">
-                <iconify icon="ph:tag-bold" class="tw:text-emerald-400 tw:shrink-0" />
-                <span class="tw:font-medium tw:text-sm tw:text-emerald-300">{{ promoInfo.code }}</span>
-                <span class="tw:text-xs app-text-muted tw:truncate">{{ promoInfo.name }}</span>
+                <iconify
+                  icon="ph:tag-bold"
+                  class="tw:text-emerald-400 tw:shrink-0"
+                />
+                <span class="tw:font-medium tw:text-sm tw:text-emerald-300">{{
+                  promoInfo.code
+                }}</span>
+                <span class="tw:text-xs app-text-muted tw:truncate">{{
+                  promoInfo.name
+                }}</span>
               </div>
-              <prime-button size="small" text severity="secondary" :class="btnIcon" @click="clearPromo">
+              <prime-button
+                size="small"
+                text
+                severity="secondary"
+                :class="btnIcon"
+                @click="clearPromo"
+              >
                 <iconify icon="prime:times" class="tw:text-xs" />
               </prime-button>
             </div>
@@ -1135,20 +1298,31 @@ onMounted(async () => {
               class="tw:mt-2 tw:rounded-xl tw:border tw:p-3"
               style="border-color: var(--app-border)"
             >
-              <p class="tw:text-xs tw:font-medium tw:mb-2 tw:flex tw:items-center tw:gap-1 tw:text-emerald-400">
+              <p
+                class="tw:text-xs tw:font-medium tw:mb-2 tw:flex tw:items-center tw:gap-1 tw:text-emerald-400"
+              >
                 <iconify icon="ph:gift-bold" />
-                {{ t('orders.create.selectFreeGift') }}
+                {{ t("orders.create.selectFreeGift") }}
               </p>
               <div class="tw:flex tw:flex-col tw:gap-1.5">
                 <button
                   v-for="item in freeItemPickerPool"
                   :key="item._key"
                   class="tw:flex tw:items-center tw:justify-between tw:rounded-lg tw:border tw:px-3 tw:py-2 tw:text-left tw:text-sm tw:transition-colors tw:w-full"
-                  :class="freeItemSelection?._key === item._key
-                    ? 'tw:border-emerald-500 tw:bg-emerald-500/10 tw:text-emerald-300'
-                    : 'hover:tw:border-emerald-500/40 app-text-muted'"
-                  :style="freeItemSelection?._key === item._key ? '' : 'border-color: var(--app-border)'"
-                  @click="freeItemSelection = freeItemSelection?._key === item._key ? null : item"
+                  :class="
+                    freeItemSelection?._key === item._key
+                      ? 'tw:border-emerald-500 tw:bg-emerald-500/10 tw:text-emerald-300'
+                      : 'hover:tw:border-emerald-500/40 app-text-muted'
+                  "
+                  :style="
+                    freeItemSelection?._key === item._key
+                      ? ''
+                      : 'border-color: var(--app-border)'
+                  "
+                  @click="
+                    freeItemSelection =
+                      freeItemSelection?._key === item._key ? null : item
+                  "
                 >
                   <span class="tw:flex tw:items-center tw:gap-1.5">
                     <iconify
@@ -1156,14 +1330,12 @@ onMounted(async () => {
                       icon="ph:check-circle-fill"
                       class="tw:text-emerald-400 tw:shrink-0"
                     />
-                    <iconify
-                      v-else
-                      icon="ph:circle"
-                      class="tw:shrink-0"
-                    />
+                    <iconify v-else icon="ph:circle" class="tw:shrink-0" />
                     {{ item.productName }}
                   </span>
-                  <span class="tw:text-xs tw:font-semibold tw:text-emerald-400 tw:shrink-0">
+                  <span
+                    class="tw:text-xs tw:font-semibold tw:text-emerald-400 tw:shrink-0"
+                  >
                     {{ formatVnd(item.unitPrice) }}
                   </span>
                 </button>
@@ -1185,9 +1357,12 @@ onMounted(async () => {
                   :loading="promoLoading"
                   :disabled="!promoCode.trim()"
                   @click="applyPromoCode"
-                >{{ t('orders.create.apply') }}</prime-button>
+                  >{{ t("orders.create.apply") }}</prime-button
+                >
               </div>
-              <p v-if="promoError" class="tw:text-xs tw:text-red-400 tw:mt-1.5">{{ promoError }}</p>
+              <p v-if="promoError" class="tw:text-xs tw:text-red-400 tw:mt-1.5">
+                {{ promoError }}
+              </p>
             </div>
           </div>
 
@@ -1209,14 +1384,14 @@ onMounted(async () => {
             @click="placeOrder"
           >
             <iconify icon="prime:check" />
-            <span>{{ t('orders.create.submit') }}</span>
+            <span>{{ t("orders.create.submit") }}</span>
           </prime-button>
 
           <p
             v-if="!sessionId && !sessionLoading"
             class="tw:text-xs app-text-muted tw:text-center tw:mt-2"
           >
-            {{ t('orders.create.tableHint') }}
+            {{ t("orders.create.tableHint") }}
           </p>
         </div>
       </aside>
@@ -1231,44 +1406,78 @@ onMounted(async () => {
     :style="{ width: '30rem' }"
   >
     <div class="tw:space-y-2">
-      <div v-if="publicPromosLoading" class="tw:flex tw:items-center tw:justify-center tw:gap-2 tw:py-8 app-text-muted">
+      <div
+        v-if="publicPromosLoading"
+        class="tw:flex tw:items-center tw:justify-center tw:gap-2 tw:py-8 app-text-muted"
+      >
         <iconify icon="prime:spinner" class="tw:animate-spin" />
-        <span class="tw:text-sm">{{ t('orders.create.promoDialog.loading') }}</span>
+        <span class="tw:text-sm">{{
+          t("orders.create.promoDialog.loading")
+        }}</span>
       </div>
-      <div v-else-if="publicPromos.length === 0" class="tw:py-8 tw:text-center tw:text-sm app-text-muted">
-        {{ t('orders.create.promoDialog.empty') }}
+      <div
+        v-else-if="publicPromos.length === 0"
+        class="tw:py-8 tw:text-center tw:text-sm app-text-muted"
+      >
+        {{ t("orders.create.promoDialog.empty") }}
       </div>
       <div
         v-else
         v-for="promo in publicPromos"
         :key="promo.id"
         class="tw:rounded-xl tw:border tw:p-3 tw:transition-colors"
-        :class="isPromoAvailable(promo)
-          ? 'tw:cursor-pointer hover:tw:border-emerald-500/50 hover:tw:bg-emerald-500/5'
-          : 'tw:opacity-40 tw:cursor-not-allowed'"
+        :class="
+          isPromoAvailable(promo)
+            ? 'tw:cursor-pointer hover:tw:border-emerald-500/50 hover:tw:bg-emerald-500/5'
+            : 'tw:opacity-40 tw:cursor-not-allowed'
+        "
         style="border-color: var(--app-border)"
         @click="isPromoAvailable(promo) && selectPromo(promo)"
       >
         <div class="tw:flex tw:items-start tw:justify-between tw:gap-3">
           <div class="tw:min-w-0">
-            <p class="tw:text-sm tw:font-semibold tw:leading-snug">{{ promo.name }}</p>
-            <p class="tw:text-xs tw:font-mono app-text-muted tw:mt-0.5">{{ promo.code }}</p>
+            <p class="tw:text-sm tw:font-semibold tw:leading-snug">
+              {{ promo.name }}
+            </p>
+            <p class="tw:text-xs tw:font-mono app-text-muted tw:mt-0.5">
+              {{ promo.code }}
+            </p>
             <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:mt-1.5">
-              <span v-if="promo.minOrderAmount" class="tw:text-xs app-text-muted">
-                {{ t('orders.create.promoDialog.minAmount', { amount: formatVnd(promo.minOrderAmount) }) }}
+              <span
+                v-if="promo.minOrderAmount"
+                class="tw:text-xs app-text-muted"
+              >
+                {{
+                  t("orders.create.promoDialog.minAmount", {
+                    amount: formatVnd(promo.minOrderAmount),
+                  })
+                }}
               </span>
               <span v-if="promo.endDate" class="tw:text-xs app-text-muted">
-                {{ t('orders.create.promoDialog.until', { date: new Date(promo.endDate).toLocaleDateString('vi-VN') }) }}
+                {{
+                  t("orders.create.promoDialog.until", {
+                    date: new Date(promo.endDate).toLocaleDateString("vi-VN"),
+                  })
+                }}
               </span>
               <span v-if="promo.maxUsage" class="tw:text-xs app-text-muted">
-                {{ t('orders.create.promoDialog.usesLeft', { n: promo.maxUsage - promo.currentUsage }) }}
+                {{
+                  t("orders.create.promoDialog.usesLeft", {
+                    n: promo.maxUsage - promo.currentUsage,
+                  })
+                }}
               </span>
-              <span v-if="!isPromoAvailable(promo)" class="tw:text-xs tw:text-red-400">
+              <span
+                v-if="!isPromoAvailable(promo)"
+                class="tw:text-xs tw:text-red-400"
+              >
                 {{ promoDisableReason(promo) }}
               </span>
             </div>
           </div>
-          <span class="tw:shrink-0 tw:text-emerald-400 tw:font-semibold tw:text-sm">
+          <span
+            class="tw:shrink-0 tw:text-emerald-400 tw:font-semibold tw:text-sm"
+          >
             {{ formatPromotionValue(promo) }}
           </span>
         </div>
@@ -1287,7 +1496,9 @@ onMounted(async () => {
     <div class="tw:space-y-5">
       <!-- Quantity -->
       <div>
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t('orders.create.optionsDialog.quantity') }}</p>
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+          {{ t("orders.create.optionsDialog.quantity") }}
+        </p>
         <div class="tw:flex tw:items-center tw:gap-3">
           <button
             class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
@@ -1311,7 +1522,9 @@ onMounted(async () => {
 
       <!-- Temperature -->
       <div v-if="selectedProduct?.hasTemperatureOption">
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t('orders.create.optionsDialog.temperature') }}</p>
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+          {{ t("orders.create.optionsDialog.temperature") }}
+        </p>
         <div class="tw:flex tw:gap-2">
           <prime-button
             v-for="opt in temperatureOptions"
@@ -1335,7 +1548,9 @@ onMounted(async () => {
           pendingOptions.temperature !== DRINK_TEMPERATURE.HOT
         "
       >
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t('orders.create.optionsDialog.iceLevel') }}</p>
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+          {{ t("orders.create.optionsDialog.iceLevel") }}
+        </p>
         <div class="tw:grid tw:grid-cols-2 tw:gap-2">
           <prime-button
             v-for="opt in iceLevelOptions"
@@ -1360,7 +1575,9 @@ onMounted(async () => {
           pendingOptions.temperature !== DRINK_TEMPERATURE.HOT
         "
       >
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t('orders.create.optionsDialog.sugarLevel') }}</p>
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+          {{ t("orders.create.optionsDialog.sugarLevel") }}
+        </p>
         <div class="tw:grid tw:grid-cols-2 tw:gap-2">
           <prime-button
             v-for="opt in sugarLevelOptions"
@@ -1380,7 +1597,9 @@ onMounted(async () => {
 
       <!-- Serving -->
       <div>
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t('orders.create.optionsDialog.serving') }}</p>
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+          {{ t("orders.create.optionsDialog.serving") }}
+        </p>
         <div class="tw:flex tw:gap-2">
           <prime-button
             v-for="servingType in servingOptions"
@@ -1406,11 +1625,13 @@ onMounted(async () => {
         text
         @click="showOptionsDialog = false"
       >
-        <span class="tw:ml-2">{{ t('orders.cancel') }}</span>
+        <span class="tw:ml-2">{{ t("orders.cancel") }}</span>
       </prime-button>
       <prime-button @click="confirmAddToCart">
         <iconify icon="prime:shopping-cart" />
-        <span class="tw:ml-2">{{ t('orders.create.optionsDialog.addToCart') }}</span>
+        <span class="tw:ml-2">{{
+          t("orders.create.optionsDialog.addToCart")
+        }}</span>
       </prime-button>
     </template>
   </prime-dialog>

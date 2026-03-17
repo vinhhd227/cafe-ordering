@@ -277,6 +277,7 @@ const columns = computed(() => [
   { field: 'orderDate',     header: t('orders.list.col.date'),        width: '10rem' },
   { field: 'status',        header: t('orders.list.col.status'),      width: '8rem' },
   { field: 'paymentStatus', header: t('orders.list.col.payment'),     width: '10rem' },
+  { field: 'guestCount',    header: t('orders.list.col.guests'),      width: '6rem' },
   { key: 'items',           header: t('orders.list.col.items'),       width: '14rem' },
   { key: 'promos',          header: t('orders.list.col.discount'),    width: '11rem' },
   { field: 'totalAmount',   header: t('orders.list.col.total'),       width: '9rem' },
@@ -760,6 +761,14 @@ const confirmPayment = async () => {
           :value="paymentTag(data.paymentStatus, data.paymentMethod).label"
           :severity="paymentTag(data.paymentStatus, data.paymentMethod).severity"
         />
+      </template>
+
+      <template #col-guestCount="{ data }">
+        <span v-if="data.guestCount" class="tw:flex tw:items-center tw:gap-1 tw:text-sm">
+          <iconify icon="ph:users" class="tw:text-sm tw:opacity-60" />
+          {{ data.guestCount }}
+        </span>
+        <span v-else class="tw:text-xs app-text-subtle">—</span>
       </template>
 
       <template #col-items="{ data }">

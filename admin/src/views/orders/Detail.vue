@@ -834,6 +834,27 @@ const confirmSplit = async () => {
                     >{{ String(order.sessionId).slice(0, 8) }}…</span
                   >
                 </div>
+                <div v-if="order.guestCount" class="tw:flex tw:justify-between tw:text-sm tw:items-center">
+                  <span class="app-text-muted tw:flex tw:items-center tw:gap-1">
+                    <iconify icon="ph:users" class="tw:text-sm" />
+                    {{ t('orders.detail.info.guestCount') }}
+                  </span>
+                  <span class="tw:font-semibold">{{ order.guestCount }}</span>
+                </div>
+                <div v-if="order.completedAt" class="tw:flex tw:justify-between tw:text-sm tw:items-center">
+                  <span class="app-text-muted tw:flex tw:items-center tw:gap-1">
+                    <iconify icon="ph:check-circle" class="tw:text-sm tw:text-green-500" />
+                    {{ t('orders.detail.info.completedAt') }}
+                  </span>
+                  <span class="tw:text-xs tw:font-mono">{{ formatDate(order.completedAt) }}</span>
+                </div>
+                <div v-if="order.paidAt" class="tw:flex tw:justify-between tw:text-sm tw:items-center">
+                  <span class="app-text-muted tw:flex tw:items-center tw:gap-1">
+                    <iconify icon="ph:currency-circle-dollar" class="tw:text-sm tw:text-blue-400" />
+                    {{ t('orders.detail.info.paidAt') }}
+                  </span>
+                  <span class="tw:text-xs tw:font-mono">{{ formatDate(order.paidAt) }}</span>
+                </div>
                 <prime-divider />
                 <div v-if="order.totalDiscount > 0" class="tw:flex tw:justify-between tw:text-xs tw:mb-1">
                   <span class="tw:flex tw:items-center tw:gap-1 app-text-muted">
@@ -958,16 +979,16 @@ const confirmSplit = async () => {
                   >
                 </p>
                 <div class="tw:flex tw:gap-2">
-                  <!-- Add item button (Pending + Unpaid only) -->
+                  <!-- Edit order button (Pending + Unpaid only) -->
                   <prime-button
                     v-if="canEditItems"
                     severity="secondary"
                     outlined
                     size="small"
-                    @click="openAddItemDialog"
+                    @click="router.push({ name: 'ordersEdit', params: { id: orderId } })"
                   >
-                    <iconify icon="ph:plus-bold" />
-                    <span>{{ t('orders.detail.addItem.title') }}</span>
+                    <iconify icon="ph:pencil-simple-bold" />
+                    <span>{{ t('orders.detail.editOrder') }}</span>
                   </prime-button>
                   <!-- Split button -->
                   <prime-button

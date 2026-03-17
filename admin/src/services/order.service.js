@@ -28,8 +28,8 @@ export const splitOrder = (orderId, items) =>
 export const updateOrderItem = (orderId, productId, quantity) =>
   api.put(`/admin/orders/${orderId}/items/${productId}`, { quantity })
 
-export const createOrder = (sessionId, items) =>
-  api.post('/orders', { sessionId, items })
+export const createOrder = (sessionId, items, guestCount = null) =>
+  api.post('/orders', { sessionId, items, ...(guestCount != null && { guestCount }) })
 
 export const applyPromotionAdmin = (orderId, code) =>
   api.post(`/admin/orders/${orderId}/promotions`, { code })
@@ -39,3 +39,7 @@ export const removePromotionAdmin = (orderId, promotionId) =>
 
 export const autoApplyPromotions = (orderId) =>
   api.post(`/admin/orders/${orderId}/promotions/auto`, {})
+
+// Replace all items in a Pending order (also updates guestCount)
+export const editOrderItems = (orderId, items, guestCount = null) =>
+  api.put(`/admin/orders/${orderId}/items`, { items, guestCount })
