@@ -15,6 +15,7 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
   public bool HasTemperatureOption { get; private set; }
   public bool HasIceLevelOption { get; private set; }
   public bool HasSugarLevelOption { get; private set; }
+  public bool IsAccompaniment { get; private set; }
 
   // Navigation
   public Category? Category { get; private set; }
@@ -27,7 +28,8 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
     string? imageUrl = null,
     bool hasTemperatureOption = false,
     bool hasIceLevelOption = false,
-    bool hasSugarLevelOption = false)
+    bool hasSugarLevelOption = false,
+    bool isAccompaniment = false)
   {
     var product = new Product
     {
@@ -39,6 +41,7 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
       HasTemperatureOption = hasTemperatureOption,
       HasIceLevelOption = hasIceLevelOption,
       HasSugarLevelOption = hasSugarLevelOption,
+      IsAccompaniment = isAccompaniment,
       IsActive = true
     };
 
@@ -46,6 +49,8 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
 
     return product;
   }
+
+  public void UpdateAccompaniment(bool value) => IsAccompaniment = value;
 
   public void UpdateDetails(
     string name,

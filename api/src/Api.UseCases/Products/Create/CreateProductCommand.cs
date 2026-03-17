@@ -11,5 +11,6 @@ public record CreateProductCommand(
   string? ImageUrl = null,
   bool HasTemperatureOption = false,
   bool HasIceLevelOption = false,
-  bool HasSugarLevelOption = false
+  bool HasSugarLevelOption = false,
+  bool IsAccompaniment = false
 ) : ICommand<Result<int>>;

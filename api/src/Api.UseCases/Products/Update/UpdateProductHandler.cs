@@ -36,6 +36,8 @@ public class UpdateProductHandler : ICommandHandler<UpdateProductCommand, Result
       request.HasIceLevelOption,
       request.HasSugarLevelOption);
 
+    product.UpdateAccompaniment(request.IsAccompaniment);
+
     if (request.IsActive)
       product.Activate();
     else

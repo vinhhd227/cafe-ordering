@@ -15,6 +15,7 @@ public record ProductDto(
   bool HasTemperatureOption,
   bool HasIceLevelOption,
   bool HasSugarLevelOption,
+  bool IsAccompaniment,
   DateTime CreatedAt,
   DateTime? UpdatedAt
 );

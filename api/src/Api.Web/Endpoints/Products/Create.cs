@@ -40,6 +40,12 @@ public sealed class CreateProductRequest
   /// (0 % / 25 % / 50 % / 75 % / 100 %).
   /// </summary>
   public bool HasSugarLevelOption { get; set; }
+
+  /// <summary>
+  /// When <c>true</c>, this product is an accompaniment (e.g. food side, add-on)
+  /// and will not be counted toward the default guest count when creating an order.
+  /// </summary>
+  public bool IsAccompaniment { get; set; }
 }
 
 public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
@@ -62,7 +68,8 @@ public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
       req.ImageUrl,
       req.HasTemperatureOption,
       req.HasIceLevelOption,
-      req.HasSugarLevelOption);
+      req.HasSugarLevelOption,
+      req.IsAccompaniment);
 
     var result = await mediator.Send(command, ct);
 

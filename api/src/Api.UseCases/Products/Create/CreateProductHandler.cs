@@ -18,7 +18,8 @@ public class CreateProductHandler(IRepositoryBase<Product> repository)
       request.ImageUrl,
       request.HasTemperatureOption,
       request.HasIceLevelOption,
-      request.HasSugarLevelOption);
+      request.HasSugarLevelOption,
+      request.IsAccompaniment);
 
     await repository.AddAsync(product, ct);
 

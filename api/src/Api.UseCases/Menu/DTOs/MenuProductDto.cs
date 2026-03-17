@@ -8,5 +8,6 @@ public record MenuProductDto(
   string? ImageUrl,
   bool HasTemperatureOption,
   bool HasIceLevelOption,
-  bool HasSugarLevelOption
+  bool HasSugarLevelOption,
+  bool IsAccompaniment
 );

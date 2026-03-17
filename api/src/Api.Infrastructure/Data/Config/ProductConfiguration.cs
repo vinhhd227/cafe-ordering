@@ -29,6 +29,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
       .HasForeignKey(p => p.CategoryId)
       .OnDelete(DeleteBehavior.Restrict);
 
+    builder.Property(p => p.IsAccompaniment)
+      .IsRequired()
+      .HasDefaultValue(false);
+
     // Indexes
     builder.HasIndex(p => p.CategoryId);
     builder.HasIndex(p => p.IsActive);

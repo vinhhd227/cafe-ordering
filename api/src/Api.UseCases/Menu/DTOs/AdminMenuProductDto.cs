@@ -13,5 +13,6 @@ public record AdminMenuProductDto(
   bool IsActive,
   bool HasTemperatureOption,
   bool HasIceLevelOption,
-  bool HasSugarLevelOption
+  bool HasSugarLevelOption,
+  bool IsAccompaniment
 );

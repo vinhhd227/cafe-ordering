@@ -40,6 +40,12 @@ public sealed class UpdateProductRequest
 
   /// <summary>Allow customers to choose sugar level.</summary>
   public bool HasSugarLevelOption { get; set; }
+
+  /// <summary>
+  /// When <c>true</c>, this product is an accompaniment (e.g. food side, add-on)
+  /// and will not be counted toward the default guest count when creating an order.
+  /// </summary>
+  public bool IsAccompaniment { get; set; }
 }
 
 public class Update : Endpoint<UpdateProductRequest>
@@ -71,6 +77,7 @@ public class Update : Endpoint<UpdateProductRequest>
         req.HasTemperatureOption,
         req.HasIceLevelOption,
         req.HasSugarLevelOption,
+        req.IsAccompaniment,
         req.Description,
         req.ImageUrl), ct);
 

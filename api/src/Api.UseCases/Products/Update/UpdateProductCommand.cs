@@ -12,6 +12,7 @@ public record UpdateProductCommand(
   bool HasTemperatureOption,
   bool HasIceLevelOption,
   bool HasSugarLevelOption,
+  bool IsAccompaniment = false,
   string? Description = null,
   string? ImageUrl = null
 ) : ICommand<Result>;

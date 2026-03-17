@@ -25,6 +25,7 @@ public class GetSummary : Summary<Get>
       HasTemperatureOption: true,
       HasIceLevelOption: true,
       HasSugarLevelOption: true,
+      IsAccompaniment: false,
       CreatedAt: new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
       UpdatedAt: null);
 
