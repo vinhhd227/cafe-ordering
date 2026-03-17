@@ -46,6 +46,9 @@ export default defineConfig({
             vueTemplate: true,
             dts: 'src/auto-imports.d.ts',
         }),],
+    optimizeDeps: {
+        include: ['html-to-image', 'jspdf'],
+    },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url)),
