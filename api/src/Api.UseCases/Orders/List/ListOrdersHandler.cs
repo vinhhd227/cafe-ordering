@@ -110,6 +110,9 @@ public class ListOrdersHandler(
         o.OrderDate,
         o.SessionId,
         tableCode,
+        o.GuestCount,
+        o.CompletedAt,
+        o.PaidAt,
         o.Items.Select(i => new OrderItemDto(
           i.ProductId,
           i.ProductName,

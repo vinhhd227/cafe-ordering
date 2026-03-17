@@ -46,6 +46,9 @@ public class GetOrderHandler(
       order.OrderDate,
       order.SessionId,
       tableCode,
+      order.GuestCount,
+      order.CompletedAt,
+      order.PaidAt,
       order.Items.Select(i => new OrderItemDto(
         i.ProductId,
         i.ProductName,

@@ -34,6 +34,9 @@ public record OrderDto(
   DateTime OrderDate,
   Guid SessionId,
   string? TableCode,
+  int? GuestCount,
+  DateTime? CompletedAt,
+  DateTime? PaidAt,
   List<OrderItemDto> Items,
   List<AppliedPromotionDto> Promotions
 );

@@ -4,4 +4,5 @@ namespace Api.UseCases.Orders.Create;
 
 public record PlaceOrderCommand(
   Guid SessionId,
-  List<PlaceOrderItemDto> Items) : ICommand<Result<PlaceOrderResponseDto>>;
+  List<PlaceOrderItemDto> Items,
+  int? GuestCount = null) : ICommand<Result<PlaceOrderResponseDto>>;

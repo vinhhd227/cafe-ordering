@@ -9,6 +9,7 @@ public sealed class CreateOrderRequest
 {
   public Guid SessionId { get; set; }
   public List<CreateOrderItemRequest> Items { get; set; } = [];
+  public int? GuestCount { get; set; }
 }
 
 public sealed class CreateOrderItemRequest
@@ -52,7 +53,7 @@ public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrde
         i.Temperature, i.IceLevel, i.SugarLevel, i.IsTakeaway, i.IsFreeGift))
       .ToList();
 
-    var result = await mediator.Send(new PlaceOrderCommand(req.SessionId, items), ct);
+    var result = await mediator.Send(new PlaceOrderCommand(req.SessionId, items, req.GuestCount), ct);
     await this.SendResultAsync(result, ct);
   }
 }

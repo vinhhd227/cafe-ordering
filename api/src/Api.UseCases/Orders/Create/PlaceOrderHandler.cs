@@ -32,7 +32,7 @@ public class PlaceOrderHandler(
 
     // 3. Tạo order — chưa có items, save để EF sinh Id
     var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}";
-    var order = Order.Create(request.SessionId, orderNumber);
+    var order = Order.Create(request.SessionId, orderNumber, guestCount: request.GuestCount);
 
     await orderRepository.AddAsync(order, ct); // EF sinh order.Id sau bước này
 

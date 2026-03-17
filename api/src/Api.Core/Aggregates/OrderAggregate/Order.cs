@@ -26,9 +26,12 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   public OrderStatus Status { get; private set; }
   public PaymentStatus PaymentStatus { get; private set; } = PaymentStatus.Unpaid;
   public PaymentMethod PaymentMethod { get; private set; } = PaymentMethod.Unknown;
+  public int? GuestCount { get; private set; }
   public decimal? AmountReceived { get; private set; }
   public decimal TipAmount { get; private set; }
   public DateTime OrderDate { get; private set; }
+  public DateTime? CompletedAt { get; private set; }
+  public DateTime? PaidAt { get; private set; }
   public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
   public IReadOnlyCollection<OrderPromotion> Promotions => _promotions.AsReadOnly();
 
@@ -40,7 +43,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   /// <summary>
   ///   Factory method for session-based orders (guest or authenticated).
   /// </summary>
-  public static Order Create(Guid sessionId, string orderNumber, string? deviceToken = null, string? customerId = null)
+  public static Order Create(Guid sessionId, string orderNumber, string? deviceToken = null, string? customerId = null, int? guestCount = null)
   {
     Guard.Against.Default(sessionId, nameof(sessionId));
     Guard.Against.NullOrEmpty(orderNumber, nameof(orderNumber));
@@ -51,6 +54,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
       OrderNumber = orderNumber,
       DeviceToken = deviceToken,
       CustomerId = customerId,
+      GuestCount = guestCount,
       Status = OrderStatus.Pending,
       OrderDate = DateTime.UtcNow
     };
@@ -100,6 +104,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
       throw new InvalidOperationException($"Cannot complete order in {Status} status");
 
     Status = OrderStatus.Completed;
+    CompletedAt = DateTime.UtcNow;
 
     RegisterDomainEvent(new OrderCompletedEvent(this));
     RegisterDomainEvent(new OrderStatusChangedEvent(this));
@@ -115,6 +120,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
     PaymentMethod = method;
     AmountReceived = amountReceived;
     TipAmount = tipAmount;
+    if (status == PaymentStatus.Paid) PaidAt ??= DateTime.UtcNow;
 
     RegisterDomainEvent(new OrderPaymentUpdatedEvent(this));
   }
@@ -208,6 +214,30 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   {
     Status = OrderStatus.Cancelled;
   }
+
+  /// <summary>
+  ///   Merge: cộng dồn số khách từ secondary order vào primary.
+  ///   Chỉ cộng nếu secondary có GuestCount (không null).
+  /// </summary>
+  public void AddGuestCount(int? secondaryGuestCount)
+  {
+    if (secondaryGuestCount is null) return;
+    GuestCount = (GuestCount ?? 0) + secondaryGuestCount.Value;
+  }
+
+  /// <summary>
+  ///   Edit: xoá toàn bộ items + promotions để replace bằng danh sách mới.
+  /// </summary>
+  public void ClearAllItems()
+  {
+    _items.Clear();
+    _promotions.Clear();
+  }
+
+  /// <summary>
+  ///   Cập nhật số khách (dùng khi edit order).
+  /// </summary>
+  public void UpdateGuestCount(int? value) => GuestCount = value;
 
   /// <summary>
   ///   Set the quantity of an item. quantity = 0 removes the item.

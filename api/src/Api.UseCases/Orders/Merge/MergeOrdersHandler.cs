@@ -60,12 +60,13 @@ public class MergeOrdersHandler(
           $"Order {secondary.OrderNumber} belongs to a closed session and cannot be merged.");
     }
 
-    // 5. Merge items from secondaries into primary
+    // 5. Merge items + guest count from secondaries into primary
     foreach (var secondary in secondaries)
     {
       foreach (var item in secondary.Items)
         primary.AddItemForMerge(item.ProductId, item.ProductName, item.UnitPrice, item.Quantity);
 
+      primary.AddGuestCount(secondary.GuestCount);
       secondary.CancelAsMerged();
     }
 

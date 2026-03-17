@@ -45,10 +45,13 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         v => v.Name.ToUpperInvariant(),
         v => PaymentMethod.FromName(v, true));
 
+    builder.Property(o => o.GuestCount);
     builder.Property(o => o.AmountReceived);
     builder.Property(o => o.TipAmount).IsRequired().HasDefaultValue(0m);
 
     builder.Property(o => o.OrderDate).IsRequired();
+    builder.Property(o => o.CompletedAt);
+    builder.Property(o => o.PaidAt);
 
     // FK: Order → GuestSession
     builder.HasOne<GuestSession>()

@@ -91,6 +91,9 @@ public class UpdateOrderItemHandler(
       order.OrderDate,
       order.SessionId,
       null, // tableCode — not needed for item edit response
+      order.GuestCount,
+      order.CompletedAt,
+      order.PaidAt,
       order.Items.Select(i => new OrderItemDto(
         i.ProductId,
         i.ProductName,

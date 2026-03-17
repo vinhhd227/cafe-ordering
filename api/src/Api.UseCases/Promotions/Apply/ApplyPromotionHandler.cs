@@ -110,6 +110,9 @@ public class ApplyPromotionHandler(
     order.OrderDate,
     order.SessionId,
     null,
+    order.GuestCount,
+    order.CompletedAt,
+    order.PaidAt,
     order.Items.Select(i => new OrderItemDto(
       i.ProductId, i.ProductName, i.UnitPrice, i.Quantity, i.Discount, i.TotalPrice,
       i.Temperature?.Name.ToUpperInvariant(),
