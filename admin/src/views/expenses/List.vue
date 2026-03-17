@@ -19,6 +19,7 @@ import {
 } from "@/constants/expensePaymentMethod";
 import { btnIcon } from "@/layout/ui";
 
+const { t } = useI18n();
 const { can } = usePermission();
 
 // ── Cache ──────────────────────────────────────────────────────────
@@ -43,15 +44,15 @@ const errorMessage = ref("");
 
 // ── Column visibility ────────────────────────────────────────────
 const colDefs = ref([
-  { field: 'purchaseDate', header: 'Date',       width: '8rem',  visible: true },
-  { field: 'name',         header: 'Item',        width: '12rem', visible: true },
-  { field: 'category',     header: 'Category',   width: '9rem',  visible: true },
-  { field: 'paymentMethod', header: 'Payment',   width: '9rem',  visible: true },
-  { key:   'qty',           header: 'Qty',        width: '7rem',  visible: true },
-  { field: 'unitPrice',    header: 'Unit price', width: '9rem',  visible: true },
-  { field: 'totalAmount',  header: 'Total',      width: '9rem',  visible: true },
-  { field: 'notes',        header: 'Notes',      width: '10rem', visible: true },
-  { key:   'actions',      header: 'Actions',    width: '8rem',  toggleable: false },
+  { field: 'purchaseDate', header: t('expenses.list.col.date'),      width: '8rem',  visible: true },
+  { field: 'name',         header: t('expenses.list.col.item'),       width: '12rem', visible: true },
+  { field: 'category',     header: t('expenses.list.col.category'),   width: '9rem',  visible: true },
+  { field: 'paymentMethod', header: t('expenses.list.col.payment'),   width: '9rem',  visible: true },
+  { key:   'qty',           header: t('expenses.list.col.qty'),       width: '7rem',  visible: true },
+  { field: 'unitPrice',    header: t('expenses.list.col.unitPrice'),  width: '9rem',  visible: true },
+  { field: 'totalAmount',  header: t('expenses.list.col.total'),      width: '9rem',  visible: true },
+  { field: 'notes',        header: t('expenses.list.col.notes'),      width: '10rem', visible: true },
+  { key:   'actions',      header: t('expenses.list.col.actions'),    width: '8rem',  toggleable: false },
 ]);
 
 // ── Filters ────────────────────────────────────────────────────────
@@ -207,7 +208,7 @@ const loadExpenses = async () => {
     saveCurrentState();
   } catch (err) {
     errorMessage.value =
-      err?.response?.data?.message || "Failed to load expenses.";
+      err?.response?.data?.message || t('expenses.error.loadFailed');
   } finally {
     loading.value = false;
   }
@@ -258,7 +259,7 @@ const fTotalAmount = computed(
 );
 const isEditMode = computed(() => editingExpense.value !== null);
 const dialogHeader = computed(() =>
-  isEditMode.value ? "Edit expense" : "New expense",
+  isEditMode.value ? t('expenses.dialog.titleEdit') : t('expenses.dialog.titleCreate'),
 );
 
 const openCreateDialog = () => {
@@ -292,15 +293,15 @@ const openEditDialog = (expense) => {
 const submitForm = async () => {
   formError.value = "";
   if (!fName.value.trim()) {
-    formError.value = "Item name is required.";
+    formError.value = t('expenses.validation.nameRequired');
     return;
   }
   if (!fQuantity.value || fQuantity.value <= 0) {
-    formError.value = "Quantity must be greater than 0.";
+    formError.value = t('expenses.validation.quantityRequired');
     return;
   }
   if (fUnitPrice.value === null || fUnitPrice.value < 0) {
-    formError.value = "Unit price must be 0 or greater.";
+    formError.value = t('expenses.validation.unitPriceRequired');
     return;
   }
 
@@ -321,16 +322,16 @@ const submitForm = async () => {
       await updateExpense(editingExpense.value.id, payload);
       toast.add({
         severity: "success",
-        summary: "Updated",
-        detail: "Expense updated.",
+        summary: t('expenses.toast.updatedTitle'),
+        detail: t('expenses.toast.updatedDetail'),
         life: 3000,
       });
     } else {
       await createExpense(payload);
       toast.add({
         severity: "success",
-        summary: "Created",
-        detail: "Expense recorded.",
+        summary: t('expenses.toast.createdTitle'),
+        detail: t('expenses.toast.createdDetail'),
         life: 3000,
       });
     }
@@ -342,7 +343,7 @@ const submitForm = async () => {
     formError.value =
       err?.response?.data?.errors?.join(", ") ||
       err?.response?.data?.title ||
-      "Failed to save expense.";
+      t('expenses.error.saveFailed');
   } finally {
     formLoading.value = false;
   }
@@ -350,18 +351,18 @@ const submitForm = async () => {
 
 const handleDelete = (expense) => {
   confirm.require({
-    message: `Delete "${expense.name}"? This cannot be undone.`,
-    header: "Confirm delete",
+    message: t('expenses.confirm.deleteMessage', { name: expense.name }),
+    header: t('expenses.confirm.deleteHeader'),
     acceptSeverity: "danger",
-    acceptLabel: "Delete",
-    rejectLabel: "Cancel",
+    acceptLabel: t('expenses.confirm.deleteAccept'),
+    rejectLabel: t('expenses.confirm.deleteReject'),
     accept: async () => {
       try {
         await deleteExpense(expense.id);
         toast.add({
           severity: "success",
-          summary: "Deleted",
-          detail: "Expense deleted.",
+          summary: t('expenses.toast.deletedTitle'),
+          detail: t('expenses.toast.deletedDetail'),
           life: 3000,
         });
         if (expenses.value.length === 1 && first.value > 0) {
@@ -370,7 +371,7 @@ const handleDelete = (expense) => {
         await loadAll();
       } catch (err) {
         errorMessage.value =
-          err?.response?.data?.title || "Failed to delete expense.";
+          err?.response?.data?.title || t('expenses.error.deleteFailed');
       }
     },
   });
@@ -394,7 +395,7 @@ const handleDelete = (expense) => {
         <label
           class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
         >
-          Purchase date
+          {{ t('expenses.dialog.purchaseDate') }}
         </label>
         <prime-date-picker
           v-model="fPurchaseDate"
@@ -409,11 +410,11 @@ const handleDelete = (expense) => {
         <label
           class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
         >
-          Item name <span class="tw:text-red-400">*</span>
+          {{ t('expenses.dialog.itemName') }} <span class="tw:text-red-400">*</span>
         </label>
         <prime-input-text
           v-model="fName"
-          placeholder="e.g. Fresh milk, Trash bags…"
+          :placeholder="t('expenses.dialog.itemNamePlaceholder')"
           class="app-input tw:w-full"
         />
       </div>
@@ -424,7 +425,7 @@ const handleDelete = (expense) => {
           <label
             class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
           >
-            Category
+            {{ t('expenses.dialog.category') }}
           </label>
           <prime-select
             v-model="fCategory"
@@ -452,7 +453,7 @@ const handleDelete = (expense) => {
           <label
             class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
           >
-            Payment
+            {{ t('expenses.dialog.payment') }}
           </label>
           <prime-select
             v-model="fPaymentMethod"
@@ -483,7 +484,7 @@ const handleDelete = (expense) => {
           <label
             class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
           >
-            Quantity <span class="tw:text-red-400">*</span>
+            {{ t('expenses.dialog.quantity') }} <span class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
             v-model="fQuantity"
@@ -499,11 +500,11 @@ const handleDelete = (expense) => {
           <label
             class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
           >
-            Unit
+            {{ t('expenses.dialog.unit') }}
           </label>
           <prime-input-text
             v-model="fUnit"
-            placeholder="box, kg, bottle…"
+            :placeholder="t('expenses.dialog.unitPlaceholder')"
             class="app-input tw:w-full"
           />
         </div>
@@ -515,7 +516,7 @@ const handleDelete = (expense) => {
           <label
             class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
           >
-            Unit price <span class="tw:text-red-400">*</span>
+            {{ t('expenses.dialog.unitPrice') }} <span class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
             v-model="fUnitPrice"
@@ -531,7 +532,7 @@ const handleDelete = (expense) => {
           <label
             class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
           >
-            Total (auto)
+            {{ t('expenses.dialog.totalAuto') }}
           </label>
           <div
             class="tw:flex tw:items-center tw:h-10 tw:px-3 tw:rounded-lg tw:border tw:border-white/10 tw:bg-white/5 tw:text-sm tw:font-semibold"
@@ -546,12 +547,12 @@ const handleDelete = (expense) => {
         <label
           class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
         >
-          Notes
+          {{ t('expenses.dialog.notes') }}
         </label>
         <prime-textarea
           v-model="fNotes"
           :rows="2"
-          placeholder="Additional notes…"
+          :placeholder="t('expenses.dialog.notesPlaceholder')"
           class="app-input tw:w-full"
           auto-resize
         />
@@ -566,7 +567,7 @@ const handleDelete = (expense) => {
         outlined
         @click="dialogVisible = false"
       >
-        Cancel
+        {{ t('expenses.dialog.cancel') }}
       </prime-button>
       <prime-button
         :severity="isEditMode ? 'primary' : 'success'"
@@ -574,7 +575,7 @@ const handleDelete = (expense) => {
         @click="submitForm"
       >
         <iconify :icon="isEditMode ? 'ph:check-bold' : 'ph:plus-bold'" />
-        <span>{{ isEditMode ? "Save changes" : "Add expense" }}</span>
+        <span>{{ isEditMode ? t('expenses.dialog.saveChanges') : t('expenses.dialog.addExpense') }}</span>
       </prime-button>
     </template>
   </prime-dialog>
@@ -586,11 +587,11 @@ const handleDelete = (expense) => {
         <p
           class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
         >
-          Operations
+          {{ t('expenses.groupLabel') }}
         </p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Expenses</h1>
+        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('expenses.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm app-text-muted">
-          Track purchases and compare with revenue (P&amp;L).
+          {{ t('expenses.subtitle') }}
         </p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
@@ -602,7 +603,7 @@ const handleDelete = (expense) => {
           @click="loadAll"
         >
           <iconify icon="ph:arrows-clockwise-bold" class="tw:mr-1" />
-          <span>Refresh</span>
+          <span>{{ t('expenses.refresh') }}</span>
         </prime-button>
         <prime-button
           v-if="can('expense.create')"
@@ -611,7 +612,7 @@ const handleDelete = (expense) => {
           @click="openCreateDialog"
         >
           <iconify icon="ph:plus-bold" class="tw:mr-1" />
-          <span>New expense</span>
+          <span>{{ t('expenses.newExpense') }}</span>
         </prime-button>
       </div>
     </div>
@@ -630,7 +631,7 @@ const handleDelete = (expense) => {
     <div class="tw:grid tw:grid-cols-3 tw:gap-3 sm:tw:grid-cols-3">
       <!-- Revenue -->
       <widget-stat
-        label="Revenue"
+        :label="t('expenses.summary.revenue')"
         label-class="tw:text-emerald-400"
         :value="summaryLoading ? '…' : formatVnd(revenue.total)"
       >
@@ -645,13 +646,13 @@ const handleDelete = (expense) => {
             class="tw:mt-2 tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:text-xs app-text-muted"
           >
             <span
-              >Cash
+              >{{ t('expenses.summary.cash') }}
               <span class="tw:text-white/70">{{
                 formatVnd(revenue.cash)
               }}</span></span
             >
             <span
-              >Bank
+              >{{ t('expenses.summary.bank') }}
               <span class="tw:text-white/70">{{
                 formatVnd(revenue.bank)
               }}</span></span
@@ -662,7 +663,7 @@ const handleDelete = (expense) => {
 
       <!-- Expenses -->
       <widget-stat
-        label="Expenses"
+        :label="t('expenses.summary.expenses')"
         label-class="tw:text-red-400"
         :value="summaryLoading ? '…' : formatVnd(expenseBreakdown.total)"
       >
@@ -677,13 +678,13 @@ const handleDelete = (expense) => {
             class="tw:mt-2 tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:text-xs app-text-muted"
           >
             <span
-              >Cash
+              >{{ t('expenses.summary.cash') }}
               <span class="tw:text-white/70">{{
                 formatVnd(expenseBreakdown.cash)
               }}</span></span
             >
             <span
-              >Bank
+              >{{ t('expenses.summary.bank') }}
               <span class="tw:text-white/70">{{
                 formatVnd(expenseBreakdown.bank)
               }}</span></span
@@ -694,7 +695,7 @@ const handleDelete = (expense) => {
 
       <!-- Profit -->
       <widget-stat
-        label="Profit"
+        :label="t('expenses.summary.profit')"
         :label-class="profit >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'"
         :value="summaryLoading ? '…' : formatVnd(profit)"
       >
@@ -711,7 +712,7 @@ const handleDelete = (expense) => {
         <template #sub>
           <div class="tw:mt-2 tw:text-xs app-text-muted">
             <span v-if="profitMargin !== null">
-              Margin
+              {{ t('expenses.summary.margin') }}
               <span
                 :class="
                   profit >= 0
@@ -757,7 +758,7 @@ const handleDelete = (expense) => {
           <prime-button
             :severity="hasActiveFilters ? 'success' : 'secondary'"
             :outlined="!hasActiveFilters"
-            v-tooltip.top="'Filters'"
+            v-tooltip.top="t('expenses.filter.filtersTooltip')"
             @click="filterPanel.toggle($event)"
             :class="!hasActiveFilters ? btnIcon : ''"
           >
@@ -773,21 +774,21 @@ const handleDelete = (expense) => {
           <!-- Filter popover -->
           <prime-popover ref="filterPanel">
             <div class="tw:flex tw:flex-col tw:gap-4 tw:w-56">
-              <p class="tw:text-sm tw:font-semibold">Filter expenses</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('expenses.filter.title') }}</p>
 
               <!-- Category -->
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
                 >
-                  Category
+                  {{ t('expenses.filter.category') }}
                 </label>
                 <prime-select
                   v-model="categoryFilter"
                   :options="EXPENSE_CATEGORY_OPTIONS"
                   option-label="label"
                   option-value="value"
-                  placeholder="All categories"
+                  :placeholder="t('expenses.filter.allCategories')"
                   show-clear
                   class="app-input tw:w-full"
                 >
@@ -808,7 +809,7 @@ const handleDelete = (expense) => {
                 @click="clearFilters"
               >
                 <iconify icon="ph:x-bold" />
-                <span>Clear filters</span>
+                <span>{{ t('expenses.filter.clearFilters') }}</span>
               </prime-button>
             </div>
           </prime-popover>
@@ -871,7 +872,7 @@ const handleDelete = (expense) => {
             severity="secondary"
             outlined
             size="small"
-            v-tooltip.top="'Edit'"
+            v-tooltip.top="t('common.edit')"
             :class="btnIcon"
             @click="openEditDialog(data)"
           >
@@ -882,7 +883,7 @@ const handleDelete = (expense) => {
             severity="danger"
             outlined
             size="small"
-            v-tooltip.top="'Delete'"
+            v-tooltip.top="t('common.delete')"
             :class="btnIcon"
             @click="handleDelete(data)"
           >

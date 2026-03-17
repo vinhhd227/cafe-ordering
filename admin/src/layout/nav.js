@@ -32,7 +32,7 @@ export const navGroups = [
       },
       {
         label: "Tables",
-        icon: "ph:table-bold",
+        icon: "ic:round-table-bar",
         to: { name: "tables" },
         requiredClaim: "table.read",
       },
