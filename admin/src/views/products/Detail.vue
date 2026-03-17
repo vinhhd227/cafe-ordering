@@ -29,6 +29,7 @@ const form = ref({
   hasTemperatureOption: false,
   hasIceLevelOption: false,
   hasSugarLevelOption: false,
+  isAccompaniment: false,
 });
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -80,6 +81,7 @@ const loadProduct = async () => {
       hasTemperatureOption: product.value.hasTemperatureOption ?? false,
       hasIceLevelOption: product.value.hasIceLevelOption ?? false,
       hasSugarLevelOption: product.value.hasSugarLevelOption ?? false,
+      isAccompaniment: product.value.isAccompaniment ?? false,
     };
   } catch (err) {
     errorMessage.value =
@@ -104,6 +106,7 @@ const save = async () => {
       hasTemperatureOption: form.value.hasTemperatureOption,
       hasIceLevelOption: form.value.hasIceLevelOption,
       hasSugarLevelOption: form.value.hasSugarLevelOption,
+      isAccompaniment: form.value.isAccompaniment,
     });
     // Reload để lấy updatedAt mới nhất
     await loadProduct();
@@ -267,7 +270,8 @@ onMounted(() => {
                 v-if="
                   product.hasTemperatureOption ||
                   product.hasIceLevelOption ||
-                  product.hasSugarLevelOption
+                  product.hasSugarLevelOption ||
+                  product.isAccompaniment
                 "
                 class="tw:flex tw:flex-wrap tw:gap-2"
               >
@@ -285,6 +289,11 @@ onMounted(() => {
                   v-if="product.hasSugarLevelOption"
                   value="Sugar level"
                   severity="info"
+                />
+                <prime-tag
+                  v-if="product.isAccompaniment"
+                  value="Đồ ăn kèm"
+                  severity="warn"
                 />
               </div>
               <p v-else class="tw:text-xs app-text-muted">None</p>
@@ -419,6 +428,17 @@ onMounted(() => {
                   </p>
                 </div>
                 <prime-toggle-switch v-model="form.hasSugarLevelOption" />
+              </div>
+
+              <!-- Accompaniment -->
+              <div class="tw:flex tw:items-center tw:justify-between">
+                <div>
+                  <p class="tw:text-sm tw:font-medium">Đồ ăn kèm</p>
+                  <p class="tw:text-xs app-text-muted">
+                    Không tính vào số khách mặc định khi tạo order
+                  </p>
+                </div>
+                <prime-toggle-switch v-model="form.isAccompaniment" />
               </div>
             </div>
             <prime-divider class="tw:my-5" />

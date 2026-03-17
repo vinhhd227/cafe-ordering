@@ -21,6 +21,7 @@ const form = ref({
   hasTemperatureOption: false,
   hasIceLevelOption: false,
   hasSugarLevelOption: false,
+  isAccompaniment: false,
 });
 
 const loadCategories = async () => {
@@ -56,6 +57,7 @@ const submit = async () => {
       hasTemperatureOption: form.value.hasTemperatureOption,
       hasIceLevelOption: form.value.hasIceLevelOption,
       hasSugarLevelOption: form.value.hasSugarLevelOption,
+      isAccompaniment: form.value.isAccompaniment,
     });
     // Endpoint trả về { id } với 201
     const newId = res?.data?.id ?? res?.data?.Id;
@@ -229,6 +231,17 @@ onMounted(loadCategories);
                   </p>
                 </div>
                 <prime-toggle-switch v-model="form.hasSugarLevelOption" />
+              </div>
+
+              <!-- Accompaniment -->
+              <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
+                <div>
+                  <p class="tw:text-sm tw:font-medium">Đồ ăn kèm</p>
+                  <p class="tw:text-xs app-text-muted tw:mt-0.5">
+                    Không tính vào số khách mặc định khi tạo order
+                  </p>
+                </div>
+                <prime-toggle-switch v-model="form.isAccompaniment" />
               </div>
 
             </div>
