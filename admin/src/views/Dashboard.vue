@@ -594,42 +594,18 @@ const expensesArea = buildArea("expenses");
     <div class="tw:grid tw:grid-cols-1 tw:gap-4 tw:lg:grid-cols-2 tw:xl:grid-cols-4">
 
       <!-- Top products (compact) -->
-      <prime-card class="app-card tw:rounded-2xl tw:border">
-        <template #content>
-          <div class="tw:flex tw:items-center tw:justify-between tw:mb-3">
-            <div>
-              <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.topProducts.title') }}</p>
-              <p class="tw:text-xs app-text-muted">{{ t('dashboard.topProducts.subtitle') }}</p>
-            </div>
-            <iconify icon="ph:ranking-bold" class="tw:text-emerald-400 tw:opacity-60 tw:text-lg" />
-          </div>
-
-          <div class="tw:space-y-2">
-            <div
-              v-for="(p, i) in [
-                { name: 'Bạc xỉu',       qty: 28, pct: 100 },
-                { name: 'Cà phê sữa đá', qty: 22, pct: 79  },
-                { name: 'Matcha latte',   qty: 18, pct: 64  },
-                { name: 'Cold brew',      qty: 15, pct: 54  },
-                { name: 'Trà đào',        qty: 12, pct: 43  },
-              ]"
-              :key="i"
-              class="tw:flex tw:items-center tw:gap-2"
-            >
-              <span class="tw:text-[11px] tw:font-bold tw:w-3 tw:text-center app-text-subtle tw:flex-shrink-0">{{ i + 1 }}</span>
-              <div class="tw:flex-1 tw:min-w-0">
-                <div class="tw:flex tw:items-center tw:justify-between tw:mb-0.5">
-                  <span class="tw:text-xs tw:font-medium tw:truncate">{{ p.name }}</span>
-                  <span class="tw:text-[11px] app-text-muted tw:ml-2 tw:flex-shrink-0">{{ p.qty }} {{ t('dashboard.topProducts.unit') }}</span>
-                </div>
-                <div class="tw:h-1 tw:w-full tw:rounded-full tw:bg-white/8">
-                  <div class="tw:h-full tw:rounded-full tw:bg-emerald-400/70" :style="{ width: p.pct + '%' }" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </template>
-      </prime-card>
+      <widget-top-products
+        :title="t('dashboard.topProducts.title')"
+        :subtitle="t('dashboard.topProducts.subtitle')"
+        :unit="t('dashboard.topProducts.unit')"
+        :items="[
+          { name: 'Bạc xỉu',       qty: 28, pct: 100 },
+          { name: 'Cà phê sữa đá', qty: 22, pct: 79  },
+          { name: 'Matcha latte',   qty: 18, pct: 64  },
+          { name: 'Cold brew',      qty: 15, pct: 54  },
+          { name: 'Trà đào',        qty: 12, pct: 43  },
+        ]"
+      />
 
       <!-- Revenue Drivers -->
       <prime-card class="app-card tw:rounded-2xl tw:border">
@@ -687,35 +663,11 @@ const expensesArea = buildArea("expenses");
       </prime-card>
 
       <!-- Top category -->
-      <prime-card class="app-card tw:rounded-2xl tw:border">
-        <template #content>
-          <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
-            <div>
-              <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.topCategories.title') }}</p>
-              <p class="tw:text-xs app-text-muted">{{ t('dashboard.topCategories.subtitle') }}</p>
-            </div>
-            <iconify icon="ph:tag-bold" class="tw:text-amber-400 tw:opacity-60 tw:text-lg" />
-          </div>
-
-          <div class="tw:space-y-3">
-            <div v-for="cat in topCategories" :key="cat.name" class="tw:flex tw:items-center tw:gap-3">
-              <!-- Color dot -->
-              <span class="tw:size-2 tw:rounded-full tw:flex-shrink-0" :style="{ backgroundColor: cat.hex }" />
-              <!-- Name -->
-              <span class="tw:text-sm tw:w-16 tw:flex-shrink-0">{{ cat.name }}</span>
-              <!-- Bar track -->
-              <div class="tw:flex-1 tw:h-2 tw:rounded-full tw:bg-white/8">
-                <div
-                  class="tw:h-full tw:rounded-full tw:transition-all"
-                  :style="{ width: cat.pct + '%', backgroundColor: cat.hex, opacity: '0.75' }"
-                />
-              </div>
-              <!-- Pct -->
-              <span class="tw:text-xs tw:font-semibold tw:w-8 tw:text-right app-text-muted">{{ cat.pct }}%</span>
-            </div>
-          </div>
-        </template>
-      </prime-card>
+      <widget-top-categories
+        :title="t('dashboard.topCategories.title')"
+        :subtitle="t('dashboard.topCategories.subtitle')"
+        :items="topCategories"
+      />
 
       <!-- Payment ratio -->
       <prime-card class="app-card tw:rounded-2xl tw:border">

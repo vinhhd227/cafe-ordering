@@ -210,6 +210,24 @@
       "title": "Ly bán theo ngày",
       "label": "Ly"
     },
+    "widgets": {
+      "avgPerDay": {
+        "title": "TB / ngày",
+        "rev": "Doanh thu",
+        "drinks": "Ly bán",
+        "orders": "Đơn hàng",
+        "guests": "Lượt khách"
+      }
+    },
+    "topProducts": {
+      "title": "Sản phẩm bán chạy",
+      "subtitle": "Theo số lượng bán ra",
+      "unit": "ly"
+    },
+    "topCategories": {
+      "title": "Danh mục nổi bật",
+      "subtitle": "Theo doanh thu"
+    },
     "error": "Không thể tải dữ liệu báo cáo.",
     "empty": "Không có đơn hàng trong khoảng thời gian này.",
     "export": "Xuất",

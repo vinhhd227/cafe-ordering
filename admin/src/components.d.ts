@@ -20,5 +20,7 @@ declare module 'vue' {
     WidgetOrdersSummary: typeof import('./components/widgets/orders/WidgetOrdersSummary.vue')['default']
     WidgetSettingsButton: typeof import('./components/widgets/WidgetSettingsButton.vue')['default']
     WidgetStat: typeof import('./components/widgets/WidgetStat.vue')['default']
+    WidgetTopCategories: typeof import('./components/widgets/WidgetTopCategories.vue')['default']
+    WidgetTopProducts: typeof import('./components/widgets/WidgetTopProducts.vue')['default']
   }
 }

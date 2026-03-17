@@ -210,6 +210,24 @@
       "title": "Drinks sold per day",
       "label": "Drinks"
     },
+    "widgets": {
+      "avgPerDay": {
+        "title": "Avg / day",
+        "rev": "Revenue",
+        "drinks": "Drinks",
+        "orders": "Orders",
+        "guests": "Guests"
+      }
+    },
+    "topProducts": {
+      "title": "Top products",
+      "subtitle": "By quantity sold",
+      "unit": "cups"
+    },
+    "topCategories": {
+      "title": "Top categories",
+      "subtitle": "By revenue"
+    },
     "error": "Failed to load report data.",
     "empty": "No orders in the selected period.",
     "export": "Export",

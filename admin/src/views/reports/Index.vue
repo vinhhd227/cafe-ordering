@@ -108,6 +108,19 @@ const avgRevPerDay = computed(() => {
   return data.value.totalRevenue / days
 })
 
+const avgGuestsPerDay = computed(() => {
+  const days = data.value?.dailyRevenue?.length
+  const guests = data.value?.totalGuestCount ?? 0
+  if (!days) return 0
+  return guests / days
+})
+
+const avgOrdersPerDay = computed(() => {
+  const days = data.value?.dailyRevenue?.length
+  if (!days) return 0
+  return (data.value?.totalOrders ?? 0) / days
+})
+
 // ── Chart ──────────────────────────────────────────────────────────
 const chartData = computed(() => {
   const daily = data.value?.dailyRevenue ?? []
@@ -244,19 +257,15 @@ const fileStem = computed(() => {
   return f.toDateString() === t2.toDateString() ? iso(f) : `${iso(f)}_${iso(t2)}`
 })
 
-const captureCanvas = async () => {
-  const { default: html2canvas } = await import('html2canvas')
-  return html2canvas(reportContent.value, { scale: 2, useCORS: true, logging: false })
-}
-
 const downloadPng = async () => {
   if (!data.value) return
   exporting.value = true
   try {
-    const canvas = await captureCanvas()
+    const { toPng } = await import('html-to-image')
+    const dataUrl = await toPng(reportContent.value, { pixelRatio: 2 })
     const a = document.createElement('a')
     a.download = `report-${fileStem.value}.png`
-    a.href = canvas.toDataURL('image/png')
+    a.href = dataUrl
     a.click()
   } finally {
     exporting.value = false
@@ -267,16 +276,20 @@ const downloadPdf = async () => {
   if (!data.value) return
   exporting.value = true
   try {
-    const canvas  = await captureCanvas()
-    const { jsPDF } = await import('jspdf')
-    const pw = canvas.width  / 2
-    const ph = canvas.height / 2
+    const { toPng } = await import('html-to-image')
+    const { jsPDF }  = await import('jspdf')
+    const dataUrl = await toPng(reportContent.value, { pixelRatio: 2 })
+    const img = new Image()
+    img.src = dataUrl
+    await new Promise(r => { img.onload = r })
+    const pw = img.naturalWidth  / 2
+    const ph = img.naturalHeight / 2
     const pdf = new jsPDF({
       orientation: pw > ph ? 'landscape' : 'portrait',
       unit: 'px',
       format: [pw, ph],
     })
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pw, ph)
+    pdf.addImage(dataUrl, 'PNG', 0, 0, pw, ph)
     pdf.save(`report-${fileStem.value}.pdf`)
   } finally {
     exporting.value = false
@@ -379,8 +392,12 @@ onMounted(load)
 
     <!-- Content -->
     <div v-if="data" ref="reportContent" class="tw:space-y-8">
+      <!-- Export header: date range label (visible in capture) -->
+      <p class="tw:text-sm app-text-muted">
+        {{ fileStem.replace('_', ' → ') }}
+      </p>
       <!-- Summary widgets -->
-      <div class="tw:grid tw:gap-3 tw:grid-cols-2 md:tw:grid-cols-4">
+      <div class="tw:grid tw:gap-3 tw:grid-cols-3 md:tw:grid-cols-3">
         <widget-orders-revenue
           :total="data.totalRevenue"
           :cash="data.cashRevenue"
@@ -393,55 +410,84 @@ onMounted(load)
           :completed="data.completedOrders"
           :cancelled="data.cancelledOrders"
         />
-        <widget-stat :label="t('report.widgets.totalTips')" :value="fmt(data.totalTips)">
-          <template #icon>
-            <iconify icon="ph:hand-coins-bold" class="tw:text-amber-400 tw:opacity-70" />
-          </template>
-          <template #sub>
-            <p class="tw:text-[11px] app-text-subtle">{{ t('report.widgets.tipsSubtitle') }}</p>
-          </template>
-        </widget-stat>
-        <widget-stat :label="t('report.widgets.avgOrder')" :value="fmt(avgOrderValue)">
-          <template #icon>
-            <iconify icon="ph:chart-line-up-bold" class="tw:text-purple-400 tw:opacity-70" />
-          </template>
-          <template #sub>
-            <p class="tw:text-[11px] app-text-subtle">
-              {{ t('report.widgets.avgSubtitle', { n: data.completedOrders }) }}
-            </p>
-          </template>
-        </widget-stat>
-        <widget-stat :label="t('report.widgets.itemsSold')" :value="data.totalItemsSold">
-          <template #icon>
-            <iconify icon="ph:coffee-bold" class="tw:text-orange-400 tw:opacity-70" />
-          </template>
-          <template #sub>
-            <p class="tw:text-[11px] app-text-subtle">
-              {{ t('report.widgets.itemsSubtitle', { n: data.completedOrders }) }}
-            </p>
-          </template>
-        </widget-stat>
-        <widget-stat
-          :label="t('report.widgets.avgDrinks')"
-          :value="avgDrinksPerDay % 1 === 0 ? avgDrinksPerDay : avgDrinksPerDay.toFixed(1)"
-        >
-          <template #icon>
-            <iconify icon="ph:drop-bold" class="tw:text-cyan-400 tw:opacity-70" />
-          </template>
-          <template #sub>
-            <p class="tw:text-[11px] app-text-subtle">{{ t('report.widgets.avgDrinksSubtitle') }}</p>
-          </template>
-        </widget-stat>
-        <widget-stat :label="t('report.widgets.avgRevPerDay')" :value="fmt(avgRevPerDay)">
-          <template #icon>
-            <iconify icon="ph:coins-bold" class="tw:text-rose-400 tw:opacity-70" />
-          </template>
-          <template #sub>
-            <p class="tw:text-[11px] app-text-subtle">{{ t('report.widgets.avgRevPerDaySubtitle') }}</p>
-          </template>
-        </widget-stat>
-      </div>
 
+        <!-- Avg per day combined widget -->
+        <prime-card
+          :pt="{
+            root: { class: `${appCard} ${cardRing} tw:p-4` },
+            body: { class: 'tw:p-0! tw:h-full' },
+            content: { class: 'tw:h-full tw:flex tw:flex-col tw:justify-between' },
+          }"
+        >
+          <template #header>
+            <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:truncate app-text-subtle">
+              {{ t('report.widgets.avgPerDay.title') }}
+            </p>
+            <iconify icon="ph:trend-up-bold" class="tw:text-violet-400 tw:opacity-70 tw:shrink-0" />
+          </template>
+          <template #content>
+            <div class="tw:grid tw:grid-cols-2 tw:gap-x-4 tw:mt-1">
+              <!-- Revenue / day -->
+              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
+                <div class="tw:flex tw:items-center tw:gap-1.5">
+                  <iconify icon="ph:coins-bold" class="tw:text-rose-400 tw:text-sm tw:opacity-80" />
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.rev') }}</span>
+                </div>
+                <span class="tw:text-xs tw:font-semibold">{{ fmt(avgRevPerDay) }}</span>
+              </div>
+              <!-- Drinks / day -->
+              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
+                <div class="tw:flex tw:items-center tw:gap-1.5">
+                  <iconify icon="ph:coffee-bold" class="tw:text-cyan-400 tw:text-sm tw:opacity-80" />
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.drinks') }}</span>
+                </div>
+                <span class="tw:text-xs tw:font-semibold">
+                  {{ avgDrinksPerDay % 1 === 0 ? avgDrinksPerDay : avgDrinksPerDay.toFixed(1) }}
+                </span>
+              </div>
+              <!-- Orders / day -->
+              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
+                <div class="tw:flex tw:items-center tw:gap-1.5">
+                  <iconify icon="ph:receipt-bold" class="tw:text-green-400 tw:text-sm tw:opacity-80" />
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.orders') }}</span>
+                </div>
+                <span class="tw:text-xs tw:font-semibold">
+                  {{ avgOrdersPerDay % 1 === 0 ? avgOrdersPerDay : avgOrdersPerDay.toFixed(1) }}
+                </span>
+              </div>
+              <!-- Guests / day -->
+              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
+                <div class="tw:flex tw:items-center tw:gap-1.5">
+                  <iconify icon="ph:users-bold" class="tw:text-amber-400 tw:text-sm tw:opacity-80" />
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.guests') }}</span>
+                </div>
+                <span class="tw:text-xs tw:font-semibold">
+                  {{ avgGuestsPerDay % 1 === 0 ? avgGuestsPerDay : avgGuestsPerDay.toFixed(1) }}
+                </span>
+              </div>
+            </div>
+          </template>
+        </prime-card>
+      </div>
+ <!-- Top products & Top categories -->
+      <div
+        v-if="data.topProducts?.length || data.topCategories?.length"
+        class="tw:grid tw:grid-cols-2 tw:gap-4 md:tw:grid-cols-2"
+      >
+        <widget-top-products
+          v-if="data.topProducts?.length"
+          :title="t('report.topProducts.title')"
+          :subtitle="t('report.topProducts.subtitle')"
+          :unit="t('report.topProducts.unit')"
+          :items="data.topProducts"
+        />
+        <widget-top-categories
+          v-if="data.topCategories?.length"
+          :title="t('report.topCategories.title')"
+          :subtitle="t('report.topCategories.subtitle')"
+          :items="data.topCategories"
+        />
+      </div>
       <!-- Chart -->
       <prime-card
         v-if="data.dailyRevenue.length > 0"
@@ -552,6 +598,8 @@ onMounted(load)
           </prime-data-table>
         </template>
       </prime-card>
+
+     
 
       <!-- Empty state -->
       <div
