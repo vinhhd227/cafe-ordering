@@ -7,6 +7,7 @@ import { useTableCache } from "@/composables/useTableCache";
 import { usePermission } from "@/composables/usePermission";
 import { btnIcon } from "@/layout/ui";
 
+const { t } = useI18n();
 const cache = useTableCache("categories");
 
 const router = useRouter();
@@ -22,10 +23,10 @@ const searchTimer    = ref(null);
 const search       = ref("");
 const statusFilter = ref(null);
 
-const statusOptions = [
-  { label: "Active",   value: true  },
-  { label: "Inactive", value: false },
-];
+const statusOptions = computed(() => [
+  { label: t('categories.status.active'),   value: true  },
+  { label: t('categories.status.inactive'), value: false },
+]);
 
 const filterPanel = ref(null);
 
@@ -77,8 +78,17 @@ const summary = computed(() => {
 // ── Status helpers ────────────────────────────────────────────────
 const statusTag = (isActive) =>
   isActive
-    ? { label: "Active", severity: "success" }
-    : { label: "Inactive", severity: "danger" };
+    ? { label: t('categories.status.active'),   severity: "success" }
+    : { label: t('categories.status.inactive'), severity: "danger" };
+
+// ── Columns ───────────────────────────────────────────────────────
+const columns = computed(() => [
+  { field: 'id',          header: t('categories.list.col.id'),          width: '4rem' },
+  { field: 'name',        header: t('categories.list.col.name'),        width: '12rem' },
+  { field: 'description', header: t('categories.list.col.description'), width: '16rem' },
+  { field: 'isActive',    header: t('categories.list.col.status'),      width: '8rem' },
+  { key: 'actions',       header: t('categories.list.col.actions'),     width: '12rem', toggleable: false },
+]);
 
 // ── Actions ───────────────────────────────────────────────────────
 const handleToggleActive = async (row) => {
@@ -87,7 +97,7 @@ const handleToggleActive = async (row) => {
     await loadCategories();
   } catch (err) {
     errorMessage.value =
-      err?.response?.data?.message ?? `Failed to update category "${row.name}".`;
+      err?.response?.data?.message ?? t('categories.list.error');
   }
 };
 
@@ -107,7 +117,7 @@ const loadCategories = async () => {
       : [];
   } catch (err) {
     errorMessage.value =
-      err?.response?.data?.message || "Failed to load categories.";
+      err?.response?.data?.message || t('categories.list.error');
   } finally {
     loading.value = false;
   }
@@ -144,14 +154,6 @@ watch([search, statusFilter], () => {
 onBeforeUnmount(() => {
   clearTimeout(searchTimer.value);
 });
-
-const columns = [
-  { field: 'id',          header: 'ID',          width: '4rem' },
-  { field: 'name',        header: 'Name',         width: '12rem' },
-  { field: 'description', header: 'Description',  width: '16rem' },
-  { field: 'isActive',    header: 'Status',       width: '8rem' },
-  { key: 'actions',       header: 'Actions',      width: '12rem', toggleable: false },
-]
 </script>
 
 <template>
@@ -161,11 +163,11 @@ const columns = [
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
         <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
-          Catalog
+          {{ t('categories.breadcrumb') }}
         </p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Categories</h1>
+        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('categories.list.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm app-text-muted">
-          Manage the categories used to organise your menu.
+          {{ t('categories.list.subtitle') }}
         </p>
       </div>
       <prime-button
@@ -175,7 +177,7 @@ const columns = [
         @click="router.push({ name: 'categoriesCreate' })"
       >
         <iconify icon="ph:plus-bold" />
-        <span>Add category</span>
+        <span>{{ t('categories.list.addCategory') }}</span>
       </prime-button>
     </div>
 
@@ -184,7 +186,7 @@ const columns = [
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
           <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle">
-            Total
+            {{ t('categories.widgets.total.label') }}
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ summary.total }}</p>
         </template>
@@ -192,7 +194,7 @@ const columns = [
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
           <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400">
-            Active
+            {{ t('categories.widgets.active.label') }}
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ summary.active }}</p>
         </template>
@@ -200,7 +202,7 @@ const columns = [
       <prime-card class="app-card tw:rounded-xl tw:border">
         <template #content>
           <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-red-400">
-            Inactive
+            {{ t('categories.widgets.inactive.label') }}
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ summary.inactive }}</p>
         </template>
@@ -232,7 +234,7 @@ const columns = [
           <!-- Search -->
           <prime-input-text
             v-model="search"
-            placeholder="Search by name…"
+            :placeholder="t('categories.list.searchPlaceholder')"
             class="app-input tw:w-56"
           />
 
@@ -240,7 +242,7 @@ const columns = [
           <prime-button
             :severity="hasActiveFilters ? 'success' : 'secondary'"
             :outlined="!hasActiveFilters"
-            v-tooltip.top="'Filters'"
+            v-tooltip.top="t('categories.list.filtersTooltip')"
             @click="filterPanel.toggle($event)"
             :class="!hasActiveFilters ? btnIcon : ''"
           >
@@ -256,16 +258,16 @@ const columns = [
           <!-- Filter popover -->
           <prime-popover ref="filterPanel">
             <div class="tw:flex tw:flex-col tw:gap-4">
-              <p class="tw:text-sm tw:font-semibold">Filter categories</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('categories.list.filterTitle') }}</p>
 
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Status</label>
+                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('categories.list.col.status') }}</label>
                 <prime-select
                   v-model="statusFilter"
                   :options="statusOptions"
                   option-label="label"
                   option-value="value"
-                  placeholder="All statuses"
+                  :placeholder="t('categories.list.allStatuses')"
                   show-clear
                   class="app-input tw:w-full"
                 />
@@ -279,7 +281,7 @@ const columns = [
                 @click="clearFilters"
               >
                 <iconify icon="ph:x-bold" />
-                <span>Clear filters</span>
+                <span>{{ t('categories.list.clearFilters') }}</span>
               </prime-button>
             </div>
           </prime-popover>
@@ -305,7 +307,7 @@ const columns = [
             outlined
             size="small"
             :class="btnIcon"
-            v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
+            v-tooltip.top="data.isActive ? t('categories.list.tooltip.deactivate') : t('categories.list.tooltip.activate')"
             @click="handleToggleActive(data)"
           >
             <iconify :icon="data.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
@@ -314,7 +316,7 @@ const columns = [
             severity="secondary"
             outlined
             size="small"
-            v-tooltip.top="'View detail'"
+            v-tooltip.top="t('categories.list.tooltip.viewDetail')"
             @click="router.push({ name: 'categoriesDetail', params: { id: data.id } })"
             :class="btnIcon"
           >

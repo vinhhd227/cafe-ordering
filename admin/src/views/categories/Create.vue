@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { createCategory } from "@/services/category.service";
 import { usePermission } from "@/composables/usePermission";
 
+const { t } = useI18n();
 const router = useRouter();
 const { can } = usePermission();
 
@@ -18,7 +19,7 @@ const form = ref({
 const extractError = (err) =>
   err?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
   err?.response?.data?.message ||
-  "Failed to create category.";
+  t('categories.create.error');
 
 const submit = async () => {
   loading.value = true;
@@ -50,11 +51,11 @@ const submit = async () => {
         <p
           class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
         >
-          Categories
+          {{ t('categories.breadcrumb') }}
         </p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Add category</h1>
+        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('categories.create.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm app-text-muted">
-          Create a new category to group your menu items.
+          {{ t('categories.create.subtitle') }}
         </p>
       </div>
       <prime-button
@@ -64,7 +65,7 @@ const submit = async () => {
         @click="router.push({ name: 'categories' })"
       >
         <iconify icon="ph:arrow-left-bold" />
-        <span>Back to list</span>
+        <span>{{ t('categories.create.backToList') }}</span>
       </prime-button>
     </div>
 
@@ -86,12 +87,12 @@ const submit = async () => {
           <!-- Name -->
           <div class="tw:space-y-1.5">
             <label for="name" class="tw:text-sm tw:font-medium">
-              Name <span class="tw:text-red-400">*</span>
+              {{ t('categories.form.name') }} <span class="tw:text-red-400">*</span>
             </label>
             <prime-input-text
               id="name"
               v-model="form.name"
-              placeholder="e.g. Hot Beverages"
+              :placeholder="t('categories.form.namePlaceholder')"
               class="app-input tw:w-full"
             />
           </div>
@@ -99,14 +100,14 @@ const submit = async () => {
           <!-- Description -->
           <div class="tw:space-y-1.5">
             <label for="description" class="tw:text-sm tw:font-medium">
-              Description
-              <span class="app-text-muted tw:font-normal">(optional)</span>
+              {{ t('categories.form.description') }}
+              <span class="app-text-muted tw:font-normal">{{ t('categories.form.optional') }}</span>
             </label>
             <prime-textarea
               id="description"
               v-model="form.description"
               rows="3"
-              placeholder="Short description of this category…"
+              :placeholder="t('categories.form.descriptionPlaceholder')"
               class="app-input tw:w-full tw:resize-none"
               auto-resize
             />
@@ -116,7 +117,7 @@ const submit = async () => {
         <!-- ── Footer actions ── -->
         <div class="tw:flex tw:justify-end tw:gap-3">
           <prime-button
-            label="Cancel"
+            :label="t('categories.create.cancel')"
             severity="secondary"
             outlined
             size="small"
@@ -130,7 +131,7 @@ const submit = async () => {
             @click="submit"
           >
             <iconify icon="ph:check-bold" />
-            <span>Create category</span>
+            <span>{{ t('categories.create.submit') }}</span>
           </prime-button>
         </div>
       </template>

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { getCategoryById, updateCategory } from "@/services/category.service";
 import { usePermission } from "@/composables/usePermission";
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const categoryId = Number(route.params.id);
@@ -29,7 +30,7 @@ const formatDate = (d) => (d ? new Date(d).toLocaleString("vi-VN") : "—");
 const extractError = (err) =>
   err?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
   err?.response?.data?.message ||
-  "Failed to update category.";
+  t('categories.detail.error.updateFailed');
 
 // ── Data ───────────────────────────────────────────────────────────
 const loadCategory = async () => {
@@ -45,7 +46,7 @@ const loadCategory = async () => {
     };
   } catch (err) {
     errorMessage.value =
-      err?.response?.data?.message || "Failed to load category.";
+      err?.response?.data?.message || t('categories.detail.error.loadFailed');
   } finally {
     loading.value = false;
   }
@@ -82,7 +83,7 @@ onMounted(loadCategory);
         <p
           class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
         >
-          Categories
+          {{ t('categories.breadcrumb') }}
         </p>
         <h1
           class="tw:mt-2 tw:text-3xl tw:font-semibold tw:flex tw:items-center tw:gap-3"
@@ -91,16 +92,16 @@ onMounted(loadCategory);
           <prime-skeleton v-else width="14rem" height="2rem" />
           <prime-tag
             v-if="category"
-            :value="category.isActive ? 'Active' : 'Inactive'"
+            :value="category.isActive ? t('categories.status.active') : t('categories.status.inactive')"
             :severity="category.isActive ? 'success' : 'danger'"
           />
         </h1>
         <p class="tw:mt-2 tw:text-sm app-text-muted">
-          Category #{{ categoryId }}
+          {{ t('categories.detail.id', { id: categoryId }) }}
           <template v-if="category">
-            · Created {{ formatDate(category.createdAt) }}
+            · {{ t('categories.detail.created') }} {{ formatDate(category.createdAt) }}
             <template v-if="category.updatedAt">
-              · Updated {{ formatDate(category.updatedAt) }}
+              · {{ t('categories.detail.updated') }} {{ formatDate(category.updatedAt) }}
             </template>
           </template>
         </p>
@@ -112,7 +113,7 @@ onMounted(loadCategory);
         @click="router.push({ name: 'categories' })"
       >
         <iconify icon="ph:arrow-left-bold" />
-        <span>Back to list</span>
+        <span>{{ t('categories.detail.backToList') }}</span>
       </prime-button>
     </div>
 
@@ -158,7 +159,7 @@ onMounted(loadCategory);
         size="small"
         variant="simple"
         :closable="false"
-        >Category updated successfully.</prime-message
+        >{{ t('categories.detail.updateSuccess') }}</prime-message
       >
 
       <div class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3">
@@ -180,14 +181,14 @@ onMounted(loadCategory);
             <!-- Info rows -->
             <div class="tw:space-y-3">
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">Status</span>
+                <span class="app-text-muted">{{ t('categories.list.col.status') }}</span>
                 <prime-tag
-                  :value="category.isActive ? 'Active' : 'Inactive'"
+                  :value="category.isActive ? t('categories.status.active') : t('categories.status.inactive')"
                   :severity="category.isActive ? 'success' : 'danger'"
                 />
               </div>
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">Created</span>
+                <span class="app-text-muted">{{ t('categories.detail.created') }}</span>
                 <span class="tw:font-medium tw:text-right">{{
                   formatDate(category.createdAt)
                 }}</span>
@@ -196,7 +197,7 @@ onMounted(loadCategory);
                 v-if="category.updatedAt"
                 class="tw:flex tw:justify-between tw:text-sm"
               >
-                <span class="app-text-muted">Updated</span>
+                <span class="app-text-muted">{{ t('categories.detail.updated') }}</span>
                 <span class="tw:font-medium tw:text-right">{{
                   formatDate(category.updatedAt)
                 }}</span>
@@ -208,7 +209,7 @@ onMounted(loadCategory);
               <p
                 class="tw:text-xs tw:uppercase tw:tracking-widest app-text-subtle tw:mb-1"
               >
-                Description
+                {{ t('categories.detail.description') }}
               </p>
               <p class="tw:text-sm app-text-muted tw:leading-relaxed">
                 {{ category.description }}
@@ -220,13 +221,13 @@ onMounted(loadCategory);
         <!-- ── Right: edit form ────────────────────────────────── -->
         <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-2">
           <template #content>
-            <p class="tw:text-sm tw:font-semibold tw:mb-5">Edit details</p>
+            <p class="tw:text-sm tw:font-semibold tw:mb-5">{{ t('categories.detail.editTitle') }}</p>
 
             <div class="tw:space-y-5">
               <!-- Name -->
               <div class="tw:space-y-1.5">
                 <label for="name" class="tw:text-sm tw:font-medium">
-                  Name <span class="tw:text-red-400">*</span>
+                  {{ t('categories.form.name') }} <span class="tw:text-red-400">*</span>
                 </label>
                 <prime-input-text
                   id="name"
@@ -238,8 +239,8 @@ onMounted(loadCategory);
               <!-- Description -->
               <div class="tw:space-y-1.5">
                 <label for="description" class="tw:text-sm tw:font-medium">
-                  Description
-                  <span class="app-text-muted tw:font-normal">(optional)</span>
+                  {{ t('categories.form.description') }}
+                  <span class="app-text-muted tw:font-normal">{{ t('categories.form.optional') }}</span>
                 </label>
                 <prime-textarea
                   id="description"
@@ -256,9 +257,9 @@ onMounted(loadCategory);
             <div>
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
-                  <p class="tw:text-sm tw:font-semibold">Active</p>
+                  <p class="tw:text-sm tw:font-semibold">{{ t('categories.detail.activeOption.label') }}</p>
                   <p class="tw:text-xs app-text-muted">
-                    Hiển thị category trên menu
+                    {{ t('categories.detail.activeOption.hint') }}
                   </p>
                 </div>
                 <prime-toggle-switch v-model="form.isActive" />
@@ -272,7 +273,7 @@ onMounted(loadCategory);
               class="tw:flex tw:justify-end tw:gap-3"
             >
               <prime-button
-                label="Reset"
+                :label="t('categories.detail.reset')"
                 severity="secondary"
                 outlined
                 size="small"
@@ -285,7 +286,7 @@ onMounted(loadCategory);
                 @click="save"
               >
                 <iconify icon="ph:check-bold" class="tw:-ml-1" />
-                <span>Save changes</span>
+                <span>{{ t('categories.detail.saveChanges') }}</span>
               </prime-button>
             </div>
           </template>
@@ -300,7 +301,7 @@ onMounted(loadCategory);
           class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted"
         >
           <iconify icon="ph:warning-bold" class="tw:text-3xl tw:mb-2" />
-          <p class="tw:text-sm">Category not found.</p>
+          <p class="tw:text-sm">{{ t('categories.detail.notFound') }}</p>
         </div>
       </template>
     </prime-card>
