@@ -1,6 +1,7 @@
 using Api.Infrastructure.Data;
 using Api.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 
 namespace Api.Web.Configurations;
@@ -18,6 +19,17 @@ public static class MiddlewareConfig
       app.UseDefaultExceptionHandler();
       app.UseHsts();
     }
+
+    // Serve uploaded files at /uploads — for local dev without Docker.
+    // In Docker, Nginx serves the same volume directly (faster, no .NET thread used).
+    var uploadsPath = Path.GetFullPath(
+        app.Configuration["FileStorage:BasePath"] ?? "uploads");
+    Directory.CreateDirectory(uploadsPath);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(uploadsPath),
+        RequestPath  = "/uploads"
+    });
 
     app.UseFastEndpoints();
 
