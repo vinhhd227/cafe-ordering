@@ -659,10 +659,12 @@ const onTableSelect = async (tableId) => {
 };
 
 // ── Place order ────────────────────────────────────────────────────
+const notificationStore = useNotificationStore();
 const placeOrder = async () => {
   if (!canPlaceOrder.value) return;
   errorMessage.value = "";
   placing.value = true;
+  notificationStore.creatingOrder = true;
   try {
     const res = await createOrder(
       sessionId.value,
@@ -715,6 +717,7 @@ const placeOrder = async () => {
       "Failed to place order.";
   } finally {
     placing.value = false;
+    notificationStore.creatingOrder = false;
   }
 };
 

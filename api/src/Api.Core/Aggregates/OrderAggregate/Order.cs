@@ -59,11 +59,14 @@ public class Order : AuditableEntity<int>, IAggregateRoot
       OrderDate = DateTime.UtcNow
     };
 
-    // Register domain event
-    order.RegisterDomainEvent(new OrderCreatedEvent(order));
-
     return order;
   }
+
+  /// <summary>
+  ///   Đăng ký OrderCreatedEvent — gọi SAU khi items đã được thêm vào order
+  ///   để SSE broadcast có đầy đủ thông tin (items, totalAmount).
+  /// </summary>
+  public void NotifyCreated() => RegisterDomainEvent(new OrderCreatedEvent(this));
 
   public void AddItem(int productId, string productName, decimal unitPrice, int quantity,
     DrinkTemperature? temperature = null, IceLevel? iceLevel = null, SugarLevel? sugarLevel = null,

@@ -50,7 +50,9 @@ public class PlaceOrderHandler(
         temp, iceLevel, sugarLevel, item.IsTakeaway, item.IsFreeGift);
     }
 
-    await orderRepository.UpdateAsync(order, ct); // Lưu items
+    // Đăng ký OrderCreatedEvent sau khi items đã được thêm → SSE có đầy đủ data
+    order.NotifyCreated();
+    await orderRepository.UpdateAsync(order, ct); // Lưu items + dispatch event
 
     return Result.Success(new PlaceOrderResponseDto(order.Id, order.OrderNumber, order.TotalAmount));
   }

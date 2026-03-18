@@ -1,5 +1,6 @@
 <script setup>
 import { useSidebar } from "@/composables/useSidebar";
+import NotificationBell from "@/components/NotificationBell.vue";
 
 const { t } = useI18n();
 const { isCollapsed, toggle, toggleCollapse } = useSidebar();
@@ -40,6 +41,9 @@ const { isCollapsed, toggle, toggleCollapse } = useSidebar();
       </div>
     </div>
 
-    <prime-button :label="t('header.export')" severity="secondary" outlined size="small" />
+    <div class="tw:flex tw:items-center tw:gap-2">
+      <notification-bell />
+      <prime-button :label="t('header.export')" severity="secondary" outlined size="small" />
+    </div>
   </header>
 </template>

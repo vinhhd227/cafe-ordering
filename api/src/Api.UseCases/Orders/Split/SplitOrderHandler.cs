@@ -63,7 +63,8 @@ public class SplitOrderHandler(IRepositoryBase<Order> repository)
       source.RemoveItem(splitItem.ProductId, splitItem.Quantity);
     }
 
-    // 6. Persist both
+    // 6. Persist both — fire OrderCreatedEvent on newOrder after items are added
+    newOrder.NotifyCreated();
     await repository.UpdateAsync(newOrder, ct);
     await repository.UpdateAsync(source, ct);
 
