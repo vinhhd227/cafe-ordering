@@ -37,6 +37,9 @@
  */
 
 import { ref, computed, watch } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps({
   value: { type: Array, default: () => [] },
@@ -46,7 +49,7 @@ const props = defineProps({
   totalRecords: { type: Number, default: 0 },
   rowsPerPageOptions: { type: Array, default: () => [10, 20, 50] },
   columns: { type: Array, default: () => [] },
-  showColumnToggle: { type: Boolean, default: false },
+  emptyMessage: { type: String, default: null },
 });
 
 const emit = defineEmits([
@@ -166,17 +169,36 @@ watch(
       </div>
     </template>
     <template #content>
+      <!-- ── Skeleton Loading ───────────────────────────────────── -->
+      <div v-if="loading" class="tw:space-y-1 tw:py-1">
+        <prime-skeleton height="2.75rem" border-radius="0" class="tw:opacity-70" />
+        <prime-skeleton
+          v-for="n in Math.min(rows, 8)"
+          :key="n"
+          height="2.75rem"
+          border-radius="0"
+        />
+      </div>
+
       <!-- ── Data Table ─────────────────────────────────────────── -->
       <prime-data-table
+        v-else
         :pt="{
           bodyRow: { class: 'tw:bg-transparent!' },
+          emptyMessage: { class: 'tw:bg-transparent!' },
+
         }"
         :value="value"
-        :loading="loading"
         :lazy="true"
         :paginator="false"
         responsiveLayout="scroll"
       >
+        <template #empty>
+          <div class="tw:py-14 tw:flex tw:flex-col tw:items-center tw:gap-3 app-text-muted">
+            <iconify icon="ph:tray-bold" class="tw:text-5xl" />
+            <span class="tw:text-sm">{{ emptyMessage ?? t('common.table.emptyMessage') }}</span>
+          </div>
+        </template>
         <prime-column
           :pt="{
             headerCell: { class: 'tw:bg-transparent!' },
@@ -207,8 +229,7 @@ watch(
         <span
           class="tw:text-sm app-text-muted tw:whitespace-nowrap tw:min-w-[14rem]"
         >
-          Showing {{ showingFrom }} to {{ showingTo }} of
-          {{ totalRecords }} items
+          {{ t('common.table.showing', { from: showingFrom, to: showingTo, total: totalRecords }) }}
         </span>
 
         <!-- Center: page navigation -->
@@ -283,17 +304,16 @@ watch(
         <div
           class="tw:flex tw:items-center tw:gap-2 tw:min-w-[14rem] tw:justify-end"
         >
-          <span class="tw:text-sm app-text-muted tw:whitespace-nowrap"
-            >Items per page</span
-          >
+          <span class="tw:text-sm app-text-muted tw:whitespace-nowrap">{{ t('common.table.itemsPerPage') }}</span>
           <prime-select
             :model-value="rows"
             :options="rowsPerPageOptions"
             class="app-input"
+            size="small"
             @update:model-value="onRowsChange"
           />
           <prime-button
-            v-if="showColumnToggle"
+            v-if="toggleableColumns.length > 0"
             severity="secondary"
             outlined
             v-tooltip.top="'Toggle columns'"
@@ -306,7 +326,7 @@ watch(
       </div>
       <!-- ── Column toggle dialog ───────────────────────────────── -->
       <prime-dialog
-        v-if="showColumnToggle"
+        v-if="toggleableColumns.length > 0"
         v-model:visible="colDialogVisible"
         header="Columns"
         :modal="true"
