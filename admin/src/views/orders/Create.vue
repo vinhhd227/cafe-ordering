@@ -879,7 +879,7 @@ onMounted(async () => {
           <!-- Products grid -->
           <div
             v-show="!collapsedCategories[category.id]"
-            class="tw:grid tw:grid-cols-2 tw:md:grid-cols-3 tw:xl:grid-cols-4 tw:gap-3 sm:tw:grid-cols-3 tw:p-3 tw:pt-0"
+            class="tw:grid tw:grid-cols-2 tw:md:grid-cols-3 tw:xl:grid-cols-4 tw:2xl:grid-cols-5 tw:gap-3 sm:tw:grid-cols-3 tw:p-3 tw:pt-0"
           >
             <article
               v-for="product in category.filteredProducts"
