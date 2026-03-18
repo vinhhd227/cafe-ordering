@@ -6,8 +6,9 @@ public class LoginSummary : Summary<LoginEndpoint>
   {
     Summary = "Authenticate and obtain JWT tokens";
     Description =
-      "Validates credentials and issues a short-lived access token (15 min) together with a long-lived " +
-      "refresh token (7 days). Use the access token as a Bearer token on every authenticated request. " +
+      "Validates credentials and issues a short-lived access token (15 min). " +
+      "A long-lived refresh token (7 days) is set as an HttpOnly cookie automatically. " +
+      "Use the access token as a Bearer token on every authenticated request. " +
       "Failed attempts increment the lockout counter; the account is locked for 15 minutes after 5 failures.";
 
     ExampleRequest = new LoginRequest
@@ -21,8 +22,7 @@ public class LoginSummary : Summary<LoginEndpoint>
       Success = true,
       Message = "Login successful",
       AccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-      RefreshToken = "dGhpcyBpcyBhIHNhbXBsZSByZWZyZXNoIHRva2Vu...",
-      ExpiresAt = DateTime.UtcNow.AddDays(7)
+      ExpiresAt = DateTime.UtcNow.AddMinutes(15)
     };
 
     Response<LoginResponse>(200, "Authentication successful.");

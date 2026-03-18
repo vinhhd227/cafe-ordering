@@ -1,4 +1,5 @@
 using Api.UseCases.Auth.Login;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Api.Web.Endpoints.Auth;
 
@@ -16,13 +17,12 @@ public sealed class LoginResponse
   public bool Success { get; init; }
   public string Message { get; init; } = string.Empty;
   public string? AccessToken { get; init; }
-  public string? RefreshToken { get; init; }
 
-  /// <summary>UTC expiry time of the refresh token.</summary>
+  /// <summary>UTC expiry time of the access token.</summary>
   public DateTime? ExpiresAt { get; init; }
 }
 
-public class LoginEndpoint(IMediator mediator) : Ep.Req<LoginRequest>.Res<LoginResponse>
+public class LoginEndpoint(IMediator mediator, IWebHostEnvironment env) : Ep.Req<LoginRequest>.Res<LoginResponse>
 {
   public override void Configure()
   {
@@ -48,12 +48,20 @@ public class LoginEndpoint(IMediator mediator) : Ep.Req<LoginRequest>.Res<LoginR
       return;
     }
 
+    HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken, new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = !env.IsDevelopment(),
+      SameSite = SameSiteMode.Strict,
+      MaxAge = TimeSpan.FromDays(7),
+      Path = "/api/auth"
+    });
+
     await SendOkAsync(new LoginResponse
     {
       Success = true,
       Message = "Login successful",
       AccessToken = result.Value.AccessToken,
-      RefreshToken = result.Value.RefreshToken,
       ExpiresAt = result.Value.ExpiresAt
     }, ct);
   }

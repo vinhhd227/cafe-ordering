@@ -569,6 +569,20 @@ public class IdentityService : IIdentityService
     return token;
   }
 
+  public async Task<Result> RevokeTokenAsync(string refreshToken)
+  {
+    var storedToken = await _identityDb.RefreshTokens
+      .FirstOrDefaultAsync(t => t.Token == refreshToken);
+
+    if (storedToken is null)
+      return Result.NotFound();
+
+    storedToken.Revoke();
+    await _identityDb.SaveChangesAsync();
+
+    return Result.Success();
+  }
+
   private async Task RevokeAllUserTokensAsync(Guid userId)
   {
     var activeTokens = await _identityDb.RefreshTokens

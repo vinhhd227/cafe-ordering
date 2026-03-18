@@ -30,6 +30,12 @@ public interface IIdentityService
   Task<Result<AuthResponseDto>> RefreshTokenAsync(string refreshToken);
 
   /// <summary>
+  /// Revoke a specific refresh token (used on logout).
+  /// Returns NotFound if the token does not exist.
+  /// </summary>
+  Task<Result> RevokeTokenAsync(string refreshToken);
+
+  /// <summary>
   /// Create a staff account with an auto-generated temporary password.
   /// </summary>
   Task<Result<TemporaryPasswordDto>> CreateStaffAccountAsync(

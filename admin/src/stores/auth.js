@@ -30,7 +30,6 @@ const userFromToken = (token) => {
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         accessToken: null,
-        refreshToken: null,
         user: null,
         expiresAt: null,
         refreshTimer: null,
@@ -47,8 +46,6 @@ export const useAuthStore = defineStore('auth', {
         async login(payload) {
             const res = await login(payload)
             this.accessToken = res.data.accessToken
-            this.refreshToken = res.data.refreshToken
-            localStorage.setItem('refreshToken', res.data.refreshToken)
             this.user = userFromToken(res.data.accessToken)
             localStorage.setItem('user', JSON.stringify(this.user))
             this.expiresAt = res.data.expiresAt
@@ -74,20 +71,9 @@ export const useAuthStore = defineStore('auth', {
                 throw new Error('Refresh attempt exceeded')
             }
 
-            // Recover refresh token from localStorage on page reload
-            if (!this.refreshToken) {
-                this.refreshToken = localStorage.getItem('refreshToken')
-            }
-
-            // Snapshot token ngay lúc này để tránh bị overwrite
-            // nếu có concurrent call nào đó thay đổi this.refreshToken
-            const tokenToUse = this.refreshToken
-
             this._refreshPromise = (async () => {
-                const res = await refresh(tokenToUse)
+                const res = await refresh()
                 this.accessToken = res.data.accessToken
-                this.refreshToken = res.data.refreshToken
-                localStorage.setItem('refreshToken', res.data.refreshToken)
                 this.expiresAt = res.data.expiresAt
                 this.user = userFromToken(res.data.accessToken)
                 localStorage.setItem('user', JSON.stringify(this.user))
@@ -141,14 +127,16 @@ export const useAuthStore = defineStore('auth', {
             const refreshAtMs = Math.max(expiresAtMs - 30_000, Date.now() + 1_000)
             const delay = refreshAtMs - Date.now()
             this.refreshTimer = setTimeout(() => {
-                this.doRefreshToken()
+                this.doRefreshToken().catch(() => {
+                    // Proactive refresh thất bại (network blip, server restart, ...)
+                    // Reset attempts để interceptor vẫn có thể retry khi 401 thực sự xảy ra
+                    this.refreshAttempts = 0
+                })
             }, delay)
         },
 
         logout() {
             this.accessToken = null
-            this.refreshToken = null
-            localStorage.removeItem('refreshToken')
             localStorage.removeItem('user')
             this.user = null
             this.expiresAt = null

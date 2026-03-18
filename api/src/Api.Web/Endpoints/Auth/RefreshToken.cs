@@ -1,26 +1,20 @@
 using Api.UseCases.Auth.RefreshToken;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Api.Web.Endpoints.Auth;
-
-public sealed class RefreshTokenRequest
-{
-  /// <summary>The refresh token received at login or from the last refresh call.</summary>
-  public string RefreshToken { get; set; } = string.Empty;
-}
 
 public sealed class RefreshTokenResponse
 {
   public bool Success { get; init; }
   public string Message { get; init; } = string.Empty;
   public string? AccessToken { get; init; }
-  public string? RefreshToken { get; init; }
 
-  /// <summary>UTC expiry time of the new refresh token.</summary>
+  /// <summary>UTC expiry time of the new access token.</summary>
   public DateTime? ExpiresAt { get; init; }
 }
 
-public class RefreshTokenEndpoint(IMediator mediator)
-  : Ep.Req<RefreshTokenRequest>.Res<RefreshTokenResponse>
+public class RefreshTokenEndpoint(IMediator mediator, IWebHostEnvironment env)
+  : EndpointWithoutRequest<RefreshTokenResponse>
 {
   public override void Configure()
   {
@@ -30,15 +24,17 @@ public class RefreshTokenEndpoint(IMediator mediator)
     Description(b => b.WithTags("Authentication"));
   }
 
-  public override async Task HandleAsync(RefreshTokenRequest req, CancellationToken ct)
+  public override async Task HandleAsync(CancellationToken ct)
   {
-    if (string.IsNullOrWhiteSpace(req.RefreshToken))
+    var token = HttpContext.Request.Cookies["refreshToken"];
+
+    if (string.IsNullOrWhiteSpace(token))
     {
       await SendAsync(new RefreshTokenResponse { Success = false, Message = "Refresh token is required" }, 400, ct);
       return;
     }
 
-    var result = await mediator.Send(new RefreshTokenCommand(req.RefreshToken), ct);
+    var result = await mediator.Send(new RefreshTokenCommand(token), ct);
 
     if (!result.IsSuccess)
     {
@@ -46,12 +42,20 @@ public class RefreshTokenEndpoint(IMediator mediator)
       return;
     }
 
+    HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken, new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = !env.IsDevelopment(),
+      SameSite = SameSiteMode.Strict,
+      MaxAge = TimeSpan.FromDays(7),
+      Path = "/api/auth"
+    });
+
     await SendOkAsync(new RefreshTokenResponse
     {
       Success = true,
       Message = "Token refreshed successfully",
       AccessToken = result.Value.AccessToken,
-      RefreshToken = result.Value.RefreshToken,
       ExpiresAt = result.Value.ExpiresAt
     }, ct);
   }
