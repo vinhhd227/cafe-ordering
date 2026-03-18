@@ -10,7 +10,7 @@ namespace Api.UseCases.Promotions.Apply;
 
 public class ApplyPromotionHandler(
   IRepositoryBase<Order> orderRepo,
-  IReadRepositoryBase<Promotion> promoRepo,
+  IRepositoryBase<Promotion> promoRepo,
   IReadRepositoryBase<Product> productRepo)
   : ICommandHandler<ApplyPromotionCommand, Result<OrderDto>>
 {
@@ -59,7 +59,7 @@ public class ApplyPromotionHandler(
       return Result.Invalid(new ValidationError("Promotion",
         $"Order total must be at least {promo.MinOrderAmount:N0} to apply this promotion."));
 
-    // 5. Calculate discount
+    // 5. Build productCategoryMap if needed
     Dictionary<int, int>? productCategoryMap = null;
 
     var needsCategoryMap = (promo.Scope == PromotionScope.Category && promo.ApplicableCategoryIds.Any())
@@ -72,13 +72,31 @@ public class ApplyPromotionHandler(
       productCategoryMap = products.ToDictionary(p => p.Id, p => p.CategoryId);
     }
 
-    var discountResult = PromotionCalculator.Calculate(promo, order.Items, productCategoryMap);
+    // 6. Load external free products for cross-product BUY_X_GET_Y
+    IReadOnlyList<Product>? externalFreeProducts = null;
+
+    if (promo.DiscountType == DiscountType.BuyXGetY && promo.GetFromProductIds is { Count: > 0 })
+    {
+      externalFreeProducts = await productRepo.ListAsync(
+        new ProductsByIdsSpec(promo.GetFromProductIds), ct);
+    }
+
+    // 7. Calculate discount
+    var discountResult = PromotionCalculator.Calculate(promo, order.Items, productCategoryMap, externalFreeProducts);
 
     if (discountResult.TotalDiscount <= 0)
       return Result.Invalid(new ValidationError("Promotion",
         "This promotion does not apply to any items in the order."));
 
-    // 6. Apply to domain
+    // 8. Add free gift items to order (cross-product BUY_X_GET_Y)
+    if (discountResult.FreeGifts is { Count: > 0 })
+    {
+      order.RemoveFreeGiftItems();
+      foreach (var gift in discountResult.FreeGifts)
+        order.AddItem(gift.ProductId, gift.ProductName, gift.UnitPrice, gift.Quantity, isFreeGift: true);
+    }
+
+    // 9. Apply to domain
     try
     {
       order.ApplyPromotion(promo.Id, promo.Code, discountResult.TotalDiscount);
@@ -88,10 +106,11 @@ public class ApplyPromotionHandler(
       return Result.Invalid(new ValidationError("Promotion", ex.Message));
     }
 
-    // 7. Increment usage
+    // 10. Increment usage
     promo.IncrementUsage(order.Id);
 
     await orderRepo.UpdateAsync(order, ct);
+    await promoRepo.UpdateAsync(promo, ct);
 
     return Result.Success(MapToDto(order));
   }

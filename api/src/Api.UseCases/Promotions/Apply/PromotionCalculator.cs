@@ -1,13 +1,23 @@
 using Api.Core.Aggregates.OrderAggregate;
+using Api.Core.Aggregates.ProductAggregate;
 using Api.Core.Aggregates.PromotionAggregate;
 
 namespace Api.UseCases.Promotions.Apply;
 
 /// <summary>
+///   Item cần được thêm vào order khi BUY_X_GET_Y với GetFromProductIds.
+/// </summary>
+public record FreeGiftItem(int ProductId, string ProductName, decimal UnitPrice, int Quantity);
+
+/// <summary>
 ///   Kết quả tính toán discount. ItemDiscountsPerUnit chứa discount/unit cho từng sản phẩm
 ///   (chỉ có giá trị khi Scope = PRODUCT hoặc CATEGORY).
+///   FreeGifts chứa các sản phẩm cần thêm vào order như free gift (BUY_X_GET_Y cross-product).
 /// </summary>
-public record DiscountResult(decimal TotalDiscount, Dictionary<int, decimal> ItemDiscountsPerUnit);
+public record DiscountResult(
+  decimal TotalDiscount,
+  Dictionary<int, decimal> ItemDiscountsPerUnit,
+  IReadOnlyList<FreeGiftItem>? FreeGifts = null);
 
 /// <summary>
 ///   Tính toán số tiền giảm giá từ một Promotion cho một Order.
@@ -18,10 +28,16 @@ public static class PromotionCalculator
   /// <param name="promo">Promotion đã được validate (active, valid, applicable).</param>
   /// <param name="items">Các OrderItem của order.</param>
   /// <param name="productCategoryMap">productId → categoryId, cần thiết khi Scope = CATEGORY hoặc GetFromCategoryIds set.</param>
+  /// <param name="externalFreeProducts">
+  ///   Danh sách sản phẩm cho phép tặng (từ GetFromProductIds).
+  ///   Khi được cung cấp, calculator sẽ dùng giá sản phẩm này thay vì filter từ order items.
+  ///   Kết quả trả về FreeGifts để handler thêm vào order.
+  /// </param>
   public static DiscountResult Calculate(
     Promotion promo,
     IReadOnlyCollection<OrderItem> items,
-    Dictionary<int, int>? productCategoryMap = null)
+    Dictionary<int, int>? productCategoryMap = null,
+    IReadOnlyList<Product>? externalFreeProducts = null)
   {
     var scopedItems = GetScopedItems(promo, items, productCategoryMap);
 
@@ -35,7 +51,7 @@ public static class PromotionCalculator
       return CalculateFixed(promo, items, scopedItems);
 
     if (promo.DiscountType == DiscountType.BuyXGetY)
-      return CalculateBuyXGetY(promo, scopedItems, items, productCategoryMap);
+      return CalculateBuyXGetY(promo, scopedItems, items, productCategoryMap, externalFreeProducts);
 
     return new DiscountResult(0, new());
   }
@@ -104,25 +120,32 @@ public static class PromotionCalculator
     Promotion promo,
     List<OrderItem> scopedItems,
     IReadOnlyCollection<OrderItem> allItems,
-    Dictionary<int, int>? productCategoryMap)
+    Dictionary<int, int>? productCategoryMap,
+    IReadOnlyList<Product>? externalFreeProducts)
   {
     if (promo.BuyQuantity == null || promo.GetQuantity == null)
       return new DiscountResult(0, new());
 
-    var buyQty    = promo.BuyQuantity.Value;
-    var getQty    = promo.GetQuantity.Value;
-    var groupSize = buyQty + getQty;
+    var buyQty = promo.BuyQuantity.Value;
+    var getQty = promo.GetQuantity.Value;
 
     // Trigger: count qty of scoped items (buy side)
     var totalScopedQty = scopedItems.Sum(i => i.Quantity);
     if (totalScopedQty < buyQty)
       return new DiscountResult(0, new());
 
-    var groups = totalScopedQty / groupSize;
+    // groups = how many times the buy condition is met
+    var groups = totalScopedQty / buyQty;
     if (groups == 0) return new DiscountResult(0, new());
     var freeUnitsRemaining = groups * getQty;
 
-    // Determine which pool of items can be given for free
+    // Cross-product: GetFromProductIds set và có external products → tặng từ catalog sản phẩm
+    if (promo.GetFromProductIds is { Count: > 0 } && externalFreeProducts is { Count: > 0 })
+    {
+      return CalculateCrossProductFreeGifts(externalFreeProducts, freeUnitsRemaining);
+    }
+
+    // Determine which pool of items can be given for free (from order items)
     List<OrderItem> freePool;
 
     if (promo.GetFromProductIds is { Count: > 0 })
@@ -148,7 +171,7 @@ public static class PromotionCalculator
       return new DiscountResult(0, new());
 
     // Cheapest items free — sort by UnitPrice ASC
-    var sortedPool    = freePool.OrderBy(i => i.UnitPrice).ToList();
+    var sortedPool = freePool.OrderBy(i => i.UnitPrice).ToList();
     decimal totalDiscount = 0;
 
     foreach (var item in sortedPool)
@@ -160,5 +183,26 @@ public static class PromotionCalculator
     }
 
     return new DiscountResult(totalDiscount, new());
+  }
+
+  private static DiscountResult CalculateCrossProductFreeGifts(
+    IReadOnlyList<Product> externalFreeProducts,
+    int freeUnitsRemaining)
+  {
+    // Cheapest products free — sort by Price ASC
+    var sortedProducts = externalFreeProducts.OrderBy(p => p.Price).ToList();
+    var freeGifts = new List<FreeGiftItem>();
+    decimal totalDiscount = 0;
+
+    foreach (var product in sortedProducts)
+    {
+      if (freeUnitsRemaining <= 0) break;
+      // Give 1 unit of each product (cheapest first) until freeUnitsRemaining exhausted
+      freeGifts.Add(new FreeGiftItem(product.Id, product.Name, product.Price, 1));
+      totalDiscount += product.Price;
+      freeUnitsRemaining -= 1;
+    }
+
+    return new DiscountResult(totalDiscount, new(), freeGifts);
   }
 }
