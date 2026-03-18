@@ -257,12 +257,24 @@ const fileStem = computed(() => {
   return f.toDateString() === t2.toDateString() ? iso(f) : `${iso(f)}_${iso(t2)}`
 })
 
+const getExportOptions = (pad = 24) => {
+  const el = reportContent.value
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--app-bg').trim()
+  return {
+    pixelRatio: 2,
+    backgroundColor: bg,
+    width:  el.offsetWidth  + pad * 2,
+    height: el.offsetHeight + pad * 2,
+    style: { padding: `${pad}px` },
+  }
+}
+
 const downloadPng = async () => {
   if (!data.value) return
   exporting.value = true
   try {
     const { toPng } = await import('html-to-image')
-    const dataUrl = await toPng(reportContent.value, { pixelRatio: 2 })
+    const dataUrl = await toPng(reportContent.value, getExportOptions())
     const a = document.createElement('a')
     a.download = `report-${fileStem.value}.png`
     a.href = dataUrl
@@ -278,7 +290,7 @@ const downloadPdf = async () => {
   try {
     const { toPng } = await import('html-to-image')
     const { jsPDF }  = await import('jspdf')
-    const dataUrl = await toPng(reportContent.value, { pixelRatio: 2 })
+    const dataUrl = await toPng(reportContent.value, getExportOptions())
     const img = new Image()
     img.src = dataUrl
     await new Promise(r => { img.onload = r })
