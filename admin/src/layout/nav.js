@@ -1,14 +1,14 @@
 export const navGroups = [
   {
-    label: "Overview",
+    labelKey: "nav.groups.overview",
     items: [
       {
-        label: "Dashboard",
+        labelKey: "nav.dashboard",
         icon: "ph:squares-four-bold",
         to: { name: "dashboard" },
       },
       {
-        label: "Reports",
+        labelKey: "nav.reports",
         icon: "ph:chart-bar-bold",
         to: { name: "reports" },
         requiredClaim: "report.read",
@@ -16,46 +16,46 @@ export const navGroups = [
     ],
   },
   {
-    label: "Operations",
+    labelKey: "nav.groups.operations",
     items: [
       {
-        label: "Orders",
+        labelKey: "nav.orders",
         icon: "ph:receipt-bold",
         to: { name: "orders" },
         requiredClaim: "order.read",
       },
       {
-        label: "Expenses",
+        labelKey: "nav.expenses",
         icon: "ph:shopping-cart-bold",
         to: { name: "expenses" },
         requiredClaim: "expense.read",
       },
       {
-        label: "Tables",
+        labelKey: "nav.tables",
         icon: "ic:round-table-bar",
         to: { name: "tables" },
         requiredClaim: "table.read",
       },
       {
-        label: "Menu",
+        labelKey: "nav.menu",
         icon: "ph:fork-knife-bold",
         to: { name: "menu" },
         requiredClaim: "menu.read",
       },
       {
-        label: "Products",
+        labelKey: "nav.products",
         icon: "ph:package-bold",
         to: { name: "products" },
         requiredClaim: "product.read",
       },
       {
-        label: "Categories",
+        labelKey: "nav.categories",
         icon: "ph:tag-bold",
         to: { name: "categories" },
         requiredClaim: "category.read",
       },
       {
-        label: "Promotions",
+        labelKey: "nav.promotions",
         icon: "ph:percent-bold",
         to: { name: "promotions" },
         requiredClaim: "promotion.read",
@@ -63,28 +63,28 @@ export const navGroups = [
     ],
   },
   {
-    label: "People",
+    labelKey: "nav.groups.people",
     items: [
       {
-        label: "Staff",
+        labelKey: "nav.staff",
         icon: "ph:users-bold",
         to: { name: "staff" },
         requiredClaim: "staff.read",
       },
       {
-        label: "Customers",
+        labelKey: "nav.customers",
         icon: "ph:address-book-bold",
         to: { name: "customer" },
         requiredClaim: "customer.read"
       },
       {
-        label: "Users",
+        labelKey: "nav.users",
         icon: "ph:user-gear-bold",
         to: { name: "user" },
         requiredClaim: "user.read",
       },
       {
-        label: "Roles",
+        labelKey: "nav.roles",
         icon: "ph:shield-bold",
         to: { name: "roles" },
         adminOnly: true,

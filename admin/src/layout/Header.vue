@@ -1,6 +1,7 @@
 <script setup>
 import { useSidebar } from "@/composables/useSidebar";
 
+const { t } = useI18n();
 const { isCollapsed, toggle, toggleCollapse } = useSidebar();
 </script>
 
@@ -22,7 +23,7 @@ const { isCollapsed, toggle, toggleCollapse } = useSidebar();
       <button
         type="button"
         class="tw:hidden tw:lg:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-lg tw:transition-colors hover:tw:bg-black/5"
-        :title="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+        :title="isCollapsed ? t('header.expandSidebar') : t('header.collapseSidebar')"
         @click="toggleCollapse"
       >
         <iconify
@@ -33,12 +34,12 @@ const { isCollapsed, toggle, toggleCollapse } = useSidebar();
 
       <div>
         <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] app-text-subtle">
-          Admin workspace
+          {{ t('header.workspace') }}
         </p>
-        <h2 class="tw:text-lg tw:font-semibold">Good shift, team.</h2>
+        <h2 class="tw:text-lg tw:font-semibold">{{ t('header.greeting') }}</h2>
       </div>
     </div>
 
-    <prime-button label="Export" severity="secondary" outlined size="small" />
+    <prime-button :label="t('header.export')" severity="secondary" outlined size="small" />
   </header>
 </template>

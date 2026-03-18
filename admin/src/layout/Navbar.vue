@@ -6,6 +6,7 @@ import { useThemeStore } from "@/stores/theme";
 import { navGroups } from "@/layout/nav";
 import { useSidebar } from "@/composables/useSidebar";
 
+const { t } = useI18n()
 const { locale, locales, setLocale } = useLocale()
 
 const route = useRoute();
@@ -71,25 +72,25 @@ const avatarImage = computed(() => {
 
 const profileItems = computed(() => [
   {
-    label: "View Profile",
+    label: t('auth.profile'),
     command: () => router.push({ name: "profile", query: { tab: "overview" } }),
   },
   {
-    label: "Settings",
+    label: t('auth.settings'),
     command: () => router.push({ name: "profile", query: { tab: "settings" } }),
   },
   { separator: true },
   {
-    label: themeStore.isDark ? "Switch to Light" : "Switch to Dark",
+    label: themeStore.isDark ? t('auth.switchToLight') : t('auth.switchToDark'),
     command: () => themeStore.toggleTheme(),
   },
   {
-    label: "Help/Support",
+    label: t('auth.helpSupport'),
     command: () => window.open("mailto:support@cafe.com", "_blank"),
   },
   { separator: true },
   {
-    label: "Logout",
+    label: t('auth.logout'),
     command: () => {
       auth.logout();
       window.location.replace("/login");
@@ -119,9 +120,9 @@ const toggleProfileMenu = (event) => {
     >
       <template v-if="!isCollapsed">
         <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-[0.4em] tw:text-emerald-400">
-          Cafe Ordering
+          {{ t('sidebar.brand') }}
         </p>
-        <h1 class="tw:mt-1 tw:text-base tw:font-semibold">Admin Panel</h1>
+        <h1 class="tw:mt-1 tw:text-base tw:font-semibold">{{ t('sidebar.title') }}</h1>
       </template>
       <iconify v-else icon="ph:coffee-bold" class="tw:text-xl tw:text-emerald-400" />
     </div>
@@ -133,13 +134,13 @@ const toggleProfileMenu = (event) => {
     >
       <div
         v-for="group in visibleNavGroups"
-        :key="group.label"
+        :key="group.labelKey"
         class="tw:mb-5 last:tw:mb-0"
       >
         <!-- Section label -->
         <template v-if="!isCollapsed">
           <p class="tw:mb-1.5 tw:px-3 tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-[0.15em] app-text-subtle">
-            {{ group.label }}
+            {{ t(group.labelKey) }}
           </p>
         </template>
         <div v-else class="tw:mb-2 tw:mx-1 tw:h-px" style="background: var(--app-border)" />
@@ -157,11 +158,11 @@ const toggleProfileMenu = (event) => {
                 ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
                 : 'app-text-muted hover:tw:bg-white/5 hover:tw:text-white'
             ]"
-            :title="isCollapsed ? item.label : undefined"
+            :title="isCollapsed ? t(item.labelKey) : undefined"
             @click="close"
           >
             <iconify :icon="item.icon" class="tw:shrink-0 tw:text-base" />
-            <span v-if="!isCollapsed">{{ item.label }}</span>
+            <span v-if="!isCollapsed">{{ t(item.labelKey) }}</span>
           </router-link>
         </div>
       </div>
