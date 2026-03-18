@@ -3,8 +3,10 @@ import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getProduct, updateProduct } from "@/services/product.service";
 import { getCategory } from "@/services/category.service";
+import { uploadImage } from "@/services/upload.service";
 import { usePermission } from "@/composables/usePermission";
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const productId = Number(route.params.id);
@@ -32,6 +34,26 @@ const form = ref({
   isAccompaniment: false,
 });
 
+const fileInput = ref(null);
+const uploading = ref(false);
+
+const handleFileSelect = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  uploading.value = true;
+  try {
+    const res = await uploadImage(file);
+    form.value.imageUrl = res?.data?.url ?? "";
+  } catch (err) {
+    errorMessage.value =
+      err?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
+      t('products.form.uploadError');
+  } finally {
+    uploading.value = false;
+    event.target.value = "";
+  }
+};
+
 // ── Helpers ────────────────────────────────────────────────────────
 const formatVnd = (v) =>
   new Intl.NumberFormat("vi-VN", {
@@ -45,7 +67,7 @@ const formatDate = (d) => (d ? new Date(d).toLocaleString("vi-VN") : "—");
 const extractError = (err) =>
   err?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
   err?.response?.data?.message ||
-  "Failed to update product.";
+  t('products.detail.error.updateFailed');
 
 // ── Data ───────────────────────────────────────────────────────────
 const loadCategories = async () => {
@@ -69,7 +91,6 @@ const loadProduct = async () => {
   errorMessage.value = "";
   try {
     const res = await getProduct(productId);
-    // SendResultAsync gửi result.Value trực tiếp → res.data = ProductDto
     product.value = res?.data;
     form.value = {
       categoryId: product.value.categoryId,
@@ -85,7 +106,7 @@ const loadProduct = async () => {
     };
   } catch (err) {
     errorMessage.value =
-      err?.response?.data?.message || "Failed to load product.";
+      err?.response?.data?.message || t('products.detail.error.loadFailed');
   } finally {
     loading.value = false;
   }
@@ -108,7 +129,6 @@ const save = async () => {
       hasSugarLevelOption: form.value.hasSugarLevelOption,
       isAccompaniment: form.value.isAccompaniment,
     });
-    // Reload để lấy updatedAt mới nhất
     await loadProduct();
     saveSuccess.value = true;
     setTimeout(() => (saveSuccess.value = false), 3000);
@@ -130,19 +150,15 @@ onMounted(() => {
     <!-- ── Header ───────────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p
-          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
-        >
-          Products
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+          {{ t('products.breadcrumb') }}
         </p>
-        <h1
-          class="tw:mt-2 tw:text-3xl tw:font-semibold tw:flex tw:items-center tw:gap-3"
-        >
+        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold tw:flex tw:items-center tw:gap-3">
           <span v-if="product">{{ product.name }}</span>
           <prime-skeleton v-else width="16rem" height="2rem" />
           <prime-tag
             v-if="product"
-            :value="product.isActive ? 'Active' : 'Inactive'"
+            :value="product.isActive ? t('products.status.active') : t('products.status.inactive')"
             :severity="product.isActive ? 'success' : 'danger'"
           />
         </h1>
@@ -163,7 +179,7 @@ onMounted(() => {
         @click="router.push({ name: 'products' })"
       >
         <iconify icon="ph:arrow-left-bold" />
-        <span>Back to list</span>
+        <span>{{ t('products.detail.backToList') }}</span>
       </prime-button>
     </div>
 
@@ -205,9 +221,9 @@ onMounted(() => {
         v-if="saveSuccess"
         severity="success"
         variant="accent"
-        closable  
-        @close="errorMessage = ''"
-        >Product updated successfully.</prime-alert
+        closable
+        @close="saveSuccess = false"
+        >{{ t('products.detail.updateSuccess') }}</prime-alert
       >
       <div class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3">
         <!-- ── Left: readonly info ─────────────────────────────── -->
@@ -235,7 +251,7 @@ onMounted(() => {
             <!-- Info rows -->
             <div class="tw:mt-5 tw:space-y-3">
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">Category</span>
+                <span class="app-text-muted">{{ t('products.detail.info.category') }}</span>
                 <span class="tw:font-medium">
                   {{
                     categories.find((c) => c.id === form.categoryId)?.name ||
@@ -245,15 +261,15 @@ onMounted(() => {
                 </span>
               </div>
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">Price</span>
+                <span class="app-text-muted">{{ t('products.detail.info.price') }}</span>
                 <span class="tw:font-semibold tw:text-emerald-300">{{
                   formatVnd(product.price)
                 }}</span>
               </div>
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">Status</span>
+                <span class="app-text-muted">{{ t('products.detail.info.status') }}</span>
                 <prime-tag
-                  :value="product.isActive ? 'Active' : 'Inactive'"
+                  :value="product.isActive ? t('products.status.active') : t('products.status.inactive')"
                   :severity="product.isActive ? 'success' : 'danger'"
                 />
               </div>
@@ -261,10 +277,8 @@ onMounted(() => {
 
             <!-- Options -->
             <div class="tw:mt-5">
-              <p
-                class="tw:text-xs tw:uppercase tw:tracking-widest app-text-subtle tw:mb-3"
-              >
-                Customisation options
+              <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-subtle tw:mb-3">
+                {{ t('products.detail.info.options') }}
               </p>
               <div
                 v-if="
@@ -277,34 +291,32 @@ onMounted(() => {
               >
                 <prime-tag
                   v-if="product.hasTemperatureOption"
-                  value="Temperature"
+                  :value="t('products.options.temperature.label')"
                   severity="info"
                 />
                 <prime-tag
                   v-if="product.hasIceLevelOption"
-                  value="Ice level"
+                  :value="t('products.options.iceLevel.label')"
                   severity="info"
                 />
                 <prime-tag
                   v-if="product.hasSugarLevelOption"
-                  value="Sugar level"
+                  :value="t('products.options.sugarLevel.label')"
                   severity="info"
                 />
                 <prime-tag
                   v-if="product.isAccompaniment"
-                  value="Đồ ăn kèm"
+                  :value="t('products.options.accompaniment.label')"
                   severity="warn"
                 />
               </div>
-              <p v-else class="tw:text-xs app-text-muted">None</p>
+              <p v-else class="tw:text-xs app-text-muted">{{ t('products.detail.info.noOptions') }}</p>
             </div>
 
             <!-- Description -->
             <div v-if="product.description" class="tw:mt-5">
-              <p
-                class="tw:text-xs tw:uppercase tw:tracking-widest app-text-subtle tw:mb-1"
-              >
-                Description
+              <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-subtle tw:mb-1">
+                {{ t('products.detail.info.description') }}
               </p>
               <p class="tw:text-sm app-text-muted tw:leading-relaxed">
                 {{ product.description }}
@@ -316,20 +328,20 @@ onMounted(() => {
         <!-- ── Right: edit form ────────────────────────────────── -->
         <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-2">
           <template #content>
-            <p class="tw:text-sm tw:font-semibold tw:mb-5">Edit details</p>
+            <p class="tw:text-sm tw:font-semibold tw:mb-5">{{ t('products.detail.editTitle') }}</p>
 
             <div class="tw:space-y-5">
               <!-- Category -->
               <div class="tw:space-y-1.5">
                 <label class="tw:text-sm tw:font-medium">
-                  Category <span class="tw:text-red-400">*</span>
+                  {{ t('products.form.category') }} <span class="tw:text-red-400">*</span>
                 </label>
                 <prime-select
                   v-model="form.categoryId"
                   :options="categories"
                   option-label="name"
                   option-value="id"
-                  placeholder="Select a category"
+                  :placeholder="t('products.form.selectCategory')"
                   class="app-input tw:w-full"
                 />
               </div>
@@ -337,7 +349,7 @@ onMounted(() => {
               <!-- Name -->
               <div class="tw:space-y-1.5">
                 <label class="tw:text-sm tw:font-medium">
-                  Name <span class="tw:text-red-400">*</span>
+                  {{ t('products.form.name') }} <span class="tw:text-red-400">*</span>
                 </label>
                 <prime-input-text
                   v-model="form.name"
@@ -348,7 +360,7 @@ onMounted(() => {
               <!-- Price -->
               <div class="tw:space-y-1.5">
                 <label class="tw:text-sm tw:font-medium">
-                  Price (VND) <span class="tw:text-red-400">*</span>
+                  {{ t('products.form.price') }} <span class="tw:text-red-400">*</span>
                 </label>
                 <prime-input-number
                   v-model="form.price"
@@ -361,8 +373,8 @@ onMounted(() => {
               <!-- Description -->
               <div class="tw:space-y-1.5">
                 <label class="tw:text-sm tw:font-medium">
-                  Description
-                  <span class="app-text-muted tw:font-normal">(optional)</span>
+                  {{ t('products.form.description') }}
+                  <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
                 </label>
                 <prime-textarea
                   v-model="form.description"
@@ -372,17 +384,37 @@ onMounted(() => {
                 />
               </div>
 
-              <!-- Image URL -->
+              <!-- Image -->
               <div class="tw:space-y-1.5">
                 <label class="tw:text-sm tw:font-medium">
-                  Image URL
-                  <span class="app-text-muted tw:font-normal">(optional)</span>
+                  {{ t('products.form.image') }}
+                  <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
                 </label>
-                <prime-input-text
-                  v-model="form.imageUrl"
-                  placeholder="https://…"
-                  class="app-input tw:w-full"
-                />
+                <div class="tw:flex tw:gap-2">
+                  <input
+                    ref="fileInput"
+                    type="file"
+                    accept="image/*"
+                    class="tw:hidden"
+                    @change="handleFileSelect"
+                  />
+                  <prime-button
+                    severity="secondary"
+                    outlined
+                    size="small"
+                    :loading="uploading"
+                    v-tooltip.top="t('products.form.uploadImage')"
+                    @click="fileInput.click()"
+                  >
+                    <iconify icon="ph:upload-simple-bold" />
+                    <span>{{ t('products.form.uploadImage') }}</span>
+                  </prime-button>
+                  <prime-input-text
+                    v-model="form.imageUrl"
+                    :placeholder="t('products.form.pasteUrl')"
+                    class="app-input tw:flex-1"
+                  />
+                </div>
                 <img
                   v-if="form.imageUrl"
                   :src="form.imageUrl"
@@ -395,15 +427,13 @@ onMounted(() => {
             <prime-divider class="tw:my-5" />
             <!-- Customisation options -->
             <div class="tw:space-y-4">
-              <p class="tw:text-sm tw:font-semibold">Customisation options</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('products.options.title') }}</p>
 
               <!-- Temperature -->
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
-                  <p class="tw:text-sm tw:font-medium">Temperature option</p>
-                  <p class="tw:text-xs app-text-muted">
-                    Cho phép chọn nóng / lạnh
-                  </p>
+                  <p class="tw:text-sm tw:font-medium">{{ t('products.options.temperature.label') }}</p>
+                  <p class="tw:text-xs app-text-muted">{{ t('products.options.temperature.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasTemperatureOption" />
               </div>
@@ -411,10 +441,8 @@ onMounted(() => {
               <!-- Ice level -->
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
-                  <p class="tw:text-sm tw:font-medium">Ice level option</p>
-                  <p class="tw:text-xs app-text-muted">
-                    Cho phép chọn lượng đá
-                  </p>
+                  <p class="tw:text-sm tw:font-medium">{{ t('products.options.iceLevel.label') }}</p>
+                  <p class="tw:text-xs app-text-muted">{{ t('products.options.iceLevel.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasIceLevelOption" />
               </div>
@@ -422,10 +450,8 @@ onMounted(() => {
               <!-- Sugar level -->
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
-                  <p class="tw:text-sm tw:font-medium">Sugar level option</p>
-                  <p class="tw:text-xs app-text-muted">
-                    Cho phép chọn lượng đường
-                  </p>
+                  <p class="tw:text-sm tw:font-medium">{{ t('products.options.sugarLevel.label') }}</p>
+                  <p class="tw:text-xs app-text-muted">{{ t('products.options.sugarLevel.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasSugarLevelOption" />
               </div>
@@ -433,10 +459,8 @@ onMounted(() => {
               <!-- Accompaniment -->
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
-                  <p class="tw:text-sm tw:font-medium">Đồ ăn kèm</p>
-                  <p class="tw:text-xs app-text-muted">
-                    Không tính vào số khách mặc định khi tạo order
-                  </p>
+                  <p class="tw:text-sm tw:font-medium">{{ t('products.options.accompaniment.label') }}</p>
+                  <p class="tw:text-xs app-text-muted">{{ t('products.options.accompaniment.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.isAccompaniment" />
               </div>
@@ -446,10 +470,8 @@ onMounted(() => {
             <div>
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
-                  <p class="tw:text-sm tw:font-semibold">Active</p>
-                  <p class="tw:text-xs app-text-muted">
-                    Hiện sản phẩm trên menu
-                  </p>
+                  <p class="tw:text-sm tw:font-semibold">{{ t('products.detail.activeOption.label') }}</p>
+                  <p class="tw:text-xs app-text-muted">{{ t('products.detail.activeOption.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.isActive" />
               </div>
@@ -461,7 +483,7 @@ onMounted(() => {
               class="tw:flex tw:justify-end tw:gap-3"
             >
               <prime-button
-                label="Reset"
+                :label="t('products.detail.reset')"
                 severity="secondary"
                 outlined
                 size="small"
@@ -474,7 +496,7 @@ onMounted(() => {
                 @click="save"
               >
                 <iconify icon="ph:check-bold" class="tw:-ml-1" />
-                <span>Save changes</span>
+                <span>{{ t('products.detail.saveChanges') }}</span>
               </prime-button>
             </div>
           </template>
@@ -485,11 +507,9 @@ onMounted(() => {
     <!-- ── Not found ──────────────────────────────────────────────── -->
     <prime-card v-else class="app-card tw:rounded-2xl tw:border">
       <template #content>
-        <div
-          class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted"
-        >
+        <div class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted">
           <iconify icon="ph:warning-bold" class="tw:text-3xl tw:mb-2" />
-          <p class="tw:text-sm">Product not found.</p>
+          <p class="tw:text-sm">{{ t('products.detail.notFound') }}</p>
         </div>
       </template>
     </prime-card>

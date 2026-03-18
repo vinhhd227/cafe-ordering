@@ -9,6 +9,7 @@ import WidgetSettingsButton from "@/components/widgets/WidgetSettingsButton.vue"
 import { useTableCache } from "@/composables/useTableCache";
 import { btnIcon } from "@/layout/ui";
 
+const { t } = useI18n();
 const cache = useTableCache("products");
 
 const router = useRouter();
@@ -22,14 +23,15 @@ const rows = ref(10);
 const first = ref(0);
 
 // ── Column visibility ────────────────────────────────────────────────
-const colDefs = ref([
-  { field: 'id',       header: 'ID',       width: '4rem',  visible: true },
-  { key: 'product',    header: 'Product',  width: '14rem', visible: true },
-  { field: 'category', header: 'Category',                 visible: true },
-  { field: 'price',    header: 'Price',                    visible: true },
-  { field: 'status',   header: 'Status',                   visible: true },
-  { key: 'actions',    header: 'Actions',  width: '12rem', toggleable: false },
-]);
+const buildColDefs = () => [
+  { field: 'id',       header: t('products.list.col.id'),       width: '4rem',  visible: true },
+  { key: 'product',    header: t('products.list.col.product'),  width: '14rem', visible: true },
+  { field: 'category', header: t('products.list.col.category'),                 visible: true },
+  { field: 'price',    header: t('products.list.col.price'),                    visible: true },
+  { field: 'status',   header: t('products.list.col.status'),                   visible: true },
+  { key: 'actions',    header: t('products.list.col.actions'),  width: '12rem', toggleable: false },
+];
+const colDefs = ref(buildColDefs());
 const totalRecords = ref(0);
 const summary = ref({ total: 0, active: 0, low: 0, inactive: 0 });
 const searchTimer = ref(null);
@@ -42,10 +44,10 @@ const minPrice = ref(null);
 const maxPrice = ref(null);
 const categories = ref([]);
 
-const statusOptions = [
-  { label: "Active", value: true },
-  { label: "Inactive", value: false },
-];
+const statusOptions = computed(() => [
+  { label: t('products.status.active'),   value: true },
+  { label: t('products.status.inactive'), value: false },
+]);
 
 const filterPanel = ref(null);
 
@@ -71,11 +73,11 @@ const clearFilters = () => {
 const statusTag = (status) => {
   switch (status) {
     case "active":
-      return { label: "Active", severity: "success" };
+      return { label: t('products.status.active'),   severity: "success" };
     case "inactive":
-      return { label: "Inactive", severity: "danger" };
+      return { label: t('products.status.inactive'), severity: "danger" };
     default:
-      return { label: "Unknown", severity: "info" };
+      return { label: status, severity: "info" };
   }
 };
 
@@ -145,12 +147,10 @@ const loadProducts = async (page = 1) => {
       })) ?? [];
     const total = paged.pagedInfo?.totalRecords ?? 0;
     totalRecords.value = total;
-    // Chỉ cập nhật total — active/inactive do loadStats() quản lý riêng,
-    // không reset về 0 khi đổi trang
     summary.value = { ...summary.value, total };
   } catch (err) {
     errorMessage.value =
-      err?.response?.data?.message || "Failed to load products.";
+      err?.response?.data?.message || t('products.list.error');
   } finally {
     loading.value = false;
   }
@@ -164,7 +164,7 @@ const handleToggleActive = async (row) => {
     loadStats();
   } catch (err) {
     errorMessage.value =
-      err?.response?.data?.title ?? `Failed to update product "${row.name}".`;
+      err?.response?.data?.title ?? t('products.list.error');
   }
 };
 
@@ -179,7 +179,17 @@ onMounted(() => {
     statusFilter.value = cached.statusFilter ?? null;
     minPrice.value = cached.minPrice ?? null;
     maxPrice.value = cached.maxPrice ?? null;
-    if (cached.colDefs) colDefs.value = cached.colDefs;
+    if (cached.colDefs) {
+      const cachedMap = Object.fromEntries(
+        cached.colDefs.map(c => [c.key ?? c.field, c])
+      );
+      colDefs.value = colDefs.value.map(col => {
+        if (col.toggleable === false) return col;
+        const id = col.key ?? col.field;
+        const cached = cachedMap[id];
+        return cached ? { ...col, visible: cached.visible } : col;
+      });
+    }
     const page = rows.value > 0 ? Math.floor(first.value / rows.value) + 1 : 1;
     loadProducts(page);
   } else {
@@ -222,10 +232,10 @@ watch([categoryFilter, statusFilter], () => {
 // ── Widget visibility ──────────────────────────────────────────────
 const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('products', [
-    { id: 'total',    label: 'Total items', preview: '48', description: 'Tổng số sản phẩm trong danh mục.' },
-    { id: 'active',   label: 'Active',      preview: '36', description: 'Sản phẩm đang hiển thị và được bán trên menu.', labelClass: 'tw:text-emerald-400' },
-    { id: 'low',      label: 'Low stock',   preview: '4',  description: 'Sản phẩm sắp hết nguyên liệu, cần nhập thêm.' },
-    { id: 'inactive', label: 'Inactive',    preview: '8',  description: 'Sản phẩm đã tắt, không hiển thị trên menu.', labelClass: 'tw:text-red-400' },
+    { id: 'total',    label: t('products.widgets.total.label'),    preview: '48', description: t('products.widgets.total.description') },
+    { id: 'active',   label: t('products.widgets.active.label'),   preview: '36', description: t('products.widgets.active.description'),   labelClass: 'tw:text-emerald-400' },
+    { id: 'low',      label: t('products.widgets.low.label'),      preview: '4',  description: t('products.widgets.low.description') },
+    { id: 'inactive', label: t('products.widgets.inactive.label'), preview: '8',  description: t('products.widgets.inactive.description'), labelClass: 'tw:text-red-400' },
   ], { defaultCols: 4 })
 const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
 const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
@@ -236,15 +246,11 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
     <!-- ── Header ───────────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p
-          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
-        >
-          Products
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+          {{ t('products.breadcrumb') }}
         </p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Catalog overview</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
-          Track pricing, stock, and status across the menu.
-        </p>
+        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('products.list.title') }}</h1>
+        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('products.list.subtitle') }}</p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
         <widget-settings-button
@@ -261,7 +267,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
           @click="router.push({ name: 'productsCreate' })"
         >
           <iconify icon="ph:plus-bold" />
-          <span>Add product</span>
+          <span>{{ t('products.list.addProduct') }}</span>
         </prime-button>
       </div>
     </div>
@@ -270,23 +276,23 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
     <div :class="['tw:grid tw:gap-3', wColsClass]">
       <widget-stat
         v-if="wVisible('total')"
-        label="Total items"
+        :label="t('products.widgets.total.label')"
         :value="summary.total"
       />
       <widget-stat
         v-if="wVisible('active')"
-        label="Active"
+        :label="t('products.widgets.active.label')"
         label-class="tw:text-emerald-400"
         :value="summary.active"
       />
       <widget-stat
         v-if="wVisible('low')"
-        label="Low stock"
+        :label="t('products.widgets.low.label')"
         :value="summary.low"
       />
       <widget-stat
         v-if="wVisible('inactive')"
-        label="Inactive"
+        :label="t('products.widgets.inactive.label')"
         label-class="tw:text-red-400"
         :value="summary.inactive"
       />
@@ -319,7 +325,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
           <!-- Search by name -->
           <prime-input-text
             v-model="search"
-            placeholder="Search by name…"
+            :placeholder="t('products.list.searchPlaceholder')"
             class="app-input tw:w-56"
           />
 
@@ -327,7 +333,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
           <prime-button
             :severity="hasActiveFilters ? 'success' : 'secondary'"
             :outlined="!hasActiveFilters"
-            v-tooltip.top="'Filters'"
+            v-tooltip.top="t('products.list.filtersTooltip')"
             @click="filterPanel.toggle($event)"
             :class="!hasActiveFilters ? btnIcon : ''"
           >
@@ -343,14 +349,14 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
           <!-- Filter popover -->
           <prime-popover ref="filterPanel">
             <div class="tw:flex tw:flex-col tw:gap-4 tw:w-full">
-              <p class="tw:text-sm tw:font-semibold">Filter products</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('products.list.filterTitle') }}</p>
 
               <!-- Category -->
               <div class="tw:space-y-1.5">
                 <label
                   for="filter-category"
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
-                  >Category</label
+                  >{{ t('products.form.category') }}</label
                 >
                 <prime-select
                   v-model="categoryFilter"
@@ -358,7 +364,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
                   :options="categories"
                   option-label="name"
                   option-value="id"
-                  placeholder="All categories"
+                  :placeholder="t('products.list.allCategories')"
                   show-clear
                   class="app-input tw:w-full"
                 />
@@ -369,7 +375,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
                 <label
                   for="filter-status"
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
-                  >Status</label
+                  >{{ t('common.status') }}</label
                 >
                 <prime-select
                   v-model="statusFilter"
@@ -377,7 +383,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
                   :options="statusOptions"
                   option-label="label"
                   option-value="value"
-                  placeholder="All statuses"
+                  :placeholder="t('products.list.allStatuses')"
                   show-clear
                   class="app-input tw:w-full"
                 />
@@ -387,7 +393,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
               <div class="tw:space-y-1.5">
                 <label
                   class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
-                  >Price range (VND)</label
+                  >{{ t('products.list.priceRange') }}</label
                 >
                 <div class="tw:flex tw:items-center tw:gap-2">
                   <prime-input-number
@@ -419,7 +425,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
                 @click="clearFilters"
               >
                 <iconify icon="ph:x-bold" />
-                <span>Clear filters</span>
+                <span>{{ t('products.list.clearFilters') }}</span>
               </prime-button>
             </div>
           </prime-popover>
@@ -461,7 +467,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
             outlined
             size="small"
             :class="btnIcon"
-            v-tooltip.top="data.status === 'active' ? 'Deactivate' : 'Activate'"
+            v-tooltip.top="data.status === 'active' ? t('products.list.tooltip.deactivate') : t('products.list.tooltip.activate')"
             @click="handleToggleActive(data)"
           >
             <iconify :icon="data.status === 'active' ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
@@ -471,7 +477,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
             severity="secondary"
             outlined
             size="small"
-            v-tooltip.top="'View detail'"
+            v-tooltip.top="t('products.list.tooltip.viewDetail')"
             @click="router.push({ name: 'productsDetail', params: { id: data.id } })"
             :class="btnIcon"
           >

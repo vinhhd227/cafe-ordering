@@ -3,8 +3,10 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { createProduct } from "@/services/product.service";
 import { getCategory } from "@/services/category.service";
+import { uploadImage } from "@/services/upload.service";
 import { usePermission } from "@/composables/usePermission";
 
+const { t } = useI18n();
 const router = useRouter();
 const { can } = usePermission();
 
@@ -28,7 +30,6 @@ const loadCategories = async () => {
   try {
     const res = await getCategory();
     const raw = res?.data;
-    // Handle plain array hoặc Ardalis-wrapped result
     categories.value = Array.isArray(raw)
       ? raw
       : Array.isArray(raw?.value)
@@ -39,10 +40,30 @@ const loadCategories = async () => {
   } catch { /* non-critical */ }
 };
 
+const fileInput = ref(null);
+const uploading = ref(false);
+
+const handleFileSelect = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  uploading.value = true;
+  try {
+    const res = await uploadImage(file);
+    form.value.imageUrl = res?.data?.url ?? "";
+  } catch (err) {
+    errorMessage.value =
+      err?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
+      t('products.form.uploadError');
+  } finally {
+    uploading.value = false;
+    event.target.value = "";
+  }
+};
+
 const extractError = (err) =>
   err?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
   err?.response?.data?.message ||
-  "Failed to create product.";
+  t('products.create.error');
 
 const submit = async () => {
   loading.value = true;
@@ -59,7 +80,6 @@ const submit = async () => {
       hasSugarLevelOption: form.value.hasSugarLevelOption,
       isAccompaniment: form.value.isAccompaniment,
     });
-    // Endpoint trả về { id } với 201
     const newId = res?.data?.id ?? res?.data?.Id;
     if (newId) {
       router.push({ name: "productsDetail", params: { id: newId } });
@@ -82,12 +102,12 @@ onMounted(loadCategories);
     <!-- ── Header ───────────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">Products</p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Add product</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">Fill in the details to add a new item to the menu.</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('products.breadcrumb') }}</p>
+        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('products.create.title') }}</h1>
+        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('products.create.subtitle') }}</p>
       </div>
       <prime-button
-        label="Back to list"
+        :label="t('products.create.backToList')"
         icon="pi pi-arrow-left"
         severity="secondary"
         outlined
@@ -114,14 +134,14 @@ onMounted(loadCategories);
             <!-- Category -->
             <div class="tw:space-y-1.5">
               <label class="tw:text-sm tw:font-medium">
-                Category <span class="tw:text-red-400">*</span>
+                {{ t('products.form.category') }} <span class="tw:text-red-400">*</span>
               </label>
               <prime-select
                 v-model="form.categoryId"
                 :options="categories"
                 option-label="name"
                 option-value="id"
-                placeholder="Select a category"
+                :placeholder="t('products.form.selectCategory')"
                 class="app-input tw:w-full"
               />
             </div>
@@ -129,11 +149,11 @@ onMounted(loadCategories);
             <!-- Name -->
             <div class="tw:space-y-1.5">
               <label class="tw:text-sm tw:font-medium">
-                Name <span class="tw:text-red-400">*</span>
+                {{ t('products.form.name') }} <span class="tw:text-red-400">*</span>
               </label>
               <prime-input-text
                 v-model="form.name"
-                placeholder="e.g. Caramel Macchiato"
+                :placeholder="t('products.form.namePlaceholder')"
                 class="app-input tw:w-full"
               />
             </div>
@@ -141,13 +161,13 @@ onMounted(loadCategories);
             <!-- Price -->
             <div class="tw:space-y-1.5">
               <label class="tw:text-sm tw:font-medium">
-                Price (VND) <span class="tw:text-red-400">*</span>
+                {{ t('products.form.price') }} <span class="tw:text-red-400">*</span>
               </label>
               <prime-input-number
                 v-model="form.price"
                 :min="0"
                 :use-grouping="true"
-                placeholder="e.g. 45000"
+                :placeholder="t('products.form.pricePlaceholder')"
                 class="app-input tw:w-full"
               />
             </div>
@@ -155,30 +175,49 @@ onMounted(loadCategories);
             <!-- Description -->
             <div class="tw:space-y-1.5">
               <label class="tw:text-sm tw:font-medium">
-                Description
-                <span class="app-text-muted tw:font-normal">(optional)</span>
+                {{ t('products.form.description') }}
+                <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
               </label>
               <prime-textarea
                 v-model="form.description"
                 rows="3"
-                placeholder="Short description shown on the menu card…"
+                :placeholder="t('products.form.descriptionPlaceholder')"
                 class="app-input tw:w-full tw:resize-none"
                 auto-resize
               />
             </div>
 
-            <!-- Image URL -->
+            <!-- Image -->
             <div class="tw:space-y-1.5">
               <label class="tw:text-sm tw:font-medium">
-                Image URL
-                <span class="app-text-muted tw:font-normal">(optional)</span>
+                {{ t('products.form.image') }}
+                <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
               </label>
-              <prime-input-text
-                v-model="form.imageUrl"
-                placeholder="https://…"
-                class="app-input tw:w-full"
-              />
-              <!-- Preview -->
+              <div class="tw:flex tw:gap-2">
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept="image/*"
+                  class="tw:hidden"
+                  @change="handleFileSelect"
+                />
+                <prime-button
+                  severity="secondary"
+                  outlined
+                  size="small"
+                  :loading="uploading"
+                  v-tooltip.top="t('products.form.uploadImage')"
+                  @click="fileInput.click()"
+                >
+                  <iconify icon="ph:upload-simple-bold" />
+                  <span>{{ t('products.form.uploadImage') }}</span>
+                </prime-button>
+                <prime-input-text
+                  v-model="form.imageUrl"
+                  :placeholder="t('products.form.pasteUrl')"
+                  class="app-input tw:flex-1"
+                />
+              </div>
               <img
                 v-if="form.imageUrl"
                 :src="form.imageUrl"
@@ -192,10 +231,8 @@ onMounted(loadCategories);
           <!-- ── Right column: Options ── -->
           <div class="tw:space-y-5">
             <div>
-              <p class="tw:text-sm tw:font-medium tw:mb-1">Customisation options</p>
-              <p class="tw:text-xs app-text-muted">
-                Let customers personalise their order when placing it.
-              </p>
+              <p class="tw:text-sm tw:font-medium tw:mb-1">{{ t('products.options.title') }}</p>
+              <p class="tw:text-xs app-text-muted">{{ t('products.options.subtitle') }}</p>
             </div>
 
             <div class="tw:space-y-4">
@@ -203,10 +240,8 @@ onMounted(loadCategories);
               <!-- Temperature -->
               <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
-                  <p class="tw:text-sm tw:font-medium">Temperature</p>
-                  <p class="tw:text-xs app-text-muted tw:mt-0.5">
-                    Hot / Iced / Blended
-                  </p>
+                  <p class="tw:text-sm tw:font-medium">{{ t('products.options.temperature.label') }}</p>
+                  <p class="tw:text-xs app-text-muted tw:mt-0.5">{{ t('products.options.temperature.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasTemperatureOption" />
               </div>
@@ -214,10 +249,8 @@ onMounted(loadCategories);
               <!-- Ice level -->
               <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
-                  <p class="tw:text-sm tw:font-medium">Ice level</p>
-                  <p class="tw:text-xs app-text-muted tw:mt-0.5">
-                    No ice / Less / Normal / Extra
-                  </p>
+                  <p class="tw:text-sm tw:font-medium">{{ t('products.options.iceLevel.label') }}</p>
+                  <p class="tw:text-xs app-text-muted tw:mt-0.5">{{ t('products.options.iceLevel.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasIceLevelOption" />
               </div>
@@ -225,10 +258,8 @@ onMounted(loadCategories);
               <!-- Sugar level -->
               <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
-                  <p class="tw:text-sm tw:font-medium">Sugar level</p>
-                  <p class="tw:text-xs app-text-muted tw:mt-0.5">
-                    0 % / 25 % / 50 % / 75 % / 100 %
-                  </p>
+                  <p class="tw:text-sm tw:font-medium">{{ t('products.options.sugarLevel.label') }}</p>
+                  <p class="tw:text-xs app-text-muted tw:mt-0.5">{{ t('products.options.sugarLevel.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasSugarLevelOption" />
               </div>
@@ -236,10 +267,8 @@ onMounted(loadCategories);
               <!-- Accompaniment -->
               <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
-                  <p class="tw:text-sm tw:font-medium">Đồ ăn kèm</p>
-                  <p class="tw:text-xs app-text-muted tw:mt-0.5">
-                    Không tính vào số khách mặc định khi tạo order
-                  </p>
+                  <p class="tw:text-sm tw:font-medium">{{ t('products.options.accompaniment.label') }}</p>
+                  <p class="tw:text-xs app-text-muted tw:mt-0.5">{{ t('products.options.accompaniment.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.isAccompaniment" />
               </div>
@@ -251,7 +280,7 @@ onMounted(loadCategories);
         <!-- ── Footer actions ── -->
         <div class="tw:flex tw:justify-end tw:gap-3">
           <prime-button
-            label="Cancel"
+            :label="t('products.create.cancel')"
             severity="secondary"
             outlined
             size="small"
@@ -259,7 +288,7 @@ onMounted(loadCategories);
           />
           <prime-button
             v-if="can('product.create')"
-            label="Create product"
+            :label="t('products.create.submit')"
             icon="pi pi-check"
             severity="success"
             size="small"

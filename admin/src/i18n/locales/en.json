@@ -77,6 +77,13 @@
     "brand": "Cafe Ordering",
     "title": "Admin Panel"
   },
+  "header": {
+    "workspace": "Admin workspace",
+    "greeting": "Good shift, team.",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "export": "Export"
+  },
   "widget": {
     "revenue": {
       "label": "Total revenue",
@@ -470,6 +477,101 @@
       "saving": "Saving...",
       "promotionWarning": "Existing promotions will be removed — enter a new code below to re-apply.",
       "successToast": "{orderNumber} updated successfully."
+    }
+  },
+
+  "products": {
+    "breadcrumb": "Products",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "widgets": {
+      "total":    { "label": "Total items", "description": "Total number of products in the catalog." },
+      "active":   { "label": "Active",      "description": "Products currently visible and for sale on the menu." },
+      "low":      { "label": "Low stock",   "description": "Products running low on ingredients." },
+      "inactive": { "label": "Inactive",    "description": "Products turned off, not shown on the menu." }
+    },
+    "options": {
+      "title":    "Customisation options",
+      "subtitle": "Let customers personalise their order when placing it.",
+      "temperature":   { "label": "Temperature", "hint": "Hot / Iced / Blended" },
+      "iceLevel":      { "label": "Ice level",   "hint": "No ice / Less / Normal / Extra" },
+      "sugarLevel":    { "label": "Sugar level", "hint": "0 % / 25 % / 50 % / 75 % / 100 %" },
+      "accompaniment": { "label": "Accompaniment", "hint": "Not counted toward guest count by default" }
+    },
+    "form": {
+      "category":    "Category",
+      "name":        "Name",
+      "price":       "Price (VND)",
+      "description": "Description",
+      "image":       "Image",
+      "optional":    "(optional)",
+      "selectCategory":          "Select a category",
+      "namePlaceholder":         "e.g. Caramel Macchiato",
+      "pricePlaceholder":        "e.g. 45000",
+      "descriptionPlaceholder":  "Short description shown on the menu card…",
+      "uploadImage": "Upload",
+      "pasteUrl":    "or paste URL…",
+      "uploadError": "Failed to upload image."
+    },
+    "list": {
+      "title":       "Catalog overview",
+      "subtitle":    "Track pricing, stock, and status across the menu.",
+      "addProduct":  "Add product",
+      "searchPlaceholder": "Search by name…",
+      "filtersTooltip": "Filters",
+      "filterTitle": "Filter products",
+      "priceRange":  "Price range (VND)",
+      "allCategories": "All categories",
+      "allStatuses": "All statuses",
+      "clearFilters": "Clear filters",
+      "col": {
+        "id":       "ID",
+        "product":  "Product",
+        "category": "Category",
+        "price":    "Price",
+        "status":   "Status",
+        "actions":  "Actions"
+      },
+      "tooltip": {
+        "deactivate": "Deactivate",
+        "activate":   "Activate",
+        "viewDetail": "View detail"
+      },
+      "error": "Failed to load products."
+    },
+    "create": {
+      "title":      "Add product",
+      "subtitle":   "Fill in the details to add a new item to the menu.",
+      "submit":     "Create product",
+      "cancel":     "Cancel",
+      "backToList": "Back to list",
+      "error":      "Failed to create product."
+    },
+    "detail": {
+      "backToList":    "Back to list",
+      "editTitle":     "Edit details",
+      "reset":         "Reset",
+      "saveChanges":   "Save changes",
+      "updateSuccess": "Product updated successfully.",
+      "notFound":      "Product not found.",
+      "info": {
+        "category":    "Category",
+        "price":       "Price",
+        "status":      "Status",
+        "options":     "Customisation options",
+        "noOptions":   "None",
+        "description": "Description"
+      },
+      "activeOption": {
+        "label": "Active",
+        "hint":  "Show product on menu"
+      },
+      "error": {
+        "loadFailed":   "Failed to load product.",
+        "updateFailed": "Failed to update product."
+      }
     }
   },
 

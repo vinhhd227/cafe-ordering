@@ -77,6 +77,13 @@
     "brand": "Cafe Ordering",
     "title": "Quản trị"
   },
+  "header": {
+    "workspace": "Khu vực quản trị",
+    "greeting": "Chúc ca làm việc vui vẻ!",
+    "collapseSidebar": "Thu gọn sidebar",
+    "expandSidebar": "Mở rộng sidebar",
+    "export": "Xuất"
+  },
   "widget": {
     "revenue": {
       "label": "Tổng doanh thu",
@@ -470,6 +477,101 @@
       "saving": "Đang lưu...",
       "promotionWarning": "Khuyến mãi hiện tại sẽ bị xóa — nhập mã mới bên dưới nếu cần áp lại.",
       "successToast": "Đã cập nhật {orderNumber}."
+    }
+  },
+
+  "products": {
+    "breadcrumb": "Sản phẩm",
+    "status": {
+      "active": "Đang bán",
+      "inactive": "Ngừng bán"
+    },
+    "widgets": {
+      "total":    { "label": "Tổng sản phẩm", "description": "Tổng số sản phẩm trong danh mục." },
+      "active":   { "label": "Đang bán",      "description": "Sản phẩm đang hiển thị và được bán trên menu." },
+      "low":      { "label": "Sắp hết",       "description": "Sản phẩm sắp hết nguyên liệu, cần nhập thêm." },
+      "inactive": { "label": "Ngừng bán",     "description": "Sản phẩm đã tắt, không hiển thị trên menu." }
+    },
+    "options": {
+      "title":    "Tuỳ chọn thêm",
+      "subtitle": "Cho phép khách tùy chỉnh khi đặt món.",
+      "temperature":   { "label": "Nhiệt độ",  "hint": "Nóng / Lạnh / Đá xay" },
+      "iceLevel":      { "label": "Mức đá",    "hint": "Không đá / Ít đá / Bình thường / Nhiều đá" },
+      "sugarLevel":    { "label": "Mức đường", "hint": "0 % / 25 % / 50 % / 75 % / 100 %" },
+      "accompaniment": { "label": "Đồ ăn kèm", "hint": "Không tính vào số khách mặc định khi tạo order" }
+    },
+    "form": {
+      "category":    "Danh mục",
+      "name":        "Tên",
+      "price":       "Giá (VND)",
+      "description": "Mô tả",
+      "image":       "Ảnh",
+      "optional":    "(không bắt buộc)",
+      "selectCategory":         "Chọn danh mục",
+      "namePlaceholder":        "VD: Cà Phê Sữa",
+      "pricePlaceholder":       "VD: 45000",
+      "descriptionPlaceholder": "Mô tả ngắn hiển thị trên menu…",
+      "uploadImage": "Tải ảnh",
+      "pasteUrl":    "hoặc dán URL…",
+      "uploadError": "Không thể tải ảnh lên."
+    },
+    "list": {
+      "title":       "Tổng quan sản phẩm",
+      "subtitle":    "Theo dõi giá, tồn kho và trạng thái trên thực đơn.",
+      "addProduct":  "Thêm sản phẩm",
+      "searchPlaceholder": "Tìm theo tên…",
+      "filtersTooltip": "Bộ lọc",
+      "filterTitle": "Lọc sản phẩm",
+      "priceRange":  "Khoảng giá (VND)",
+      "allCategories": "Tất cả danh mục",
+      "allStatuses": "Tất cả trạng thái",
+      "clearFilters": "Xoá bộ lọc",
+      "col": {
+        "id":       "ID",
+        "product":  "Sản phẩm",
+        "category": "Danh mục",
+        "price":    "Giá",
+        "status":   "Trạng thái",
+        "actions":  "Thao tác"
+      },
+      "tooltip": {
+        "deactivate": "Tắt sản phẩm",
+        "activate":   "Bật sản phẩm",
+        "viewDetail": "Xem chi tiết"
+      },
+      "error": "Không thể tải danh sách sản phẩm."
+    },
+    "create": {
+      "title":      "Thêm sản phẩm",
+      "subtitle":   "Điền thông tin để thêm món mới vào thực đơn.",
+      "submit":     "Tạo sản phẩm",
+      "cancel":     "Hủy",
+      "backToList": "Quay lại",
+      "error":      "Không thể tạo sản phẩm."
+    },
+    "detail": {
+      "backToList":    "Quay lại",
+      "editTitle":     "Chỉnh sửa",
+      "reset":         "Đặt lại",
+      "saveChanges":   "Lưu thay đổi",
+      "updateSuccess": "Đã cập nhật sản phẩm.",
+      "notFound":      "Không tìm thấy sản phẩm.",
+      "info": {
+        "category":    "Danh mục",
+        "price":       "Giá",
+        "status":      "Trạng thái",
+        "options":     "Tuỳ chọn",
+        "noOptions":   "Không có",
+        "description": "Mô tả"
+      },
+      "activeOption": {
+        "label": "Kích hoạt",
+        "hint":  "Hiện sản phẩm trên menu"
+      },
+      "error": {
+        "loadFailed":   "Không thể tải sản phẩm.",
+        "updateFailed": "Không thể cập nhật sản phẩm."
+      }
     }
   },
 
