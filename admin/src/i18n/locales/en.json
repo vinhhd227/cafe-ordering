@@ -35,7 +35,12 @@
     "status": "Status",
     "actions": "Actions",
     "loading": "Loading...",
-    "noData": "No data found."
+    "noData": "No data found.",
+    "table": {
+      "emptyMessage": "No records found",
+      "showing": "Showing {from} to {to} of {total} items",
+      "itemsPerPage": "Items per page"
+    }
   },
   "auth": {
     "login": "Sign in",
@@ -83,6 +88,17 @@
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
     "export": "Export"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No new notifications",
+    "newOrder": "New order",
+    "table": "Table",
+    "itemCount": "{n} item | {n} items",
+    "itemUnit": "items",
+    "sound": "Toggle sound",
+    "markAllRead": "Mark all as read",
+    "clear": "Clear all"
   },
   "widget": {
     "revenue": {
@@ -660,6 +676,77 @@
       "loadFailed": "Failed to load expenses.",
       "saveFailed": "Failed to save expense.",
       "deleteFailed": "Failed to delete expense."
+    }
+  },
+
+  "categories": {
+    "breadcrumb": "Categories",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "widgets": {
+      "total":    { "label": "Total" },
+      "active":   { "label": "Active" },
+      "inactive": { "label": "Inactive" }
+    },
+    "form": {
+      "name":                   "Name",
+      "description":            "Description",
+      "optional":               "(optional)",
+      "namePlaceholder":        "e.g. Hot Beverages",
+      "descriptionPlaceholder": "Short description of this category…"
+    },
+    "list": {
+      "title":             "Categories",
+      "subtitle":          "Manage the categories used to organise your menu.",
+      "addCategory":       "Add category",
+      "searchPlaceholder": "Search by name…",
+      "filtersTooltip":    "Filters",
+      "filterTitle":       "Filter categories",
+      "allStatuses":       "All statuses",
+      "clearFilters":      "Clear filters",
+      "col": {
+        "id":          "ID",
+        "name":        "Name",
+        "description": "Description",
+        "status":      "Status",
+        "actions":     "Actions"
+      },
+      "tooltip": {
+        "deactivate": "Deactivate",
+        "activate":   "Activate",
+        "viewDetail": "View detail"
+      },
+      "error": "Failed to load categories."
+    },
+    "create": {
+      "title":    "Add category",
+      "subtitle": "Create a new category to group your menu items.",
+      "backToList": "Back to list",
+      "submit":   "Create category",
+      "cancel":   "Cancel",
+      "error":    "Failed to create category."
+    },
+    "detail": {
+      "backToList":    "Back to list",
+      "id":            "Category #{id}",
+      "created":       "Created",
+      "updated":       "Updated",
+      "description":   "Description",
+      "editTitle":     "Edit details",
+      "activeOption": {
+        "label": "Active",
+        "hint":  "Show category on menu"
+      },
+      "reset":         "Reset",
+      "saveChanges":   "Save changes",
+      "updateSuccess": "Category updated successfully.",
+      "notFound":      "Category not found.",
+      "error": {
+        "loadFailed":   "Failed to load category.",
+        "updateFailed": "Failed to update category."
+      }
     }
   }
 }

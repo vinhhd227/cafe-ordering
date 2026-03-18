@@ -35,7 +35,12 @@
     "status": "Trạng thái",
     "actions": "Thao tác",
     "loading": "Đang tải...",
-    "noData": "Không có dữ liệu."
+    "noData": "Không có dữ liệu.",
+    "table": {
+      "emptyMessage": "Không có dữ liệu",
+      "showing": "Hiển thị {from} đến {to} trong tổng số {total} mục",
+      "itemsPerPage": "Số mục mỗi trang"
+    }
   },
   "auth": {
     "login": "Đăng nhập",
@@ -83,6 +88,17 @@
     "collapseSidebar": "Thu gọn sidebar",
     "expandSidebar": "Mở rộng sidebar",
     "export": "Xuất"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "empty": "Không có thông báo mới",
+    "newOrder": "Đơn hàng mới",
+    "table": "Bàn",
+    "itemCount": "{n} món",
+    "itemUnit": "món",
+    "sound": "Bật/tắt âm thanh",
+    "markAllRead": "Đánh dấu đã đọc",
+    "clear": "Xóa tất cả"
   },
   "widget": {
     "revenue": {
@@ -660,6 +676,77 @@
       "loadFailed": "Không thể tải danh sách chi phí.",
       "saveFailed": "Không thể lưu chi phí.",
       "deleteFailed": "Không thể xoá chi phí."
+    }
+  },
+
+  "categories": {
+    "breadcrumb": "Danh mục",
+    "status": {
+      "active": "Đang dùng",
+      "inactive": "Ngừng dùng"
+    },
+    "widgets": {
+      "total":    { "label": "Tổng danh mục" },
+      "active":   { "label": "Đang dùng" },
+      "inactive": { "label": "Ngừng dùng" }
+    },
+    "form": {
+      "name":                   "Tên",
+      "description":            "Mô tả",
+      "optional":               "(không bắt buộc)",
+      "namePlaceholder":        "VD: Đồ uống nóng",
+      "descriptionPlaceholder": "Mô tả ngắn về danh mục này…"
+    },
+    "list": {
+      "title":             "Danh mục",
+      "subtitle":          "Quản lý các danh mục để nhóm các món trên menu.",
+      "addCategory":       "Thêm danh mục",
+      "searchPlaceholder": "Tìm theo tên…",
+      "filtersTooltip":    "Bộ lọc",
+      "filterTitle":       "Lọc danh mục",
+      "allStatuses":       "Tất cả trạng thái",
+      "clearFilters":      "Xoá bộ lọc",
+      "col": {
+        "id":          "ID",
+        "name":        "Tên",
+        "description": "Mô tả",
+        "status":      "Trạng thái",
+        "actions":     "Thao tác"
+      },
+      "tooltip": {
+        "deactivate": "Tắt danh mục",
+        "activate":   "Bật danh mục",
+        "viewDetail": "Xem chi tiết"
+      },
+      "error": "Không thể tải danh sách danh mục."
+    },
+    "create": {
+      "title":    "Thêm danh mục",
+      "subtitle": "Tạo danh mục mới để nhóm các món trên thực đơn.",
+      "backToList": "Quay lại",
+      "submit":   "Tạo danh mục",
+      "cancel":   "Hủy",
+      "error":    "Không thể tạo danh mục."
+    },
+    "detail": {
+      "backToList":    "Quay lại",
+      "id":            "Danh mục #{id}",
+      "created":       "Tạo lúc",
+      "updated":       "Cập nhật lúc",
+      "description":   "Mô tả",
+      "editTitle":     "Chỉnh sửa",
+      "activeOption": {
+        "label": "Kích hoạt",
+        "hint":  "Hiển thị danh mục trên menu"
+      },
+      "reset":         "Đặt lại",
+      "saveChanges":   "Lưu thay đổi",
+      "updateSuccess": "Đã cập nhật danh mục.",
+      "notFound":      "Không tìm thấy danh mục.",
+      "error": {
+        "loadFailed":   "Không thể tải danh mục.",
+        "updateFailed": "Không thể cập nhật danh mục."
+      }
     }
   }
 }

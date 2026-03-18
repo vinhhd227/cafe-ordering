@@ -647,13 +647,13 @@ const handleDelete = (expense) => {
           >
             <span
               >{{ t('expenses.summary.cash') }}
-              <span class="tw:text-white/70">{{
+              <span class="tw:font-medium">{{
                 formatVnd(revenue.cash)
               }}</span></span
             >
             <span
               >{{ t('expenses.summary.bank') }}
-              <span class="tw:text-white/70">{{
+              <span class="tw:font-medium">{{
                 formatVnd(revenue.bank)
               }}</span></span
             >
@@ -679,13 +679,13 @@ const handleDelete = (expense) => {
           >
             <span
               >{{ t('expenses.summary.cash') }}
-              <span class="tw:text-white/70">{{
+              <span class="tw:font-medium">{{
                 formatVnd(expenseBreakdown.cash)
               }}</span></span
             >
             <span
               >{{ t('expenses.summary.bank') }}
-              <span class="tw:text-white/70">{{
+              <span class="tw:font-medium">{{
                 formatVnd(expenseBreakdown.bank)
               }}</span></span
             >
