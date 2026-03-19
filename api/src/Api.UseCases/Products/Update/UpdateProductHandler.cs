@@ -37,6 +37,7 @@ public class UpdateProductHandler : ICommandHandler<UpdateProductCommand, Result
       request.HasSugarLevelOption);
 
     product.UpdateAccompaniment(request.IsAccompaniment);
+    product.SetEstimatedPrepTime(request.EstimatedPrepMinutes);
 
     if (request.IsActive)
       product.Activate();

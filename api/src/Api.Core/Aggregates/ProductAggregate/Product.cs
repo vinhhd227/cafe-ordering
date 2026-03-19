@@ -16,6 +16,7 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
   public bool HasIceLevelOption { get; private set; }
   public bool HasSugarLevelOption { get; private set; }
   public bool IsAccompaniment { get; private set; }
+  public int? EstimatedPrepMinutes { get; private set; }
 
   // Navigation
   public Category? Category { get; private set; }
@@ -51,6 +52,8 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
   }
 
   public void UpdateAccompaniment(bool value) => IsAccompaniment = value;
+
+  public void SetEstimatedPrepTime(int? minutes) => EstimatedPrepMinutes = minutes;
 
   public void UpdateDetails(
     string name,

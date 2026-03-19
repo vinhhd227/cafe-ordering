@@ -33,6 +33,7 @@ public class GetProductHandler(IReadRepositoryBase<Product> repository)
       product.HasIceLevelOption,
       product.HasSugarLevelOption,
       product.IsAccompaniment,
+      product.EstimatedPrepMinutes,
       product.CreatedAt,
       product.UpdatedAt);
   }

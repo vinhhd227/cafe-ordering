@@ -33,6 +33,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
       .IsRequired()
       .HasDefaultValue(false);
 
+    builder.Property(p => p.EstimatedPrepMinutes);
+
     // Indexes
     builder.HasIndex(p => p.CategoryId);
     builder.HasIndex(p => p.IsActive);

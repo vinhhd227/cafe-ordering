@@ -529,7 +529,9 @@
       "descriptionPlaceholder":  "Short description shown on the menu card…",
       "uploadImage": "Upload",
       "pasteUrl":    "or paste URL…",
-      "uploadError": "Failed to upload image."
+      "uploadError": "Failed to upload image.",
+      "estimatedPrepMinutes": "Est. prep time (min)",
+      "estimatedPrepMinutesPlaceholder": "Leave blank if unknown"
     },
     "list": {
       "title":       "Catalog overview",
@@ -578,7 +580,9 @@
         "status":      "Status",
         "options":     "Customisation options",
         "noOptions":   "None",
-        "description": "Description"
+        "description": "Description",
+        "estimatedPrepMinutes": "Est. prep time",
+        "minutes": "min"
       },
       "activeOption": {
         "label": "Active",

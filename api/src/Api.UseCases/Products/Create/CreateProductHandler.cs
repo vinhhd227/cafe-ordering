@@ -21,6 +21,8 @@ public class CreateProductHandler(IRepositoryBase<Product> repository)
       request.HasSugarLevelOption,
       request.IsAccompaniment);
 
+    product.SetEstimatedPrepTime(request.EstimatedPrepMinutes);
+
     await repository.AddAsync(product, ct);
 
     return Result.Success(product.Id);

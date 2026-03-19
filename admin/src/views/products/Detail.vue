@@ -32,6 +32,7 @@ const form = ref({
   hasIceLevelOption: false,
   hasSugarLevelOption: false,
   isAccompaniment: false,
+  estimatedPrepMinutes: null,
 });
 
 const fileInput = ref(null);
@@ -103,6 +104,7 @@ const loadProduct = async () => {
       hasIceLevelOption: product.value.hasIceLevelOption ?? false,
       hasSugarLevelOption: product.value.hasSugarLevelOption ?? false,
       isAccompaniment: product.value.isAccompaniment ?? false,
+      estimatedPrepMinutes: product.value.estimatedPrepMinutes ?? null,
     };
   } catch (err) {
     errorMessage.value =
@@ -128,6 +130,7 @@ const save = async () => {
       hasIceLevelOption: form.value.hasIceLevelOption,
       hasSugarLevelOption: form.value.hasSugarLevelOption,
       isAccompaniment: form.value.isAccompaniment,
+      estimatedPrepMinutes: form.value.estimatedPrepMinutes || null,
     });
     await loadProduct();
     saveSuccess.value = true;
@@ -273,6 +276,10 @@ onMounted(() => {
                   :severity="product.isActive ? 'success' : 'danger'"
                 />
               </div>
+              <div v-if="product.estimatedPrepMinutes" class="tw:flex tw:justify-between tw:text-sm">
+                <span class="app-text-muted">{{ t('products.detail.info.estimatedPrepMinutes') }}</span>
+                <span>{{ product.estimatedPrepMinutes }} {{ t('products.detail.info.minutes') }}</span>
+              </div>
             </div>
 
             <!-- Options -->
@@ -381,6 +388,21 @@ onMounted(() => {
                   rows="3"
                   class="app-input tw:w-full tw:resize-none"
                   auto-resize
+                />
+              </div>
+
+              <!-- Estimated prep time -->
+              <div class="tw:space-y-1.5">
+                <label class="tw:text-sm tw:font-medium">
+                  {{ t('products.form.estimatedPrepMinutes') }}
+                  <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
+                </label>
+                <prime-input-number
+                  v-model="form.estimatedPrepMinutes"
+                  :min="1"
+                  :max="120"
+                  :placeholder="t('products.form.estimatedPrepMinutesPlaceholder')"
+                  class="app-input tw:w-full"
                 />
               </div>
 

@@ -529,7 +529,9 @@
       "descriptionPlaceholder": "Mô tả ngắn hiển thị trên menu…",
       "uploadImage": "Tải ảnh",
       "pasteUrl":    "hoặc dán URL…",
-      "uploadError": "Không thể tải ảnh lên."
+      "uploadError": "Không thể tải ảnh lên.",
+      "estimatedPrepMinutes": "Thời gian pha ước tính (phút)",
+      "estimatedPrepMinutesPlaceholder": "Để trống nếu không xác định"
     },
     "list": {
       "title":       "Tổng quan sản phẩm",
@@ -578,7 +580,9 @@
         "status":      "Trạng thái",
         "options":     "Tuỳ chọn",
         "noOptions":   "Không có",
-        "description": "Mô tả"
+        "description": "Mô tả",
+        "estimatedPrepMinutes": "Thời gian pha ước tính",
+        "minutes": "phút"
       },
       "activeOption": {
         "label": "Kích hoạt",

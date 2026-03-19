@@ -26,6 +26,7 @@ public class GetSummary : Summary<Get>
       HasIceLevelOption: true,
       HasSugarLevelOption: true,
       IsAccompaniment: false,
+      EstimatedPrepMinutes: 5,
       CreatedAt: new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
       UpdatedAt: null);
 

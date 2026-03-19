@@ -46,6 +46,9 @@ public sealed class UpdateProductRequest
   /// and will not be counted toward the default guest count when creating an order.
   /// </summary>
   public bool IsAccompaniment { get; set; }
+
+  /// <summary>Estimated preparation time in minutes. Pass <c>null</c> to clear.</summary>
+  public int? EstimatedPrepMinutes { get; set; }
 }
 
 public class Update : Endpoint<UpdateProductRequest>
@@ -79,7 +82,8 @@ public class Update : Endpoint<UpdateProductRequest>
         req.HasSugarLevelOption,
         req.IsAccompaniment,
         req.Description,
-        req.ImageUrl), ct);
+        req.ImageUrl,
+        req.EstimatedPrepMinutes), ct);
 
     await this.SendResultAsync(result, ct);
   }

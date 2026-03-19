@@ -46,6 +46,9 @@ public sealed class CreateProductRequest
   /// and will not be counted toward the default guest count when creating an order.
   /// </summary>
   public bool IsAccompaniment { get; set; }
+
+  /// <summary>Estimated preparation time in minutes. Used to show customers expected wait time.</summary>
+  public int? EstimatedPrepMinutes { get; set; }
 }
 
 public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
@@ -69,7 +72,8 @@ public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
       req.HasTemperatureOption,
       req.HasIceLevelOption,
       req.HasSugarLevelOption,
-      req.IsAccompaniment);
+      req.IsAccompaniment,
+      req.EstimatedPrepMinutes);
 
     var result = await mediator.Send(command, ct);
 

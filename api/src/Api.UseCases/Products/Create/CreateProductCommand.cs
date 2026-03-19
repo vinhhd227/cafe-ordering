@@ -12,5 +12,6 @@ public record CreateProductCommand(
   bool HasTemperatureOption = false,
   bool HasIceLevelOption = false,
   bool HasSugarLevelOption = false,
-  bool IsAccompaniment = false
+  bool IsAccompaniment = false,
+  int? EstimatedPrepMinutes = null
 ) : ICommand<Result<int>>;

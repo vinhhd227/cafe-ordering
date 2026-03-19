@@ -14,5 +14,6 @@ public record UpdateProductCommand(
   bool HasSugarLevelOption,
   bool IsAccompaniment = false,
   string? Description = null,
-  string? ImageUrl = null
+  string? ImageUrl = null,
+  int? EstimatedPrepMinutes = null
 ) : ICommand<Result>;

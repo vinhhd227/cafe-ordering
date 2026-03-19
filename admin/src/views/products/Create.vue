@@ -24,6 +24,7 @@ const form = ref({
   hasIceLevelOption: false,
   hasSugarLevelOption: false,
   isAccompaniment: false,
+  estimatedPrepMinutes: null,
 });
 
 const loadCategories = async () => {
@@ -79,6 +80,7 @@ const submit = async () => {
       hasIceLevelOption: form.value.hasIceLevelOption,
       hasSugarLevelOption: form.value.hasSugarLevelOption,
       isAccompaniment: form.value.isAccompaniment,
+      estimatedPrepMinutes: form.value.estimatedPrepMinutes || null,
     });
     const newId = res?.data?.id ?? res?.data?.Id;
     if (newId) {
@@ -184,6 +186,21 @@ onMounted(loadCategories);
                 :placeholder="t('products.form.descriptionPlaceholder')"
                 class="app-input tw:w-full tw:resize-none"
                 auto-resize
+              />
+            </div>
+
+            <!-- Estimated prep time -->
+            <div class="tw:space-y-1.5">
+              <label class="tw:text-sm tw:font-medium">
+                {{ t('products.form.estimatedPrepMinutes') }}
+                <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
+              </label>
+              <prime-input-number
+                v-model="form.estimatedPrepMinutes"
+                :min="1"
+                :max="120"
+                :placeholder="t('products.form.estimatedPrepMinutesPlaceholder')"
+                class="app-input tw:w-full"
               />
             </div>
 
