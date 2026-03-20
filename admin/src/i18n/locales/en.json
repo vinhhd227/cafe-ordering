@@ -255,7 +255,54 @@
     "empty": "No orders in the selected period.",
     "export": "Export",
     "exportPng": "Download as PNG",
-    "exportPdf": "Download as PDF"
+    "exportPdf": "Download as PDF",
+    "tabs": {
+      "dateRange": "Date Range",
+      "monthly": "Monthly Comparison"
+    },
+    "monthly": {
+      "title": "Monthly Comparison",
+      "selectMonth": "Select month",
+      "currentMonth": "Current",
+      "prevMonth": "Previous",
+      "vs": "vs",
+      "noData": "No completed & paid orders in this month.",
+      "metrics": {
+        "revenue": "Revenue",
+        "orders": "Orders",
+        "items": "Items Sold",
+        "guests": "Guests",
+        "avgOrder": "Avg / Order",
+        "cash": "Cash",
+        "bank": "Bank Transfer"
+      },
+      "charts": {
+        "peakHours": "Peak Hours",
+        "peakHoursSubtitle": "Orders & revenue by hour of day",
+        "weekday": "By Day of Week",
+        "weekdaySubtitle": "Orders & revenue by weekday",
+        "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      },
+      "topProducts": {
+        "title": "Top Products by Revenue",
+        "subtitle": "Compared with previous month",
+        "rank": "#",
+        "product": "Product",
+        "qty": "Qty",
+        "revenue": "Revenue",
+        "change": "Change",
+        "new": "NEW"
+      },
+      "worstSellers": {
+        "title": "Least Sold",
+        "subtitle": "Bottom 5 products this month"
+      },
+      "takeaway": {
+        "title": "Takeaway vs Dine-in",
+        "takeaway": "Takeaway",
+        "dineIn": "Dine-in"
+      }
+    }
   },
   "orders": {
     "breadcrumb": "Orders",
@@ -419,7 +466,8 @@
         "iceLevel": "Ice level",
         "sugarLevel": "Sugar level",
         "serving": "Serving",
-        "addToCart": "Add to cart"
+        "addToCart": "Add to cart",
+        "prepTime": "~{min} min"
       }
     },
 

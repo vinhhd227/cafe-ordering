@@ -255,7 +255,54 @@
     "empty": "Không có đơn hàng trong khoảng thời gian này.",
     "export": "Xuất",
     "exportPng": "Tải ảnh PNG",
-    "exportPdf": "Tải file PDF"
+    "exportPdf": "Tải file PDF",
+    "tabs": {
+      "dateRange": "Theo ngày",
+      "monthly": "So sánh tháng"
+    },
+    "monthly": {
+      "title": "So sánh theo tháng",
+      "selectMonth": "Chọn tháng",
+      "currentMonth": "Tháng này",
+      "prevMonth": "Tháng trước",
+      "vs": "so với",
+      "noData": "Không có đơn hoàn thành & đã thanh toán trong tháng này.",
+      "metrics": {
+        "revenue": "Doanh thu",
+        "orders": "Số đơn",
+        "items": "Ly bán",
+        "guests": "Lượt khách",
+        "avgOrder": "TB / Đơn",
+        "cash": "Tiền mặt",
+        "bank": "Chuyển khoản"
+      },
+      "charts": {
+        "peakHours": "Giờ cao điểm",
+        "peakHoursSubtitle": "Số đơn & doanh thu theo giờ trong ngày",
+        "weekday": "Theo ngày trong tuần",
+        "weekdaySubtitle": "Số đơn & doanh thu theo thứ",
+        "weekdays": ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
+      },
+      "topProducts": {
+        "title": "Top sản phẩm theo doanh thu",
+        "subtitle": "So sánh với tháng trước",
+        "rank": "#",
+        "product": "Sản phẩm",
+        "qty": "SL",
+        "revenue": "Doanh thu",
+        "change": "Thay đổi",
+        "new": "MỚI"
+      },
+      "worstSellers": {
+        "title": "Bán ít nhất",
+        "subtitle": "5 sản phẩm bán ít nhất tháng này"
+      },
+      "takeaway": {
+        "title": "Takeaway vs Tại chỗ",
+        "takeaway": "Mang đi",
+        "dineIn": "Tại chỗ"
+      }
+    }
   },
   "orders": {
     "breadcrumb": "Đơn hàng",
@@ -419,7 +466,8 @@
         "iceLevel": "Mức đá",
         "sugarLevel": "Mức đường",
         "serving": "Phục vụ",
-        "addToCart": "Thêm vào giỏ"
+        "addToCart": "Thêm vào giỏ",
+        "prepTime": "~{min} phút"
       }
     },
 

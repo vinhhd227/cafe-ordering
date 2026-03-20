@@ -4,8 +4,12 @@ import { getOrdersSummary } from '@/services/report.service'
 import WidgetOrdersRevenue from '@/components/widgets/orders/WidgetOrdersRevenue.vue'
 import WidgetOrdersSummary from '@/components/widgets/orders/WidgetOrdersSummary.vue'
 import WidgetStat from '@/components/widgets/WidgetStat.vue'
+import MonthlyReport from './Monthly.vue'
 
 const { t } = useI18n()
+
+// ── Tab ────────────────────────────────────────────────────────────
+const activeTab = ref('range')
 
 // ── Helpers ────────────────────────────────────────────────────────
 const toMidnight = (d) => {
@@ -360,6 +364,34 @@ onMounted(load)
       <prime-menu ref="exportMenu" :model="exportMenuItems" popup />
     </page-header>
 
+    <!-- Tab switcher -->
+    <div class="tw:flex tw:gap-1 tw:self-start tw:bg-black/10 dark:tw:bg-white/5 tw:rounded-lg tw:p-0.5 tw:w-fit">
+      <button
+        class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
+        :class="activeTab === 'range'
+          ? 'tw:bg-white dark:tw:bg-white/15 tw:text-surface-900 dark:tw:text-white tw:shadow-sm'
+          : 'app-text-muted'"
+        @click="activeTab = 'range'"
+      >
+        {{ t('report.tabs.dateRange') }}
+      </button>
+      <button
+        class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
+        :class="activeTab === 'monthly'
+          ? 'tw:bg-white dark:tw:bg-white/15 tw:text-surface-900 dark:tw:text-white tw:shadow-sm'
+          : 'app-text-muted'"
+        @click="activeTab = 'monthly'"
+      >
+        {{ t('report.tabs.monthly') }}
+      </button>
+    </div>
+
+    <!-- Monthly comparison tab -->
+    <monthly-report v-if="activeTab === 'monthly'" />
+
+    <!-- Date range tab content -->
+    <template v-if="activeTab === 'range'">
+
     <!-- Date range filter -->
     <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-2">
       <prime-date-picker
@@ -369,6 +401,7 @@ onMounted(load)
         date-format="dd/mm/yy"
         show-button-bar
         class="app-input tw:w-55"
+        size="small"
       />
       <prime-button
         v-for="p in presets"
@@ -622,5 +655,7 @@ onMounted(load)
         <p class="tw:text-sm">{{ t('report.empty') }}</p>
       </div>
     </div>
+
+    </template> <!-- end range tab -->
   </section>
 </template>
