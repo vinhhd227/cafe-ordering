@@ -51,44 +51,29 @@ import CheckboxGroup from 'primevue/checkboxgroup';
 import Dialog from 'primevue/dialog';
 
 // Theme
-const coffeePreset = definePreset(Aura, {
+const emeraldPreset = definePreset(Aura, {
     semantic: {
         primary: {
-            50: '#f6ede6',
-            100: '#ecd8c9',
-            200: '#dec2a2',
-            300: '#cfa06b',
-            400: '#bd7b45',
-            500: '#af7341', // PRIMARY
-            600: '#9a6238',
-            700: '#7f512f',
-            800: '#654026',
-            900: '#4b301d',
-        },
-        surface: {
-            0: '#ffffff',
-            50: '#FAF7F2', // nền chính content
-            100: '#F2EDE6', // section xen kẽ
-            200: '#E6DED4', // border / divider
-        },
-        text: {
-            primary: '#2B1D14', // text chính
-            secondary: '#6B5A4D', // text phụ
-            muted: '#8B7A6C',
-            inverse: '#FAF7F2', // text trên nền tối
-        },
-        accent: {
-            500: '#E3A857', // vàng mật ong
+            50:  '#ecfdf5',
+            100: '#d1fae5',
+            200: '#a7f3d0',
+            300: '#6ee7b7',
+            400: '#34d399',
+            500: '#10b981',
+            600: '#059669',
+            700: '#047857',
+            800: '#065f46',
+            900: '#064e3b',
+            950: '#022c22',
         },
     },
-    //Your customizations, see the following sections for examples
 })
 export default {
     install(app) {
         app.use(ToastService)
         app.use(PrimeVue, {
             theme: {
-                preset: Aura,
+                preset: emeraldPreset,
                 options: {
                     darkModeSelector: '.app-dark',
                     cssLayer: false,

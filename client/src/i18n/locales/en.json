@@ -3,7 +3,18 @@
     "dashboard": "Dashboard",
     "orders": "Orders",
     "menu": "Menu",
-    "staff": "Staff"
+    "staff": "Staff",
+    "tables": "Select table"
+  },
+  "table": {
+    "selectTitle": "Choose your table",
+    "selectSubtitle": "Select a table to start ordering",
+    "available": "Available",
+    "occupied": "Occupied",
+    "inactive": "Inactive",
+    "loading": "Loading tables...",
+    "empty": "No tables available",
+    "order": "Order"
   },
   "common": {
     "save": "Save",
@@ -12,23 +23,85 @@
     "close": "Close",
     "loading": "Loading...",
     "search": "Search",
-    "export": "Export"
+    "export": "Export",
+    "refresh": "Refresh"
   },
   "auth": {
     "login": "Sign in",
     "logout": "Logout",
     "register": "Create an account",
     "email": "Email",
+    "phone": "Phone number",
     "password": "Password",
     "forgotPassword": "Forgot password?",
     "keepSignedIn": "Keep me signed in"
+  },
+  "login": {
+    "title": "Welcome back",
+    "subtitle": "Sign in to your account to continue ordering",
+    "phonePlaceholder": "0901 234 567",
+    "validation": {
+      "usernameRequired": "Phone number is required."
+    },
+    "rememberMe": "Keep me signed in",
+    "forgotPassword": "Forgot password?",
+    "submit": "Sign in",
+    "or": "or",
+    "continueAsGuest": "Continue without account",
+    "newUser": "New here?",
+    "register": "Create an account",
+    "toast": {
+      "successTitle": "Signed in!",
+      "successDetail": "Welcome back!",
+      "errorTitle": "Sign in failed",
+      "errorFallback": "Login failed. Please try again."
+    }
+  },
+  "register": {
+    "title": "Create account",
+    "subtitle": "Set up your profile and start ordering",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "Ava Nguyen",
+    "phonePlaceholder": "0901 234 567",
+    "passwordPlaceholder": "Create a strong password",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "agreePrefix": "I agree to the",
+    "agreePolicy": "data policy",
+    "submit": "Create account",
+    "alreadyHave": "Already have an account?",
+    "signIn": "Sign in",
+    "strength": "Strength: {label}",
+    "success": {
+      "title": "Account created!",
+      "welcome": "Welcome, @{username}",
+      "countdown": "Redirecting to sign in in {seconds}s…",
+      "signInNow": "Sign in now →"
+    },
+    "toast": {
+      "errorTitle": "Registration failed",
+      "errorFallback": "Register failed. Please try again."
+    },
+    "validation": {
+      "fullNameRequired": "Full name is required.",
+      "phoneRequired": "Phone number is required.",
+      "passwordRequired": "Password is required.",
+      "confirmPasswordRequired": "Please re-enter your password.",
+      "passwordsMismatch": "Passwords do not match.",
+      "agreeRequired": "You must accept the policy.",
+      "emailTaken": "Email is already taken."
+    }
   },
   "layout": {
     "brand": "Cafe Ordering",
     "adminPanel": "Admin Panel",
     "adminWorkspace": "Admin workspace",
     "greeting": "Good shift, team.",
-    "shiftLead": "Shift lead"
+    "shiftLead": "Shift lead",
+    "menuPanel": "Menu",
+    "workspace": "Order",
+    "orderGreeting": "Welcome!",
+    "guestLabel": "Guest"
   },
   "order": {
     "title": "Orders",
@@ -37,6 +110,92 @@
     "avgTicket": "Avg ticket",
     "liveQueue": "Live queue",
     "inPrep": "In prep",
-    "queued": "Queued"
+    "queued": "Queued",
+    "active": "Active",
+    "viewBill": "View bill",
+    "selectTable": "Select a table",
+    "todaysMenu": "Today's menu",
+    "itemCount": "{count} items",
+    "noCategoryItems": "No items in this category.",
+    "menuEmpty": "Menu is empty. Please check back later.",
+    "menuLoadError": "Failed to load menu. Please try again.",
+    "sessionError": "Could not connect to table. Please try again.",
+    "cart": "Cart",
+    "cartItems": "{count} item(s)",
+    "cartEmpty": "Your cart is empty. Pick something from the menu!",
+    "cartEmptyShort": "Your cart is empty.",
+    "subtotal": "Subtotal",
+    "discount": "Discount ({code})",
+    "serviceFee": "Service fee",
+    "free": "Free",
+    "total": "Total",
+    "placeOrder": "Place order",
+    "tableNotConnected": "Table not connected — cannot place order.",
+    "viewCart": "View cart",
+    "keepBrowsing": "Keep browsing",
+    "tableBill": "Table bill",
+    "pending": "Pending",
+    "grandTotal": "Grand total",
+    "noOrders": "No orders yet.",
+    "orderPlacedTitle": "Order placed!",
+    "orderPlaced": "Order number: {number}",
+    "orderError": "Failed to place order. Please try again.",
+    "billLoadError": "Failed to load bill. Please try again.",
+    "updateFailed": "Update failed.",
+    "removeItemConfirm": "Remove this item from the order?",
+    "percentOff": "{value}% off",
+    "buyXgetY": "Buy {buy} get {get}",
+    "defaultDescription": "Rich flavor, served fresh.",
+    "prepTime": "~{minutes} min"
+  },
+  "product": {
+    "optionsDialog": {
+      "quantity": "Quantity",
+      "temperature": "Temperature",
+      "iceLevel": "Ice level",
+      "sugarLevel": "Sugar level",
+      "serving": "Serving",
+      "addToCart": "Add to cart"
+    },
+    "temperature": {
+      "HOT": "Hot",
+      "COLD": "Cold"
+    },
+    "iceLevel": {
+      "LESS": "Less ice",
+      "NORMAL": "Normal ice",
+      "MORE": "More ice"
+    },
+    "sugarLevel": {
+      "LESS": "Less sugar",
+      "NORMAL": "Normal sugar",
+      "MORE": "More sugar"
+    },
+    "serving": {
+      "dineIn": "Dine-in",
+      "takeaway": "Takeaway"
+    }
+  },
+  "cart": {
+    "promo": {
+      "findPromotions": "Find promotions",
+      "browse": "Browse",
+      "placeholder": "Promo code",
+      "apply": "Apply",
+      "inactive": "Inactive",
+      "notStarted": "Not started yet",
+      "expired": "Expired",
+      "noUsesLeft": "No uses left",
+      "orderTooLow": "Order total too low",
+      "notApplicable": "Promo code is not applicable.",
+      "invalid": "Invalid promo code.",
+      "dialog": {
+        "title": "Available Promotions",
+        "loading": "Loading promotions...",
+        "empty": "No public promotions available",
+        "minAmount": "Min. order {amount}",
+        "until": "Until {date}"
+      }
+    }
   }
 }

@@ -3,7 +3,18 @@
     "dashboard": "Tổng quan",
     "orders": "Đơn hàng",
     "menu": "Thực đơn",
-    "staff": "Nhân viên"
+    "staff": "Nhân viên",
+    "tables": "Chọn bàn"
+  },
+  "table": {
+    "selectTitle": "Chọn bàn của bạn",
+    "selectSubtitle": "Chọn bàn để bắt đầu đặt món",
+    "available": "Trống",
+    "occupied": "Đang dùng",
+    "inactive": "Không hoạt động",
+    "loading": "Đang tải danh sách bàn...",
+    "empty": "Không có bàn nào khả dụng",
+    "order": "Đặt món"
   },
   "common": {
     "save": "Lưu",
@@ -12,23 +23,85 @@
     "close": "Đóng",
     "loading": "Đang tải...",
     "search": "Tìm kiếm",
-    "export": "Xuất"
+    "export": "Xuất",
+    "refresh": "Làm mới"
   },
   "auth": {
     "login": "Đăng nhập",
     "logout": "Đăng xuất",
     "register": "Tạo tài khoản",
     "email": "Email",
+    "phone": "Số điện thoại",
     "password": "Mật khẩu",
     "forgotPassword": "Quên mật khẩu?",
     "keepSignedIn": "Ghi nhớ đăng nhập"
+  },
+  "login": {
+    "title": "Chào mừng trở lại",
+    "subtitle": "Đăng nhập để tiếp tục đặt món",
+    "phonePlaceholder": "0901 234 567",
+    "validation": {
+      "usernameRequired": "Số điện thoại là bắt buộc."
+    },
+    "or": "hoặc",
+    "continueAsGuest": "Tiếp tục không cần tài khoản",
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "forgotPassword": "Quên mật khẩu?",
+    "submit": "Đăng nhập",
+    "newUser": "Chưa có tài khoản?",
+    "register": "Tạo tài khoản",
+    "toast": {
+      "successTitle": "Đăng nhập thành công!",
+      "successDetail": "Chào mừng bạn trở lại!",
+      "errorTitle": "Đăng nhập thất bại",
+      "errorFallback": "Đăng nhập thất bại. Vui lòng thử lại."
+    }
+  },
+  "register": {
+    "title": "Tạo tài khoản",
+    "subtitle": "Thiết lập hồ sơ và bắt đầu đặt món",
+    "fullName": "Họ và tên",
+    "fullNamePlaceholder": "Ava Nguyễn",
+    "phonePlaceholder": "0901 234 567",
+    "passwordPlaceholder": "Tạo mật khẩu mạnh",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "confirmPasswordPlaceholder": "Nhập lại mật khẩu",
+    "agreePrefix": "Tôi đồng ý với",
+    "agreePolicy": "chính sách dữ liệu",
+    "submit": "Tạo tài khoản",
+    "alreadyHave": "Đã có tài khoản?",
+    "signIn": "Đăng nhập",
+    "strength": "Độ mạnh: {label}",
+    "success": {
+      "title": "Tạo tài khoản thành công!",
+      "welcome": "Chào mừng, @{username}",
+      "countdown": "Chuyển đến đăng nhập sau {seconds}s…",
+      "signInNow": "Đăng nhập ngay →"
+    },
+    "toast": {
+      "errorTitle": "Tạo tài khoản thất bại",
+      "errorFallback": "Tạo tài khoản thất bại. Vui lòng thử lại."
+    },
+    "validation": {
+      "fullNameRequired": "Họ và tên là bắt buộc.",
+      "phoneRequired": "Số điện thoại là bắt buộc.",
+      "passwordRequired": "Mật khẩu là bắt buộc.",
+      "confirmPasswordRequired": "Vui lòng nhập lại mật khẩu.",
+      "passwordsMismatch": "Mật khẩu không khớp.",
+      "agreeRequired": "Bạn phải chấp nhận chính sách.",
+      "emailTaken": "Email đã được sử dụng."
+    }
   },
   "layout": {
     "brand": "Cafe Ordering",
     "adminPanel": "Quản trị",
     "adminWorkspace": "Khu vực quản trị",
     "greeting": "Ca làm tốt lành, team.",
-    "shiftLead": "Trưởng ca"
+    "shiftLead": "Trưởng ca",
+    "menuPanel": "Thực đơn",
+    "workspace": "Đặt món",
+    "orderGreeting": "Chào mừng bạn!",
+    "guestLabel": "Khách vãng lai"
   },
   "order": {
     "title": "Đơn hàng",
@@ -37,6 +110,92 @@
     "avgTicket": "Trung bình/đơn",
     "liveQueue": "Hàng đợi",
     "inPrep": "Đang pha",
-    "queued": "Chờ xử lý"
+    "queued": "Chờ xử lý",
+    "active": "Hoạt động",
+    "viewBill": "Xem bill",
+    "selectTable": "Chọn bàn",
+    "todaysMenu": "Thực đơn hôm nay",
+    "itemCount": "{count} món",
+    "noCategoryItems": "Không có món nào trong danh mục này.",
+    "menuEmpty": "Thực đơn trống. Vui lòng quay lại sau.",
+    "menuLoadError": "Không thể tải thực đơn. Vui lòng thử lại.",
+    "sessionError": "Không thể kết nối bàn. Vui lòng thử lại.",
+    "cart": "Giỏ hàng",
+    "cartItems": "{count} món",
+    "cartEmpty": "Giỏ hàng trống. Hãy chọn món từ thực đơn!",
+    "cartEmptyShort": "Giỏ hàng trống.",
+    "subtotal": "Tạm tính",
+    "discount": "Giảm giá ({code})",
+    "serviceFee": "Phí dịch vụ",
+    "free": "Miễn phí",
+    "total": "Tổng cộng",
+    "placeOrder": "Đặt món",
+    "tableNotConnected": "Chưa kết nối bàn — không thể đặt món.",
+    "viewCart": "Xem giỏ hàng",
+    "keepBrowsing": "Tiếp tục xem",
+    "tableBill": "Hóa đơn bàn",
+    "pending": "Chờ xử lý",
+    "grandTotal": "Tổng hóa đơn",
+    "noOrders": "Chưa có đơn hàng nào.",
+    "orderPlacedTitle": "Đặt món thành công!",
+    "orderPlaced": "Mã đơn: {number}",
+    "orderError": "Không thể đặt món. Vui lòng thử lại.",
+    "billLoadError": "Không thể tải hóa đơn. Vui lòng thử lại.",
+    "updateFailed": "Cập nhật thất bại.",
+    "removeItemConfirm": "Xóa món này khỏi đơn hàng?",
+    "percentOff": "Giảm {value}%",
+    "buyXgetY": "Mua {buy} tặng {get}",
+    "defaultDescription": "Hương vị đậm đà, phục vụ tươi mới.",
+    "prepTime": "~{minutes} phút"
+  },
+  "product": {
+    "optionsDialog": {
+      "quantity": "Số lượng",
+      "temperature": "Nhiệt độ",
+      "iceLevel": "Lượng đá",
+      "sugarLevel": "Độ ngọt",
+      "serving": "Phục vụ",
+      "addToCart": "Thêm vào giỏ"
+    },
+    "temperature": {
+      "HOT": "Nóng",
+      "COLD": "Lạnh"
+    },
+    "iceLevel": {
+      "LESS": "Ít",
+      "NORMAL": "Thường",
+      "MORE": "Nhiều"
+    },
+    "sugarLevel": {
+      "LESS": "Ít đường",
+      "NORMAL": "Đường bình thường",
+      "MORE": "Nhiều đường"
+    },
+    "serving": {
+      "dineIn": "Tại chỗ",
+      "takeaway": "Mang đi"
+    }
+  },
+  "cart": {
+    "promo": {
+      "findPromotions": "Tìm khuyến mãi",
+      "browse": "Xem",
+      "placeholder": "Mã khuyến mãi",
+      "apply": "Áp dụng",
+      "inactive": "Không hoạt động",
+      "notStarted": "Chưa bắt đầu",
+      "expired": "Đã hết hạn",
+      "noUsesLeft": "Đã hết lượt dùng",
+      "orderTooLow": "Đơn hàng chưa đủ điều kiện",
+      "notApplicable": "Mã khuyến mãi không áp dụng được.",
+      "invalid": "Mã khuyến mãi không hợp lệ.",
+      "dialog": {
+        "title": "Khuyến mãi hiện có",
+        "loading": "Đang tải...",
+        "empty": "Không có khuyến mãi nào",
+        "minAmount": "Đơn tối thiểu {amount}",
+        "until": "Hết hạn {date}"
+      }
+    }
   }
 }
