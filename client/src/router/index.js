@@ -21,18 +21,24 @@ const routes = [
     name: "forgotPassword",
     component: () => import("@/views/ForgotPassword.vue"),
   },
-  {
-    path: "/order/:tableId?",
-    name: "order",
-    component: () => import("@/views/Order.vue"),
-  },
+
   {
     path: "/",
     component: () => import("@/layout/Layout.vue"),
     children: [
       {
         path: "",
-        redirect: { name: "dashboard" },
+        redirect: { name: "tableSelect" },
+      },
+      {
+        path: "tables",
+        name: "tableSelect",
+        component: () => import("@/views/TableSelect.vue"),
+      },
+      {
+        path: "/order/:tableId?",
+        name: "order",
+        component: () => import("@/views/Order.vue"),
       },
       {
         path: "dashboard",

@@ -27,6 +27,8 @@ export const validatePromotion = (code, orderAmount) =>
     params: orderAmount != null ? { orderAmount } : undefined,
   })
 
+export const getPublicPromotions = () => api.get('/promotions/public')
+
 /**
  * Apply a promotion to an existing Pending order.
  * @param {number} orderId

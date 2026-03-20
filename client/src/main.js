@@ -1,18 +1,26 @@
 import '@/assets/styles/tailwind.css'
 import { registerPlugins } from '@/plugins'
 
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
+import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 
 const app = createApp(App)
+const pinia = createPinia()
 
-app.use(createPinia())
+app.use(pinia)
+registerPlugins(app)
 app.use(router)
 
-registerPlugins(app)
+const authStore = useAuthStore(pinia)
 
-app.mount('#app')
+;(async () => {
+  await authStore.hydrateFromRefresh()
+  const themeStore = useThemeStore(pinia)
+  themeStore.init()
+  app.mount('#app')
+})()

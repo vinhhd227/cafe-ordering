@@ -1,6 +1,19 @@
 @import "./fonts.css";
+@import "./app.css";
 @import "tailwindcss" prefix(tw);
 @import "tailwindcss-primeui";
+
+@custom-variant dark (&:where(.app-dark, .app-dark *));
+
+@utility max-w-8xl {
+  max-width: 88rem;
+}
+@utility max-w-9xl {
+  max-width: 96rem;
+}
+@utility max-w-10xl {
+  max-width: 112rem;
+}
 
 html {
     font-size: 14px;
