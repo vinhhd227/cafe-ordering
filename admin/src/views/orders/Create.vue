@@ -1491,151 +1491,205 @@ onMounted(async () => {
   <!-- ── Options Dialog ─────────────────────────────────────────── -->
   <prime-dialog
     v-model:visible="showOptionsDialog"
-    :header="selectedProduct?.name"
     modal
-    :style="{ width: '22rem' }"
+    :style="{ width: '52rem', maxWidth: '95vw' }"
+    :pt="{ content: { class: 'tw:p-0! tw:overflow-hidden' } }"
     @hide="selectedProduct = null"
   >
-    <div class="tw:space-y-5">
-      <!-- Quantity -->
-      <div>
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">
-          {{ t("orders.create.optionsDialog.quantity") }}
-        </p>
-        <div class="tw:flex tw:items-center tw:gap-3">
-          <button
-            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
-            style="border-color: var(--app-border)"
-            @click="pendingQuantity = Math.max(1, pendingQuantity - 1)"
-          >
-            <iconify icon="ph:minus-bold" class="tw:h-4 tw:w-4" />
-          </button>
-          <span class="tw:min-w-10 tw:text-center tw:text-xl tw:font-bold">{{
-            pendingQuantity
-          }}</span>
-          <button
-            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
-            style="border-color: var(--app-border)"
-            @click="pendingQuantity++"
-          >
-            <iconify icon="ph:plus-bold" class="tw:h-4 tw:w-4" />
-          </button>
-        </div>
-      </div>
-
-      <!-- Temperature -->
-      <div v-if="selectedProduct?.hasTemperatureOption">
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">
-          {{ t("orders.create.optionsDialog.temperature") }}
-        </p>
-        <div class="tw:flex tw:gap-2">
-          <prime-button
-            v-for="opt in temperatureOptions"
-            variant="outlined"
-            class="tw:w-full"
-            :severity="
-              pendingOptions.temperature === opt.value ? 'primary' : 'secondary'
-            "
-            @click="setTemperature(opt.value)"
-          >
-            <iconify :icon="opt.icon" />
-            <span>{{ opt.label }}</span>
-          </prime-button>
-        </div>
-      </div>
-
-      <!-- Ice level — only when Cold -->
+    <div class="tw:flex tw:min-h-[28rem] tw:flex-col tw:sm:flex-row">
+      <!-- LEFT: Product info -->
       <div
-        v-if="
-          selectedProduct?.hasIceLevelOption &&
-          pendingOptions.temperature !== DRINK_TEMPERATURE.HOT
-        "
+        class="tw:flex tw:flex-col tw:border-b tw:border-slate-200 tw:sm:w-5/12 tw:sm:border-b-0 tw:sm:border-r"
+        style="border-color: var(--app-border); background: var(--app-bg-subtle)"
       >
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">
-          {{ t("orders.create.optionsDialog.iceLevel") }}
-        </p>
-        <div class="tw:grid tw:grid-cols-2 tw:gap-2">
-          <prime-button
-            v-for="opt in iceLevelOptions"
-            :key="opt.value"
-            variant="outlined"
-            class="tw:w-full"
-            :severity="
-              pendingOptions.iceLevel === opt.value ? 'primary' : 'secondary'
-            "
-            @click="pendingOptions.iceLevel = opt.value"
+        <!-- Image -->
+        <div class="tw:relative tw:h-48 tw:flex-none tw:overflow-hidden tw:sm:h-56" style="background: var(--app-bg)">
+          <img
+            v-if="selectedProduct?.imageUrl"
+            :src="selectedProduct.imageUrl"
+            :alt="selectedProduct?.name"
+            class="tw:h-full tw:w-full tw:object-cover"
+          />
+          <div
+            v-else
+            class="tw:flex tw:h-full tw:w-full tw:items-center tw:justify-center"
           >
-            <iconify :icon="opt.icon" />
-            <span>{{ opt.label }}</span>
-          </prime-button>
+            <iconify icon="ph:coffee-bold" class="tw:text-6xl tw:text-emerald-400/20" />
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="tw:flex tw:flex-1 tw:flex-col tw:gap-2 tw:p-4">
+          <h3 class="tw:text-lg tw:font-bold tw:leading-snug">
+            {{ selectedProduct?.name }}
+          </h3>
+          <p class="tw:text-xl tw:font-semibold tw:text-emerald-500">
+            {{ selectedProduct ? formatVnd(selectedProduct.price) : '' }}
+          </p>
+          <p
+            v-if="selectedProduct?.description"
+            class="tw:text-sm tw:leading-relaxed app-text-muted"
+          >
+            {{ selectedProduct.description }}
+          </p>
+          <div
+            v-if="selectedProduct?.estimatedPrepMinutes"
+            class="tw:mt-auto tw:flex tw:items-center tw:gap-1 tw:pt-2 tw:text-xs app-text-muted"
+          >
+            <iconify icon="ph:clock-bold" class="tw:h-4 tw:w-4" />
+            <span>{{ t("orders.create.optionsDialog.prepTime", { min: selectedProduct.estimatedPrepMinutes }) }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Sugar level — only when Cold -->
-      <div
-        v-if="
-          selectedProduct?.hasSugarLevelOption &&
-          pendingOptions.temperature !== DRINK_TEMPERATURE.HOT
-        "
-      >
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">
-          {{ t("orders.create.optionsDialog.sugarLevel") }}
-        </p>
-        <div class="tw:grid tw:grid-cols-2 tw:gap-2">
-          <prime-button
-            v-for="opt in sugarLevelOptions"
-            :key="opt.value"
-            variant="outlined"
-            class="tw:w-full"
-            :severity="
-              pendingOptions.sugarLevel === opt.value ? 'primary' : 'secondary'
-            "
-            @click="pendingOptions.sugarLevel = opt.value"
-          >
-            <iconify v-if="opt.icon" :icon="opt.icon" />
-            <span>{{ opt.label }}</span>
-          </prime-button>
-        </div>
-      </div>
+      <!-- RIGHT: Options + actions -->
+      <div class="tw:flex tw:flex-1 tw:flex-col tw:p-5">
+        <div class="tw:flex-1 tw:space-y-5">
+          <!-- Quantity -->
+          <div>
+            <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+              {{ t("orders.create.optionsDialog.quantity") }}
+            </p>
+            <div class="tw:flex tw:items-center tw:gap-3">
+              <button
+                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
+                style="border-color: var(--app-border)"
+                @click="pendingQuantity = Math.max(1, pendingQuantity - 1)"
+              >
+                <iconify icon="ph:minus-bold" class="tw:h-4 tw:w-4" />
+              </button>
+              <span class="tw:min-w-10 tw:text-center tw:text-xl tw:font-bold">{{
+                pendingQuantity
+              }}</span>
+              <button
+                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
+                style="border-color: var(--app-border)"
+                @click="pendingQuantity++"
+              >
+                <iconify icon="ph:plus-bold" class="tw:h-4 tw:w-4" />
+              </button>
+            </div>
+          </div>
 
-      <!-- Serving -->
-      <div>
-        <p class="tw:mb-2 tw:text-sm tw:font-semibold">
-          {{ t("orders.create.optionsDialog.serving") }}
-        </p>
-        <div class="tw:flex tw:gap-2">
-          <prime-button
-            v-for="servingType in servingOptions"
-            variant="outlined"
-            class="tw:w-full"
-            :severity="
-              pendingOptions.isTakeaway === servingType.value
-                ? 'primary'
-                : 'secondary'
+          <!-- Temperature -->
+          <div v-if="selectedProduct?.hasTemperatureOption">
+            <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+              {{ t("orders.create.optionsDialog.temperature") }}
+            </p>
+            <div class="tw:flex tw:gap-2">
+              <prime-button
+                v-for="opt in temperatureOptions"
+                variant="outlined"
+                class="tw:w-full"
+                :severity="
+                  pendingOptions.temperature === opt.value ? 'primary' : 'secondary'
+                "
+                @click="setTemperature(opt.value)"
+              >
+                <iconify :icon="opt.icon" />
+                <span>{{ opt.label }}</span>
+              </prime-button>
+            </div>
+          </div>
+
+          <!-- Ice level — only when Cold -->
+          <div
+            v-if="
+              selectedProduct?.hasIceLevelOption &&
+              pendingOptions.temperature !== DRINK_TEMPERATURE.HOT
             "
-            @click="pendingOptions.isTakeaway = servingType.value"
           >
-            <iconify :icon="servingType.icon" />
-            <span>{{ servingType.label }}</span>
+            <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+              {{ t("orders.create.optionsDialog.iceLevel") }}
+            </p>
+            <div class="tw:grid tw:grid-cols-2 tw:gap-2">
+              <prime-button
+                v-for="opt in iceLevelOptions"
+                :key="opt.value"
+                variant="outlined"
+                class="tw:w-full"
+                :severity="
+                  pendingOptions.iceLevel === opt.value ? 'primary' : 'secondary'
+                "
+                @click="pendingOptions.iceLevel = opt.value"
+              >
+                <iconify :icon="opt.icon" />
+                <span>{{ opt.label }}</span>
+              </prime-button>
+            </div>
+          </div>
+
+          <!-- Sugar level — only when Cold -->
+          <div
+            v-if="
+              selectedProduct?.hasSugarLevelOption &&
+              pendingOptions.temperature !== DRINK_TEMPERATURE.HOT
+            "
+          >
+            <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+              {{ t("orders.create.optionsDialog.sugarLevel") }}
+            </p>
+            <div class="tw:grid tw:grid-cols-2 tw:gap-2">
+              <prime-button
+                v-for="opt in sugarLevelOptions"
+                :key="opt.value"
+                variant="outlined"
+                class="tw:w-full"
+                :severity="
+                  pendingOptions.sugarLevel === opt.value ? 'primary' : 'secondary'
+                "
+                @click="pendingOptions.sugarLevel = opt.value"
+              >
+                <iconify v-if="opt.icon" :icon="opt.icon" />
+                <span>{{ opt.label }}</span>
+              </prime-button>
+            </div>
+          </div>
+
+          <!-- Serving -->
+          <div>
+            <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+              {{ t("orders.create.optionsDialog.serving") }}
+            </p>
+            <div class="tw:flex tw:gap-2">
+              <prime-button
+                v-for="servingType in servingOptions"
+                variant="outlined"
+                class="tw:w-full"
+                :severity="
+                  pendingOptions.isTakeaway === servingType.value
+                    ? 'primary'
+                    : 'secondary'
+                "
+                @click="pendingOptions.isTakeaway = servingType.value"
+              >
+                <iconify :icon="servingType.icon" />
+                <span>{{ servingType.label }}</span>
+              </prime-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div
+          class="tw:mt-5 tw:flex tw:justify-end tw:gap-2 tw:border-t tw:pt-4"
+          style="border-color: var(--app-border)"
+        >
+          <prime-button
+            severity="secondary"
+            text
+            @click="showOptionsDialog = false"
+          >
+            <span>{{ t("orders.cancel") }}</span>
+          </prime-button>
+          <prime-button @click="confirmAddToCart">
+            <iconify icon="prime:shopping-cart" />
+            <span class="tw:ml-2">{{
+              t("orders.create.optionsDialog.addToCart")
+            }}</span>
           </prime-button>
         </div>
       </div>
     </div>
-
-    <template #footer>
-      <prime-button
-        severity="secondary"
-        text
-        @click="showOptionsDialog = false"
-      >
-        <span class="tw:ml-2">{{ t("orders.cancel") }}</span>
-      </prime-button>
-      <prime-button @click="confirmAddToCart">
-        <iconify icon="prime:shopping-cart" />
-        <span class="tw:ml-2">{{
-          t("orders.create.optionsDialog.addToCart")
-        }}</span>
-      </prime-button>
-    </template>
   </prime-dialog>
 </template>

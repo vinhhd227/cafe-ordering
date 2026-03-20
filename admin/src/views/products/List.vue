@@ -327,6 +327,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
             v-model="search"
             :placeholder="t('products.list.searchPlaceholder')"
             class="app-input tw:w-56"
+            size="small"
           />
 
           <!-- Filter toggle button -->
@@ -348,7 +349,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 
           <!-- Filter popover -->
           <prime-popover ref="filterPanel">
-            <div class="tw:flex tw:flex-col tw:gap-4 tw:w-full">
+            <div class="tw:flex tw:flex-col tw:gap-2 tw:w-full">
               <p class="tw:text-sm tw:font-semibold">{{ t('products.list.filterTitle') }}</p>
 
               <!-- Category -->
@@ -367,6 +368,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
                   :placeholder="t('products.list.allCategories')"
                   show-clear
                   class="app-input tw:w-full"
+                  size="small"
                 />
               </div>
 
@@ -386,6 +388,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
                   :placeholder="t('products.list.allStatuses')"
                   show-clear
                   class="app-input tw:w-full"
+                  size="small"
                 />
               </div>
 
@@ -403,6 +406,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
                     :min="0"
                     :use-grouping="true"
                     class="app-input tw:flex-1"
+                    size="small"
                   />
                   <span class="app-text-muted tw:text-sm">–</span>
                   <prime-input-number
@@ -412,6 +416,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
                     :min="0"
                     :use-grouping="true"
                     class="app-input tw:flex-1"
+                    size="small"
                   />
                 </div>
               </div>
@@ -423,6 +428,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
                 outlined
                 size="small"
                 @click="clearFilters"
+                class="tw:mt-1"
               >
                 <iconify icon="ph:x-bold" />
                 <span>{{ t('products.list.clearFilters') }}</span>

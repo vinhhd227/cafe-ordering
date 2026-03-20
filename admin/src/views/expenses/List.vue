@@ -625,6 +625,7 @@ const handleDelete = (expense) => {
       date-format="dd/mm/yy"
       show-button-bar
       class="app-input tw:w-55"
+      size="small"
     />
 
     <!-- P&L summary cards -->
