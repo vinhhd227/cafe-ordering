@@ -14,5 +14,6 @@ public record AdminMenuProductDto(
   bool HasTemperatureOption,
   bool HasIceLevelOption,
   bool HasSugarLevelOption,
-  bool IsAccompaniment
+  bool IsAccompaniment,
+  int? EstimatedPrepMinutes
 );

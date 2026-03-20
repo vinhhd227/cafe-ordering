@@ -9,5 +9,6 @@ public record MenuProductDto(
   bool HasTemperatureOption,
   bool HasIceLevelOption,
   bool HasSugarLevelOption,
-  bool IsAccompaniment
+  bool IsAccompaniment,
+  int? EstimatedPrepMinutes
 );

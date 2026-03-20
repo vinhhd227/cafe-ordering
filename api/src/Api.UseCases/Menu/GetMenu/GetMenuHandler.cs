@@ -46,7 +46,8 @@ public class GetMenuHandler(
             p.HasTemperatureOption,
             p.HasIceLevelOption,
             p.HasSugarLevelOption,
-            p.IsAccompaniment))
+            p.IsAccompaniment,
+            p.EstimatedPrepMinutes))
           .ToList()))
       .Where(c => c.Products.Count > 0)
       .ToList(); 

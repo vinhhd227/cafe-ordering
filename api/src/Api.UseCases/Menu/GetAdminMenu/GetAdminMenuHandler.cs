@@ -41,7 +41,8 @@ public class GetAdminMenuHandler(
             p.HasTemperatureOption,
             p.HasIceLevelOption,
             p.HasSugarLevelOption,
-            p.IsAccompaniment))
+            p.IsAccompaniment,
+            p.EstimatedPrepMinutes))
           .ToList()))
       .ToList();
 
