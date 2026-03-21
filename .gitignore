@@ -103,4 +103,5 @@ Thumbs.db
 
 # Local credential overrides — không bao giờ commit
 docker-compose.dev.override.yml
+docker-compose.prod.override.yml
 api/src/Api.Web/uploads/
