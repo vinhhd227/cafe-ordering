@@ -4,9 +4,9 @@ set -e
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 COMPOSE_CMD="docker compose -f docker-compose.prod.yml -f docker-compose.prod.override.yml"
 
-echo "==> Pulling latest code from origin/product..."
+echo "==> Pulling latest code from origin/main..."
 cd "$REPO_DIR"
-git pull origin product
+git pull origin main
 
 echo "==> Building and restarting services..."
 $COMPOSE_CMD up -d --build

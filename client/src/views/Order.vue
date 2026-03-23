@@ -43,6 +43,7 @@ const pendingOptions = ref({
   iceLevel: "NORMAL",
   sugarLevel: "NORMAL",
   isTakeaway: false,
+  note: "",
 });
 
 /* ─── Mobile cart sheet ─────────────────────────────────── */
@@ -164,6 +165,8 @@ const optionsLabel = (options) => {
   return parts.join(" · ");
 };
 
+const noteLabel = (options) => options?.note?.trim() || null;
+
 /* ─── Session ──────────────────────────────────────────── */
 const fetchSession = async () => {
   if (!tableId.value) {
@@ -236,6 +239,7 @@ const handleAddToCart = (product) => {
     iceLevel: "NORMAL",
     sugarLevel: "NORMAL",
     isTakeaway: false,
+    note: "",
   };
   pendingQuantity.value = 1;
   showOptionsDialog.value = true;
@@ -270,6 +274,7 @@ const submitOrder = async () => {
         iceLevel: item.options?.iceLevel ?? null,
         sugarLevel: item.options?.sugarLevel ?? null,
         isTakeaway: item.options?.isTakeaway ?? false,
+        note: item.options?.note?.trim() || null,
       })),
     };
     const result = await placeOrderApi(payload);
@@ -556,6 +561,9 @@ onMounted(async () => {
                 <p v-if="optionsLabel(item.options)" class="tw:mt-0.5 tw:text-xs tw:text-orange-400">
                   {{ optionsLabel(item.options) }}
                 </p>
+                <p v-if="noteLabel(item.options)" class="tw:mt-0.5 tw:text-xs app-text-muted tw:italic">
+                  {{ noteLabel(item.options) }}
+                </p>
               </div>
               <div class="tw:flex tw:shrink-0 tw:items-center tw:gap-2">
                 <prime-button class="p-button-sm p-button-rounded" @click="cartStore.removeItem(item)">
@@ -706,6 +714,9 @@ onMounted(async () => {
           <p class="tw:text-xs app-text-muted">{{ formatPrice(item.price) }} × {{ item.quantity }}</p>
           <p v-if="optionsLabel(item.options)" class="tw:mt-0.5 tw:text-xs tw:text-orange-400">
             {{ optionsLabel(item.options) }}
+          </p>
+          <p v-if="noteLabel(item.options)" class="tw:mt-0.5 tw:text-xs app-text-muted tw:italic">
+            {{ noteLabel(item.options) }}
           </p>
         </div>
         <div class="tw:flex tw:shrink-0 tw:items-center tw:gap-2">
@@ -860,26 +871,6 @@ onMounted(async () => {
       <!-- RIGHT: Options + actions -->
       <div class="tw:flex tw:flex-1 tw:flex-col tw:p-5">
         <div class="tw:flex-1 tw:space-y-5">
-          <!-- Quantity -->
-          <div>
-            <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t('product.optionsDialog.quantity') }}</p>
-            <div class="tw:flex tw:items-center tw:gap-3">
-              <button
-                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-white/15 app-text-muted tw:transition hover:tw:border-orange-400/50"
-                @click="pendingQuantity = Math.max(1, pendingQuantity - 1)"
-              >
-                <iconify icon="ph:minus-bold" class="tw:h-4 tw:w-4" />
-              </button>
-              <span class="tw:min-w-10 tw:text-center tw:text-xl tw:font-bold">{{ pendingQuantity }}</span>
-              <button
-                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-white/15 app-text-muted tw:transition hover:tw:border-orange-400/50"
-                @click="pendingQuantity++"
-              >
-                <iconify icon="ph:plus-bold" class="tw:h-4 tw:w-4" />
-              </button>
-            </div>
-          </div>
-
           <!-- Temperature -->
           <div v-if="selectedProduct?.hasTemperatureOption">
             <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t('product.optionsDialog.temperature') }}</p>
@@ -946,6 +937,7 @@ onMounted(async () => {
                 class="tw:w-full"
                 :severity="pendingOptions.sugarLevel === opt.value ? 'primary' : 'secondary'"
                 @click="pendingOptions.sugarLevel = opt.value"
+                size="small"
               >
                 <iconify :icon="opt.icon" />
                 <span>{{ opt.label }}</span>
@@ -974,15 +966,43 @@ onMounted(async () => {
               </prime-button>
             </div>
           </div>
-        </div>
 
-        <!-- Actions -->
-        <div class="tw:mt-5 tw:flex tw:justify-end tw:gap-2 tw:border-t tw:border-white/10 tw:pt-4">
-          <prime-button :label="t('common.cancel')" severity="secondary" text @click="showOptionsDialog = false" />
-          <prime-button @click="confirmAddToCart">
-            <iconify icon="prime:shopping-cart" />
-            <span class="tw:ml-2">{{ t('product.optionsDialog.addToCart') }}</span>
-          </prime-button>
+          <!-- Note -->
+          <div>
+            <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t('product.optionsDialog.note') }}</p>
+            <textarea
+              v-model="pendingOptions.note"
+              :placeholder="t('product.optionsDialog.notePlaceholder')"
+              rows="2"
+              class="tw:w-full tw:rounded-xl tw:border tw:border-white/15 tw:bg-white/5 tw:px-3 tw:py-2 tw:text-sm tw:resize-none tw:outline-none focus:tw:border-orange-400/50 placeholder:tw:text-white/30"
+            />
+          </div>
+
+          <!-- Quantity + Add -->
+          <div class="tw:border-t tw:border-white/10 tw:pt-4">
+            <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t('product.optionsDialog.quantity') }}</p>
+            <div class="tw:flex tw:items-center tw:justify-between tw:gap-3">
+            <div class="tw:flex tw:items-center tw:gap-3">
+              <button
+                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-white/15 app-text-muted tw:transition hover:tw:border-orange-400/50"
+                @click="pendingQuantity = Math.max(1, pendingQuantity - 1)"
+              >
+                <iconify icon="ph:minus-bold" class="tw:h-4 tw:w-4" />
+              </button>
+              <span class="tw:min-w-8 tw:text-center tw:text-xl tw:font-bold">{{ pendingQuantity }}</span>
+              <button
+                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-white/15 app-text-muted tw:transition hover:tw:border-orange-400/50"
+                @click="pendingQuantity++"
+              >
+                <iconify icon="ph:plus-bold" class="tw:h-4 tw:w-4" />
+              </button>
+            </div>
+            <prime-button @click="confirmAddToCart">
+              <iconify icon="prime:shopping-cart" />
+              <span class="tw:ml-2">{{ t('product.optionsDialog.addToCart') }}</span>
+            </prime-button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

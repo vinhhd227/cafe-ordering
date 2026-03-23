@@ -13,9 +13,15 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
-const navItems = [
-  { labelKey: 'nav.orders', icon: 'ph:receipt-bold', to: { name: 'order' } },
-]
+const navItems = computed(() => [
+  {
+    labelKey: 'nav.orders',
+    icon: 'ph:receipt-bold',
+    to: route.name === 'order' && route.params.tableId
+      ? { name: 'order', params: { tableId: route.params.tableId }, query: { code: route.query.code } }
+      : { name: 'order' },
+  },
+])
 
 const isActive = (to) => route.name === to.name
 
