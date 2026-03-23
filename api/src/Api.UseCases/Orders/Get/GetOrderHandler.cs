@@ -60,7 +60,8 @@ public class GetOrderHandler(
         i.IceLevel?.Name.ToUpperInvariant(),
         i.SugarLevel?.Name.ToUpperInvariant(),
         i.IsTakeaway,
-        i.IsFreeGift
+        i.IsFreeGift,
+        i.Note
       )).ToList(),
       order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList()
     );

@@ -6,7 +6,8 @@ public record EditOrderItemDto(
   string? Temperature,
   string? IceLevel,
   string? SugarLevel,
-  bool IsTakeaway);
+  bool IsTakeaway,
+  string? Note = null);
 
 public record EditOrderItemsCommand(
   int OrderId,

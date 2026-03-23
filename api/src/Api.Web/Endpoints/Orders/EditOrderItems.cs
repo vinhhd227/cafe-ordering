@@ -18,6 +18,7 @@ public sealed class EditOrderItemRequestDto
   public string? IceLevel { get; set; }
   public string? SugarLevel { get; set; }
   public bool IsTakeaway { get; set; }
+  public string? Note { get; set; }
 }
 
 public class EditOrderItems(IMediator mediator) : Endpoint<EditOrderItemsRequest>
@@ -37,7 +38,7 @@ public class EditOrderItems(IMediator mediator) : Endpoint<EditOrderItemsRequest
       req.Items.Select(i => new EditOrderItemDto(
         i.ProductId, i.Quantity,
         i.Temperature, i.IceLevel, i.SugarLevel,
-        i.IsTakeaway)).ToList(),
+        i.IsTakeaway, i.Note)).ToList(),
       req.GuestCount);
 
     var result = await mediator.Send(command, ct);

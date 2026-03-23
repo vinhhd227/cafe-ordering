@@ -24,6 +24,7 @@ public class OrderItem : BaseEntity
   public SugarLevel? SugarLevel { get; private set; }
   public bool IsTakeaway { get; private set; }
   public bool IsFreeGift { get; private set; }
+  public string? Note { get; private set; }
 
   // Calculated property
   public decimal TotalPrice => (UnitPrice - Discount) * Quantity;
@@ -34,7 +35,7 @@ public class OrderItem : BaseEntity
   internal static OrderItem Create(int orderId, int productId,
     string productName, decimal unitPrice, int quantity,
     DrinkTemperature? temperature = null, IceLevel? iceLevel = null, SugarLevel? sugarLevel = null,
-    bool isTakeaway = false, bool isFreeGift = false)
+    bool isTakeaway = false, bool isFreeGift = false, string? note = null)
   {
     return new OrderItem
     {
@@ -49,6 +50,7 @@ public class OrderItem : BaseEntity
       SugarLevel = sugarLevel,
       IsTakeaway = isTakeaway,
       IsFreeGift = isFreeGift,
+      Note = note,
     };
   }
 

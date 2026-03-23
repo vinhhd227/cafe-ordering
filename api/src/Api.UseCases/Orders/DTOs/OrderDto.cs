@@ -11,7 +11,8 @@ public record OrderItemDto(
   string? IceLevel,
   string? SugarLevel,
   bool IsTakeaway,
-  bool IsFreeGift
+  bool IsFreeGift,
+  string? Note
 );
 
 public record AppliedPromotionDto(

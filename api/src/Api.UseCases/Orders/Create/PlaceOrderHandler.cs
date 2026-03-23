@@ -47,7 +47,7 @@ public class PlaceOrderHandler(
         ? SugarLevel.FromName(NormalizeSugarLevel(item.SugarLevel), true) : null;
 
       order.AddItem(item.ProductId, item.ProductName, item.UnitPrice, item.Quantity,
-        temp, iceLevel, sugarLevel, item.IsTakeaway, item.IsFreeGift);
+        temp, iceLevel, sugarLevel, item.IsTakeaway, item.IsFreeGift, item.Note);
     }
 
     // Đăng ký OrderCreatedEvent sau khi items đã được thêm → SSE có đầy đủ data

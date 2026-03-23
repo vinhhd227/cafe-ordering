@@ -9,7 +9,8 @@ public record PlaceOrderItemDto(
   string? IceLevel = null,
   string? SugarLevel = null,
   bool IsTakeaway = false,
-  bool IsFreeGift = false);
+  bool IsFreeGift = false,
+  string? Note = null);
 
 public record PlaceOrderResponseDto(
   int OrderId,

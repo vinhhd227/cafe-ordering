@@ -14,6 +14,7 @@
     "inactive": "Không hoạt động",
     "loading": "Đang tải danh sách bàn...",
     "empty": "Không có bàn nào khả dụng",
+    "noZone": "Khu vực chung",
     "order": "Đặt món"
   },
   "common": {
@@ -155,7 +156,9 @@
       "iceLevel": "Lượng đá",
       "sugarLevel": "Độ ngọt",
       "serving": "Phục vụ",
-      "addToCart": "Thêm vào giỏ"
+      "addToCart": "Thêm vào giỏ",
+      "note": "Ghi chú",
+      "notePlaceholder": "Yêu cầu đặc biệt, vd: ít đường, không ống hút..."
     },
     "temperature": {
       "HOT": "Nóng",
@@ -167,9 +170,9 @@
       "MORE": "Nhiều"
     },
     "sugarLevel": {
-      "LESS": "Ít đường",
-      "NORMAL": "Đường bình thường",
-      "MORE": "Nhiều đường"
+      "LESS": "Ít",
+      "NORMAL": "Thường",
+      "MORE": "Nhiều"
     },
     "serving": {
       "dineIn": "Tại chỗ",

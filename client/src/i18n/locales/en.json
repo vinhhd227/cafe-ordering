@@ -14,6 +14,7 @@
     "inactive": "Inactive",
     "loading": "Loading tables...",
     "empty": "No tables available",
+    "noZone": "General",
     "order": "Order"
   },
   "common": {
@@ -155,7 +156,9 @@
       "iceLevel": "Ice level",
       "sugarLevel": "Sugar level",
       "serving": "Serving",
-      "addToCart": "Add to cart"
+      "addToCart": "Add to cart",
+      "note": "Note",
+      "notePlaceholder": "Special requests, e.g. less sweet, no straw..."
     },
     "temperature": {
       "HOT": "Hot",

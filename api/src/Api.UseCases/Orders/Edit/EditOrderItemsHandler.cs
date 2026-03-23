@@ -58,7 +58,7 @@ public class EditOrderItemsHandler(
         ? SugarLevel.FromName(item.SugarLevel.Trim().ToUpperInvariant(), true) : null;
 
       order.AddItem(item.ProductId, product.Name, product.Price, item.Quantity,
-        temp, iceLevel, sugarLevel, item.IsTakeaway, isFreeGift: false);
+        temp, iceLevel, sugarLevel, item.IsTakeaway, isFreeGift: false, item.Note);
     }
 
     // 7. Cập nhật số khách

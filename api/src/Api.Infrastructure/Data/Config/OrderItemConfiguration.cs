@@ -25,5 +25,8 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
       .HasConversion(
         v => v == null ? null : v.Name.ToUpperInvariant(),
         v => v == null ? null : SugarLevel.FromName(v, true));
+
+    builder.Property(i => i.Note)
+      .HasMaxLength(200);
   }
 }

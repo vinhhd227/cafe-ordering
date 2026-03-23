@@ -33,6 +33,7 @@ public sealed class CreateOrderItemRequest
 
   public bool IsTakeaway { get; set; }
   public bool IsFreeGift { get; set; }
+  public string? Note { get; set; }
 }
 
 public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrderResponseDto>
@@ -50,7 +51,7 @@ public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrde
     var items = req.Items
       .Select(i => new PlaceOrderItemDto(
         i.ProductId, i.ProductName, i.UnitPrice, i.Quantity,
-        i.Temperature, i.IceLevel, i.SugarLevel, i.IsTakeaway, i.IsFreeGift))
+        i.Temperature, i.IceLevel, i.SugarLevel, i.IsTakeaway, i.IsFreeGift, i.Note))
       .ToList();
 
     var result = await mediator.Send(new PlaceOrderCommand(req.SessionId, items, req.GuestCount), ct);

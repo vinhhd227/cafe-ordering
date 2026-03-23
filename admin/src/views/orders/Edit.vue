@@ -26,6 +26,7 @@ const pendingOptions = ref({
   iceLevel: null,
   sugarLevel: null,
   isTakeaway: false,
+  note: "",
 });
 
 // ── Cart ─────────────────────────────────────────────────────────
@@ -95,8 +96,9 @@ const makeCartKey = (productId, opts) => {
     iceLevel = "",
     sugarLevel = "",
     isTakeaway = false,
+    note = "",
   } = opts ?? {};
-  return `${productId}|${temperature}|${iceLevel}|${sugarLevel}|${isTakeaway}`;
+  return `${productId}|${temperature}|${iceLevel}|${sugarLevel}|${isTakeaway}|${note}`;
 };
 
 const optionsLabel = (item) => {
@@ -190,6 +192,7 @@ const handleAddToCart = (product) => {
     iceLevel: product.hasIceLevelOption ? ICE_LEVEL.NORMAL : null,
     sugarLevel: product.hasSugarLevelOption ? SUGAR_LEVEL.NORMAL : null,
     isTakeaway: false,
+    note: "",
   };
   pendingQuantity.value = 1;
   showOptionsDialog.value = true;
@@ -227,6 +230,7 @@ const confirmAddToCart = () => {
       iceLevel: pendingOptions.value.iceLevel,
       sugarLevel: pendingOptions.value.sugarLevel,
       isTakeaway: pendingOptions.value.isTakeaway,
+      note: pendingOptions.value.note?.trim() || null,
       isAccompaniment: selectedProduct.value.isAccompaniment ?? false,
       isFreeGift: false,
     });
@@ -250,6 +254,7 @@ const saveChanges = async () => {
         iceLevel: item.iceLevel ?? null,
         sugarLevel: item.sugarLevel ?? null,
         isTakeaway: item.isTakeaway ?? false,
+        note: item.note ?? null,
       })),
       guestCount.value != null
         ? Number(guestCount.value)
@@ -311,6 +316,7 @@ onMounted(async () => {
           iceLevel: i.iceLevel,
           sugarLevel: i.sugarLevel,
           isTakeaway: i.isTakeaway,
+          note: i.note ?? "",
         }),
         productId: i.productId,
         productName: i.productName,
@@ -320,6 +326,7 @@ onMounted(async () => {
         iceLevel: i.iceLevel ?? null,
         sugarLevel: i.sugarLevel ?? null,
         isTakeaway: i.isTakeaway ?? false,
+        note: i.note ?? null,
         isAccompaniment: false,
         isFreeGift: false,
       }));
@@ -532,6 +539,7 @@ onMounted(async () => {
                     v-if="item.isTakeaway"
                     class="tw:inline-block tw:mt-1 tw:text-xs tw:px-1.5 tw:py-0.5 tw:rounded tw:bg-sky-500/10 tw:text-sky-400"
                   >{{ t("orders.create.takeaway") }}</span>
+                  <p v-if="item.note" class="tw:text-xs tw:mt-1 tw:italic app-text-muted">{{ item.note }}</p>
                 </div>
                 <div class="tw:flex tw:items-center tw:gap-1 tw:shrink-0">
                   <prime-button
@@ -739,6 +747,18 @@ onMounted(async () => {
             <span>{{ servingType.label }}</span>
           </prime-button>
         </div>
+      </div>
+
+      <!-- Note -->
+      <div class="tw:mt-4">
+        <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t("orders.create.optionsDialog.note") }}</p>
+        <prime-textarea
+          v-model="pendingOptions.note"
+          :placeholder="t('orders.create.optionsDialog.notePlaceholder')"
+          rows="2"
+          class="tw:w-full"
+          auto-resize
+        />
       </div>
     </div>
 
