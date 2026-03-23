@@ -2,7 +2,7 @@
 set -e
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
-COMPOSE_CMD="docker compose -p cafe-prod -f docker-compose.prod.yml -f docker-compose.prod.override.yml"
+COMPOSE_CMD="docker compose -p cafe-prod --env-file .env.prod -f docker-compose.prod.yml"
 
 echo "==> Pulling latest code from origin/main..."
 cd "$REPO_DIR"

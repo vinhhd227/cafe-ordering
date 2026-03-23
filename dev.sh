@@ -2,7 +2,7 @@
 set -e
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
-COMPOSE_CMD="docker compose -p cafe-dev -f docker-compose.dev.yml -f docker-compose.dev.override.yml"
+COMPOSE_CMD="docker compose -p cafe-dev --env-file .env -f docker-compose.dev.yml"
 
 cd "$REPO_DIR"
 
