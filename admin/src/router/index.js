@@ -90,6 +90,22 @@ const routes = [
         ],
       },
       {
+        path: "zones",
+        meta: { requiresAuth: true, requiredClaim: "zone.read", section: "nav.groups.operations" },
+        children: [
+          {
+            path: "",
+            name: "zones",
+            component: () => import("@/views/zones/List.vue"),
+          },
+          {
+            path: ":id",
+            name: "zoneDetail",
+            component: () => import("@/views/zones/Detail.vue"),
+          },
+        ],
+      },
+      {
         path: "menu",
         name: "menu",
         component: () => import("@/views/Menu.vue"),

@@ -4,6 +4,7 @@
     "orders": "Đơn hàng",
     "expenses": "Chi phí",
     "tables": "Bàn",
+    "zones": "Khu vực",
     "menu": "Thực đơn",
     "products": "Sản phẩm",
     "categories": "Danh mục",
@@ -467,6 +468,8 @@
         "sugarLevel": "Mức đường",
         "serving": "Phục vụ",
         "addToCart": "Thêm vào giỏ",
+        "note": "Ghi chú",
+        "notePlaceholder": "Yêu cầu đặc biệt, vd: ít đường, không ống hút...",
         "prepTime": "~{min} phút"
       }
     },

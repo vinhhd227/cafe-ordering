@@ -63,6 +63,11 @@ public static class PermissionRegistry
 
       // Reports
       ["report.read"]        = "View reports and analytics",
+      // Zone
+      ["zone.create"]        = "Create zones",
+      ["zone.read"]          = "View zone list",
+      ["zone.update"]        = "Edit zone information",
+      ["zone.delete"]        = "Delete zones",
     };
 
   /// <summary>Returns the description for a permission value, or null if unknown.</summary>

@@ -14,6 +14,7 @@ import {
   markAvailable,
   closeSession,
 } from "@/services/table.service";
+import { listZones } from "@/services/zone.service";
 import QRCode from "qrcode";
 import { btnIcon } from "@/layout/ui";
 
@@ -27,9 +28,24 @@ const tables = ref([]);
 const rows = ref(20);
 const first = ref(0);
 
+// ── Zones ───────────────────────────────────────────────────────────
+const zones = ref([]);
+const loadZones = async () => {
+  try {
+    const res = await listZones();
+    zones.value = res.data ?? [];
+  } catch {
+    // non-critical, ignore
+  }
+};
+const zoneOptions = computed(() =>
+  zones.value.map((z) => ({ label: z.name, value: z.id }))
+);
+
 // ── Filters ────────────────────────────────────────────────────────
 const statusFilter = ref(null);
 const activeFilter = ref(null);
+const zoneFilter = ref(null);
 
 const statusOptions = [
   { label: "Available", value: "Available" },
@@ -59,6 +75,8 @@ const filtered = computed(() => {
     if (statusFilter.value !== null && t.status !== statusFilter.value)
       return false;
     if (activeFilter.value !== null && t.isActive !== activeFilter.value)
+      return false;
+    if (zoneFilter.value !== null && t.zoneId !== zoneFilter.value)
       return false;
     return true;
   });
@@ -129,11 +147,13 @@ const handleDelete = async (row) => {
 // ── Add table dialog ───────────────────────────────────────────────
 const showAddDialog = ref(false);
 const newCode = ref("");
+const newZoneId = ref(null);
 const addError = ref("");
 const addLoading = ref(false);
 
 const openAddDialog = () => {
   newCode.value = "";
+  newZoneId.value = null;
   addError.value = "";
   showAddDialog.value = true;
 };
@@ -146,7 +166,7 @@ const handleAddTable = async () => {
   addLoading.value = true;
   addError.value = "";
   try {
-    await createTable(newCode.value.trim());
+    await createTable(newCode.value.trim(), newZoneId.value);
     await load();
     showAddDialog.value = false;
     newCode.value = "";
@@ -164,12 +184,14 @@ const handleAddTable = async () => {
 const showEditDialog = ref(false);
 const editRow = ref(null);
 const editCode = ref("");
+const editZoneId = ref(null);
 const editError = ref("");
 const editLoading = ref(false);
 
 const openEditDialog = (row) => {
   editRow.value = row;
   editCode.value = row.code;
+  editZoneId.value = row.zoneId ?? null;
   editError.value = "";
   showEditDialog.value = true;
 };
@@ -184,6 +206,7 @@ const handleEditTable = async () => {
   try {
     await updateTable(editRow.value.id, {
       code: editCode.value.trim(),
+      zoneId: editZoneId.value,
     });
     await load();
     showEditDialog.value = false;
@@ -249,12 +272,14 @@ const activeFilterCount = computed(() => {
   let n = 0;
   if (statusFilter.value !== null) n++;
   if (activeFilter.value !== null) n++;
+  if (zoneFilter.value !== null) n++;
   return n;
 });
 
 const clearFilters = () => {
   statusFilter.value = null;
   activeFilter.value = null;
+  zoneFilter.value = null;
   first.value = 0;
 };
 
@@ -268,8 +293,10 @@ onMounted(() => {
     first.value = cached.first ?? 0;
     statusFilter.value = cached.statusFilter ?? null;
     activeFilter.value = cached.activeFilter ?? null;
+    zoneFilter.value = cached.zoneFilter ?? null;
   }
   load();
+  loadZones();
 });
 
 onBeforeRouteLeave(() => {
@@ -278,10 +305,11 @@ onBeforeRouteLeave(() => {
     first: first.value,
     statusFilter: statusFilter.value,
     activeFilter: activeFilter.value,
+    zoneFilter: zoneFilter.value,
   });
 });
 
-watch([statusFilter, activeFilter], () => {
+watch([statusFilter, activeFilter, zoneFilter], () => {
   first.value = 0;
 });
 
@@ -298,6 +326,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 
 const columns = [
   { field: 'code',            header: 'Code',    width: '8rem' },
+  { field: 'zoneName',        header: 'Zone',    width: '9rem' },
   { field: 'status',          header: 'Status',  width: '8rem' },
   { field: 'isActive',        header: 'Active',  width: '7rem' },
   { field: 'activeSessionId', header: 'Session', width: '8rem' },
@@ -331,6 +360,20 @@ const columns = [
         <p class="tw:text-[11px] app-text-subtle">
           Format tự do — ví dụ: F1-01 (tầng 1 bàn 1)
         </p>
+      </div>
+      <div class="tw:space-y-1.5">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          Zone <span class="app-text-subtle">(optional)</span>
+        </label>
+        <prime-select
+          v-model="newZoneId"
+          :options="zoneOptions"
+          option-label="label"
+          option-value="value"
+          placeholder="No zone"
+          show-clear
+          class="app-input tw:w-full"
+        />
       </div>
       <p v-if="addError" class="tw:text-xs tw:text-red-400">{{ addError }}</p>
     </div>
@@ -366,6 +409,20 @@ const columns = [
           placeholder="e.g. F1-01"
           class="app-input tw:w-full tw:font-mono"
           @keyup.enter="handleEditTable"
+        />
+      </div>
+      <div class="tw:space-y-1.5">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          Zone <span class="app-text-subtle">(optional)</span>
+        </label>
+        <prime-select
+          v-model="editZoneId"
+          :options="zoneOptions"
+          option-label="label"
+          option-value="value"
+          placeholder="No zone"
+          show-clear
+          class="app-input tw:w-full"
         />
       </div>
       <p v-if="editError" class="tw:text-xs tw:text-red-400">{{ editError }}</p>
@@ -536,6 +593,22 @@ const columns = [
                 />
               </div>
 
+              <div v-if="zoneOptions.length > 0" class="tw:space-y-1.5">
+                <label
+                  class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
+                  >Zone</label
+                >
+                <prime-select
+                  v-model="zoneFilter"
+                  :options="zoneOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="All zones"
+                  show-clear
+                  class="app-input tw:w-full"
+                />
+              </div>
+
               <prime-button
                 v-if="activeFilterCount > 0"
                 severity="danger"
@@ -553,6 +626,11 @@ const columns = [
 
       <template #col-code="{ data }">
         <span class="tw:font-mono tw:font-semibold tw:text-sm">{{ data.code }}</span>
+      </template>
+
+      <template #col-zoneName="{ data }">
+        <span v-if="data.zoneName" class="tw:text-sm">{{ data.zoneName }}</span>
+        <span v-else class="app-text-subtle">—</span>
       </template>
 
       <template #col-status="{ data }">

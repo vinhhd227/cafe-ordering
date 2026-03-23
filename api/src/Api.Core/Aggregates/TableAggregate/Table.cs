@@ -1,4 +1,5 @@
 using Api.Core.Aggregates.TableAggregate.Events;
+using Api.Core.Aggregates.ZoneAggregate;
 
 namespace Api.Core.Aggregates.TableAggregate;
 
@@ -10,17 +11,25 @@ public class Table : SoftDeletableEntity<int>, IAggregateRoot
   public bool IsActive { get; private set; } = true;
   public TableStatus Status { get; private set; } = TableStatus.Available;
   public Guid? ActiveSessionId { get; private set; }
+  public int? ZoneId { get; private set; }
+  public Zone? Zone { get; private set; }
 
-  public static Table Create(string code)
+  public static Table Create(string code, int? zoneId = null)
   {
     var table = new Table
     {
       Code     = Guard.Against.NullOrWhiteSpace(code),
       IsActive = true,
-      Status   = TableStatus.Available
+      Status   = TableStatus.Available,
+      ZoneId   = zoneId
     };
 
     return table;
+  }
+
+  public void AssignZone(int? zoneId)
+  {
+    ZoneId = zoneId;
   }
 
   public void UpdateCode(string code)

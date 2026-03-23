@@ -8,6 +8,7 @@ public sealed class UpdateTableRequest
 {
   public int TableId { get; set; }
   public string Code { get; set; } = string.Empty;
+  public int? ZoneId { get; set; }
 }
 
 public class UpdateTable(IMediator mediator) : Endpoint<UpdateTableRequest, TableDto>
@@ -22,7 +23,7 @@ public class UpdateTable(IMediator mediator) : Endpoint<UpdateTableRequest, Tabl
 
   public override async Task HandleAsync(UpdateTableRequest req, CancellationToken ct)
   {
-    var result = await mediator.Send(new UpdateTableCommand(req.TableId, req.Code), ct);
+    var result = await mediator.Send(new UpdateTableCommand(req.TableId, req.Code, req.ZoneId), ct);
     await this.SendResultAsync(result, ct);
   }
 }

@@ -1,0 +1,20 @@
+using Api.Core.Aggregates.ZoneAggregate;
+using Api.Core.Aggregates.ZoneAggregate.Specifications;
+
+namespace Api.UseCases.Zones.Deactivate;
+
+public class DeactivateZoneHandler(IRepositoryBase<Zone> repository)
+  : ICommandHandler<DeactivateZoneCommand, Result>
+{
+  public async ValueTask<Result> Handle(DeactivateZoneCommand request, CancellationToken ct)
+  {
+    var zone = await repository.FirstOrDefaultAsync(new ZoneByIdSpec(request.ZoneId), ct);
+    if (zone is null)
+      return Result.NotFound($"Zone {request.ZoneId} not found.");
+
+    zone.Deactivate();
+    await repository.UpdateAsync(zone, ct);
+
+    return Result.Success();
+  }
+}

@@ -13,7 +13,7 @@ public class ListPublicTablesHandler(IReadRepositoryBase<Table> repository)
     var tables = await repository.ListAsync(spec, ct);
 
     var dtos = tables
-      .Select(t => new PublicTableDto(t.Id, t.Code, t.Status.ToString()))
+      .Select(t => new PublicTableDto(t.Id, t.Code, t.Status.ToString(), t.ZoneId, t.Zone?.Name))
       .ToList();
 
     return Result.Success(dtos);

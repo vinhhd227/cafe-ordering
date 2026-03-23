@@ -37,6 +37,12 @@ export const navGroups = [
         requiredClaim: "table.read",
       },
       {
+        labelKey: "nav.zones",
+        icon: "ph:map-pin-bold",
+        to: { name: "zones" },
+        requiredClaim: "zone.read",
+      },
+      {
         labelKey: "nav.menu",
         icon: "ph:fork-knife-bold",
         to: { name: "menu" },

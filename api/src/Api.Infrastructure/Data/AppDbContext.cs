@@ -6,6 +6,7 @@ using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.ProductAggregate;
 using Api.Core.Aggregates.PromotionAggregate;
 using Api.Core.Aggregates.TableAggregate;
+using Api.Core.Aggregates.ZoneAggregate;
 
 namespace Api.Infrastructure.Data;
 
@@ -28,6 +29,7 @@ public class AppDbContext : DbContext
   public DbSet<Category> Categories => Set<Category>();
   public DbSet<Customer> Customers => Set<Customer>();
   public DbSet<Table> Tables => Set<Table>();
+  public DbSet<Zone> Zones => Set<Zone>();
   public DbSet<GuestSession> GuestSessions => Set<GuestSession>();
   public DbSet<Order> Orders => Set<Order>();
   public DbSet<OrderPromotion> OrderPromotions => Set<OrderPromotion>();

@@ -17,7 +17,9 @@ public class ListTablesHandler(IReadRepositoryBase<Table> repository)
       t.Code,
       t.IsActive,
       t.Status.ToString(),
-      t.ActiveSessionId
+      t.ActiveSessionId,
+      t.ZoneId,
+      t.Zone?.Name
     )).ToList();
 
     return Result.Success(dtos);

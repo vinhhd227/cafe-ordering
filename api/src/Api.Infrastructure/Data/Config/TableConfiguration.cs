@@ -1,4 +1,5 @@
 using Api.Core.Aggregates.TableAggregate;
+using Api.Core.Aggregates.ZoneAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -28,6 +29,13 @@ public class TableConfiguration : IEntityTypeConfiguration<Table>
 
     builder.HasIndex(t => t.Status)
       .HasDatabaseName("IX_Tables_Status");
+
+    // Zone (optional FK)
+    builder.HasOne<Zone>(t => t.Zone)
+      .WithMany()
+      .HasForeignKey(t => t.ZoneId)
+      .OnDelete(DeleteBehavior.SetNull)
+      .IsRequired(false);
 
     // Concurrency token
     builder.Property(t => t.RowVersion)

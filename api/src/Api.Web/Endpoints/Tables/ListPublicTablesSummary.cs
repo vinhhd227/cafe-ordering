@@ -11,8 +11,8 @@ public class ListPublicTablesSummary : Summary<ListPublicTables>
 
     ResponseExamples[200] = new List<PublicTableDto>
     {
-      new(1, "T01", "Available"),
-      new(2, "T02", "Occupied"),
+      new(1, "T01", "Available", 1, "Tầng 1"),
+      new(2, "T02", "Occupied",  null, null),
     };
 
     Response<List<PublicTableDto>>(200, "List of active tables with current status.");

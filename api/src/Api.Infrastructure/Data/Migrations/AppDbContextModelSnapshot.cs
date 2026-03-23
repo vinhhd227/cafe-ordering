@@ -407,6 +407,10 @@ namespace Api.Infrastructure.Data.Migrations
                     b.Property<bool>("IsTakeaway")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Note")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
@@ -744,6 +748,9 @@ namespace Api.Infrastructure.Data.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
 
+                    b.Property<int?>("ZoneId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
@@ -754,7 +761,66 @@ namespace Api.Infrastructure.Data.Migrations
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Tables_Status");
 
+                    b.HasIndex("ZoneId");
+
                     b.ToTable("Tables", "business");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ZoneAggregate.Zone", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Zones_Name")
+                        .HasFilter("\"IsDeleted\" = false");
+
+                    b.ToTable("Zones", "business");
                 });
 
             modelBuilder.Entity("Api.Core.Aggregates.GuestSessionAggregate.GuestSession", b =>
@@ -801,6 +867,16 @@ namespace Api.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.TableAggregate.Table", b =>
+                {
+                    b.HasOne("Api.Core.Aggregates.ZoneAggregate.Zone", "Zone")
+                        .WithMany()
+                        .HasForeignKey("ZoneId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Zone");
                 });
 
             modelBuilder.Entity("Api.Core.Aggregates.OrderAggregate.Order", b =>

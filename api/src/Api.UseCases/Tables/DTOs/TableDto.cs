@@ -5,5 +5,7 @@ public record TableDto(
   string Code,
   bool IsActive,
   string Status,
-  Guid? ActiveSessionId
+  Guid? ActiveSessionId,
+  int? ZoneId,
+  string? ZoneName
 );

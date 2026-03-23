@@ -20,6 +20,7 @@ public static class IdentitySeedData
       "product.create", "product.read", "product.update", "product.delete",
       "staff.create", "staff.read", "staff.update", "staff.deactivate",
       "table.create", "table.read", "table.update",
+      "zone.create", "zone.read", "zone.update", "zone.delete",
       "expense.read", "expense.create", "expense.update", "expense.delete",
       "promotion.create", "promotion.read", "promotion.update", "promotion.delete",
       "report.read"
@@ -30,6 +31,7 @@ public static class IdentitySeedData
       "order.read", "order.update",
       "product.read",
       "table.read", "table.update",
+      "zone.read",
       "expense.read", "expense.create", "expense.update",
     ],
     ["Customer"] =

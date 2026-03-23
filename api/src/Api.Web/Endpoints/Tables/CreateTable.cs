@@ -7,6 +7,7 @@ namespace Api.Web.Endpoints.Tables;
 public sealed class CreateTableRequest
 {
   public string Code { get; set; } = string.Empty;
+  public int? ZoneId { get; set; }
 }
 
 public class CreateTable(IMediator mediator) : Endpoint<CreateTableRequest, TableDto>
@@ -21,7 +22,7 @@ public class CreateTable(IMediator mediator) : Endpoint<CreateTableRequest, Tabl
 
   public override async Task HandleAsync(CreateTableRequest req, CancellationToken ct)
   {
-    var result = await mediator.Send(new CreateTableCommand(req.Code), ct);
+    var result = await mediator.Send(new CreateTableCommand(req.Code, req.ZoneId), ct);
     await this.SendResultAsync(result, ct);
   }
 }

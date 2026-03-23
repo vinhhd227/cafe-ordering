@@ -4,6 +4,7 @@
     "orders": "Orders",
     "expenses": "Expenses",
     "tables": "Tables",
+    "zones": "Zones",
     "menu": "Menu",
     "products": "Products",
     "categories": "Categories",
@@ -467,6 +468,8 @@
         "sugarLevel": "Sugar level",
         "serving": "Serving",
         "addToCart": "Add to cart",
+        "note": "Note",
+        "notePlaceholder": "Special requests, e.g. less sweet, no straw...",
         "prepTime": "~{min} min"
       }
     },
