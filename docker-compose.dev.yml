@@ -109,21 +109,6 @@ services:
     networks:
       - cafe-network
 
-  # Cloudflare Tunnel — exposes dev via demo.5-am-coffee.com
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: cafe-cloudflared-dev
-    restart: unless-stopped
-    command: tunnel --no-autoupdate --config /etc/cloudflared/config.dev.yml run
-    volumes:
-      - ~/.cloudflared:/etc/cloudflared:ro
-    depends_on:
-      - client
-      - admin
-      - api
-    networks:
-      - cafe-network
-
 # Shared resources
 volumes:
   cafe-db-data:

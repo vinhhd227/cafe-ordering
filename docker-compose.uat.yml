@@ -1,0 +1,117 @@
+services:
+  # Database
+  cafe-db:
+    image: postgres:16-alpine
+    container_name: cafe-db-uat
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      POSTGRES_DB: ${DB_NAME:-cafe_ordering_uat}
+    ports:
+      - "5434:5432"
+    volumes:
+      - cafe-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-admin} -d ${DB_NAME:-cafe_ordering_uat}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - cafe-network
+
+  # Backend API
+  api:
+    container_name: coffee-api-uat
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      cafe-db:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=cafe-db;Port=5432;Database=${DB_NAME:-cafe_ordering_uat};Username=${DB_USER:-admin};Password=${DB_PASSWORD}
+      - Jwt__Key=${JWT_KEY:?JWT_KEY is required}
+      - Jwt__ExpiresMinutes=15
+      - FileStorage__BasePath=/app/uploads
+      - FileStorage__BaseUrl=/uploads
+      - AdminAccount__Password=${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
+      - Cors__AllowedOrigins__0=https://demo.5-am-coffee.com
+      - Cors__AllowedOrigins__1=https://admin-demo.5-am-coffee.com
+    volumes:
+      - cafe-uploads:/app/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/api/health > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - cafe-network
+
+  # Nginx — serves uploaded static files from shared volume (internal only)
+  nginx-uploads:
+    image: nginx:alpine
+    container_name: cafe-nginx-uploads-uat
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - cafe-uploads:/data/uploads:ro
+    networks:
+      - cafe-network
+
+  # Frontend client app
+  client:
+    container_name: coffee-client-uat
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+      nginx-uploads:
+        condition: service_started
+    networks:
+      - cafe-network
+
+  # Admin panel
+  admin:
+    container_name: coffee-admin-uat
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+      nginx-uploads:
+        condition: service_started
+    networks:
+      - cafe-network
+
+  # Cloudflare Tunnel — exposes UAT via demo.5-am-coffee.com
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cafe-cloudflared-uat
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.uat.yml run
+    volumes:
+      - ~/.cloudflared:/etc/cloudflared:ro
+    depends_on:
+      - client
+      - admin
+      - api
+    networks:
+      - cafe-network
+
+volumes:
+  cafe-db-data:
+  cafe-uploads:
+
+networks:
+  cafe-network:
+    driver: bridge

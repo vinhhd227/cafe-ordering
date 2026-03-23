@@ -82,6 +82,7 @@ pnpm-lock.yaml.bak
 # Environment
 .env
 .env.prod
+.env.uat
 .env.local
 .env.*.local
 
