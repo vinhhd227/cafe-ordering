@@ -57,6 +57,7 @@ export default defineConfig({
     server: {
         host: true,
         port: parseInt(process.env.PORT || '5173'),
+        allowedHosts: ['admin-demo.5-am-coffee.com'],
         proxy: {
             '/api': {
                 target: 'http://localhost:5095',
