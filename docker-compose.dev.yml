@@ -1,6 +1,7 @@
 x-frontend-env: &frontend-env
   CHOKIDAR_USEPOLLING: "true"
-  VITE_API_BASE_URL: http://${HOST_IP:-localhost}:${API_PORT:-8080}/api
+  VITE_API_BASE_URL: /api
+  VITE_API_PROXY_TARGET: http://api:8080
 
 services:
   # Database service

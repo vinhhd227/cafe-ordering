@@ -35,11 +35,11 @@ export default defineConfig({
         allowedHosts: ['demo.5-am-coffee.com'],
         proxy: {
             '/api': {
-                target: 'http://localhost:5095',
+                target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:5095',
                 changeOrigin: true,
             },
             '/uploads': {
-                target: 'http://localhost:5095',
+                target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:5095',
                 changeOrigin: true,
             },
         },
