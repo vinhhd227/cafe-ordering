@@ -12,7 +12,7 @@ COPY tests/Api.FunctionalTests/Api.FunctionalTests.csproj tests/Api.FunctionalTe
 RUN dotnet restore api.sln
 
 COPY . .
-RUN dotnet publish src/Api.Web/Api.Web.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish src/Api.Web/Api.Web.csproj -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
