@@ -10,3 +10,5 @@ export const closeSession  = (sessionId)             => api.put(`/sessions/${ses
 
 export const getOrCreateSession = (tableId) =>
   api.get(`/tables/${tableId}/session`)
+
+export const regenerateQrToken = (id) => api.put(`/admin/tables/${id}/qr-token`, {})

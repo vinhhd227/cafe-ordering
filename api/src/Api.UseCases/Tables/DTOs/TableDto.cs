@@ -7,5 +7,6 @@ public record TableDto(
   string Status,
   Guid? ActiveSessionId,
   int? ZoneId,
-  string? ZoneName
+  string? ZoneName,
+  Guid QrToken
 );

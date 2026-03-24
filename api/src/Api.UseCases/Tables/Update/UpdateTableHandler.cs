@@ -35,6 +35,6 @@ public class UpdateTableHandler(
     table.AssignZone(request.ZoneId);
     await repository.UpdateAsync(table, ct);
 
-    return Result.Success(new TableDto(table.Id, table.Code, table.IsActive, table.Status.ToString(), table.ActiveSessionId, table.ZoneId, table.Zone?.Name));
+    return Result.Success(new TableDto(table.Id, table.Code, table.IsActive, table.Status.ToString(), table.ActiveSessionId, table.ZoneId, table.Zone?.Name, table.QrToken));
   }
 }

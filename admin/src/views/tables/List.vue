@@ -13,6 +13,7 @@ import {
   deleteTable,
   markAvailable,
   closeSession,
+  regenerateQrToken,
 } from "@/services/table.service";
 import { listZones } from "@/services/zone.service";
 import QRCode from "qrcode";
@@ -228,7 +229,7 @@ const qrUrl = ref("");
 
 const openQrDialog = async (row) => {
   qrRow.value = row;
-  qrUrl.value = `${import.meta.env.VITE_ORDERING_BASE_URL ?? ""}/table/${row.code}`;
+  qrUrl.value = `${import.meta.env.VITE_ORDERING_BASE_URL ?? ""}/order/${row.id}?token=${row.qrToken}`;
   showQrDialog.value = true;
   await nextTick();
   if (qrCanvas.value) {
@@ -246,6 +247,26 @@ const downloadQr = () => {
   link.download = `table-${qrRow.value.code}.png`;
   link.href = qrCanvas.value.toDataURL("image/png");
   link.click();
+};
+
+const regenerateLoading = ref(false);
+const regenerateError = ref("");
+
+const handleRegenerateQrToken = async () => {
+  regenerateLoading.value = true;
+  regenerateError.value = "";
+  try {
+    const res = await regenerateQrToken(qrRow.value.id);
+    const updated = res.data;
+    // Update the row in the tables list so re-opening uses the new token
+    const idx = tables.value.findIndex((t) => t.id === updated.id);
+    if (idx !== -1) tables.value[idx] = updated;
+    await openQrDialog(updated);
+  } catch (err) {
+    regenerateError.value = err?.response?.data?.title ?? "Failed to regenerate QR token.";
+  } finally {
+    regenerateLoading.value = false;
+  }
 };
 
 // ── Tag helpers ────────────────────────────────────────────────────
@@ -461,11 +482,24 @@ const columns = [
       >
         {{ qrUrl }}
       </p>
+      <p v-if="regenerateError" class="tw:text-xs tw:text-red-400 tw:text-center">
+        {{ regenerateError }}
+      </p>
     </div>
     <template #footer>
       <prime-button severity="secondary" outlined @click="showQrDialog = false"
         >Close</prime-button
       >
+      <prime-button
+        severity="warn"
+        outlined
+        :loading="regenerateLoading"
+        v-tooltip.top="'Tạo token mới — QR cũ sẽ không còn hoạt động'"
+        @click="handleRegenerateQrToken"
+      >
+        <iconify icon="ph:arrows-clockwise-bold" />
+        <span>Regenerate</span>
+      </prime-button>
       <prime-button severity="primary" @click="downloadQr">
         <iconify icon="ph:download-bold" />
         <span>Download PNG</span>

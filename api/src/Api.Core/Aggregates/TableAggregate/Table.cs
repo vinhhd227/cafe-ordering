@@ -13,6 +13,7 @@ public class Table : SoftDeletableEntity<int>, IAggregateRoot
   public Guid? ActiveSessionId { get; private set; }
   public int? ZoneId { get; private set; }
   public Zone? Zone { get; private set; }
+  public Guid QrToken { get; private set; } = Guid.NewGuid();
 
   public static Table Create(string code, int? zoneId = null)
   {
@@ -21,7 +22,8 @@ public class Table : SoftDeletableEntity<int>, IAggregateRoot
       Code     = Guard.Against.NullOrWhiteSpace(code),
       IsActive = true,
       Status   = TableStatus.Available,
-      ZoneId   = zoneId
+      ZoneId   = zoneId,
+      QrToken  = Guid.NewGuid()
     };
 
     return table;
@@ -67,5 +69,10 @@ public class Table : SoftDeletableEntity<int>, IAggregateRoot
   public void MarkAvailable()
   {
     Status = TableStatus.Available;
+  }
+
+  public void RegenerateQrToken()
+  {
+    QrToken = Guid.NewGuid();
   }
 }

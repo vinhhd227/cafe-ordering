@@ -30,6 +30,6 @@ public class CreateTableHandler(
     var table = Table.Create(request.Code, request.ZoneId);
     await repository.AddAsync(table, ct);
 
-    return Result.Success(new TableDto(table.Id, table.Code, table.IsActive, table.Status.ToString(), null, table.ZoneId, null));
+    return Result.Success(new TableDto(table.Id, table.Code, table.IsActive, table.Status.ToString(), null, table.ZoneId, null, table.QrToken));
   }
 }

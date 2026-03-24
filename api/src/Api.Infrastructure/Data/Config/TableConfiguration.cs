@@ -21,6 +21,10 @@ public class TableConfiguration : IEntityTypeConfiguration<Table>
 
     builder.Property(t => t.ActiveSessionId);
 
+    builder.Property(t => t.QrToken)
+      .IsRequired()
+      .HasDefaultValueSql("gen_random_uuid()");
+
     // Unique table code among non-deleted tables
     builder.HasIndex(t => t.Code)
       .IsUnique()

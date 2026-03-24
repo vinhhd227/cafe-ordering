@@ -19,7 +19,8 @@ public class ListTablesHandler(IReadRepositoryBase<Table> repository)
       t.Status.ToString(),
       t.ActiveSessionId,
       t.ZoneId,
-      t.Zone?.Name
+      t.Zone?.Name,
+      t.QrToken
     )).ToList();
 
     return Result.Success(dtos);
