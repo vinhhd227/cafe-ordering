@@ -1,7 +1,9 @@
 using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
 using Api.Core.Aggregates.OrderAggregate;
+using Api.Core.Aggregates.OrderAggregate.Specifications;
 using Api.UseCases.Orders.DTOs;
+using Microsoft.Extensions.Configuration;
 
 namespace Api.UseCases.Orders.Create;
 
@@ -10,7 +12,8 @@ namespace Api.UseCases.Orders.Create;
 /// </summary>
 public class PlaceOrderHandler(
   IRepositoryBase<Order> orderRepository,
-  IReadRepositoryBase<GuestSession> sessionRepository)
+  IReadRepositoryBase<GuestSession> sessionRepository,
+  IConfiguration configuration)
   : ICommandHandler<PlaceOrderCommand, Result<PlaceOrderResponseDto>>
 {
   public async ValueTask<Result<PlaceOrderResponseDto>> Handle(
@@ -26,17 +29,36 @@ public class PlaceOrderHandler(
     if (session.Status == GuestSessionStatus.Closed)
       return Result.Conflict("Cannot place order on a closed session.");
 
-    // 2. Validate items
+    // 2. Order cooldown — chống spam đặt hàng liên tục trong cùng session
+    var cooldownSeconds = configuration.GetValue<int>("OrderCooldown:Seconds", 30);
+    if (cooldownSeconds > 0)
+    {
+      var lastOrder = await orderRepository.FirstOrDefaultAsync(
+        new LatestOrderBySessionIdSpec(request.SessionId), ct);
+
+      if (lastOrder is not null)
+      {
+        var elapsed = DateTime.UtcNow - lastOrder.OrderDate;
+        if (elapsed.TotalSeconds < cooldownSeconds)
+        {
+          var remaining = (int)(cooldownSeconds - elapsed.TotalSeconds) + 1;
+          return Result.Invalid(new ValidationError("SessionId",
+            $"Vui lòng chờ {remaining} giây trước khi đặt thêm."));
+        }
+      }
+    }
+
+    // 3. Validate items
     if (request.Items is null || request.Items.Count == 0)
       return Result.Invalid(new ValidationError("Items", "Order must contain at least one item."));
 
-    // 3. Tạo order — chưa có items, save để EF sinh Id
+    // 4. Tạo order — chưa có items, save để EF sinh Id
     var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}";
     var order = Order.Create(request.SessionId, orderNumber, guestCount: request.GuestCount);
 
     await orderRepository.AddAsync(order, ct); // EF sinh order.Id sau bước này
 
-    // 4. Thêm items (dùng order.Id đã được sinh)
+    // 5. Thêm items (dùng order.Id đã được sinh)
     foreach (var item in request.Items)
     {
       DrinkTemperature? temp = item.Temperature is not null
@@ -50,7 +72,7 @@ public class PlaceOrderHandler(
         temp, iceLevel, sugarLevel, item.IsTakeaway, item.IsFreeGift, item.Note);
     }
 
-    // Đăng ký OrderCreatedEvent sau khi items đã được thêm → SSE có đầy đủ data
+    // 6. Đăng ký OrderCreatedEvent sau khi items đã được thêm → SSE có đầy đủ data
     order.NotifyCreated();
     await orderRepository.UpdateAsync(order, ct); // Lưu items + dispatch event
 

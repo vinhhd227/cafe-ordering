@@ -23,6 +23,9 @@ builder.Services.AddAuth(builder.Configuration);
 // CORS
 builder.Services.AddCorsPolicy(builder.Configuration);
 
+// Rate limiting
+builder.Services.AddOrderRateLimiting(builder.Configuration);
+
 // FastEndpoints + Swagger
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument(o =>

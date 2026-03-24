@@ -121,6 +121,7 @@
     "menuEmpty": "Menu is empty. Please check back later.",
     "menuLoadError": "Failed to load menu. Please try again.",
     "sessionError": "Could not connect to table. Please try again.",
+    "invalidQrCode": "Please scan the QR code on your table to start ordering.",
     "cart": "Cart",
     "cartItems": "{count} item(s)",
     "cartEmpty": "Your cart is empty. Pick something from the menu!",

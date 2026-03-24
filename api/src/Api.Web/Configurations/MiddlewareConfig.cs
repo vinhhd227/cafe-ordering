@@ -31,6 +31,7 @@ public static class MiddlewareConfig
         RequestPath  = "/uploads"
     });
 
+    app.UseRateLimiter();
     app.UseFastEndpoints();
 
     if (app.Environment.IsDevelopment())

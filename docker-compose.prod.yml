@@ -8,6 +8,8 @@ services:
       POSTGRES_USER: ${DB_USER:-admin}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       POSTGRES_DB: ${DB_NAME:-cafe_ordering_db}
+    ports:
+      - "5433:5432"
     volumes:
       - cafe-db-data:/var/lib/postgresql/data
     healthcheck:

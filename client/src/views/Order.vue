@@ -24,6 +24,7 @@ const route = useRoute();
 const router = useRouter();
 const tableId = computed(() => Number(route.params.tableId));
 const tableCode = ref(route.query.code || null);
+const qrToken = computed(() => route.query.token || null);
 
 /* ─── Menu ─────────────────────────────────────────────── */
 const menu = ref([]);
@@ -173,15 +174,23 @@ const fetchSession = async () => {
     router.replace({ name: 'tableSelect' });
     return;
   }
+  if (!qrToken.value) {
+    sessionError.value = t('order.invalidQrCode');
+    return;
+  }
   if (!tableCode.value) {
     const tables = await getPublicTables().catch(() => []);
     const found = tables.find(t => t.id === tableId.value);
     if (found) tableCode.value = found.code;
   }
   try {
-    session.value = await getOrCreateSession(tableId.value);
-  } catch {
-    sessionError.value = t('order.sessionError');
+    session.value = await getOrCreateSession(tableId.value, qrToken.value);
+  } catch (err) {
+    if (err?.response?.status === 403) {
+      sessionError.value = t('order.invalidQrCode');
+    } else {
+      sessionError.value = t('order.sessionError');
+    }
   }
 };
 

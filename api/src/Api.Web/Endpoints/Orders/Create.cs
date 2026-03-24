@@ -44,6 +44,7 @@ public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrde
     AllowAnonymous();
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
+    Options(x => x.RequireRateLimiting("OrdersPerIp"));
   }
 
   public override async Task HandleAsync(CreateOrderRequest req, CancellationToken ct)

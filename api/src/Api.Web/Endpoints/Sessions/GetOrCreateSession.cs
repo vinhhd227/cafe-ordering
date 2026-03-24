@@ -8,6 +8,9 @@ public sealed class GetOrCreateSessionRequest
 {
   /// <summary>The integer ID of the table.</summary>
   public int TableId { get; set; }
+
+  /// <summary>QR token for the table (from query string). Required when QrEnforcementEnabled=true.</summary>
+  public string? Token { get; set; }
 }
 
 public class GetOrCreateSession(IMediator mediator) : Endpoint<GetOrCreateSessionRequest, SessionContextDto>
@@ -22,7 +25,7 @@ public class GetOrCreateSession(IMediator mediator) : Endpoint<GetOrCreateSessio
 
   public override async Task HandleAsync(GetOrCreateSessionRequest req, CancellationToken ct)
   {
-    var result = await mediator.Send(new GetOrCreateSessionCommand(req.TableId), ct);
+    var result = await mediator.Send(new GetOrCreateSessionCommand(req.TableId, req.Token), ct);
     await this.SendResultAsync(result, ct);
   }
 }

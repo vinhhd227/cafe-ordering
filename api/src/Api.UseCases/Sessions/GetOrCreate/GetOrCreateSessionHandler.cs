@@ -3,12 +3,14 @@ using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
 using Api.Core.Aggregates.TableAggregate;
 using Api.Core.Aggregates.TableAggregate.Specifications;
 using Api.UseCases.Sessions.DTOs;
+using Microsoft.Extensions.Configuration;
 
 namespace Api.UseCases.Sessions.GetOrCreate;
 
 public class GetOrCreateSessionHandler(
   IRepositoryBase<Table> tableRepository,
-  IRepositoryBase<GuestSession> sessionRepository)
+  IRepositoryBase<GuestSession> sessionRepository,
+  IConfiguration configuration)
   : ICommandHandler<GetOrCreateSessionCommand, Result<SessionContextDto>>
 {
   public async ValueTask<Result<SessionContextDto>> Handle(
@@ -22,6 +24,14 @@ public class GetOrCreateSessionHandler(
 
     if (!table.IsActive)
       return Result.Error($"Table {request.TableId} is inactive.");
+
+    var enforce = configuration.GetValue<bool>("QrEnforcementEnabled");
+    if (enforce &&
+        (string.IsNullOrWhiteSpace(request.Token) ||
+         !string.Equals(request.Token, table.QrToken.ToString(), StringComparison.OrdinalIgnoreCase)))
+    {
+      return Result.Forbidden();
+    }
 
     // Return existing active session if one exists
     var activeSessionSpec = new ActiveSessionByTableIdSpec(request.TableId);

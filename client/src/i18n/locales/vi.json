@@ -121,6 +121,7 @@
     "menuEmpty": "Thực đơn trống. Vui lòng quay lại sau.",
     "menuLoadError": "Không thể tải thực đơn. Vui lòng thử lại.",
     "sessionError": "Không thể kết nối bàn. Vui lòng thử lại.",
+    "invalidQrCode": "Vui lòng quét mã QR trên bàn của bạn để bắt đầu đặt món.",
     "cart": "Giỏ hàng",
     "cartItems": "{count} món",
     "cartEmpty": "Giỏ hàng trống. Hãy chọn món từ thực đơn!",
