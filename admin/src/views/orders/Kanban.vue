@@ -180,6 +180,8 @@ const NEXT_LABEL = computed(() => ({
   [ORDER_STATUS.PROCESSING]: t("orders.kanban.markComplete"),
 }));
 
+const activeTab = ref(ORDER_STATUS.PENDING);
+
 const ordersByStatus = computed(() => {
   const map = {};
   for (const s of STATUSES) map[s.key] = [];
@@ -650,8 +652,24 @@ onUnmounted(() => {
       </template>
     </page-header>
 
-    <!-- Summary stats -->
-    <div :class="['tw:grid tw:gap-3', wColsClass]">
+    <!-- Mobile compact stats (replaces widgets on mobile) -->
+    <div class="tw:flex tw:md:hidden tw:items-center tw:gap-3 tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:px-4 tw:py-3">
+      <div class="tw:shrink-0">
+        <span class="tw:text-xl tw:font-bold">{{ summary.total }}</span>
+        <span class="app-text-muted tw:text-xs tw:ml-1.5">{{ t('orders.breadcrumb').toLowerCase() }}</span>
+      </div>
+      <div class="tw:h-4 tw:w-px tw:bg-white/10 tw:shrink-0" />
+      <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
+        <span v-if="summary.pending > 0"    class="tw:text-amber-400  tw:text-xs tw:font-medium">{{ summary.pending }}  {{ t('orders.status.PENDING').toLowerCase() }}</span>
+        <span v-if="summary.processing > 0" class="tw:text-blue-400   tw:text-xs tw:font-medium">{{ summary.processing }} {{ t('orders.status.PROCESSING').toLowerCase() }}</span>
+        <span v-if="summary.completed > 0"  class="tw:text-emerald-400 tw:text-xs tw:font-medium">{{ summary.completed }} {{ t('orders.status.COMPLETED').toLowerCase() }}</span>
+        <span v-if="summary.cancelled > 0"  class="tw:text-red-400    tw:text-xs tw:font-medium">{{ summary.cancelled }} {{ t('orders.status.CANCELLED').toLowerCase() }}</span>
+      </div>
+      <span class="tw:ml-auto tw:font-semibold tw:text-sm tw:shrink-0">{{ formatVnd(summary.revenue) }}</span>
+    </div>
+
+    <!-- Summary stats (desktop only) -->
+    <div :class="['tw:hidden tw:md:grid tw:gap-3', wColsClass]">
       <widget-orders-summary
         v-if="wVisible('summary')"
         :total="summary.total"
@@ -679,6 +697,30 @@ onUnmounted(() => {
       >{{ errorMessage }}</prime-message
     >
 
+    <!-- Mobile tab strip -->
+    <div class="tw:md:hidden tw:flex tw:gap-1.5 tw:overflow-x-auto tw:pb-0.5" style="scrollbar-width:none">
+      <button
+        v-for="col in STATUSES"
+        :key="col.key"
+        @click="activeTab = col.key"
+        :class="[
+          'tw:flex tw:items-center tw:gap-1.5 tw:rounded-full tw:px-3 tw:py-1.5 tw:text-xs tw:font-semibold tw:whitespace-nowrap tw:shrink-0 tw:border tw:transition-colors tw:cursor-pointer tw:bg-transparent',
+          activeTab === col.key ? col.bg + ' ' + col.color : 'tw:border-white/15 app-text-muted'
+        ]"
+      >
+        <span
+          class="tw:inline-block tw:h-1.5 tw:w-1.5 tw:rounded-full tw:shrink-0"
+          :class="activeTab === col.key ? col.dot : 'tw:bg-white/25'"
+        />
+        {{ t(`orders.status.${col.key}`) }}
+        <span
+          v-if="ordersByStatus[col.key].length > 0"
+          class="tw:rounded-full tw:px-1.5 tw:text-[10px] tw:font-bold"
+          :class="activeTab === col.key ? 'tw:bg-white/20' : 'tw:bg-white/10'"
+        >{{ ordersByStatus[col.key].length }}</span>
+      </button>
+    </div>
+
     <!-- Kanban board -->
     <div
       class="tw:grid tw:grid-cols-1 tw:gap-4 tw:md:grid-cols-2 tw:xl:grid-cols-4"
@@ -686,7 +728,7 @@ onUnmounted(() => {
       <div
         v-for="col in STATUSES"
         :key="col.key"
-        class="tw:flex tw:flex-col tw:gap-3"
+        :class="['tw:flex tw:flex-col tw:gap-3', col.key !== activeTab ? 'tw:hidden tw:md:flex' : '']"
       >
         <!-- Column header -->
         <div
@@ -846,7 +888,8 @@ onUnmounted(() => {
                     severity="danger"
                     size="small"
                     outlined
-                    :class="NEXT_STATUS[col.key] ? 'tw:w-1/4' : 'tw:flex-1'"
+                    :class="NEXT_STATUS[col.key] ? btnIcon : 'tw:flex-1'"
+                    v-tooltip.top="NEXT_STATUS[col.key] ? t('orders.cancel') : ''"
                     :loading="updatingId === order.id"
                     @click="
                       (e) =>
@@ -872,7 +915,7 @@ onUnmounted(() => {
                     "
                   >
                     <iconify icon="ph:x-circle" />
-                    <span>{{ t("orders.cancel") }}</span>
+                    <span v-if="!NEXT_STATUS[col.key]">{{ t("orders.cancel") }}</span>
                   </prime-button>
                 </div>
                 <prime-button
