@@ -228,13 +228,7 @@
       "avgDrinks": "TB ly / ngày",
       "avgDrinksSubtitle": "Trung bình ly bán mỗi ngày",
       "avgRevPerDay": "Doanh thu / ngày",
-      "avgRevPerDaySubtitle": "Doanh thu trung bình mỗi ngày"
-    },
-    "itemsChart": {
-      "title": "Ly bán theo ngày",
-      "label": "Ly"
-    },
-    "widgets": {
+      "avgRevPerDaySubtitle": "Doanh thu trung bình mỗi ngày",
       "avgPerDay": {
         "title": "TB / ngày",
         "rev": "Doanh thu",
@@ -242,6 +236,10 @@
         "orders": "Đơn hàng",
         "guests": "Lượt khách"
       }
+    },
+    "itemsChart": {
+      "title": "Ly bán theo ngày",
+      "label": "Ly"
     },
     "topProducts": {
       "title": "Sản phẩm bán chạy",
@@ -258,7 +256,8 @@
     "exportPng": "Tải ảnh PNG",
     "exportPdf": "Tải file PDF",
     "tabs": {
-      "dateRange": "Theo ngày",
+      "day": "Theo ngày",
+      "dateRange": "Khoảng thời gian",
       "monthly": "So sánh tháng"
     },
     "monthly": {
@@ -802,6 +801,117 @@
         "loadFailed":   "Không thể tải danh mục.",
         "updateFailed": "Không thể cập nhật danh mục."
       }
+    }
+  },
+
+  "tables": {
+    "breadcrumb": "Bàn",
+    "title": "Bàn",
+    "subtitle": "Quản lý bàn, phiên đặt món và tình trạng sẵn sàng.",
+    "groupLabel": "Vận hành",
+    "addTable": "Thêm bàn",
+
+    "status": {
+      "Available": "Trống",
+      "Occupied":  "Đang dùng",
+      "Cleaning":  "Đang dọn"
+    },
+    "activeStatus": {
+      "active":   "Hoạt động",
+      "inactive": "Không hoạt động"
+    },
+
+    "widgets": {
+      "total":     { "label": "Tổng",      "description": "Tổng số bàn có trong nhà hàng." },
+      "available": { "label": "Trống",     "description": "Bàn trống, sẵn sàng đón khách mới." },
+      "occupied":  { "label": "Đang dùng", "description": "Bàn đang có khách, đang trong phiên đặt món." },
+      "cleaning":  { "label": "Đang dọn",  "description": "Bàn đang dọn dẹp sau khi khách rời đi." }
+    },
+
+    "columns": {
+      "code":    "Mã bàn",
+      "zone":    "Khu vực",
+      "status":  "Trạng thái",
+      "active":  "Hoạt động",
+      "session": "Phiên",
+      "actions": "Thao tác"
+    },
+
+    "filter": {
+      "title":       "Lọc bàn",
+      "status":      "Trạng thái",
+      "allStatuses": "Tất cả trạng thái",
+      "active":      "Hoạt động",
+      "allActive":   "Tất cả",
+      "zone":        "Khu vực",
+      "allZones":    "Tất cả khu vực",
+      "clearFilters":   "Xoá bộ lọc",
+      "filtersTooltip": "Bộ lọc"
+    },
+
+    "form": {
+      "tableCode":            "Mã bàn",
+      "tableCodePlaceholder": "VD: F1-01, BM-02",
+      "tableCodeEditPlaceholder": "VD: F1-01",
+      "tableCodeHint":        "Định dạng tự do — VD: F1-01 (tầng 1 bàn 1)",
+      "zone":                 "Khu vực",
+      "optional":             "(tùy chọn)",
+      "noZone":               "Không có khu vực"
+    },
+
+    "add": {
+      "title":  "Thêm bàn",
+      "submit": "Thêm bàn"
+    },
+
+    "edit": {
+      "title":  "Sửa bàn",
+      "submit": "Lưu thay đổi"
+    },
+
+    "qr": {
+      "customizeTooltip":  "Tuỳ chỉnh kiểu dáng",
+      "regenerateTooltip": "Tạo token mới — QR cũ sẽ không còn hoạt động",
+      "regenerate":        "Tạo lại",
+      "downloadPng":       "Tải PNG",
+      "customizer": {
+        "headerColor":  "Màu tiêu đề",
+        "reset":        "đặt lại",
+        "pattern":      "Kiểu ô",
+        "markerBorder": "Viền mã góc",
+        "markerCenter": "Tâm mã góc",
+        "precision":    "Độ chính xác"
+      }
+    },
+
+    "actions": {
+      "closeSession":          "Đóng phiên",
+      "markAvailable":         "Đánh dấu trống",
+      "edit":                  "Sửa",
+      "showQr":                "Xem mã QR",
+      "activate":              "Kích hoạt",
+      "deactivate":            "Vô hiệu hóa",
+      "delete":                "Xóa",
+      "closeSessionTooltip":   "Đóng phiên",
+      "markAvailableTooltip":  "Đánh dấu trống",
+      "editTooltip":           "Sửa bàn",
+      "showQrTooltip":         "Xem mã QR",
+      "deleteTooltip":         "Xóa bàn"
+    },
+
+    "validation": {
+      "codeRequired": "Vui lòng nhập mã bàn."
+    },
+
+    "error": {
+      "loadFailed":          "Không thể tải danh sách bàn.",
+      "updateFailed":        "Không thể cập nhật bàn {code}.",
+      "markAvailableFailed": "Không thể đánh dấu bàn {code} là trống.",
+      "closeSessionFailed":  "Không thể đóng phiên trên bàn {code}.",
+      "deleteFailed":        "Không thể xóa bàn {code}.",
+      "createFailed":        "Không thể tạo bàn. Mã có thể đã tồn tại.",
+      "editFailed":          "Không thể cập nhật bàn. Mã có thể đã tồn tại.",
+      "regenerateQrFailed":  "Không thể tạo lại mã QR."
     }
   }
 }

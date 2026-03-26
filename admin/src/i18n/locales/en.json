@@ -228,13 +228,7 @@
       "avgDrinks": "Avg drinks / day",
       "avgDrinksSubtitle": "Average drinks sold per day",
       "avgRevPerDay": "Avg rev / day",
-      "avgRevPerDaySubtitle": "Average daily revenue"
-    },
-    "itemsChart": {
-      "title": "Drinks sold per day",
-      "label": "Drinks"
-    },
-    "widgets": {
+      "avgRevPerDaySubtitle": "Average daily revenue",
       "avgPerDay": {
         "title": "Avg / day",
         "rev": "Revenue",
@@ -242,6 +236,10 @@
         "orders": "Orders",
         "guests": "Guests"
       }
+    },
+    "itemsChart": {
+      "title": "Drinks sold per day",
+      "label": "Drinks"
     },
     "topProducts": {
       "title": "Top products",
@@ -258,6 +256,7 @@
     "exportPng": "Download as PNG",
     "exportPdf": "Download as PDF",
     "tabs": {
+      "day": "By Day",
       "dateRange": "Date Range",
       "monthly": "Monthly Comparison"
     },
@@ -802,6 +801,117 @@
         "loadFailed":   "Failed to load category.",
         "updateFailed": "Failed to update category."
       }
+    }
+  },
+
+  "tables": {
+    "breadcrumb": "Tables",
+    "title": "Tables",
+    "subtitle": "Manage dining tables, sessions, and availability.",
+    "groupLabel": "Operations",
+    "addTable": "Add table",
+
+    "status": {
+      "Available": "Available",
+      "Occupied":  "Occupied",
+      "Cleaning":  "Cleaning"
+    },
+    "activeStatus": {
+      "active":   "Active",
+      "inactive": "Inactive"
+    },
+
+    "widgets": {
+      "total":     { "label": "Total",     "description": "Total tables in the restaurant." },
+      "available": { "label": "Available", "description": "Empty tables, ready for new guests." },
+      "occupied":  { "label": "Occupied",  "description": "Tables with active ordering sessions." },
+      "cleaning":  { "label": "Cleaning",  "description": "Tables being cleaned after guests left." }
+    },
+
+    "columns": {
+      "code":    "Code",
+      "zone":    "Zone",
+      "status":  "Status",
+      "active":  "Active",
+      "session": "Session",
+      "actions": "Actions"
+    },
+
+    "filter": {
+      "title":       "Filter tables",
+      "status":      "Status",
+      "allStatuses": "All statuses",
+      "active":      "Active",
+      "allActive":   "All",
+      "zone":        "Zone",
+      "allZones":    "All zones",
+      "clearFilters":   "Clear filters",
+      "filtersTooltip": "Filters"
+    },
+
+    "form": {
+      "tableCode":            "Table code",
+      "tableCodePlaceholder": "e.g. F1-01, BM-02",
+      "tableCodeEditPlaceholder": "e.g. F1-01",
+      "tableCodeHint":        "Free format — e.g. F1-01 (floor 1, table 1)",
+      "zone":                 "Zone",
+      "optional":             "(optional)",
+      "noZone":               "No zone"
+    },
+
+    "add": {
+      "title":  "Add table",
+      "submit": "Add table"
+    },
+
+    "edit": {
+      "title":  "Edit table",
+      "submit": "Save changes"
+    },
+
+    "qr": {
+      "customizeTooltip":  "Customise style",
+      "regenerateTooltip": "Generate new token — old QR will stop working",
+      "regenerate":        "Regenerate",
+      "downloadPng":       "Download PNG",
+      "customizer": {
+        "headerColor":  "Header color",
+        "reset":        "reset",
+        "pattern":      "Pattern",
+        "markerBorder": "Marker border",
+        "markerCenter": "Marker center",
+        "precision":    "Precision"
+      }
+    },
+
+    "actions": {
+      "closeSession":          "Close Session",
+      "markAvailable":         "Mark as Available",
+      "edit":                  "Edit",
+      "showQr":                "Show QR Code",
+      "activate":              "Activate",
+      "deactivate":            "Deactivate",
+      "delete":                "Delete",
+      "closeSessionTooltip":   "Close session",
+      "markAvailableTooltip":  "Mark as available",
+      "editTooltip":           "Edit table",
+      "showQrTooltip":         "Show QR code",
+      "deleteTooltip":         "Delete table"
+    },
+
+    "validation": {
+      "codeRequired": "Table code is required."
+    },
+
+    "error": {
+      "loadFailed":         "Failed to load tables.",
+      "updateFailed":       "Failed to update table {code}.",
+      "markAvailableFailed":"Failed to mark table {code} available.",
+      "closeSessionFailed": "Failed to close session on table {code}.",
+      "deleteFailed":       "Failed to delete table {code}.",
+      "createFailed":       "Failed to create table. Code may already exist.",
+      "editFailed":         "Failed to update table. Code may already exist.",
+      "regenerateQrFailed": "Failed to regenerate QR token."
     }
   }
 }
