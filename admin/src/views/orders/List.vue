@@ -72,6 +72,17 @@ if (_cached) {
 }
 
 const filterPanel = ref(null);
+const filterDrawerVisible = ref(false);
+
+const isMobile = ref(window.innerWidth < 640);
+const _onResize = () => { isMobile.value = window.innerWidth < 640; };
+onMounted(() => window.addEventListener('resize', _onResize));
+onUnmounted(() => window.removeEventListener('resize', _onResize));
+
+const openFilter = (e) => {
+  if (isMobile.value) filterDrawerVisible.value = true;
+  else filterPanel.value.toggle(e);
+};
 
 // ── Widget visibility ──────────────────────────────────────────────
 const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
@@ -255,6 +266,7 @@ const loadOrders = async () => {
 };
 
 onMounted(loadOrders);
+onBeforeRouteLeave(() => { saveCurrentState(); });
 
 // Re-fetch whenever any filter changes — reset to page 1
 watch(
@@ -515,8 +527,24 @@ const confirmPayment = async () => {
       </prime-button>
     </page-header>
 
-    <!-- Summary stats -->
-    <div :class="['tw:grid tw:gap-3', wColsClass]">
+    <!-- Mobile compact stats -->
+    <div class="tw:flex tw:sm:hidden tw:items-center tw:gap-3 tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:px-4 tw:py-3">
+      <div class="tw:shrink-0">
+        <span class="tw:text-xl tw:font-bold">{{ summary.total }}</span>
+        <span class="app-text-muted tw:text-xs tw:ml-1.5">{{ t('orders.breadcrumb').toLowerCase() }}</span>
+      </div>
+      <div class="tw:h-4 tw:w-px tw:bg-white/10 tw:shrink-0" />
+      <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
+        <span v-if="summary.pending > 0"    class="tw:text-amber-400   tw:text-xs tw:font-medium">{{ summary.pending }} {{ t('orders.status.PENDING').toLowerCase() }}</span>
+        <span v-if="summary.processing > 0" class="tw:text-blue-400    tw:text-xs tw:font-medium">{{ summary.processing }} {{ t('orders.status.PROCESSING').toLowerCase() }}</span>
+        <span v-if="summary.completed > 0"  class="tw:text-emerald-400 tw:text-xs tw:font-medium">{{ summary.completed }} {{ t('orders.status.COMPLETED').toLowerCase() }}</span>
+        <span v-if="summary.cancelled > 0"  class="tw:text-red-400     tw:text-xs tw:font-medium">{{ summary.cancelled }} {{ t('orders.status.CANCELLED').toLowerCase() }}</span>
+      </div>
+      <span class="tw:ml-auto tw:font-semibold tw:text-sm tw:shrink-0">{{ formatVnd(summary.revenue) }}</span>
+    </div>
+
+    <!-- Summary stats (desktop only) -->
+    <div :class="['tw:hidden tw:sm:grid tw:gap-3', wColsClass]">
       <widget-orders-summary
         v-if="wVisible('total')"
         :total="summary.total"
@@ -565,6 +593,152 @@ const confirmPayment = async () => {
       >{{ errorMessage }}</prime-message
     >
 
+    <!-- Filter drawer (mobile) -->
+    <prime-drawer
+      v-model:visible="filterDrawerVisible"
+      position="bottom"
+      :style="{ height: 'auto', maxHeight: '90dvh' }"
+      :pt="{ root: { class: 'tw:rounded-t-2xl' }, content: { class: 'tw:overflow-y-auto' } }"
+    >
+      <template #header>
+        <div class="tw:flex tw:items-center tw:justify-between tw:w-full tw:pr-2">
+          <span class="tw:font-semibold">{{ t('orders.filter.title') }}</span>
+          <prime-button
+            v-if="hasActiveFilters"
+            severity="danger"
+            outlined
+            size="small"
+            @click="clearFilters"
+          >
+            <iconify icon="ph:x-bold" />
+            <span>{{ t('orders.filter.clearFilters') }}</span>
+          </prime-button>
+        </div>
+      </template>
+
+      <div class="tw:flex tw:flex-col tw:gap-4 tw:pb-6">
+        <!-- Search -->
+        <div class="tw:space-y-1.5">
+          <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+            {{ t('orders.filter.searchOrder').replace('…', '').trim() }}
+          </label>
+          <prime-input-text
+            v-model="searchOrder"
+            :placeholder="t('orders.filter.searchOrder')"
+            class="app-input tw:w-full"
+          />
+        </div>
+
+        <!-- Date range -->
+        <div class="tw:space-y-1.5">
+          <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+            {{ t('orders.filter.dateRange') }}
+          </label>
+          <div class="tw:flex tw:items-center tw:gap-2">
+            <prime-date-picker
+              v-model="dateFrom"
+              :placeholder="t('orders.filter.dateFrom')"
+              date-format="dd/mm/yy"
+              show-button-bar
+              class="app-input tw:flex-1"
+            />
+            <span class="app-text-muted tw:text-sm">–</span>
+            <prime-date-picker
+              v-model="dateTo"
+              :placeholder="t('orders.filter.dateTo')"
+              date-format="dd/mm/yy"
+              show-button-bar
+              class="app-input tw:flex-1"
+            />
+          </div>
+        </div>
+
+        <!-- Order status -->
+        <div class="tw:space-y-1.5">
+          <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+            {{ t('orders.filter.orderStatus') }}
+          </label>
+          <prime-select
+            v-model="statusFilter"
+            :options="statusOptions"
+            option-label="label"
+            option-value="value"
+            :placeholder="t('orders.filter.allStatuses')"
+            show-clear
+            class="app-input tw:w-full"
+          />
+        </div>
+
+        <!-- Payment status -->
+        <div class="tw:space-y-1.5">
+          <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+            {{ t('orders.filter.paymentStatus') }}
+          </label>
+          <prime-select
+            v-model="paymentStatusFilter"
+            :options="paymentStatusOptions"
+            option-label="label"
+            option-value="value"
+            :placeholder="t('orders.filter.allPayments')"
+            show-clear
+            class="app-input tw:w-full"
+          />
+        </div>
+
+        <!-- Payment method -->
+        <div class="tw:space-y-1.5">
+          <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+            {{ t('orders.filter.paymentMethod') }}
+          </label>
+          <prime-select
+            v-model="paymentMethodFilter"
+            :options="paymentMethodOptions"
+            option-label="label"
+            option-value="value"
+            :placeholder="t('orders.filter.allMethods')"
+            show-clear
+            class="app-input tw:w-full"
+          />
+        </div>
+
+        <!-- Total range -->
+        <div class="tw:space-y-1.5">
+          <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+            {{ t('orders.filter.total') }}
+          </label>
+          <div class="tw:flex tw:items-center tw:gap-2">
+            <prime-input-number
+              v-model="minTotal"
+              :placeholder="t('orders.filter.min')"
+              :min="0"
+              :use-grouping="true"
+              class="app-input tw:flex-1"
+            />
+            <span class="app-text-muted tw:text-sm">–</span>
+            <prime-input-number
+              v-model="maxTotal"
+              :placeholder="t('orders.filter.max')"
+              :min="0"
+              :use-grouping="true"
+              class="app-input tw:flex-1"
+            />
+          </div>
+        </div>
+
+        <!-- Table code -->
+        <div class="tw:space-y-1.5">
+          <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+            {{ t('orders.filter.table') }}
+          </label>
+          <prime-input-text
+            v-model="tableCodeFilter"
+            :placeholder="t('orders.filter.tableCode')"
+            class="app-input tw:w-full"
+          />
+        </div>
+      </div>
+    </prime-drawer>
+
     <!-- Table -->
     <AppTable
       lazy
@@ -579,11 +753,11 @@ const confirmPayment = async () => {
     >
       <template #toolbar-left>
         <div class="tw:flex tw:items-center tw:gap-2">
-          <!-- Search by order number (server-side) -->
+          <!-- Search input — desktop only -->
           <prime-input-text
             v-model="searchOrder"
             :placeholder="t('orders.filter.searchOrder')"
-            class="app-input tw:w-48"
+            class="app-input tw:w-48 tw:hidden tw:sm:block"
           />
 
           <!-- Filter toggle button -->
@@ -591,7 +765,7 @@ const confirmPayment = async () => {
             :severity="hasActiveFilters ? 'success' : 'secondary'"
             :outlined="!hasActiveFilters"
             v-tooltip.top="t('orders.filter.filters')"
-            @click="filterPanel.toggle($event)"
+            @click="openFilter($event)"
             :class="!hasActiveFilters ? btnIcon : ''"
           >
             <iconify icon="ph:funnel-bold" />
@@ -604,7 +778,7 @@ const confirmPayment = async () => {
             />
           </prime-button>
 
-          <!-- Filter popover -->
+          <!-- Filter popover (desktop only) -->
           <prime-popover ref="filterPanel">
             <div class="tw:flex tw:flex-col tw:gap-4 tw:w-full">
               <p class="tw:text-sm tw:font-semibold">{{ t('orders.filter.title') }}</p>
@@ -738,6 +912,81 @@ const confirmPayment = async () => {
               </prime-button>
             </div>
           </prime-popover>
+        </div>
+      </template>
+
+      <!-- ── Mobile card ──────────────────────────────────────────── -->
+      <template #mobile-card="{ data }">
+        <div
+          class="tw:col-span-2 tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:p-3 tw:flex tw:flex-col tw:gap-2"
+          :class="data.status === ORDER_STATUS.CANCELLED ? 'tw:opacity-60' : ''"
+        >
+          <!-- Order # + amount -->
+          <div class="tw:flex tw:items-start tw:justify-between tw:gap-2">
+            <div>
+              <span class="tw:font-mono tw:font-bold tw:text-sm">{{ data.orderNumber }}</span>
+              <p class="tw:text-[11px] app-text-muted tw:mt-0.5">{{ formatDate(data.orderDate) }}</p>
+            </div>
+            <div class="tw:text-right tw:shrink-0">
+              <p class="tw:font-semibold tw:text-sm">
+                <span
+                  v-if="data.totalDiscount > 0"
+                  class="tw:text-xs app-text-muted tw:line-through tw:mr-1"
+                >{{ formatVnd(data.totalAmount) }}</span>
+                {{ formatVnd(data.totalDiscount > 0 ? data.finalAmount : data.totalAmount) }}
+              </p>
+              <div v-if="data.tipAmount > 0" class="tw:flex tw:items-center tw:justify-end tw:gap-1 tw:text-[10px] tw:text-amber-400">
+                <iconify icon="ph:heart-fill" /><span>+{{ formatVnd(data.tipAmount) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status + payment tags + guests -->
+          <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-1.5">
+            <prime-tag :value="statusTag(data.status).label" :severity="statusTag(data.status).severity" class="tw:text-[10px]! tw:px-1.5! tw:py-0.5!" />
+            <prime-tag :value="paymentTag(data.paymentStatus, data.paymentMethod).label" :severity="paymentTag(data.paymentStatus, data.paymentMethod).severity" class="tw:text-[10px]! tw:px-1.5! tw:py-0.5!" />
+            <span v-if="data.guestCount" class="tw:flex tw:items-center tw:gap-0.5 tw:text-[10px] app-text-muted">
+              <iconify icon="ph:users" />{{ data.guestCount }}
+            </span>
+          </div>
+
+          <!-- Items summary -->
+          <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
+            <span
+              v-for="(item, idx) in (data.items ?? []).slice(0, 3)"
+              :key="idx"
+              class="tw:text-[11px] app-text-muted"
+            >
+              <span class="tw:text-emerald-400 tw:font-semibold">{{ item.quantity }}×</span>
+              {{ item.productName }}
+            </span>
+            <span v-if="(data.items?.length ?? 0) > 3" class="tw:text-[10px] app-text-subtle tw:italic">
+              {{ t('orders.list.moreItems', { n: data.items.length - 3 }) }}
+            </span>
+          </div>
+
+          <!-- Actions -->
+          <div class="tw:flex tw:items-center tw:justify-end tw:gap-2 tw:pt-1.5 tw:border-t tw:border-white/10">
+            <prime-button
+              v-if="data.paymentStatus === PAYMENT_STATUS.UNPAID && data.status !== ORDER_STATUS.CANCELLED"
+              severity="warn"
+              size="small"
+              outlined
+              @click="openPayDialog(data)"
+            >
+              <iconify icon="ph:money-bold" />
+              <span>{{ t('orders.list.markPaid') }}</span>
+            </prime-button>
+            <prime-button
+              severity="secondary"
+              outlined
+              size="small"
+              :class="btnIcon"
+              @click="router.push({ name: 'ordersDetail', params: { id: data.id } })"
+            >
+              <iconify icon="ph:arrow-right-bold" />
+            </prime-button>
+          </div>
         </div>
       </template>
 

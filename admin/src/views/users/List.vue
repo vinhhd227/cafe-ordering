@@ -1,16 +1,10 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import {
   getUsers,
   createUser,
   activateUser,
   deactivateUser,
 } from '@/services/user.service'
-import AppTable from '@/components/AppTable.vue'
-import WidgetSettingsButton from '@/components/widgets/WidgetSettingsButton.vue'
-import { useTableCache } from '@/composables/useTableCache'
-import { usePermission } from '@/composables/usePermission'
 
 const cache  = useTableCache('users')
 const router = useRouter()
@@ -265,6 +259,11 @@ const columns = [
   { field: 'createdAt', header: 'Created' },
   { key: 'actions',     header: 'Actions', width: '8rem', toggleable: false },
 ]
+
+// ── Mobile drawer ──────────────────────────────────────────────
+const drawerUser = ref(null);
+const drawerVisible = ref(false);
+const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true; };
 </script>
 
 <template>
@@ -327,6 +326,32 @@ const columns = [
       :columns="columns"
       @page="(e) => loadUsers(e.page + 1)"
     >
+      <template #mobile-card="{ data }">
+        <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-white tw:dark:bg-white/5 tw:p-3 tw:flex tw:flex-col tw:gap-2">
+          <div class="tw:flex tw:items-start tw:justify-between tw:gap-1">
+            <div class="tw:flex tw:items-center tw:gap-3">
+              <div class="tw:h-8 tw:w-8 tw:rounded-full tw:flex tw:items-center tw:justify-center tw:bg-emerald-500/20 tw:text-emerald-300 tw:text-xs tw:font-bold tw:flex-shrink-0">
+                {{ initials(data.fullName) }}
+              </div>
+              <div>
+                <p class="tw:text-sm tw:font-semibold tw:leading-snug">{{ data.username }}</p>
+                <p class="tw:text-xs app-text-muted">{{ data.fullName }}</p>
+              </div>
+            </div>
+            <prime-tag
+              :value="data.isActive ? 'Active' : 'Inactive'"
+              :severity="data.isActive ? 'success' : 'danger'"
+              class="tw:text-[11px]! tw:px-1.5! tw:py-0.5! tw:flex-shrink-0"
+            />
+          </div>
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2 tw:flex tw:justify-end">
+            <prime-button severity="secondary" outlined size="small" :class="btnIcon" @click="openDrawer(data)">
+              <iconify icon="ph:dots-three-bold" />
+            </prime-button>
+          </div>
+        </div>
+      </template>
+
       <template #toolbar-left>
         <div class="tw:flex tw:items-center tw:gap-2">
           <!-- Search -->
@@ -466,6 +491,47 @@ const columns = [
         </div>
       </template>
     </AppTable>
+
+    <!-- ── Mobile action drawer ───────────────────────────────────── -->
+    <prime-drawer
+      v-model:visible="drawerVisible"
+      position="bottom"
+      :style="{ height: 'auto' }"
+      :pt="{ root: { class: 'tw:rounded-t-2xl' } }"
+    >
+      <template #header>
+        <div class="tw:flex tw:items-center tw:gap-2">
+          <span class="tw:font-medium">{{ drawerUser?.username }}</span>
+          <prime-tag
+            v-if="drawerUser"
+            :value="drawerUser.isActive ? 'Active' : 'Inactive'"
+            :severity="drawerUser.isActive ? 'success' : 'danger'"
+            class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
+          />
+        </div>
+      </template>
+      <div v-if="drawerUser" class="tw:flex tw:flex-col tw:gap-2 tw:pb-4">
+        <prime-button
+          v-if="can('user.deactivate')"
+          :label="drawerUser.isActive ? 'Deactivate' : 'Activate'"
+          :severity="drawerUser.isActive ? 'danger' : 'success'"
+          outlined fluid
+          @click="handleToggleActive(drawerUser); drawerVisible = false"
+        >
+          <template #icon>
+            <iconify :icon="drawerUser.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
+          </template>
+        </prime-button>
+        <prime-button
+          label="View / Edit"
+          severity="secondary"
+          outlined fluid
+          @click="router.push({ name: 'userDetail', params: { id: drawerUser.id } }); drawerVisible = false"
+        >
+          <template #icon><iconify icon="ph:arrow-right-bold" /></template>
+        </prime-button>
+      </div>
+    </prime-drawer>
 
     <!-- ===== Add User Dialog ===== -->
     <prime-dialog
