@@ -229,6 +229,15 @@ watch([categoryFilter, statusFilter], () => {
   loadProducts(1);
 });
 
+// ── Mobile action drawer ───────────────────────────────────────────
+const drawerProduct = ref(null);
+const drawerVisible = ref(false);
+
+const openDrawer = (row) => {
+  drawerProduct.value = row;
+  drawerVisible.value = true;
+};
+
 // ── Widget visibility ──────────────────────────────────────────────
 const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('products', [
@@ -438,6 +447,45 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
         </div>
       </template>
 
+      <template #mobile-card="{ data }">
+        <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-white tw:dark:bg-white/5 tw:p-3 tw:flex tw:flex-col tw:gap-2">
+          <!-- Image + Name -->
+          <div class="tw:flex tw:items-center tw:gap-2">
+            <img
+              v-if="data.imageUrl"
+              :src="data.imageUrl"
+              :alt="data.name"
+              class="tw:h-10 tw:w-10 tw:rounded-lg tw:object-cover tw:flex-shrink-0"
+            />
+            <div
+              v-else
+              class="tw:h-10 tw:w-10 tw:rounded-lg tw:bg-white/10 tw:flex-shrink-0 tw:flex tw:items-center tw:justify-center"
+            >
+              <iconify icon="ph:coffee-bold" class="tw:text-sm app-text-muted" />
+            </div>
+            <span class="tw:font-medium tw:text-sm tw:line-clamp-2 tw:leading-tight">{{ data.name }}</span>
+          </div>
+          <!-- Price -->
+          <p class="tw:font-semibold tw:text-sm">{{ formatVnd(data.price) }}</p>
+          <!-- Category + Status -->
+          <div class="tw:flex tw:items-center tw:gap-1.5 tw:flex-wrap">
+            <span v-if="data.category" class="tw:text-xs app-text-muted">{{ data.category }}</span>
+            <prime-tag
+              :value="statusTag(data.status).label"
+              :severity="statusTag(data.status).severity"
+              class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
+            />
+          </div>
+          <!-- Actions -->
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2 tw:flex tw:justify-end">
+            <prime-button
+              severity="secondary" outlined size="small" :class="btnIcon"
+              @click="openDrawer(data)"
+            ><iconify icon="ph:dots-three-bold" /></prime-button>
+          </div>
+        </div>
+      </template>
+
       <template #col-product="{ data }">
         <div class="tw:flex tw:items-center tw:gap-3">
           <img
@@ -492,5 +540,48 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
         </div>
       </template>
     </AppTable>
+
+    <!-- ── Mobile action drawer ───────────────────────────────────── -->
+    <prime-drawer
+      v-model:visible="drawerVisible"
+      position="bottom"
+      :style="{ height: 'auto' }"
+      :pt="{ root: { class: 'tw:rounded-t-2xl' } }"
+    >
+      <template #header>
+        <div class="tw:flex tw:items-center tw:gap-2">
+          <span class="tw:font-medium">{{ drawerProduct?.name }}</span>
+          <prime-tag
+            v-if="drawerProduct"
+            :value="statusTag(drawerProduct.status).label"
+            :severity="statusTag(drawerProduct.status).severity"
+            class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
+          />
+        </div>
+      </template>
+
+      <div v-if="drawerProduct" class="tw:flex tw:flex-col tw:gap-2 tw:pb-4">
+        <prime-button
+          v-if="can('product.update')"
+          :label="drawerProduct.status === 'active' ? t('products.list.tooltip.deactivate') : t('products.list.tooltip.activate')"
+          :severity="drawerProduct.status === 'active' ? 'danger' : 'success'"
+          outlined fluid
+          @click="handleToggleActive(drawerProduct); drawerVisible = false"
+        >
+          <template #icon>
+            <iconify :icon="drawerProduct.status === 'active' ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
+          </template>
+        </prime-button>
+
+        <prime-button
+          v-if="can('product.view')"
+          :label="t('products.list.tooltip.viewDetail')"
+          severity="secondary" outlined fluid
+          @click="router.push({ name: 'productsDetail', params: { id: drawerProduct.id } }); drawerVisible = false"
+        >
+          <template #icon><iconify icon="ph:arrow-right-bold" /></template>
+        </prime-button>
+      </div>
+    </prime-drawer>
   </section>
 </template>
