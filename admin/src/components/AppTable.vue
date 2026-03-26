@@ -180,10 +180,25 @@ watch(
         />
       </div>
 
-      <!-- ── Data Table ─────────────────────────────────────────── -->
-      <prime-data-table
-        v-else
-        :pt="{
+      <template v-else>
+        <!-- ── Mobile card grid (khi có slot #mobile-card) ────────── -->
+        <div
+          v-if="$slots['mobile-card']"
+          class="tw:sm:hidden tw:py-2"
+        >
+          <div v-if="value.length === 0" class="tw:py-14 tw:flex tw:flex-col tw:items-center tw:gap-3 app-text-muted">
+            <iconify icon="ph:tray-bold" class="tw:text-5xl" />
+            <span class="tw:text-sm">{{ emptyMessage ?? t('common.table.emptyMessage') }}</span>
+          </div>
+          <div v-else class="tw:grid tw:grid-cols-2 tw:gap-3">
+            <slot v-for="row in value" name="mobile-card" :data="row" />
+          </div>
+        </div>
+
+        <!-- ── Data Table ─────────────────────────────────────────── -->
+        <div :class="$slots['mobile-card'] ? 'tw:hidden tw:sm:block' : ''">
+        <prime-data-table
+          :pt="{
           bodyRow: { class: 'tw:bg-transparent!' },
           emptyMessage: { class: 'tw:bg-transparent!' },
 
@@ -219,15 +234,17 @@ watch(
           </template>
         </prime-column>
       </prime-data-table>
+        </div>
+      </template>
     </template>
     <template #footer>
       <!-- ── Pagination Bar ──────────────────────────────────────── -->
       <div
-        class="tw:mt-4 tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-y-3 tw:gap-x-4"
+        class="tw:mt-4 tw:flex tw:flex-col tw:sm:flex-row tw:items-center tw:justify-between tw:gap-y-3 tw:gap-x-4"
       >
         <!-- Left: showing info -->
         <span
-          class="tw:text-sm app-text-muted tw:whitespace-nowrap tw:min-w-[14rem]"
+          class="tw:text-sm app-text-muted tw:w-full tw:sm:w-auto tw:sm:min-w-[14rem]"
         >
           {{ t('common.table.showing', { from: showingFrom, to: showingTo, total: totalRecords }) }}
         </span>
@@ -241,7 +258,7 @@ watch(
             :disabled="currentPage <= 1"
             v-tooltip.top="'First page'"
             @click="goToPage(1)"
-            :class="btnIcon"
+            :class="[btnIcon, 'tw:hidden tw:sm:flex']"
           >
             <iconify icon="ph:caret-double-left-bold" />
           </prime-button>
@@ -270,7 +287,7 @@ watch(
               :text="token !== currentPage"
               size="small"
               @click="goToPage(token)"
-              :class="[btnIcon, 'tw:mx-1']"
+              :class="[btnIcon, 'tw:mx-0.5', idx !== 0 && idx !== pageTokens.length - 1 && token !== currentPage ? 'tw:hidden tw:sm:flex' : '']"
               >{{ token }}</prime-button
             >
           </template>
@@ -294,7 +311,7 @@ watch(
             :disabled="currentPage >= totalPages"
             v-tooltip.top="'Last page'"
             @click="goToPage(totalPages)"
-            :class="btnIcon"
+            :class="[btnIcon, 'tw:hidden tw:sm:flex']"
           >
             <iconify icon="ph:caret-double-right-bold" />
           </prime-button>
@@ -302,26 +319,28 @@ watch(
 
         <!-- Right: items per page + column toggle -->
         <div
-          class="tw:flex tw:items-center tw:gap-2 tw:min-w-[14rem] tw:justify-end"
+          class="tw:flex tw:items-center tw:gap-2 tw:w-full tw:sm:w-auto tw:sm:min-w-[14rem] tw:justify-between tw:sm:justify-end"
         >
-          <span class="tw:text-sm app-text-muted tw:whitespace-nowrap">{{ t('common.table.itemsPerPage') }}</span>
-          <prime-select
-            :model-value="rows"
-            :options="rowsPerPageOptions"
-            class="app-input"
-            size="small"
-            @update:model-value="onRowsChange"
-          />
-          <prime-button
-            v-if="toggleableColumns.length > 0"
-            severity="secondary"
-            outlined
-            v-tooltip.top="'Toggle columns'"
-            @click="colDialogVisible = true"
-            :class="btnIcon"
-          >
-            <iconify icon="ph:list-dashes-bold" />
-          </prime-button>
+          <span class="tw:text-sm app-text-muted tw:whitespace-nowrap tw:hidden tw:sm:inline">{{ t('common.table.itemsPerPage') }}</span>
+          <div class="tw:flex tw:items-center tw:gap-2">
+            <prime-select
+              :model-value="rows"
+              :options="rowsPerPageOptions"
+              class="app-input"
+              size="small"
+              @update:model-value="onRowsChange"
+            />
+            <prime-button
+              v-if="toggleableColumns.length > 0"
+              severity="secondary"
+              outlined
+              v-tooltip.top="'Toggle columns'"
+              @click="colDialogVisible = true"
+              :class="btnIcon"
+            >
+              <iconify icon="ph:list-dashes-bold" />
+            </prime-button>
+          </div>
         </div>
       </div>
       <!-- ── Column toggle dialog ───────────────────────────────── -->
