@@ -14,6 +14,7 @@
 
 @docs/rules/dotnet.md
 @docs/rules/vue.md
+@docs/rules/vue-list-page.md
 @docs/rules/git.md
 @docs/rules/claude.md
 
