@@ -7,6 +7,7 @@ public class LogoutEndpoint(IIdentityService identityService) : EndpointWithoutR
   public override void Configure()
   {
     Post("/api/auth/logout");
+    AllowAnonymous();
     DontAutoTag();
     Description(b => b.WithTags("Authentication"));
   }
