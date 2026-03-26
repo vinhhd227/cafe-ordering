@@ -9,7 +9,7 @@ import MonthlyReport from './Monthly.vue'
 const { t } = useI18n()
 
 // ── Tab ────────────────────────────────────────────────────────────
-const activeTab = ref('range')
+const activeTab = ref('day')
 
 // ── Helpers ────────────────────────────────────────────────────────
 const toMidnight = (d) => {
@@ -42,9 +42,15 @@ const todayMidnight = () => {
   return d
 }
 
-const dateRange = ref([firstOfMonth(), todayMidnight()])
-const dateFrom  = computed(() => dateRange.value?.[0] ?? null)
-const dateTo    = computed(() => dateRange.value?.[1] ?? null)
+const selectedDay = ref(todayMidnight())
+const dateRange   = ref([firstOfMonth(), todayMidnight()])
+
+const dateFrom = computed(() =>
+  activeTab.value === 'day' ? selectedDay.value : (dateRange.value?.[0] ?? null)
+)
+const dateTo = computed(() =>
+  activeTab.value === 'day' ? selectedDay.value : (dateRange.value?.[1] ?? null)
+)
 
 // ── Quick presets (computed so labels react to locale changes) ──────
 const presets = computed(() => [
@@ -329,9 +335,9 @@ const load = async () => {
   }
 }
 
-watch(dateRange, (val) => {
-  if (val?.[0] && val?.[1]) load()
-})
+watch(selectedDay, () => { if (activeTab.value === 'day') load() })
+watch(dateRange, (val) => { if (activeTab.value === 'range' && val?.[0] && val?.[1]) load() })
+watch(activeTab, () => { data.value = null; load() })
 onMounted(load)
 </script>
 
@@ -368,6 +374,15 @@ onMounted(load)
     <div class="tw:flex tw:gap-1 tw:self-start tw:bg-black/10 dark:tw:bg-white/5 tw:rounded-lg tw:p-0.5 tw:w-fit">
       <button
         class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
+        :class="activeTab === 'day'
+          ? 'tw:bg-white dark:tw:bg-white/15 tw:text-surface-900 dark:tw:text-white tw:shadow-sm'
+          : 'app-text-muted'"
+        @click="activeTab = 'day'"
+      >
+        {{ t('report.tabs.day') }}
+      </button>
+      <button
+        class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
         :class="activeTab === 'range'
           ? 'tw:bg-white dark:tw:bg-white/15 tw:text-surface-900 dark:tw:text-white tw:shadow-sm'
           : 'app-text-muted'"
@@ -388,6 +403,113 @@ onMounted(load)
 
     <!-- Monthly comparison tab -->
     <monthly-report v-if="activeTab === 'monthly'" />
+
+    <!-- Single-day tab content -->
+    <template v-if="activeTab === 'day'">
+
+    <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-2">
+      <prime-date-picker
+        v-model="selectedDay"
+        date-format="dd/mm/yy"
+        show-button-bar
+        class="app-input tw:w-44"
+        size="small"
+      />
+      <prime-button
+        size="small" severity="secondary" outlined class="tw:text-xs"
+        @click="selectedDay = todayMidnight()"
+      >{{ t('report.presets.today') }}</prime-button>
+      <prime-button
+        size="small" severity="secondary" outlined class="tw:text-xs"
+        @click="() => { const d = new Date(); d.setDate(d.getDate() - 1); d.setHours(0,0,0,0); selectedDay = d }"
+      >{{ t('report.presets.yesterday') }}</prime-button>
+    </div>
+
+    <prime-message v-if="error" severity="error" size="small" variant="simple" :closable="true" @close="error = ''">{{ error }}</prime-message>
+
+    <template v-if="!data && loading">
+      <div class="tw:grid tw:gap-3 tw:grid-cols-2">
+        <prime-skeleton v-for="n in 2" :key="n" height="5.5rem" class="tw:rounded-xl" />
+      </div>
+    </template>
+
+    <div v-if="data" class="tw:space-y-8">
+      <p class="tw:text-sm app-text-muted">
+        {{ selectedDay.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) }}
+      </p>
+      <div class="tw:grid tw:gap-3 tw:grid-cols-2">
+        <widget-orders-revenue :total="data.totalRevenue" :cash="data.cashRevenue" :bank="data.bankRevenue" />
+        <prime-card
+          :pt="{
+            root: { class: `${appCard} ${cardRing} tw:p-4` },
+            body: { class: 'tw:p-0! tw:h-full' },
+            content: { class: 'tw:h-full tw:flex tw:flex-col tw:justify-between' },
+          }"
+        >
+          <template #header>
+            <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:truncate app-text-subtle">
+              {{ t('report.widgets.dayStats') }}
+            </p>
+            <iconify icon="ph:chart-bar-bold" class="tw:text-violet-400 tw:opacity-70 tw:shrink-0" />
+          </template>
+          <template #content>
+            <div class="tw:grid tw:grid-cols-2 tw:gap-x-4 tw:mt-1">
+              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
+                <div class="tw:flex tw:items-center tw:gap-1.5">
+                  <iconify icon="ph:coffee-bold" class="tw:text-cyan-400 tw:text-sm tw:opacity-80" />
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.drinks') }}</span>
+                </div>
+                <span class="tw:text-xs tw:font-semibold">{{ data.totalItemsSold }}</span>
+              </div>
+              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
+                <div class="tw:flex tw:items-center tw:gap-1.5">
+                  <iconify icon="ph:receipt-bold" class="tw:text-green-400 tw:text-sm tw:opacity-80" />
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.orders') }}</span>
+                </div>
+                <span class="tw:text-xs tw:font-semibold">{{ data.totalOrders }}</span>
+              </div>
+              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
+                <div class="tw:flex tw:items-center tw:gap-1.5">
+                  <iconify icon="ph:users-bold" class="tw:text-amber-400 tw:text-sm tw:opacity-80" />
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.guests') }}</span>
+                </div>
+                <span class="tw:text-xs tw:font-semibold">{{ data.totalGuestCount ?? 0 }}</span>
+              </div>
+              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
+                <div class="tw:flex tw:items-center tw:gap-1.5">
+                  <iconify icon="ph:coins-bold" class="tw:text-rose-400 tw:text-sm tw:opacity-80" />
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgOrder') }}</span>
+                </div>
+                <span class="tw:text-xs tw:font-semibold">{{ fmt(avgOrderValue) }}</span>
+              </div>
+            </div>
+          </template>
+        </prime-card>
+      </div>
+
+      <div v-if="data.topProducts?.length || data.topCategories?.length" class="tw:grid tw:grid-cols-1 tw:gap-4 tw:sm:grid-cols-2">
+        <widget-top-products
+          v-if="data.topProducts?.length"
+          :title="t('report.topProducts.title')"
+          :subtitle="t('report.topProducts.subtitle')"
+          :unit="t('report.topProducts.unit')"
+          :items="data.topProducts"
+        />
+        <widget-top-categories
+          v-if="data.topCategories?.length"
+          :title="t('report.topCategories.title')"
+          :subtitle="t('report.topCategories.subtitle')"
+          :items="data.topCategories"
+        />
+      </div>
+
+      <div v-if="data.dailyRevenue.length === 0" class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:py-16 app-text-subtle">
+        <iconify icon="ph:chart-bar-bold" class="tw:text-4xl tw:mb-2 tw:opacity-30" />
+        <p class="tw:text-sm">{{ t('report.empty') }}</p>
+      </div>
+    </div>
+
+    </template> <!-- end day tab -->
 
     <!-- Date range tab content -->
     <template v-if="activeTab === 'range'">
@@ -517,7 +639,7 @@ onMounted(load)
  <!-- Top products & Top categories -->
       <div
         v-if="data.topProducts?.length || data.topCategories?.length"
-        class="tw:grid tw:grid-cols-2 tw:gap-4 md:tw:grid-cols-2"
+        class="tw:grid tw:grid-cols-1 tw:gap-4 tw:sm:grid-cols-2"
       >
         <widget-top-products
           v-if="data.topProducts?.length"
