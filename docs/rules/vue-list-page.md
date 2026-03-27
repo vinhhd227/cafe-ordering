@@ -242,16 +242,21 @@ const totalRecords = computed(() => filteredItems.value.length)
 ## Filter pattern
 
 ```html
-<!-- Filter button — đổi màu khi có active filter -->
+<!-- Filter button — đổi màu khi có active filter, badge overlay ở góc trên phải icon -->
+<!-- ❌ KHÔNG thêm <span> label — chỉ icon + badge overlay -->
+<!-- ❌ KHÔNG dùng :class="!hasActiveFilters ? btnIcon : ''" — luôn dùng :class="btnIcon" -->
 <prime-button
   :severity="hasActiveFilters ? 'success' : 'secondary'"
   :outlined="!hasActiveFilters"
   v-tooltip.top="t('...filtersTooltip')"
   @click="filterPanel.toggle($event)"
-  :class="!hasActiveFilters ? btnIcon : ''"
+  :class="btnIcon"
 >
-  <iconify icon="ph:funnel-bold" />
-  <prime-badge v-if="activeFilterCount > 0" :value="activeFilterCount" severity="danger" class="tw:ml-1 tw:scale-90" />
+  <span class="tw:relative tw:inline-flex">
+    <iconify icon="ph:funnel-bold" />
+    <prime-badge v-if="activeFilterCount > 0" :value="activeFilterCount" severity="danger"
+      class="tw:absolute! tw:-top-2.5! tw:-right-2.5! tw:scale-75! tw:origin-top-right!" />
+  </span>
 </prime-button>
 
 <!-- Filter popover -->

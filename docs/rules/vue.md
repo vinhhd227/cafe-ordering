@@ -74,6 +74,19 @@ class="tw:hover:text-primary-400! tw:focus:ring-2! tw:dark:bg-gray-800"
 <iconify icon="ph:trash" />
 ```
 
+- `appCard` constant cho card/panel background — glassmorphism style dark mode:
+
+```html
+<!-- Dùng trên prime-card hoặc div đóng vai trò card -->
+<prime-card :class="appCard">...</prime-card>
+<div :class="appCard">...</div>
+```
+
+`appCard` hiện tại: `tw:bg-white! tw:dark:bg-white/3! tw:border! tw:border-slate-200! tw:shadow-sm! tw:dark:border-white/15! tw:dark:shadow-xl tw:dark:backdrop-blur-md!`
+- Light mode: nền trắng, border slate-200, shadow nhẹ
+- Dark mode: nền `white/3` (trong suốt nhẹ) + blur 12px → glassmorphism effect
+- **Không tự set `bg-*` hay `backdrop-blur` trên card** — dùng `appCard` để đồng nhất toàn app
+
 - `btnIcon` constant cho icon-only buttons:
 
 ```html

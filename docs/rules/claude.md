@@ -36,7 +36,8 @@ Khi tạo endpoint FastEndpoints mới, **luôn tạo kèm Summary class** trong
 
 ## Git / Commit
 
-- **Không tự commit** trừ khi được yêu cầu rõ ràng
+- **Không tự commit** sau mỗi thay đổi — chỉ commit khi user **yêu cầu rõ ràng** (ví dụ: "commit lại", "commit đi", "done")
+- Không commit chỉ vì task vừa xong hoặc verification passed
 - Không amend commit đã có — luôn tạo commit mới
 - Không force push
 - Không bypass hooks (`--no-verify`)
