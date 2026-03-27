@@ -15,6 +15,7 @@ public static class IdentitySeedData
   {
     ["Admin"] =
     [
+      "admin.access",
       "menu.read",
       "order.create", "order.read", "order.update", "order.delete",
       "product.create", "product.read", "product.update", "product.delete",
@@ -27,6 +28,7 @@ public static class IdentitySeedData
     ],
     ["Staff"] =
     [
+      "admin.access",
       "menu.read",
       "order.read", "order.update",
       "product.read",
@@ -36,6 +38,7 @@ public static class IdentitySeedData
     ],
     ["Customer"] =
     [
+      "customer.access",
       "menu.read",
       "order.create", "order.read"
     ]

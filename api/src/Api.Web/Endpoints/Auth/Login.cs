@@ -1,6 +1,8 @@
 using Api.UseCases.Auth.Login;
 using Microsoft.AspNetCore.Hosting;
 
+// Deprecated: use /api/admin/auth/login or /api/client/auth/login instead.
+
 namespace Api.Web.Endpoints.Auth;
 
 public sealed class LoginRequest
@@ -40,7 +42,7 @@ public class LoginEndpoint(IMediator mediator, IWebHostEnvironment env) : Ep.Req
       return;
     }
 
-    var result = await mediator.Send(new LoginCommand(req.Username, req.Password), ct);
+    var result = await mediator.Send(new LoginCommand(req.Username, req.Password, AppType.Admin), ct);
 
     if (!result.IsSuccess)
     {
