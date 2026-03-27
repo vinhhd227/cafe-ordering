@@ -437,11 +437,12 @@ onMounted(load)
       <p class="tw:text-sm app-text-muted">
         {{ selectedDay.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) }}
       </p>
-      <div class="tw:grid tw:gap-3 tw:grid-cols-1 tw:sm:grid-cols-2">
+      <div v-if="data.totalOrders > 0" class="tw:grid tw:gap-3 tw:grid-cols-1 tw:sm:grid-cols-2">
         <widget-orders-revenue :total="data.totalRevenue" :cash="data.cashRevenue" :bank="data.bankRevenue" />
         <prime-card
           :pt="{
             root: { class: `${appCard} ${cardRing} tw:p-4` },
+            header: { class: 'tw:flex tw:justify-between tw:gap-3 tw:min-w-0 tw:mb-3' },
             body: { class: 'tw:p-0! tw:h-full' },
             content: { class: 'tw:h-full tw:flex tw:flex-col tw:justify-between' },
           }"
@@ -503,7 +504,7 @@ onMounted(load)
         />
       </div>
 
-      <div v-if="data.dailyRevenue.length === 0" class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:py-16 app-text-subtle">
+      <div v-if="data.totalOrders === 0" class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:py-16 app-text-subtle">
         <iconify icon="ph:chart-bar-bold" class="tw:text-4xl tw:mb-2 tw:opacity-30" />
         <p class="tw:text-sm">{{ t('report.empty') }}</p>
       </div>
@@ -564,7 +565,7 @@ onMounted(load)
         {{ fileStem.replace('_', ' → ') }}
       </p>
       <!-- Summary widgets -->
-      <div class="tw:grid tw:gap-3 tw:grid-cols-3 md:tw:grid-cols-3">
+      <div v-if="data.totalOrders > 0" class="tw:grid tw:gap-3 tw:grid-cols-3 md:tw:grid-cols-3">
         <widget-orders-revenue
           :total="data.totalRevenue"
           :cash="data.cashRevenue"
@@ -582,6 +583,7 @@ onMounted(load)
         <prime-card
           :pt="{
             root: { class: `${appCard} ${cardRing} tw:p-4` },
+            header: { class: 'tw:flex tw:justify-between tw:gap-3 tw:min-w-0 tw:mb-3' },
             body: { class: 'tw:p-0! tw:h-full' },
             content: { class: 'tw:h-full tw:flex tw:flex-col tw:justify-between' },
           }"
@@ -770,7 +772,7 @@ onMounted(load)
 
       <!-- Empty state -->
       <div
-        v-if="data.dailyRevenue.length === 0"
+        v-if="data.totalOrders === 0"
         class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:py-16 app-text-subtle"
       >
         <iconify icon="ph:chart-bar-bold" class="tw:text-4xl tw:mb-2 tw:opacity-30" />
