@@ -643,7 +643,7 @@ const handleDelete = (expense) => {
     />
 
     <!-- P&L summary cards -->
-    <div class="tw:grid tw:grid-cols-3 tw:gap-3 sm:tw:grid-cols-3">
+    <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-3 tw:gap-3">
       <!-- Revenue -->
       <widget-stat
         :label="t('expenses.summary.revenue')"
