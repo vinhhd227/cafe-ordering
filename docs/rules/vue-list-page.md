@@ -370,11 +370,26 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
 
 ---
 
+## Summary widgets — responsive
+
+Grid summary stats phải responsive: 1 cột trên mobile, 3 cột trên `sm+`:
+
+```html
+<!-- ✅ Đúng -->
+<div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-3 tw:gap-3">
+
+<!-- ❌ Sai — Tailwind prefix bị đặt sai chỗ, không responsive -->
+<div class="tw:grid tw:grid-cols-3 tw:gap-3 sm:tw:grid-cols-3">
+```
+
+---
+
 ## Quy tắc tổng hợp
 
 - **Luôn dùng `useTableCache`** — không để user mất filter khi back
 - **Luôn có `mobile-card` slot + drawer** cho action trên mobile
-- **`btnIcon`** cho tất cả icon-only action buttons trong table
+- **`btnIcon`** cho tất cả icon-only action buttons trong table (desktop)
+- **Nút mở drawer trong `mobile-card`**: dùng `fluid` + label `t('common.moreActions')`, không dùng `btnIcon`
 - **`v-if="can('...')`** bảo vệ CTA button và action buttons theo permission
 - **`app-input`** class cho tất cả input trong filter/toolbar
 - **`app-text-muted` / `app-text-subtle`** cho text phụ — không hardcode màu
