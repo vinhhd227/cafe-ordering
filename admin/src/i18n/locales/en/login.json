@@ -1,0 +1,27 @@
+{
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Use your staff account to access the floor.",
+    "usernamePlaceholder": "your-username",
+    "passwordPlaceholder": "Password",
+    "rememberMe": "Keep me signed in",
+    "forgotPassword": "Forgot password?",
+    "submit": "Access dashboard",
+    "newUser": "New to the crew?",
+    "register": "Create an account",
+    "validation": {
+      "usernameRequired": "Username is required.",
+      "passwordRequired": "Password is required."
+    },
+    "toast": {
+      "successTitle": "Login successful",
+      "successDetail": "Welcome back! Redirecting to dashboard...",
+      "errorTitle": "Login failed",
+      "errorFallback": "Login failed. Please try again."
+    },
+    "shiftTip": {
+      "label": "Shift tip",
+      "text": "Keep the espresso shots ready ahead of the morning rush."
+    }
+  }
+}

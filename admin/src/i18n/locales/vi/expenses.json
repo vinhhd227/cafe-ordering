@@ -1,0 +1,81 @@
+{
+  "expenses": {
+    "breadcrumb": "Chi phí",
+    "title": "Chi phí",
+    "subtitle": "Theo dõi các khoản chi và so sánh với doanh thu (P&L).",
+    "groupLabel": "Vận hành",
+    "refresh": "Làm mới",
+    "newExpense": "Thêm chi phí",
+    "summary": {
+      "revenue": "Doanh thu",
+      "expenses": "Chi phí",
+      "profit": "Lợi nhuận",
+      "cash": "Tiền mặt",
+      "bank": "Ngân hàng",
+      "margin": "Biên LN"
+    },
+    "filter": {
+      "title": "Lọc chi phí",
+      "category": "Danh mục",
+      "allCategories": "Tất cả danh mục",
+      "clearFilters": "Xoá bộ lọc",
+      "filtersTooltip": "Bộ lọc"
+    },
+    "list": {
+      "col": {
+        "date": "Ngày",
+        "item": "Mặt hàng",
+        "category": "Danh mục",
+        "payment": "Thanh toán",
+        "qty": "SL",
+        "unitPrice": "Đơn giá",
+        "total": "Tổng",
+        "notes": "Ghi chú",
+        "actions": "Thao tác"
+      }
+    },
+    "dialog": {
+      "titleCreate": "Thêm chi phí",
+      "titleEdit": "Sửa chi phí",
+      "purchaseDate": "Ngày mua",
+      "itemName": "Tên mặt hàng",
+      "itemNamePlaceholder": "VD: Sữa tươi, Túi rác…",
+      "category": "Danh mục",
+      "payment": "Thanh toán",
+      "quantity": "Số lượng",
+      "unit": "Đơn vị",
+      "unitPlaceholder": "hộp, kg, chai…",
+      "unitPrice": "Đơn giá",
+      "totalAuto": "Tổng (tự động)",
+      "notes": "Ghi chú",
+      "notesPlaceholder": "Ghi chú thêm…",
+      "cancel": "Hủy",
+      "saveChanges": "Lưu thay đổi",
+      "addExpense": "Thêm chi phí"
+    },
+    "validation": {
+      "nameRequired": "Tên mặt hàng không được để trống.",
+      "quantityRequired": "Số lượng phải lớn hơn 0.",
+      "unitPriceRequired": "Đơn giá phải từ 0 trở lên."
+    },
+    "toast": {
+      "updatedTitle": "Đã cập nhật",
+      "updatedDetail": "Chi phí đã được cập nhật.",
+      "createdTitle": "Đã tạo",
+      "createdDetail": "Chi phí đã được ghi nhận.",
+      "deletedTitle": "Đã xoá",
+      "deletedDetail": "Chi phí đã được xoá."
+    },
+    "confirm": {
+      "deleteHeader": "Xác nhận xoá",
+      "deleteMessage": "Xoá \"{name}\"? Không thể hoàn tác.",
+      "deleteAccept": "Xoá",
+      "deleteReject": "Hủy"
+    },
+    "error": {
+      "loadFailed": "Không thể tải danh sách chi phí.",
+      "saveFailed": "Không thể lưu chi phí.",
+      "deleteFailed": "Không thể xoá chi phí."
+    }
+  }
+}

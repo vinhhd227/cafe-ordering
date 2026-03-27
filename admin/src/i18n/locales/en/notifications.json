@@ -1,0 +1,13 @@
+{
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No new notifications",
+    "newOrder": "New order",
+    "table": "Table",
+    "itemCount": "{n} item | {n} items",
+    "itemUnit": "items",
+    "sound": "Toggle sound",
+    "markAllRead": "Mark all as read",
+    "clear": "Clear all"
+  }
+}

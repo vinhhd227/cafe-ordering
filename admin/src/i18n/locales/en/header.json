@@ -1,0 +1,9 @@
+{
+  "header": {
+    "workspace": "Admin workspace",
+    "greeting": "Good shift, team.",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "export": "Export"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "expenses": {
+    "breadcrumb": "Expenses",
+    "title": "Expenses",
+    "subtitle": "Track purchases and compare with revenue (P&L).",
+    "groupLabel": "Operations",
+    "refresh": "Refresh",
+    "newExpense": "New expense",
+    "summary": {
+      "revenue": "Revenue",
+      "expenses": "Expenses",
+      "profit": "Profit",
+      "cash": "Cash",
+      "bank": "Bank",
+      "margin": "Margin"
+    },
+    "filter": {
+      "title": "Filter expenses",
+      "category": "Category",
+      "allCategories": "All categories",
+      "clearFilters": "Clear filters",
+      "filtersTooltip": "Filters"
+    },
+    "list": {
+      "col": {
+        "date": "Date",
+        "item": "Item",
+        "category": "Category",
+        "payment": "Payment",
+        "qty": "Qty",
+        "unitPrice": "Unit price",
+        "total": "Total",
+        "notes": "Notes",
+        "actions": "Actions"
+      }
+    },
+    "dialog": {
+      "titleCreate": "New expense",
+      "titleEdit": "Edit expense",
+      "purchaseDate": "Purchase date",
+      "itemName": "Item name",
+      "itemNamePlaceholder": "e.g. Fresh milk, Trash bags…",
+      "category": "Category",
+      "payment": "Payment",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "unitPlaceholder": "box, kg, bottle…",
+      "unitPrice": "Unit price",
+      "totalAuto": "Total (auto)",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes…",
+      "cancel": "Cancel",
+      "saveChanges": "Save changes",
+      "addExpense": "Add expense"
+    },
+    "validation": {
+      "nameRequired": "Item name is required.",
+      "quantityRequired": "Quantity must be greater than 0.",
+      "unitPriceRequired": "Unit price must be 0 or greater."
+    },
+    "toast": {
+      "updatedTitle": "Updated",
+      "updatedDetail": "Expense updated.",
+      "createdTitle": "Created",
+      "createdDetail": "Expense recorded.",
+      "deletedTitle": "Deleted",
+      "deletedDetail": "Expense deleted."
+    },
+    "confirm": {
+      "deleteHeader": "Confirm delete",
+      "deleteMessage": "Delete \"{name}\"? This cannot be undone.",
+      "deleteAccept": "Delete",
+      "deleteReject": "Cancel"
+    },
+    "error": {
+      "loadFailed": "Failed to load expenses.",
+      "saveFailed": "Failed to save expense.",
+      "deleteFailed": "Failed to delete expense."
+    }
+  }
+}

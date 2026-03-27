@@ -1,0 +1,78 @@
+{
+  "categories": {
+    "breadcrumb": "Categories",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "widgets": {
+      "total": {
+        "label": "Total"
+      },
+      "active": {
+        "label": "Active"
+      },
+      "inactive": {
+        "label": "Inactive"
+      }
+    },
+    "form": {
+      "name": "Name",
+      "description": "Description",
+      "optional": "(optional)",
+      "namePlaceholder": "e.g. Hot Beverages",
+      "descriptionPlaceholder": "Short description of this category…"
+    },
+    "list": {
+      "title": "Categories",
+      "subtitle": "Manage the categories used to organise your menu.",
+      "addCategory": "Add category",
+      "searchPlaceholder": "Search by name…",
+      "filtersTooltip": "Filters",
+      "filterTitle": "Filter categories",
+      "allStatuses": "All statuses",
+      "clearFilters": "Clear filters",
+      "col": {
+        "id": "ID",
+        "name": "Name",
+        "description": "Description",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "tooltip": {
+        "deactivate": "Deactivate",
+        "activate": "Activate",
+        "viewDetail": "View detail"
+      },
+      "error": "Failed to load categories."
+    },
+    "create": {
+      "title": "Add category",
+      "subtitle": "Create a new category to group your menu items.",
+      "backToList": "Back to list",
+      "submit": "Create category",
+      "cancel": "Cancel",
+      "error": "Failed to create category."
+    },
+    "detail": {
+      "backToList": "Back to list",
+      "id": "Category #{id}",
+      "created": "Created",
+      "updated": "Updated",
+      "description": "Description",
+      "editTitle": "Edit details",
+      "activeOption": {
+        "label": "Active",
+        "hint": "Show category on menu"
+      },
+      "reset": "Reset",
+      "saveChanges": "Save changes",
+      "updateSuccess": "Category updated successfully.",
+      "notFound": "Category not found.",
+      "error": {
+        "loadFailed": "Failed to load category.",
+        "updateFailed": "Failed to update category."
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "header": {
+    "workspace": "Khu vực quản trị",
+    "greeting": "Chúc ca làm việc vui vẻ!",
+    "collapseSidebar": "Thu gọn sidebar",
+    "expandSidebar": "Mở rộng sidebar",
+    "export": "Xuất"
+  }
+}
