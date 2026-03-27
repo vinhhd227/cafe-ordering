@@ -35,6 +35,7 @@
     "inactive": "Inactive",
     "status": "Status",
     "actions": "Actions",
+    "moreActions": "More actions",
     "loading": "Loading...",
     "noData": "No data found.",
     "table": {

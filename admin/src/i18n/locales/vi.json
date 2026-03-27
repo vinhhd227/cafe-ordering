@@ -35,6 +35,7 @@
     "inactive": "Không hoạt động",
     "status": "Trạng thái",
     "actions": "Thao tác",
+    "moreActions": "Xem thêm",
     "loading": "Đang tải...",
     "noData": "Không có dữ liệu.",
     "table": {

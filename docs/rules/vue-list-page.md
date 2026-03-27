@@ -321,9 +321,10 @@ onBeforeRouteLeave(() => {
 Mọi list page có action column **phải** có mobile drawer thay thế action buttons trên màn nhỏ.
 
 ```html
-<!-- Trong mobile-card slot: chỉ hiện nút "..." để mở drawer -->
-<prime-button severity="secondary" outlined size="small" :class="btnIcon" @click="openDrawer(data)">
+<!-- Trong mobile-card slot: nút full-width để mở drawer -->
+<prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
   <iconify icon="ph:dots-three-bold" />
+  <span>{{ t('common.moreActions') }}</span>
 </prime-button>
 
 <!-- Drawer -->
