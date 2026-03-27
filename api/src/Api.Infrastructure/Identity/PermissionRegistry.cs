@@ -63,6 +63,11 @@ public static class PermissionRegistry
 
       // Reports
       ["report.read"]        = "View reports and analytics",
+
+      // App access (system-level — controls which app a role can log into)
+      ["admin.access"]       = "Access the admin management site",
+      ["customer.access"]    = "Access the customer ordering site",
+
       // Zone
       ["zone.create"]        = "Create zones",
       ["zone.read"]          = "View zone list",

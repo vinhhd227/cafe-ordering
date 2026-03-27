@@ -13,6 +13,6 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result<AuthResponseDto
 
   public async ValueTask<Result<AuthResponseDto>> Handle(LoginCommand cmd, CancellationToken ct)
   {
-    return await _identityService.LoginAsync(cmd.Username, cmd.Password);
+    return await _identityService.LoginAsync(cmd.Username, cmd.Password, cmd.App);
   }
 }

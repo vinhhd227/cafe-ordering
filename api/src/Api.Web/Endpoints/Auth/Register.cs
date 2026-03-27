@@ -1,3 +1,4 @@
+// Deprecated: use /api/client/auth/register instead.
 using Api.UseCases.Auth.Register;
 using Mediator;
 

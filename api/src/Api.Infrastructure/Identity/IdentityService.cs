@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Api.UseCases.Auth.Login;
 using Api.UseCases.Interfaces;
 using Ardalis.Result;
 using Microsoft.AspNetCore.Identity;
@@ -74,7 +75,7 @@ public class IdentityService : IIdentityService
     return Result<string>.Success(user.Id.ToString());
   }
 
-  public async Task<Result<AuthResponseDto>> LoginAsync(string username, string password)
+  public async Task<Result<AuthResponseDto>> LoginAsync(string username, string password, AppType app)
   {
     var user = await _userManager.FindByNameAsync(username);
     if (user is null || !user.IsActive)
@@ -90,6 +91,11 @@ public class IdentityService : IIdentityService
 
     var roles = await _userManager.GetRolesAsync(user);
     var permissions = await GetUserPermissionsAsync(roles);
+
+    // App-level access check
+    var requiredPermission = app == AppType.Admin ? "admin.access" : "customer.access";
+    if (!permissions.Contains(requiredPermission))
+      return Result<AuthResponseDto>.Forbidden();
 
     var accessToken = _jwtService.GenerateAccessToken(
       userId: user.Id,

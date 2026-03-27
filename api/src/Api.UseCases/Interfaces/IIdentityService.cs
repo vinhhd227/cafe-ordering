@@ -1,3 +1,5 @@
+using Api.UseCases.Auth.Login;
+
 namespace Api.UseCases.Interfaces;
 
 /// <summary>
@@ -19,8 +21,9 @@ public interface IIdentityService
 
   /// <summary>
   /// Authenticate user by username and generate JWT + refresh token.
+  /// Returns Forbidden if the user's role lacks the required app access permission.
   /// </summary>
-  Task<Result<AuthResponseDto>> LoginAsync(string username, string password);
+  Task<Result<AuthResponseDto>> LoginAsync(string username, string password, AppType app);
 
   /// <summary>
   /// Refresh access token using a refresh token.
