@@ -17,7 +17,6 @@ import {
   EXPENSE_PAYMENT_METHOD_MAP,
   EXPENSE_PAYMENT_METHOD_OPTIONS,
 } from "@/constants/expensePaymentMethod";
-import { btnIcon } from "@/layout/ui";
 
 const { t } = useI18n();
 const { can } = usePermission();
@@ -75,29 +74,6 @@ const dateTo = computed(() => dateRange.value?.[1] ?? null);
 const categoryFilter = ref(null);
 const filterPanel = ref(null);
 
-// ── Restore cache ─────────────────────────────────────────────────
-const _cached = restoreCache();
-if (_cached) {
-  if (_cached.rows !== undefined) rows.value = _cached.rows;
-  if (_cached.first !== undefined) first.value = _cached.first;
-  if (_cached.categoryFilter !== undefined)
-    categoryFilter.value = _cached.categoryFilter;
-  if (_cached.dateFrom || _cached.dateTo) {
-    dateRange.value = [
-      _cached.dateFrom ? new Date(_cached.dateFrom) : null,
-      _cached.dateTo ? new Date(_cached.dateTo) : null,
-    ];
-  }
-  if (_cached.colDefs) {
-    // Merge cached visibility states while preserving the new column structure
-    const cachedVis = {};
-    for (const c of _cached.colDefs) cachedVis[c.key ?? c.field] = c.visible !== false;
-    colDefs.value = colDefs.value.map((c) => {
-      const id = c.key ?? c.field;
-      return id in cachedVis ? { ...c, visible: cachedVis[id] } : c;
-    });
-  }
-}
 
 // ── Helpers ───────────────────────────────────────────────────────
 // Normalize date về midnight local time trước khi gửi API
@@ -216,7 +192,45 @@ const loadExpenses = async () => {
 
 const loadAll = () => Promise.all([loadSummary(), loadExpenses()]);
 
-onMounted(loadAll);
+// ── Mobile action drawer ───────────────────────────────────────────
+const drawerExpense = ref(null);
+const drawerVisible = ref(false);
+const openDrawer = (row) => { drawerExpense.value = row; drawerVisible.value = true; };
+
+onMounted(() => {
+  const cached = restoreCache();
+  if (cached) {
+    if (cached.rows !== undefined) rows.value = cached.rows;
+    if (cached.first !== undefined) first.value = cached.first;
+    if (cached.categoryFilter !== undefined) categoryFilter.value = cached.categoryFilter;
+    if (cached.dateFrom || cached.dateTo) {
+      dateRange.value = [
+        cached.dateFrom ? new Date(cached.dateFrom) : null,
+        cached.dateTo ? new Date(cached.dateTo) : null,
+      ];
+    }
+    if (cached.colDefs) {
+      const cachedVis = {};
+      for (const c of cached.colDefs) cachedVis[c.key ?? c.field] = c.visible !== false;
+      colDefs.value = colDefs.value.map((c) => {
+        const id = c.key ?? c.field;
+        return id in cachedVis ? { ...c, visible: cachedVis[id] } : c;
+      });
+    }
+  }
+  loadAll();
+});
+
+onBeforeRouteLeave(() => {
+  saveCache({
+    rows: rows.value,
+    first: first.value,
+    categoryFilter: categoryFilter.value,
+    dateFrom: dateFrom.value?.toISOString?.() ?? dateFrom.value,
+    dateTo: dateTo.value?.toISOString?.() ?? dateTo.value,
+    colDefs: colDefs.value,
+  });
+});
 
 // Date range → reload both summary + table (wait for both dates to be selected)
 watch(dateRange, (val) => {
@@ -892,6 +906,78 @@ const handleDelete = (expense) => {
           </prime-button>
         </div>
       </template>
+
+      <template #mobile-card="{ data }">
+        <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-white tw:dark:bg-white/5 tw:p-3 tw:flex tw:flex-col tw:gap-2">
+          <!-- Date + Total -->
+          <div class="tw:flex tw:items-center tw:justify-between tw:gap-1">
+            <span class="tw:text-xs app-text-muted">{{ formatDate(data.purchaseDate) }}</span>
+            <span class="tw:font-semibold tw:text-sm">{{ formatVnd(data.totalAmount) }}</span>
+          </div>
+          <!-- Item name -->
+          <span class="tw:font-medium tw:text-sm tw:leading-snug">{{ data.name }}</span>
+          <!-- Category + Payment -->
+          <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-1.5">
+            <prime-tag :severity="categoryMeta(data.category).severity" class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!">
+              <iconify :icon="categoryMeta(data.category).icon" class="tw:text-xs" />
+              <span>{{ categoryMeta(data.category).label }}</span>
+            </prime-tag>
+            <prime-tag :severity="EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.severity ?? 'secondary'" class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!">
+              <iconify :icon="EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.icon ?? 'ph:money-bold'" class="tw:text-xs" />
+              <span>{{ EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.label ?? data.paymentMethod }}</span>
+            </prime-tag>
+          </div>
+          <!-- Qty x unit price -->
+          <p class="tw:text-xs app-text-muted">
+            {{ data.quantity }}<span v-if="data.unit"> {{ data.unit }}</span> × {{ formatVnd(data.unitPrice) }}
+          </p>
+          <!-- Actions -->
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2 tw:flex tw:justify-end">
+            <prime-button severity="secondary" outlined size="small" :class="btnIcon" @click="openDrawer(data)">
+              <iconify icon="ph:dots-three-bold" />
+            </prime-button>
+          </div>
+        </div>
+      </template>
     </AppTable>
+
+    <!-- ── Mobile action drawer ───────────────────────────────────── -->
+    <prime-drawer
+      v-model:visible="drawerVisible"
+      position="bottom"
+      :style="{ height: 'auto' }"
+      :pt="{ root: { class: 'tw:rounded-t-2xl' } }"
+    >
+      <template #header>
+        <div class="tw:flex tw:flex-col tw:gap-0.5">
+          <span class="tw:font-medium">{{ drawerExpense?.name }}</span>
+          <span v-if="drawerExpense" class="tw:text-xs app-text-muted">
+            {{ formatDate(drawerExpense.purchaseDate) }} · {{ formatVnd(drawerExpense.totalAmount) }}
+          </span>
+        </div>
+      </template>
+      <div v-if="drawerExpense" class="tw:flex tw:flex-col tw:gap-2 tw:pb-4">
+        <prime-button
+          v-if="can('expense.update')"
+          :label="t('common.edit')"
+          severity="secondary"
+          outlined
+          fluid
+          @click="openEditDialog(drawerExpense); drawerVisible = false"
+        >
+          <template #icon><iconify icon="ph:pencil-bold" /></template>
+        </prime-button>
+        <prime-button
+          v-if="can('expense.delete')"
+          :label="t('common.delete')"
+          severity="danger"
+          outlined
+          fluid
+          @click="handleDelete(drawerExpense); drawerVisible = false"
+        >
+          <template #icon><iconify icon="ph:trash-bold" /></template>
+        </prime-button>
+      </div>
+    </prime-drawer>
   </section>
 </template>
