@@ -371,11 +371,11 @@ onMounted(load)
     </page-header>
 
     <!-- Tab switcher -->
-    <div class="tw:flex tw:gap-1 tw:self-start tw:bg-black/10 dark:tw:bg-white/5 tw:rounded-lg tw:p-0.5 tw:w-fit">
+    <div class="tw:flex tw:gap-1 tw:self-start tw:bg-black/10 tw:dark:bg-white/5 tw:rounded-lg tw:p-0.5 tw:w-fit">
       <button
         class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
         :class="activeTab === 'day'
-          ? 'tw:bg-white dark:tw:bg-white/15 tw:text-surface-900 dark:tw:text-white tw:shadow-sm'
+          ? 'tw:bg-white tw:dark:bg-white/15 tw:text-surface-900 tw:dark:text-white tw:shadow-sm'
           : 'app-text-muted'"
         @click="activeTab = 'day'"
       >
@@ -384,7 +384,7 @@ onMounted(load)
       <button
         class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
         :class="activeTab === 'range'
-          ? 'tw:bg-white dark:tw:bg-white/15 tw:text-surface-900 dark:tw:text-white tw:shadow-sm'
+          ? 'tw:bg-white tw:dark:bg-white/15 tw:text-surface-900 tw:dark:text-white tw:shadow-sm'
           : 'app-text-muted'"
         @click="activeTab = 'range'"
       >
@@ -393,7 +393,7 @@ onMounted(load)
       <button
         class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
         :class="activeTab === 'monthly'
-          ? 'tw:bg-white dark:tw:bg-white/15 tw:text-surface-900 dark:tw:text-white tw:shadow-sm'
+          ? 'tw:bg-white tw:dark:bg-white/15 tw:text-surface-900 tw:dark:text-white tw:shadow-sm'
           : 'app-text-muted'"
         @click="activeTab = 'monthly'"
       >
@@ -428,7 +428,7 @@ onMounted(load)
     <prime-message v-if="error" severity="error" size="small" variant="simple" :closable="true" @close="error = ''">{{ error }}</prime-message>
 
     <template v-if="!data && loading">
-      <div class="tw:grid tw:gap-3 tw:grid-cols-2">
+      <div class="tw:grid tw:gap-3 tw:grid-cols-1 tw:sm:grid-cols-2">
         <prime-skeleton v-for="n in 2" :key="n" height="5.5rem" class="tw:rounded-xl" />
       </div>
     </template>
@@ -437,7 +437,7 @@ onMounted(load)
       <p class="tw:text-sm app-text-muted">
         {{ selectedDay.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) }}
       </p>
-      <div class="tw:grid tw:gap-3 tw:grid-cols-2">
+      <div class="tw:grid tw:gap-3 tw:grid-cols-1 tw:sm:grid-cols-2">
         <widget-orders-revenue :total="data.totalRevenue" :cash="data.cashRevenue" :bank="data.bankRevenue" />
         <prime-card
           :pt="{

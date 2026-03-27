@@ -20,7 +20,7 @@ const itemsWithColor = computed(() =>
 </script>
 
 <template>
-  <prime-card class="app-card tw:rounded-2xl tw:border">
+  <prime-card :class="[appCard, cardRing]">
     <template #content>
       <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
         <div>
