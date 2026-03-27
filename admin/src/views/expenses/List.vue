@@ -642,8 +642,24 @@ const handleDelete = (expense) => {
       size="small"
     />
 
-    <!-- P&L summary cards -->
-    <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-3 tw:gap-3">
+    <!-- P&L compact bar (mobile only) -->
+    <div class="tw:sm:hidden tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-slate-50 tw:dark:bg-white/5 tw:px-4 tw:py-3 tw:grid tw:grid-cols-3 tw:gap-2">
+      <div class="tw:flex tw:flex-col tw:gap-0.5">
+        <span class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-emerald-500 tw:dark:text-emerald-400">{{ t('expenses.summary.revenue') }}</span>
+        <span class="tw:text-sm tw:font-bold">{{ summaryLoading ? '…' : formatVnd(revenue.total) }}</span>
+      </div>
+      <div class="tw:flex tw:flex-col tw:gap-0.5 tw:border-x tw:border-slate-200 tw:dark:border-white/10 tw:px-2">
+        <span class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-red-500 tw:dark:text-red-400">{{ t('expenses.summary.expenses') }}</span>
+        <span class="tw:text-sm tw:font-bold">{{ summaryLoading ? '…' : formatVnd(expenseBreakdown.total) }}</span>
+      </div>
+      <div class="tw:flex tw:flex-col tw:gap-0.5 tw:text-right">
+        <span class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">{{ t('expenses.summary.profit') }}</span>
+        <span class="tw:text-sm tw:font-bold" :class="profit >= 0 ? 'tw:text-emerald-500 tw:dark:text-emerald-400' : 'tw:text-red-500 tw:dark:text-red-400'">{{ summaryLoading ? '…' : formatVnd(profit) }}</span>
+      </div>
+    </div>
+
+    <!-- P&L summary cards (desktop) -->
+    <div class="tw:hidden tw:sm:grid tw:grid-cols-3 tw:gap-3">
       <!-- Revenue -->
       <widget-stat
         :label="t('expenses.summary.revenue')"
