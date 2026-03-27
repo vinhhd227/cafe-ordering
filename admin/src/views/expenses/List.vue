@@ -643,7 +643,7 @@ const handleDelete = (expense) => {
     />
 
     <!-- P&L compact bar (mobile only) -->
-    <div class="tw:sm:hidden tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-slate-50 tw:dark:bg-white/5 tw:px-4 tw:py-3 tw:grid tw:grid-cols-3 tw:gap-2">
+    <div class="tw:sm:hidden tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/15 tw:bg-slate-50 tw:dark:bg-white/5 tw:px-4 tw:py-3 tw:grid tw:grid-cols-3 tw:gap-2">
       <div class="tw:flex tw:flex-col tw:gap-0.5">
         <span class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-emerald-500 tw:dark:text-emerald-400">{{ t('expenses.summary.revenue') }}</span>
         <span class="tw:text-sm tw:font-bold">{{ summaryLoading ? '…' : formatVnd(revenue.total) }}</span>
@@ -791,15 +791,17 @@ const handleDelete = (expense) => {
             :outlined="!hasActiveFilters"
             v-tooltip.top="t('expenses.filter.filtersTooltip')"
             @click="filterPanel.toggle($event)"
-            :class="!hasActiveFilters ? btnIcon : ''"
+            :class="btnIcon"
           >
-            <iconify icon="ph:funnel-bold" />
-            <prime-badge
-              v-if="activeFilterCount > 0"
-              :value="activeFilterCount"
-              severity="danger"
-              class="tw:ml-1 tw:scale-90"
-            />
+            <span class="tw:relative tw:inline-flex">
+              <iconify icon="ph:funnel-bold" />
+              <prime-badge
+                v-if="activeFilterCount > 0"
+                :value="activeFilterCount"
+                severity="danger"
+                class="tw:absolute! tw:-top-2.5! tw:-right-2.5! tw:scale-75! tw:origin-top-right!"
+              />
+            </span>
           </prime-button>
 
           <!-- Filter popover -->
@@ -924,7 +926,7 @@ const handleDelete = (expense) => {
       </template>
 
       <template #mobile-card="{ data }">
-        <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-white tw:dark:bg-white/5 tw:p-3 tw:flex tw:flex-col tw:gap-2">
+        <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/15 tw:p-3 tw:flex tw:flex-col tw:gap-2">
           <!-- Date + Total -->
           <div class="tw:flex tw:items-center tw:justify-between tw:gap-1">
             <span class="tw:text-xs app-text-muted">{{ formatDate(data.purchaseDate) }}</span>

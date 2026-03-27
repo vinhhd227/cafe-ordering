@@ -253,15 +253,17 @@ const openDrawer = (row) => {
             :outlined="!hasActiveFilters"
             v-tooltip.top="t('categories.list.filtersTooltip')"
             @click="filterPanel.toggle($event)"
-            :class="!hasActiveFilters ? btnIcon : ''"
+            :class="btnIcon"
           >
-            <iconify icon="ph:funnel-bold" />
-            <prime-badge
-              v-if="activeFilterCount > 0"
-              :value="activeFilterCount"
-              severity="danger"
-              class="tw:ml-1 tw:scale-90"
-            />
+            <span class="tw:relative tw:inline-flex">
+              <iconify icon="ph:funnel-bold" />
+              <prime-badge
+                v-if="activeFilterCount > 0"
+                :value="activeFilterCount"
+                severity="danger"
+                class="tw:absolute! tw:-top-2.5! tw:-right-2.5! tw:scale-75! tw:origin-top-right!"
+              />
+            </span>
           </prime-button>
 
           <!-- Filter popover -->
@@ -312,11 +314,11 @@ const openDrawer = (row) => {
           <p v-if="data.description" class="tw:text-xs app-text-muted tw:line-clamp-2">{{ data.description }}</p>
           <p v-else class="tw:text-xs app-text-subtle">—</p>
           <!-- Actions -->
-          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2 tw:flex tw:justify-end">
-            <prime-button
-              severity="secondary" outlined size="small" :class="btnIcon"
-              @click="openDrawer(data)"
-            ><iconify icon="ph:dots-three-bold" /></prime-button>
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
+            <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
+              <iconify icon="ph:dots-three-bold" />
+              <span>{{ t('common.moreActions') }}</span>
+            </prime-button>
           </div>
         </div>
       </template>

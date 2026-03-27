@@ -861,8 +861,28 @@ const columns = computed(() => [
       </div>
     </div>
 
-    <!-- ── Summary stats ─────────────────────────────────────────── -->
-    <div :class="['tw:grid tw:gap-3', wColsClass]">
+    <!-- ── Summary stats (mobile compact bar) ───────────────────── -->
+    <div class="tw:sm:hidden tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/15 tw:bg-slate-50 tw:dark:bg-white/5 tw:p-4 tw:grid tw:grid-cols-2">
+      <div class="tw:flex tw:flex-col tw:gap-0.5 tw:pb-3 tw:pr-4">
+        <span class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-subtle">{{ t('tables.widgets.total.label') }}</span>
+        <span class="tw:text-sm tw:font-bold">{{ summary.total }}</span>
+      </div>
+      <div class="tw:flex tw:flex-col tw:gap-0.5 tw:pb-3 tw:pl-4 tw:border-l tw:border-slate-200 tw:dark:border-white/10">
+        <span class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-emerald-500 tw:dark:text-emerald-400">{{ t('tables.widgets.available.label') }}</span>
+        <span class="tw:text-sm tw:font-bold">{{ summary.available }}</span>
+      </div>
+      <div class="tw:flex tw:flex-col tw:gap-0.5 tw:pt-3 tw:pr-4 tw:border-t tw:border-slate-200 tw:dark:border-white/10">
+        <span class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-blue-500 tw:dark:text-blue-400">{{ t('tables.widgets.occupied.label') }}</span>
+        <span class="tw:text-sm tw:font-bold">{{ summary.occupied }}</span>
+      </div>
+      <div class="tw:flex tw:flex-col tw:gap-0.5 tw:pt-3 tw:pl-4 tw:border-t tw:border-l tw:border-slate-200 tw:dark:border-white/10">
+        <span class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-yellow-500 tw:dark:text-yellow-400">{{ t('tables.widgets.cleaning.label') }}</span>
+        <span class="tw:text-sm tw:font-bold">{{ summary.cleaning }}</span>
+      </div>
+    </div>
+
+    <!-- ── Summary stats (desktop) ───────────────────────────────── -->
+    <div :class="['tw:hidden tw:sm:grid tw:gap-3', wColsClass]">
       <widget-stat v-if="wVisible('total')"     :label="t('tables.widgets.total.label')"     :value="summary.total" />
       <widget-stat v-if="wVisible('available')" :label="t('tables.widgets.available.label')" :value="summary.available" label-class="tw:text-emerald-400" />
       <widget-stat v-if="wVisible('occupied')"  :label="t('tables.widgets.occupied.label')"  :value="summary.occupied"  label-class="tw:text-blue-400" />
@@ -897,15 +917,17 @@ const columns = computed(() => [
             :outlined="activeFilterCount === 0"
             v-tooltip.top="t('tables.filter.filtersTooltip')"
             @click="openFilter($event)"
-            :class="!activeFilterCount ? btnIcon : ''"
+            :class="btnIcon"
           >
-            <iconify icon="ph:funnel-bold" />
-            <prime-badge
-              v-if="activeFilterCount > 0"
-              :value="activeFilterCount"
-              severity="danger"
-              class="tw:ml-1 tw:scale-90"
-            />
+            <span class="tw:relative tw:inline-flex">
+              <iconify icon="ph:funnel-bold" />
+              <prime-badge
+                v-if="activeFilterCount > 0"
+                :value="activeFilterCount"
+                severity="danger"
+                class="tw:absolute! tw:-top-2.5! tw:-right-2.5! tw:scale-75! tw:origin-top-right!"
+              />
+            </span>
           </prime-button>
 
           <prime-popover ref="filterPanel">
@@ -999,12 +1021,11 @@ const columns = computed(() => [
             <prime-tag v-if="!data.isActive" :value="t('tables.activeStatus.inactive')" severity="danger" class="tw:text-[10px]! tw:px-1! tw:py-0!" />
           </div>
           <!-- Actions -->
-          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2 tw:flex tw:justify-end">
-            <prime-button
-              severity="secondary" outlined size="small"
-              :class="btnIcon"
-              @click="openDrawer(data)"
-            ><iconify icon="ph:dots-three-bold" /></prime-button>
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
+            <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
+              <iconify icon="ph:dots-three-bold" />
+              <span>{{ t('common.moreActions') }}</span>
+            </prime-button>
           </div>
         </div>
       </template>

@@ -310,9 +310,10 @@ onBeforeRouteLeave(() => {
             />
           </div>
           <p class="tw:text-xs app-text-muted">{{ data.tableCount }} table(s)</p>
-          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2 tw:flex tw:justify-end">
-            <prime-button severity="secondary" outlined size="small" :class="btnIcon" @click="openDrawer(data)">
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
+            <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
               <iconify icon="ph:dots-three-bold" />
+              <span>{{ t('common.moreActions') }}</span>
             </prime-button>
           </div>
         </div>

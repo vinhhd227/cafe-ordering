@@ -918,16 +918,17 @@ const handleDelete = (promo) => {
             :outlined="!hasActiveFilters"
             v-tooltip.top="'Filters'"
             @click="filterPanel.toggle($event)"
-            :class="!hasActiveFilters ? btnIcon : ''"
+            :class="btnIcon"
           >
-            <iconify icon="ph:funnel-bold" />
-            <span>Filters</span>
-            <prime-badge
-              v-if="activeFilterCount > 0"
-              :value="activeFilterCount"
-              severity="danger"
-              class="tw:ml-1 tw:scale-90"
-            />
+            <span class="tw:relative tw:inline-flex">
+              <iconify icon="ph:funnel-bold" />
+              <prime-badge
+                v-if="activeFilterCount > 0"
+                :value="activeFilterCount"
+                severity="danger"
+                class="tw:absolute! tw:-top-2.5! tw:-right-2.5! tw:scale-75! tw:origin-top-right!"
+              />
+            </span>
           </prime-button>
 
           <!-- Filter popover -->
@@ -1018,9 +1019,10 @@ const handleDelete = (promo) => {
           </div>
           <p v-if="data.code" class="tw:text-xs tw:font-mono app-text-muted">{{ data.code }}</p>
           <p class="tw:text-xs app-text-muted">{{ discountValueLabel(data) }}</p>
-          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2 tw:flex tw:justify-end">
-            <prime-button severity="secondary" outlined size="small" :class="btnIcon" @click="openDrawer(data)">
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
+            <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
               <iconify icon="ph:dots-three-bold" />
+              <span>{{ t('common.moreActions') }}</span>
             </prime-button>
           </div>
         </div>
