@@ -43,7 +43,6 @@ const { isCollapsed, toggle, toggleCollapse } = useSidebar();
 
     <div class="tw:flex tw:items-center tw:gap-2">
       <notification-bell />
-      <prime-button :label="t('header.export')" severity="secondary" outlined size="small" />
     </div>
   </header>
 </template>

@@ -1,0 +1,13 @@
+{
+  "notifications": {
+    "title": "Thông báo",
+    "empty": "Không có thông báo mới",
+    "newOrder": "Đơn hàng mới",
+    "table": "Bàn",
+    "itemCount": "{n} món",
+    "itemUnit": "món",
+    "sound": "Bật/tắt âm thanh",
+    "markAllRead": "Đánh dấu đã đọc",
+    "clear": "Xóa tất cả"
+  }
+}

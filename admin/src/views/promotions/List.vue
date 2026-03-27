@@ -47,15 +47,6 @@ const scopeFilter       = ref(null);
 const discountTypeFilter = ref(null);
 const filterPanel        = ref(null);
 
-// ── Restore cache ─────────────────────────────────────────────────
-const _cached = restoreCache();
-if (_cached) {
-  if (_cached.rows !== undefined)               rows.value              = _cached.rows;
-  if (_cached.first !== undefined)              first.value             = _cached.first;
-  if (_cached.isActiveFilter !== undefined)     isActiveFilter.value    = _cached.isActiveFilter;
-  if (_cached.scopeFilter !== undefined)        scopeFilter.value       = _cached.scopeFilter;
-  if (_cached.discountTypeFilter !== undefined) discountTypeFilter.value = _cached.discountTypeFilter;
-}
 
 // ── Helpers ───────────────────────────────────────────────────────
 const formatVnd = (value) =>
@@ -133,7 +124,21 @@ const loadPromotions = async () => {
   }
 };
 
-onMounted(loadPromotions);
+onMounted(() => {
+  const cached = restoreCache();
+  if (cached) {
+    if (cached.rows !== undefined)               rows.value               = cached.rows;
+    if (cached.first !== undefined)              first.value              = cached.first;
+    if (cached.isActiveFilter !== undefined)     isActiveFilter.value     = cached.isActiveFilter;
+    if (cached.scopeFilter !== undefined)        scopeFilter.value        = cached.scopeFilter;
+    if (cached.discountTypeFilter !== undefined) discountTypeFilter.value = cached.discountTypeFilter;
+  }
+  loadPromotions();
+});
+
+onBeforeRouteLeave(() => {
+  saveCurrentState();
+});
 
 watch([isActiveFilter, scopeFilter, discountTypeFilter], () => {
   first.value = 0;
@@ -429,6 +434,11 @@ const columns = [
   { key: 'isActive', header: 'Active',   width: '6rem' },
   { key: 'actions',  header: 'Actions',  width: '8rem', toggleable: false },
 ];
+
+// ── Mobile drawer ──────────────────────────────────────────────────
+const drawerPromo = ref(null);
+const drawerVisible = ref(false);
+const openDrawer = (row) => { drawerPromo.value = row; drawerVisible.value = true; };
 
 // ── Toggle active ──────────────────────────────────────────────────
 const togglingId = ref(null);
@@ -908,16 +918,17 @@ const handleDelete = (promo) => {
             :outlined="!hasActiveFilters"
             v-tooltip.top="'Filters'"
             @click="filterPanel.toggle($event)"
-            :class="!hasActiveFilters ? btnIcon : ''"
+            :class="btnIcon"
           >
-            <iconify icon="ph:funnel-bold" />
-            <span>Filters</span>
-            <prime-badge
-              v-if="activeFilterCount > 0"
-              :value="activeFilterCount"
-              severity="danger"
-              class="tw:ml-1 tw:scale-90"
-            />
+            <span class="tw:relative tw:inline-flex">
+              <iconify icon="ph:funnel-bold" />
+              <prime-badge
+                v-if="activeFilterCount > 0"
+                :value="activeFilterCount"
+                severity="danger"
+                class="tw:absolute! tw:-top-2.5! tw:-right-2.5! tw:scale-75! tw:origin-top-right!"
+              />
+            </span>
           </prime-button>
 
           <!-- Filter popover -->
@@ -993,6 +1004,27 @@ const handleDelete = (promo) => {
               </prime-button>
             </div>
           </prime-popover>
+        </div>
+      </template>
+
+      <template #mobile-card="{ data }">
+        <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-white tw:dark:bg-white/5 tw:p-3 tw:flex tw:flex-col tw:gap-2">
+          <div class="tw:flex tw:items-start tw:justify-between tw:gap-1">
+            <span class="tw:font-semibold tw:text-sm tw:leading-snug">{{ data.name }}</span>
+            <prime-tag
+              :value="data.isActive ? 'Active' : 'Inactive'"
+              :severity="data.isActive ? 'success' : 'danger'"
+              class="tw:text-[11px]! tw:px-1.5! tw:py-0.5! tw:flex-shrink-0"
+            />
+          </div>
+          <p v-if="data.code" class="tw:text-xs tw:font-mono app-text-muted">{{ data.code }}</p>
+          <p class="tw:text-xs app-text-muted">{{ discountValueLabel(data) }}</p>
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
+            <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
+              <iconify icon="ph:dots-three-bold" />
+              <span>{{ t('common.moreActions') }}</span>
+            </prime-button>
+          </div>
         </div>
       </template>
 
@@ -1094,5 +1126,44 @@ const handleDelete = (promo) => {
         </div>
       </template>
     </AppTable>
+
+    <!-- ── Mobile action drawer ───────────────────────────────────── -->
+    <prime-drawer
+      v-model:visible="drawerVisible"
+      position="bottom"
+      :style="{ height: 'auto' }"
+      :pt="{ root: { class: 'tw:rounded-t-2xl' } }"
+    >
+      <template #header>
+        <div class="tw:flex tw:items-center tw:gap-2">
+          <span class="tw:font-medium">{{ drawerPromo?.name }}</span>
+          <prime-tag
+            v-if="drawerPromo"
+            :value="drawerPromo.isActive ? 'Active' : 'Inactive'"
+            :severity="drawerPromo.isActive ? 'success' : 'danger'"
+            class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
+          />
+        </div>
+      </template>
+      <div v-if="drawerPromo" class="tw:flex tw:flex-col tw:gap-2 tw:pb-4">
+        <prime-button
+          :label="drawerPromo.isActive ? 'Deactivate' : 'Activate'"
+          :severity="drawerPromo.isActive ? 'danger' : 'success'"
+          outlined fluid
+          :loading="togglingId === drawerPromo.id"
+          @click="handleToggle(drawerPromo); drawerVisible = false"
+        >
+          <template #icon>
+            <iconify :icon="drawerPromo.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
+          </template>
+        </prime-button>
+        <prime-button label="Edit" severity="secondary" outlined fluid @click="openEditDialog(drawerPromo); drawerVisible = false">
+          <template #icon><iconify icon="ph:pencil-bold" /></template>
+        </prime-button>
+        <prime-button label="Delete" severity="danger" outlined fluid @click="handleDelete(drawerPromo); drawerVisible = false">
+          <template #icon><iconify icon="ph:trash-bold" /></template>
+        </prime-button>
+      </div>
+    </prime-drawer>
   </section>
 </template>

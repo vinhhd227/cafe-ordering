@@ -1,0 +1,26 @@
+{
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "create": "Tạo mới",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "reset": "Đặt lại",
+    "confirm": "Xác nhận",
+    "close": "Đóng",
+    "active": "Hoạt động",
+    "inactive": "Không hoạt động",
+    "status": "Trạng thái",
+    "actions": "Thao tác",
+    "moreActions": "Xem thêm",
+    "loading": "Đang tải...",
+    "noData": "Không có dữ liệu.",
+    "table": {
+      "emptyMessage": "Không có dữ liệu",
+      "showing": "Hiển thị {from} đến {to} trong tổng số {total} mục",
+      "itemsPerPage": "Số mục mỗi trang"
+    }
+  }
+}

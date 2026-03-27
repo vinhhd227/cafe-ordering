@@ -1,7 +1,4 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import { usePermission } from "@/composables/usePermission";
-import AppTable from "@/components/AppTable.vue";
 import {
   listZones,
   createZone,
@@ -10,9 +7,9 @@ import {
   activateZone,
   deactivateZone,
 } from "@/services/zone.service";
-import { btnIcon } from "@/layout/ui";
 
 const { can } = usePermission();
+const cache = useTableCache('zones');
 
 // ── State ──────────────────────────────────────────────────────────
 const loading = ref(false);
@@ -150,8 +147,22 @@ const columns = [
   { key: "actions",        header: "Actions",       width: "10rem", toggleable: false },
 ];
 
+// ── Mobile drawer ──────────────────────────────────────────────────
+const drawerZone = ref(null);
+const drawerVisible = ref(false);
+const openDrawer = (row) => { drawerZone.value = row; drawerVisible.value = true; };
+
 onMounted(() => {
+  const cached = cache.restore();
+  if (cached) {
+    rows.value  = cached.rows  ?? 20;
+    first.value = cached.first ?? 0;
+  }
   load();
+});
+
+onBeforeRouteLeave(() => {
+  cache.save({ rows: rows.value, first: first.value });
 });
 </script>
 
@@ -288,6 +299,26 @@ onMounted(() => {
       :columns="columns"
       @page="(e) => (first = e.first)"
     >
+      <template #mobile-card="{ data }">
+        <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-white tw:dark:bg-white/5 tw:p-3 tw:flex tw:flex-col tw:gap-2">
+          <div class="tw:flex tw:items-start tw:justify-between tw:gap-1">
+            <span class="tw:font-semibold tw:text-sm tw:leading-snug">{{ data.name }}</span>
+            <prime-tag
+              :value="activeTag(data.isActive).label"
+              :severity="activeTag(data.isActive).severity"
+              class="tw:text-[11px]! tw:px-1.5! tw:py-0.5! tw:flex-shrink-0"
+            />
+          </div>
+          <p class="tw:text-xs app-text-muted">{{ data.tableCount }} table(s)</p>
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
+            <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
+              <iconify icon="ph:dots-three-bold" />
+              <span>{{ t('common.moreActions') }}</span>
+            </prime-button>
+          </div>
+        </div>
+      </template>
+
       <template #col-tableCount="{ data }">
         <span class="tw:text-sm">{{ data.tableCount }}</span>
       </template>
@@ -339,5 +370,56 @@ onMounted(() => {
         </div>
       </template>
     </AppTable>
+
+    <!-- ── Mobile action drawer ───────────────────────────────────── -->
+    <prime-drawer
+      v-model:visible="drawerVisible"
+      position="bottom"
+      :style="{ height: 'auto' }"
+      :pt="{ root: { class: 'tw:rounded-t-2xl' } }"
+    >
+      <template #header>
+        <div class="tw:flex tw:items-center tw:gap-2">
+          <span class="tw:font-medium">{{ drawerZone?.name }}</span>
+          <prime-tag
+            v-if="drawerZone"
+            :value="activeTag(drawerZone.isActive).label"
+            :severity="activeTag(drawerZone.isActive).severity"
+            class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
+          />
+        </div>
+      </template>
+      <div v-if="drawerZone" class="tw:flex tw:flex-col tw:gap-2 tw:pb-4">
+        <prime-button
+          label="Manage tables"
+          severity="secondary"
+          outlined fluid
+          @click="$router.push({ name: 'zoneDetail', params: { id: drawerZone.id } }); drawerVisible = false"
+        >
+          <template #icon><iconify icon="ph:arrow-square-out-bold" /></template>
+        </prime-button>
+        <prime-button
+          v-if="can('zone.update')"
+          :label="drawerZone.isActive ? 'Deactivate' : 'Activate'"
+          :severity="drawerZone.isActive ? 'danger' : 'success'"
+          outlined fluid
+          @click="handleToggleActive(drawerZone); drawerVisible = false"
+        >
+          <template #icon>
+            <iconify :icon="drawerZone.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
+          </template>
+        </prime-button>
+        <prime-button
+          v-if="can('zone.delete')"
+          label="Delete"
+          severity="danger"
+          outlined fluid
+          :disabled="drawerZone.tableCount > 0"
+          @click="handleDelete(drawerZone); drawerVisible = false"
+        >
+          <template #icon><iconify icon="ph:trash-bold" /></template>
+        </prime-button>
+      </div>
+    </prime-drawer>
   </section>
 </template>

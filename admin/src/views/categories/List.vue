@@ -154,6 +154,15 @@ watch([search, statusFilter], () => {
 onBeforeUnmount(() => {
   clearTimeout(searchTimer.value);
 });
+
+// ── Mobile action drawer ───────────────────────────────────────────
+const drawerCategory = ref(null);
+const drawerVisible = ref(false);
+
+const openDrawer = (row) => {
+  drawerCategory.value = row;
+  drawerVisible.value = true;
+};
 </script>
 
 <template>
@@ -244,15 +253,17 @@ onBeforeUnmount(() => {
             :outlined="!hasActiveFilters"
             v-tooltip.top="t('categories.list.filtersTooltip')"
             @click="filterPanel.toggle($event)"
-            :class="!hasActiveFilters ? btnIcon : ''"
+            :class="btnIcon"
           >
-            <iconify icon="ph:funnel-bold" />
-            <prime-badge
-              v-if="activeFilterCount > 0"
-              :value="activeFilterCount"
-              severity="danger"
-              class="tw:ml-1 tw:scale-90"
-            />
+            <span class="tw:relative tw:inline-flex">
+              <iconify icon="ph:funnel-bold" />
+              <prime-badge
+                v-if="activeFilterCount > 0"
+                :value="activeFilterCount"
+                severity="danger"
+                class="tw:absolute! tw:-top-2.5! tw:-right-2.5! tw:scale-75! tw:origin-top-right!"
+              />
+            </span>
           </prime-button>
 
           <!-- Filter popover -->
@@ -285,6 +296,30 @@ onBeforeUnmount(() => {
               </prime-button>
             </div>
           </prime-popover>
+        </div>
+      </template>
+
+      <template #mobile-card="{ data }">
+        <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-white tw:dark:bg-white/5 tw:p-3 tw:flex tw:flex-col tw:gap-2">
+          <!-- Name + Status -->
+          <div class="tw:flex tw:items-start tw:justify-between tw:gap-1">
+            <span class="tw:font-semibold tw:text-sm tw:leading-snug">{{ data.name }}</span>
+            <prime-tag
+              :value="statusTag(data.isActive).label"
+              :severity="statusTag(data.isActive).severity"
+              class="tw:text-[11px]! tw:px-1.5! tw:py-0.5! tw:flex-shrink-0"
+            />
+          </div>
+          <!-- Description -->
+          <p v-if="data.description" class="tw:text-xs app-text-muted tw:line-clamp-2">{{ data.description }}</p>
+          <p v-else class="tw:text-xs app-text-subtle">—</p>
+          <!-- Actions -->
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
+            <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
+              <iconify icon="ph:dots-three-bold" />
+              <span>{{ t('common.moreActions') }}</span>
+            </prime-button>
+          </div>
         </div>
       </template>
 
@@ -325,6 +360,47 @@ onBeforeUnmount(() => {
         </div>
       </template>
     </AppTable>
+
+    <!-- ── Mobile action drawer ───────────────────────────────────── -->
+    <prime-drawer
+      v-model:visible="drawerVisible"
+      position="bottom"
+      :style="{ height: 'auto' }"
+      :pt="{ root: { class: 'tw:rounded-t-2xl' } }"
+    >
+      <template #header>
+        <div class="tw:flex tw:items-center tw:gap-2">
+          <span class="tw:font-medium">{{ drawerCategory?.name }}</span>
+          <prime-tag
+            v-if="drawerCategory"
+            :value="statusTag(drawerCategory.isActive).label"
+            :severity="statusTag(drawerCategory.isActive).severity"
+            class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
+          />
+        </div>
+      </template>
+
+      <div v-if="drawerCategory" class="tw:flex tw:flex-col tw:gap-2 tw:pb-4">
+        <prime-button
+          :label="drawerCategory.isActive ? t('categories.list.tooltip.deactivate') : t('categories.list.tooltip.activate')"
+          :severity="drawerCategory.isActive ? 'danger' : 'success'"
+          outlined fluid
+          @click="handleToggleActive(drawerCategory); drawerVisible = false"
+        >
+          <template #icon>
+            <iconify :icon="drawerCategory.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
+          </template>
+        </prime-button>
+
+        <prime-button
+          :label="t('categories.list.tooltip.viewDetail')"
+          severity="secondary" outlined fluid
+          @click="router.push({ name: 'categoriesDetail', params: { id: drawerCategory.id } }); drawerVisible = false"
+        >
+          <template #icon><iconify icon="ph:arrow-right-bold" /></template>
+        </prime-button>
+      </div>
+    </prime-drawer>
 
   </section>
 </template>

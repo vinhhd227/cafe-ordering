@@ -61,6 +61,7 @@ import ProgressSpinner from "primevue/progressspinner";
 import ConfirmDialog from "primevue/confirmdialog";
 import MultiSelect from 'primevue/multiselect';
 import TreeSelect from "primevue/treeselect";
+import Drawer from "primevue/drawer";
 
 import ConfirmationService from "primevue/confirmationservice";
 import Chart from "primevue/chart";
@@ -192,5 +193,6 @@ export default {
     app.component("prime-chart", Chart);
     app.component("prime-multi-select", MultiSelect);
     app.component("prime-tree-select", TreeSelect);
+    app.component("prime-drawer", Drawer);
   },
 };

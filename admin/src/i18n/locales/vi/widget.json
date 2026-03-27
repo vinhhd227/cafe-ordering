@@ -1,0 +1,17 @@
+{
+  "widget": {
+    "revenue": {
+      "label": "Tổng doanh thu",
+      "cash": "Tiền mặt",
+      "bank": "Chuyển khoản",
+      "tip": "Tiền tip"
+    },
+    "orders": {
+      "label": "Tổng đơn hàng",
+      "pending": "Chờ xử lý",
+      "processing": "Đang pha",
+      "cancelled": "Đã hủy",
+      "completed": "Hoàn thành"
+    }
+  }
+}

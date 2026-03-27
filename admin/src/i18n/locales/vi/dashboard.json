@@ -1,0 +1,74 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "snapshotToday": "Tổng quan hôm nay",
+    "viewOrders": "Xem đơn hàng",
+    "newOrder": "Tạo đơn mới",
+    "kpi": {
+      "revenue": "Doanh thu",
+      "orders": "Đơn hàng",
+      "tables": "Bàn",
+      "tablesCount": "{n} bàn",
+      "profit": "Lợi nhuận ước tính",
+      "profitTooltip": "Chưa bao gồm: nhân sự, điện nước, thuê mặt bằng",
+      "vsYesterday": "so với hôm qua",
+      "cash": "Tiền mặt",
+      "bank": "CK",
+      "avg": "Avg",
+      "occupancyRate": "Tỷ lệ lấp đầy",
+      "occupied": "Có khách",
+      "free": "Trống",
+      "ordering": "Đang order",
+      "margin": "Biên lợi nhuận",
+      "profitNote": "* chưa gồm nhân sự, điện nước"
+    },
+    "charts": {
+      "revExpenses": "Doanh thu & Chi phí",
+      "last7days": "7 ngày gần nhất",
+      "revenue": "Doanh thu",
+      "expenses": "Chi phí",
+      "ordersByHour": "Đơn theo giờ",
+      "todayPeakOrders": "Hôm nay — Peak: {h} ({n} đơn)",
+      "heatmap": "Giờ vàng doanh thu",
+      "todayPeakRev": "Hôm nay — Peak: {h} ({rev})",
+      "low": "Thấp",
+      "high": "Cao",
+      "peakLabel": "Peak {h} · {rev}",
+      "prepareBefore": "Chuẩn bị đá, topping, sữa trước"
+    },
+    "tableStatus": {
+      "title": "Trạng thái bàn",
+      "occupiedCount": "{n} đang có khách",
+      "available": "Trống",
+      "occupied": "Có khách",
+      "ordering": "Đang order"
+    },
+    "recentOrders": {
+      "title": "Đơn hàng gần đây",
+      "subtitle": "Cập nhật liên tục",
+      "viewKanban": "Kanban"
+    },
+    "topProducts": {
+      "title": "Top sản phẩm",
+      "subtitle": "Theo số lượng bán",
+      "unit": "ly"
+    },
+    "revenueDrivers": {
+      "title": "Revenue Drivers",
+      "subtitle": "Kéo doanh thu hôm nay",
+      "upsell": "↑ upsell",
+      "insightPre": "Món",
+      "insightPost": "bán ít nhưng doanh thu cao — ưu tiên push menu & combo."
+    },
+    "topCategories": {
+      "title": "Top danh mục",
+      "subtitle": "Theo doanh thu hôm nay"
+    },
+    "paymentRatio": {
+      "title": "Tỉ lệ thanh toán",
+      "today": "Hôm nay",
+      "cash": "Tiền mặt",
+      "bank": "Chuyển khoản"
+    }
+  }
+}

@@ -10,6 +10,14 @@
   + Inherit from `Summary<{EndpointName}Endpoint>`
   + Must include: Summary, Description, ResponseExamples for 200, and all possible Response codes with descriptions
 
+## Rules Files
+
+@docs/rules/dotnet.md
+@docs/rules/vue.md
+@docs/rules/vue-list-page.md
+@docs/rules/git.md
+@docs/rules/claude.md
+
 ## 1. Project Overview
 
 Hệ thống đặt món quán cafe với kiến trúc monorepo gồm 3 phần:

@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "expenses": "Expenses",
+    "tables": "Tables",
+    "zones": "Zones",
+    "menu": "Menu",
+    "products": "Products",
+    "categories": "Categories",
+    "promotions": "Promotions",
+    "reports": "Reports",
+    "staff": "Staff",
+    "customers": "Customers",
+    "users": "Users",
+    "roles": "Roles",
+    "groups": {
+      "overview": "Overview",
+      "operations": "Operations",
+      "people": "People"
+    }
+  }
+}

@@ -1,7 +1,4 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { onBeforeRouteLeave } from "vue-router";
-import { useToast } from "primevue/usetoast";
 import {
   getRoles,
   createRole,
@@ -10,10 +7,6 @@ import {
   getRolePermissions,
   setRolePermissions,
 } from "@/services/role.service";
-import AppTable from "@/components/AppTable.vue";
-import { useTableCache } from "@/composables/useTableCache";
-import { useAuthStore } from "@/stores/auth";
-import { btnIcon } from "@/layout/ui";
 
 const cache = useTableCache("roles");
 const toast = useToast();
@@ -301,6 +294,11 @@ const isGroupAllChecked = (items) => items.every((p) => p.assigned);
 const isGroupPartChecked = (items) =>
   items.some((p) => p.assigned) && !items.every((p) => p.assigned);
 
+// ── Mobile drawer ──────────────────────────────────────────────────
+const drawerRole = ref(null);
+const drawerVisible = ref(false);
+const openDrawer = (row) => { drawerRole.value = row; drawerVisible.value = true; };
+
 const savePermissions = async () => {
   permissionsSaving.value = true;
   permissionsError.value = "";
@@ -400,6 +398,26 @@ const savePermissions = async () => {
         />
       </template>
 
+      <template #mobile-card="{ data }">
+        <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-white tw:dark:bg-white/5 tw:p-3 tw:flex tw:flex-col tw:gap-2">
+          <div class="tw:flex tw:items-start tw:justify-between tw:gap-1">
+            <div class="tw:flex tw:items-center tw:gap-2">
+              <div :class="['tw:h-8 tw:w-8 tw:rounded-full tw:flex tw:items-center tw:justify-center tw:flex-shrink-0', roleBg(data.name), roleColor(data.name)]">
+                <iconify :icon="roleIcon(data.name)" class="tw:text-sm" />
+              </div>
+              <span class="tw:font-semibold tw:text-sm">{{ data.name }}</span>
+            </div>
+          </div>
+          <p v-if="data.description" class="tw:text-xs app-text-muted tw:line-clamp-2">{{ data.description }}</p>
+          <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
+            <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
+              <iconify icon="ph:dots-three-bold" />
+              <span>{{ t('common.moreActions') }}</span>
+            </prime-button>
+          </div>
+        </div>
+      </template>
+
       <template #col-role="{ data }">
         <div class="tw:flex tw:items-center tw:gap-3">
           <div
@@ -461,6 +479,31 @@ const savePermissions = async () => {
         </div>
       </template>
     </AppTable>
+
+    <!-- ── Mobile action drawer ───────────────────────────────────── -->
+    <prime-drawer
+      v-model:visible="drawerVisible"
+      position="bottom"
+      :style="{ height: 'auto' }"
+      :pt="{ root: { class: 'tw:rounded-t-2xl' } }"
+    >
+      <template #header>
+        <div class="tw:flex tw:items-center tw:gap-2">
+          <span class="tw:font-medium">{{ drawerRole?.name }}</span>
+        </div>
+      </template>
+      <div v-if="drawerRole" class="tw:flex tw:flex-col tw:gap-2 tw:pb-4">
+        <prime-button label="Permissions" severity="secondary" outlined fluid @click="openPermissionsDialog(drawerRole); drawerVisible = false">
+          <template #icon><iconify icon="ph:key-bold" /></template>
+        </prime-button>
+        <prime-button label="Edit" severity="secondary" outlined fluid @click="openEditDialog(drawerRole); drawerVisible = false">
+          <template #icon><iconify icon="ph:pencil-bold" /></template>
+        </prime-button>
+        <prime-button label="Delete" severity="danger" outlined fluid @click="confirmDeleteRole = drawerRole; drawerVisible = false">
+          <template #icon><iconify icon="ph:trash-bold" /></template>
+        </prime-button>
+      </div>
+    </prime-drawer>
 
     <!-- ===== Add Role Dialog ===== -->
     <prime-dialog

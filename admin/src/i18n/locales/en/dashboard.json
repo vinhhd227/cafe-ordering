@@ -1,0 +1,74 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "snapshotToday": "Snapshot for today",
+    "viewOrders": "View orders",
+    "newOrder": "New order",
+    "kpi": {
+      "revenue": "Revenue",
+      "orders": "Orders",
+      "tables": "Tables",
+      "tablesCount": "{n} tables",
+      "profit": "Est. Profit",
+      "profitTooltip": "Excludes: staff, utilities, rent",
+      "vsYesterday": "vs yesterday",
+      "cash": "Cash",
+      "bank": "Bank",
+      "avg": "Avg",
+      "occupancyRate": "Occupancy rate",
+      "occupied": "Occupied",
+      "free": "Free",
+      "ordering": "Ordering",
+      "margin": "Margin",
+      "profitNote": "* excl. staff, utilities"
+    },
+    "charts": {
+      "revExpenses": "Revenue & Expenses",
+      "last7days": "Last 7 days",
+      "revenue": "Revenue",
+      "expenses": "Expenses",
+      "ordersByHour": "Orders by hour",
+      "todayPeakOrders": "Today — Peak: {h} ({n} orders)",
+      "heatmap": "Peak Revenue Hours",
+      "todayPeakRev": "Today — Peak: {h} ({rev})",
+      "low": "Low",
+      "high": "High",
+      "peakLabel": "Peak {h} · {rev}",
+      "prepareBefore": "Prepare ice, toppings, milk before"
+    },
+    "tableStatus": {
+      "title": "Table status",
+      "occupiedCount": "{n} tables occupied",
+      "available": "Available",
+      "occupied": "Occupied",
+      "ordering": "Ordering"
+    },
+    "recentOrders": {
+      "title": "Recent orders",
+      "subtitle": "Updates continuously",
+      "viewKanban": "Kanban"
+    },
+    "topProducts": {
+      "title": "Top products",
+      "subtitle": "By quantity sold",
+      "unit": "cups"
+    },
+    "revenueDrivers": {
+      "title": "Revenue Drivers",
+      "subtitle": "Driving today's revenue",
+      "upsell": "↑ upsell",
+      "insightPre": "Items marked",
+      "insightPost": "sell fewer but earn more — prioritize in menu & combos."
+    },
+    "topCategories": {
+      "title": "Top categories",
+      "subtitle": "By today's revenue"
+    },
+    "paymentRatio": {
+      "title": "Payment ratio",
+      "today": "Today",
+      "cash": "Cash",
+      "bank": "Bank transfer"
+    }
+  }
+}

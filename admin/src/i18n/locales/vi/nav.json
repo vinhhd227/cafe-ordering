@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "Tổng quan",
+    "orders": "Đơn hàng",
+    "expenses": "Chi phí",
+    "tables": "Bàn",
+    "zones": "Khu vực",
+    "menu": "Thực đơn",
+    "products": "Sản phẩm",
+    "categories": "Danh mục",
+    "promotions": "Khuyến mãi",
+    "reports": "Báo cáo",
+    "staff": "Nhân viên",
+    "customers": "Khách hàng",
+    "users": "Người dùng",
+    "roles": "Vai trò",
+    "groups": {
+      "overview": "Tổng quan",
+      "operations": "Vận hành",
+      "people": "Nhân sự"
+    }
+  }
+}

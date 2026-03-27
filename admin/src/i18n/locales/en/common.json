@@ -1,0 +1,26 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "confirm": "Confirm",
+    "close": "Close",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "actions": "Actions",
+    "moreActions": "More actions",
+    "loading": "Loading...",
+    "noData": "No data found.",
+    "table": {
+      "emptyMessage": "No records found",
+      "showing": "Showing {from} to {to} of {total} items",
+      "itemsPerPage": "Items per page"
+    }
+  }
+}
