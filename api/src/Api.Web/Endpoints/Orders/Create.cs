@@ -55,7 +55,8 @@ public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrde
         i.Temperature, i.IceLevel, i.SugarLevel, i.IsTakeaway, i.IsFreeGift, i.Note))
       .ToList();
 
-    var result = await mediator.Send(new PlaceOrderCommand(req.SessionId, items, req.GuestCount), ct);
+    var bypassCooldown = User.HasClaim("permission", "admin.access");
+    var result = await mediator.Send(new PlaceOrderCommand(req.SessionId, items, req.GuestCount, bypassCooldown), ct);
     await this.SendResultAsync(result, ct);
   }
 }

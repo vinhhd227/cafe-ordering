@@ -29,21 +29,24 @@ public class PlaceOrderHandler(
     if (session.Status == GuestSessionStatus.Closed)
       return Result.Conflict("Cannot place order on a closed session.");
 
-    // 2. Order cooldown — chống spam đặt hàng liên tục trong cùng session
-    var cooldownSeconds = configuration.GetValue<int>("OrderCooldown:Seconds", 30);
-    if (cooldownSeconds > 0)
+    // 2. Order cooldown — bỏ qua cho admin/staff (BypassCooldown = true)
+    if (!request.BypassCooldown)
     {
-      var lastOrder = await orderRepository.FirstOrDefaultAsync(
-        new LatestOrderBySessionIdSpec(request.SessionId), ct);
-
-      if (lastOrder is not null)
+      var cooldownSeconds = configuration.GetValue<int>("OrderCooldown:Seconds", 30);
+      if (cooldownSeconds > 0)
       {
-        var elapsed = DateTime.UtcNow - lastOrder.OrderDate;
-        if (elapsed.TotalSeconds < cooldownSeconds)
+        var lastOrder = await orderRepository.FirstOrDefaultAsync(
+          new LatestOrderBySessionIdSpec(request.SessionId), ct);
+
+        if (lastOrder is not null)
         {
-          var remaining = (int)(cooldownSeconds - elapsed.TotalSeconds) + 1;
-          return Result.Invalid(new ValidationError("SessionId",
-            $"Vui lòng chờ {remaining} giây trước khi đặt thêm."));
+          var elapsed = DateTime.UtcNow - lastOrder.OrderDate;
+          if (elapsed.TotalSeconds < cooldownSeconds)
+          {
+            var remaining = (int)(cooldownSeconds - elapsed.TotalSeconds) + 1;
+            return Result.Invalid(new ValidationError("SessionId",
+              $"Vui lòng chờ {remaining} giây trước khi đặt thêm."));
+          }
         }
       }
     }

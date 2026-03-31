@@ -5,4 +5,5 @@ namespace Api.UseCases.Orders.Create;
 public record PlaceOrderCommand(
   Guid SessionId,
   List<PlaceOrderItemDto> Items,
-  int? GuestCount = null) : ICommand<Result<PlaceOrderResponseDto>>;
+  int? GuestCount = null,
+  bool BypassCooldown = false) : ICommand<Result<PlaceOrderResponseDto>>;
