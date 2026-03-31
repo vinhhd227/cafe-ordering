@@ -73,6 +73,12 @@ public static class PermissionRegistry
       ["zone.read"]          = "View zone list",
       ["zone.update"]        = "Edit zone information",
       ["zone.delete"]        = "Delete zones",
+
+      // Utilities
+      ["utility.read"]       = "Access utility tools (menu design, WiFi QR)",
+      ["utility.create"]     = "Save WiFi profiles and other utility data",
+      ["utility.update"]     = "Edit saved utility data",
+      ["utility.delete"]     = "Delete saved utility data",
     };
 
   /// <summary>Returns the description for a permission value, or null if unknown.</summary>

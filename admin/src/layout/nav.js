@@ -69,6 +69,23 @@ export const navGroups = [
     ],
   },
   {
+    labelKey: "nav.groups.utilities",
+    items: [
+      {
+        labelKey: "nav.menuDesign",
+        icon: "ph:book-open-bold",
+        to: { name: "menuDesign" },
+        requiredClaim: "utility.read",
+      },
+      {
+        labelKey: "nav.wifiQr",
+        icon: "ph:wifi-high-bold",
+        to: { name: "wifiQr" },
+        requiredClaim: "utility.read",
+      },
+    ],
+  },
+  {
     labelKey: "nav.groups.people",
     items: [
       {

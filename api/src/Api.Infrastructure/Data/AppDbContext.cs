@@ -6,6 +6,8 @@ using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.ProductAggregate;
 using Api.Core.Aggregates.PromotionAggregate;
 using Api.Core.Aggregates.TableAggregate;
+using Api.Core.Aggregates.SavedMenuAggregate;
+using Api.Core.Aggregates.WifiProfileAggregate;
 using Api.Core.Aggregates.ZoneAggregate;
 
 namespace Api.Infrastructure.Data;
@@ -35,6 +37,8 @@ public class AppDbContext : DbContext
   public DbSet<OrderPromotion> OrderPromotions => Set<OrderPromotion>();
   public DbSet<Expense> Expenses => Set<Expense>();
   public DbSet<Promotion> Promotions => Set<Promotion>();
+  public DbSet<WifiProfile> WifiProfiles => Set<WifiProfile>();
+  public DbSet<SavedMenu> SavedMenus => Set<SavedMenu>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {

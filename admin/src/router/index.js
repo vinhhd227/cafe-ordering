@@ -196,6 +196,18 @@ const routes = [
         meta: { requiresAuth: true, requiredClaim: "promotion.read", section: "nav.groups.operations" },
       },
       {
+        path: "utilities/menu-design",
+        name: "menuDesign",
+        component: () => import("@/views/utilities/MenuDesign.vue"),
+        meta: { requiresAuth: true, requiredClaim: "utility.read", section: "nav.groups.utilities", pageTitle: "utilities.menuDesign.title" },
+      },
+      {
+        path: "utilities/wifi-qr",
+        name: "wifiQr",
+        component: () => import("@/views/utilities/WifiQr.vue"),
+        meta: { requiresAuth: true, requiredClaim: "utility.read", section: "nav.groups.utilities", pageTitle: "utilities.wifiQr.title" },
+      },
+      {
         path: "profile",
         name: "profile",
         component: () => import("@/views/Profile.vue"),

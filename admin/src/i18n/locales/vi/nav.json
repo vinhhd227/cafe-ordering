@@ -14,10 +14,13 @@
     "customers": "Khách hàng",
     "users": "Người dùng",
     "roles": "Vai trò",
+    "menuDesign": "Thiết kế menu",
+    "wifiQr": "Tạo QR wifi",
     "groups": {
       "overview": "Tổng quan",
       "operations": "Vận hành",
-      "people": "Nhân sự"
+      "people": "Nhân sự",
+      "utilities": "Tiện ích"
     }
   }
 }

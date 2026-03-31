@@ -24,7 +24,8 @@ public static class IdentitySeedData
       "zone.create", "zone.read", "zone.update", "zone.delete",
       "expense.read", "expense.create", "expense.update", "expense.delete",
       "promotion.create", "promotion.read", "promotion.update", "promotion.delete",
-      "report.read"
+      "report.read",
+      "utility.read", "utility.create", "utility.update", "utility.delete"
     ],
     ["Staff"] =
     [
@@ -35,6 +36,7 @@ public static class IdentitySeedData
       "table.read", "table.update",
       "zone.read",
       "expense.read", "expense.create", "expense.update",
+      "utility.read", "utility.create", "utility.update", "utility.delete"
     ],
     ["Customer"] =
     [
