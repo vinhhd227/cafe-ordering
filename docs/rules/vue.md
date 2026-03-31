@@ -56,6 +56,80 @@ Modifier syntax:
 class="tw:hover:text-primary-400! tw:focus:ring-2! tw:dark:bg-gray-800"
 ```
 
+**Ưu tiên class có sẵn thay vì arbitrary values** — dùng scale mặc định của Tailwind khi có thể:
+
+```html
+<!-- ✅ Đúng -->
+<div class="tw:max-h-100">   <!-- 400px = 100 * 4px -->
+<div class="tw:w-[360px]">   <!-- không có class chuẩn tương đương -->
+
+<!-- ❌ Sai — arbitrary value khi có class sẵn -->
+<div class="tw:max-h-[400px]">
+```
+
+**Dùng tên class hiện đại** — Tailwind v3+ có các alias ngắn hơn:
+
+| Cũ | Mới |
+|----|-----|
+| `tw:flex-shrink-0` | `tw:shrink-0` |
+| `tw:flex-shrink` | `tw:shrink` |
+| `tw:flex-grow-0` | `tw:grow-0` |
+| `tw:flex-grow` | `tw:grow` |
+| `tw:overflow-ellipsis` | `tw:text-ellipsis` |
+
+**Không dùng inline style cho sizing/spacing** — dùng Tailwind thay thế:
+
+```html
+<!-- ✅ Đúng -->
+<prime-dialog v-model:visible="show" class="tw:w-[360px]">
+
+<!-- ❌ Sai -->
+<prime-dialog v-model:visible="show" :style="{ width: '360px' }">
+```
+
+Inline style chỉ chấp nhận khi giá trị là dynamic (tính từ biến JS) và không có Tailwind tương đương, ví dụ: `:style="{ backgroundColor: primaryColor }"`.
+
+## Label và form elements
+
+`<label>` **phải có `for`** trỏ đúng vào `id` của input đi kèm:
+
+```html
+<!-- ✅ Đúng -->
+<label for="cafe-name" class="...">Tên quán</label>
+<prime-input-text id="cafe-name" v-model="cafeName" />
+
+<!-- ❌ Sai — label không có for -->
+<label class="...">Tên quán</label>
+<prime-input-text v-model="cafeName" />
+```
+
+Nếu không có input/form component đi kèm (chỉ hiển thị text), **dùng `<p>` hoặc `<span>`** thay vì `<label>`:
+
+## Button — ưu tiên prime-button
+
+Luôn dùng `<prime-button>` thay vì `<button>` HTML thuần:
+
+```html
+<!-- ✅ Đúng -->
+<prime-button severity="secondary" outlined @click="handleClick">
+  <iconify icon="ph:trash-bold" />
+  <span>Xóa</span>
+</prime-button>
+
+<!-- ❌ Sai -->
+<button class="..." @click="handleClick">Xóa</button>
+```
+
+`<button>` HTML chỉ chấp nhận trong các trường hợp đặc biệt khi `prime-button` không phù hợp về mặt kỹ thuật (ví dụ: button bên trong template preview xuất PNG/PDF vì `html-to-image`/`html2canvas` capture toàn bộ DOM).
+
+```html
+<!-- ✅ Đúng — chỉ là text mô tả, không liên kết với input -->
+<p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Template</p>
+
+<!-- ❌ Sai -->
+<label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Template</label>
+```
+
 ## PrimeVue Components
 
 - Prefix `prime-` cho tất cả PrimeVue components:
