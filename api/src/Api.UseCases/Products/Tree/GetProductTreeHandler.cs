@@ -18,7 +18,7 @@ public class GetProductTreeHandler(IReadRepositoryBase<Product> repository)
       .Select(g => new ProductTreeCategoryDto(
         g.Key.CategoryId,
         g.Key.CategoryName,
-        g.Select(p => new ProductTreeItemDto(p.Id, p.Name))
+        g.Select(p => new ProductTreeItemDto(p.Id, p.Name, p.Price))
           .OrderBy(p => p.Name)
           .ToList()))
       .ToList();
