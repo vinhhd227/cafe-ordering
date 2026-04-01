@@ -4,7 +4,10 @@
       "label": "Total revenue",
       "cash": "Cash",
       "bank": "Bank transfer",
-      "tip": "Tips"
+      "tip": "Tips",
+      "vsPrev": "vs {label}",
+      "vsAvg30": "vs 30-day avg",
+      "vsAvg30Label": "30-day avg"
     },
     "orders": {
       "label": "Total orders",

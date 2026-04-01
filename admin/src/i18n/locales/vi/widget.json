@@ -4,7 +4,10 @@
       "label": "Tổng doanh thu",
       "cash": "Tiền mặt",
       "bank": "Chuyển khoản",
-      "tip": "Tiền tip"
+      "tip": "Tiền tip",
+      "vsPrev": "so với {label}",
+      "vsAvg30": "so với tb 30 ngày",
+      "vsAvg30Label": "tb 30 ngày"
     },
     "orders": {
       "label": "Tổng đơn hàng",

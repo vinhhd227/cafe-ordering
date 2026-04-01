@@ -41,6 +41,9 @@
       "avgRevPerDay": "Doanh thu / ngày",
       "avgRevPerDaySubtitle": "Doanh thu trung bình mỗi ngày",
       "dayStats": "Thống kê ngày",
+      "dayStats_orders": "Đơn",
+      "peakHour": "Giờ cao điểm",
+      "itemsPerOrder": "Ly / đơn",
       "avgPerDay": {
         "title": "TB / ngày",
         "rev": "Doanh thu",
@@ -53,6 +56,12 @@
       "title": "Ly bán theo ngày",
       "label": "Ly"
     },
+    "hourlyChart": {
+      "title": "Doanh thu theo giờ",
+      "label": "Doanh thu",
+      "average": "TB/giờ",
+      "peak": "Giờ cao điểm"
+    },
     "topProducts": {
       "title": "Sản phẩm bán chạy",
       "subtitle": "Theo số lượng bán ra",
@@ -61,6 +70,10 @@
     "topCategories": {
       "title": "Danh mục nổi bật",
       "subtitle": "Theo doanh thu"
+    },
+    "comparison": {
+      "yesterday": "hôm qua",
+      "prevPeriod": "kỳ trước"
     },
     "error": "Không thể tải dữ liệu báo cáo.",
     "empty": "Không có đơn hàng trong khoảng thời gian này.",

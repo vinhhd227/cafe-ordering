@@ -1,12 +1,27 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 
-defineProps({
+const props = defineProps({
   total: { type: Number, default: 0 },
   cash: { type: Number, default: 0 },
   bank: { type: Number, default: 0 },
   tip: { type: Number, default: 0 },
+  prevPeriodRevenue: { type: Number, default: null },
+  avg30DayRevenue: { type: Number, default: null },
+  periodLabel: { type: String, default: '' },
 })
+
+const pctVsPrev = computed(() => {
+  if (props.prevPeriodRevenue == null || props.prevPeriodRevenue === 0) return null
+  return ((props.total - props.prevPeriodRevenue) / props.prevPeriodRevenue) * 100
+})
+
+const pctVsAvg30 = computed(() => {
+  if (props.avg30DayRevenue == null || props.avg30DayRevenue === 0) return null
+  return ((props.total - props.avg30DayRevenue) / props.avg30DayRevenue) * 100
+})
+
+const fmtPct = (val) => (val >= 0 ? '+' : '') + val.toFixed(1) + '%'
 
 const { t } = useI18n()
 
@@ -54,6 +69,37 @@ const fmt = (value) =>
           <span class="tw:min-w-0 tw:truncate">{{ t('widget.revenue.tip') }}</span>
         </span>
         <span class="tw:text-xs tw:font-medium tw:shrink-0">{{ fmt(tip) }}</span>
+      </div>
+
+      <div v-if="prevPeriodRevenue != null || avg30DayRevenue != null" class="tw:space-y-1 tw:mt-2 tw:pt-2 tw:border-t tw:border-white/8">
+        <div v-if="prevPeriodRevenue != null" class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:min-w-0">
+          <span class="tw:flex tw:items-center tw:gap-1 tw:text-[10px] tw:uppercase tw:tracking-[0.15em] app-text-muted">
+            <iconify :icon="pctVsPrev !== null && pctVsPrev >= 0 ? 'ph:trend-up-bold' : 'ph:trend-down-bold'"
+              class="tw:text-sm tw:shrink-0"
+              :class="pctVsPrev !== null && pctVsPrev >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'" />
+            <span>{{ periodLabel }}</span>
+          </span>
+          <div class="tw:text-right tw:shrink-0">
+            <span class="tw:text-xs tw:font-medium">{{ fmt(prevPeriodRevenue) }}</span>
+            <span v-if="pctVsPrev !== null" class="tw:text-[10px] tw:ml-1"
+              :class="pctVsPrev >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'"
+            >{{ fmtPct(pctVsPrev) }}</span>
+          </div>
+        </div>
+        <div v-if="avg30DayRevenue != null" class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:min-w-0">
+          <span class="tw:flex tw:items-center tw:gap-1 tw:text-[10px] tw:uppercase tw:tracking-[0.15em] app-text-muted">
+            <iconify :icon="pctVsAvg30 !== null && pctVsAvg30 >= 0 ? 'ph:trend-up-bold' : 'ph:trend-down-bold'"
+              class="tw:text-sm tw:shrink-0"
+              :class="pctVsAvg30 !== null && pctVsAvg30 >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'" />
+            <span>{{ t('widget.revenue.vsAvg30Label') }}</span>
+          </span>
+          <div class="tw:text-right tw:shrink-0">
+            <span class="tw:text-xs tw:font-medium">{{ fmt(avg30DayRevenue) }}</span>
+            <span v-if="pctVsAvg30 !== null" class="tw:text-[10px] tw:ml-1"
+              :class="pctVsAvg30 >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'"
+            >{{ fmtPct(pctVsAvg30) }}</span>
+          </div>
+        </div>
       </div>
     </template>
   </prime-card>

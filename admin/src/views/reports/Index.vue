@@ -101,6 +101,17 @@ const loading = ref(false)
 const error   = ref('')
 const data    = ref(null)
 
+const periodLabel = computed(() => {
+  if (activeTab.value === 'day') return t('report.comparison.yesterday')
+  const f = dateFrom.value
+  const t2 = dateTo.value
+  if (!f || !t2) return t('report.comparison.prevPeriod')
+  const days = Math.round((t2 - f) / 86400000) + 1
+  return days === 1
+    ? t('report.comparison.yesterday')
+    : t('report.comparison.prevPeriod')
+})
+
 const avgOrderValue = computed(() => {
   if (!data.value || data.value.completedOrders === 0) return 0
   return data.value.totalRevenue / data.value.completedOrders
@@ -129,6 +140,12 @@ const avgOrdersPerDay = computed(() => {
   const days = data.value?.dailyRevenue?.length
   if (!days) return 0
   return (data.value?.totalOrders ?? 0) / days
+})
+
+const avgItemsPerOrder = computed(() => {
+  const completed = data.value?.completedOrders ?? 0
+  if (!completed) return 0
+  return (data.value?.totalItemsSold ?? 0) / completed
 })
 
 // ── Chart ──────────────────────────────────────────────────────────
@@ -192,8 +209,11 @@ const chartOptions = computed(() => ({
       ticks: {
         color: 'rgb(156, 163, 175)',
         font: { size: 11 },
-        callback: (v) =>
-          new Intl.NumberFormat('vi-VN', { notation: 'compact', maximumFractionDigits: 1 }).format(v),
+        callback: (v) => {
+          if (v >= 1_000_000) return (v / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M'
+          if (v >= 1_000) return Math.round(v / 1_000) + 'K'
+          return String(v)
+        },
       },
       grid: { color: 'rgba(255,255,255,0.05)' },
     },
@@ -248,6 +268,83 @@ const itemsChartOptions = computed(() => ({
     },
   },
 }))
+
+// ── Hourly chart ───────────────────────────────────────────────────
+const hourlyChartData = computed(() => {
+  const hourly = (data.value?.hourlyRevenue ?? []).filter((h) => h.hour >= 8 && h.hour <= 17)
+  const avgRevenue = hourly.length ? hourly.reduce((s, h) => s + h.revenue, 0) / hourly.length : 0
+  return {
+    labels: hourly.map((h) => `${String(h.hour).padStart(2, '0')}:00`),
+    datasets: [
+      {
+        label: t('report.hourlyChart.label'),
+        data: hourly.map((h) => h.revenue),
+        backgroundColor: hourly.map((h) =>
+          h.revenue === Math.max(...hourly.map(x => x.revenue))
+            ? 'rgba(251, 146, 60, 0.9)'   // orange-400 — peak hour
+            : 'rgba(251, 146, 60, 0.45)'
+        ),
+        borderColor: 'rgb(251, 146, 60)',
+        borderWidth: 1,
+        borderRadius: 4,
+        order: 1,
+      },
+      {
+        type: 'line',
+        label: t('report.hourlyChart.average'),
+        data: Array(hourly.length).fill(avgRevenue),
+        borderColor: 'rgba(99, 202, 183, 0.55)',
+        borderWidth: 1.5,
+        borderDash: [5, 4],
+        pointRadius: 0,
+        fill: false,
+        tension: 0,
+        order: 0,
+      },
+    ],
+  }
+})
+
+const hourlyChartOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        label: (ctx) => ` ${fmt(ctx.parsed.y)}`,
+        afterLabel: (ctx) => {
+          const h = data.value?.hourlyRevenue?.[ctx.dataIndex]
+          return h?.orderCount ? ` ${h.orderCount} đơn` : ''
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      ticks: { color: 'rgb(156, 163, 175)', font: { size: 10 }, maxRotation: 0 },
+      grid: { color: 'rgba(255,255,255,0.05)' },
+    },
+    y: {
+      ticks: {
+        color: 'rgb(156, 163, 175)',
+        font: { size: 11 },
+        callback: (v) => {
+          if (v >= 1_000_000) return (v / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M'
+          if (v >= 1_000) return Math.round(v / 1_000) + 'K'
+          return String(v)
+        },
+      },
+      grid: { color: 'rgba(255,255,255,0.05)' },
+    },
+  },
+}))
+
+const peakHour = computed(() => {
+  const hourly = data.value?.hourlyRevenue
+  if (!hourly?.length) return null
+  return hourly.reduce((best, h) => h.revenue > best.revenue ? h : best, hourly[0])
+})
 
 // ── Export ─────────────────────────────────────────────────────────
 const reportContent = ref(null)
@@ -438,7 +535,14 @@ onMounted(load)
         {{ selectedDay.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) }}
       </p>
       <div v-if="data.totalOrders > 0" class="tw:grid tw:gap-3 tw:grid-cols-1 tw:sm:grid-cols-2">
-        <widget-orders-revenue :total="data.totalRevenue" :cash="data.cashRevenue" :bank="data.bankRevenue" />
+        <widget-orders-revenue
+          :total="data.totalRevenue"
+          :cash="data.cashRevenue"
+          :bank="data.bankRevenue"
+          :prev-period-revenue="data.prevPeriodRevenue"
+          :avg30-day-revenue="data.avg30DayRevenue"
+          :period-label="periodLabel"
+        />
         <prime-card
           :pt="{
             root: { class: `${appCard} ${cardRing} tw:p-4` },
@@ -455,33 +559,51 @@ onMounted(load)
           </template>
           <template #content>
             <div class="tw:grid tw:grid-cols-2 tw:gap-x-4 tw:mt-1">
-              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
-                <div class="tw:flex tw:items-center tw:gap-1.5">
-                  <iconify icon="ph:coffee-bold" class="tw:text-cyan-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.drinks') }}</span>
-                </div>
-                <span class="tw:text-xs tw:font-semibold">{{ data.totalItemsSold }}</span>
-              </div>
+              <!-- Đơn hoàn thành / tổng -->
               <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
                 <div class="tw:flex tw:items-center tw:gap-1.5">
                   <iconify icon="ph:receipt-bold" class="tw:text-green-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.orders') }}</span>
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.dayStats_orders') }}</span>
                 </div>
-                <span class="tw:text-xs tw:font-semibold">{{ data.totalOrders }}</span>
+                <span class="tw:text-xs tw:font-semibold">
+                  {{ data.totalOrders }}
+                  <span v-if="data.totalOrders > 0" class="app-text-muted tw:font-normal tw:text-[10px] tw:ml-0.5">
+                    {{ Math.round(data.completedOrders / data.totalOrders * 100) }}%
+                  </span>
+                </span>
               </div>
-              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
-                <div class="tw:flex tw:items-center tw:gap-1.5">
-                  <iconify icon="ph:users-bold" class="tw:text-amber-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.guests') }}</span>
-                </div>
-                <span class="tw:text-xs tw:font-semibold">{{ data.totalGuestCount ?? 0 }}</span>
-              </div>
+              <!-- TB / đơn -->
               <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
                 <div class="tw:flex tw:items-center tw:gap-1.5">
                   <iconify icon="ph:coins-bold" class="tw:text-rose-400 tw:text-sm tw:opacity-80" />
                   <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgOrder') }}</span>
                 </div>
                 <span class="tw:text-xs tw:font-semibold">{{ fmt(avgOrderValue) }}</span>
+              </div>
+              <!-- Giờ cao điểm -->
+              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
+                <div class="tw:flex tw:items-center tw:gap-1.5">
+                  <iconify icon="ph:clock-countdown-bold" class="tw:text-violet-400 tw:text-sm tw:opacity-80" />
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.peakHour') }}</span>
+                </div>
+                <span class="tw:text-xs tw:font-semibold">
+                  <template v-if="peakHour && peakHour.revenue > 0">
+                    {{ String(peakHour.hour).padStart(2, '0') }}:00
+                    <span class="app-text-muted tw:font-normal tw:text-[10px]">
+                      {{ Math.round(peakHour.revenue / 1000) }}K
+                      <template v-if="data.totalRevenue > 0">· {{ Math.round(peakHour.revenue / data.totalRevenue * 100) }}%</template>
+                    </span>
+                  </template>
+                  <template v-else>—</template>
+                </span>
+              </div>
+              <!-- Ly / đơn -->
+              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
+                <div class="tw:flex tw:items-center tw:gap-1.5">
+                  <iconify icon="ph:coffee-bold" class="tw:text-cyan-400 tw:text-sm tw:opacity-80" />
+                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.itemsPerOrder') }}</span>
+                </div>
+                <span class="tw:text-xs tw:font-semibold">{{ avgItemsPerOrder.toFixed(1) }}</span>
               </div>
             </div>
           </template>
@@ -503,6 +625,31 @@ onMounted(load)
           :items="data.topCategories"
         />
       </div>
+
+      <!-- Hourly revenue chart -->
+      <prime-card
+        v-if="data.totalOrders > 0"
+        :pt="{
+          root: { class: `${appCard} ${cardRing} tw:p-4` },
+          body: { class: 'tw:p-0!' },
+          header: { class: 'tw:flex tw:items-center tw:gap-2 tw:mb-4' },
+          content: { class: 'tw:h-52' },
+        }"
+      >
+        <template #header>
+          <iconify icon="ph:clock-bold" class="app-text-subtle" />
+          <span class="tw:text-sm tw:font-medium">{{ t('report.hourlyChart.title') }}</span>
+          <prime-tag
+            v-if="peakHour?.revenue > 0"
+            :value="`${t('report.hourlyChart.peak')}: ${String(peakHour.hour).padStart(2,'0')}:00`"
+            severity="warn"
+            class="tw:ml-auto tw:text-[10px]!"
+          />
+        </template>
+        <template #content>
+          <prime-chart type="bar" :data="hourlyChartData" :options="hourlyChartOptions" class="tw:h-full" />
+        </template>
+      </prime-card>
 
       <div v-if="data.totalOrders === 0" class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:py-16 app-text-subtle">
         <iconify icon="ph:chart-bar-bold" class="tw:text-4xl tw:mb-2 tw:opacity-30" />
@@ -570,6 +717,9 @@ onMounted(load)
           :total="data.totalRevenue"
           :cash="data.cashRevenue"
           :bank="data.bankRevenue"
+          :prev-period-revenue="data.prevPeriodRevenue"
+          :avg30-day-revenue="data.avg30DayRevenue"
+          :period-label="periodLabel"
         />
         <widget-orders-summary
           :total="data.totalOrders"
@@ -692,6 +842,31 @@ onMounted(load)
         </template>
         <template #content>
           <prime-chart type="bar" :data="itemsChartData" :options="itemsChartOptions" class="tw:h-full" />
+        </template>
+      </prime-card>
+
+      <!-- Hourly revenue chart -->
+      <prime-card
+        v-if="data.dailyRevenue.length > 0"
+        :pt="{
+          root: { class: `${appCard} ${cardRing} tw:p-4` },
+          body: { class: 'tw:p-0!' },
+          header: { class: 'tw:flex tw:items-center tw:gap-2 tw:mb-4' },
+          content: { class: 'tw:h-52' },
+        }"
+      >
+        <template #header>
+          <iconify icon="ph:clock-bold" class="app-text-subtle" />
+          <span class="tw:text-sm tw:font-medium">{{ t('report.hourlyChart.title') }}</span>
+          <prime-tag
+            v-if="peakHour?.revenue > 0"
+            :value="`${t('report.hourlyChart.peak')}: ${String(peakHour.hour).padStart(2,'0')}:00`"
+            severity="warn"
+            class="tw:ml-auto tw:text-[10px]!"
+          />
+        </template>
+        <template #content>
+          <prime-chart type="bar" :data="hourlyChartData" :options="hourlyChartOptions" class="tw:h-full" />
         </template>
       </prime-card>
 

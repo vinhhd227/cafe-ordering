@@ -41,6 +41,9 @@
       "avgRevPerDay": "Avg rev / day",
       "avgRevPerDaySubtitle": "Average daily revenue",
       "dayStats": "Day stats",
+      "dayStats_orders": "Orders",
+      "peakHour": "Peak hour",
+      "itemsPerOrder": "Items / order",
       "avgPerDay": {
         "title": "Avg / day",
         "rev": "Revenue",
@@ -53,6 +56,12 @@
       "title": "Drinks sold per day",
       "label": "Drinks"
     },
+    "hourlyChart": {
+      "title": "Revenue by hour",
+      "label": "Revenue",
+      "average": "Avg/hour",
+      "peak": "Peak hour"
+    },
     "topProducts": {
       "title": "Top products",
       "subtitle": "By quantity sold",
@@ -61,6 +70,10 @@
     "topCategories": {
       "title": "Top categories",
       "subtitle": "By revenue"
+    },
+    "comparison": {
+      "yesterday": "yesterday",
+      "prevPeriod": "prev period"
     },
     "error": "Failed to load report data.",
     "empty": "No orders in the selected period.",
