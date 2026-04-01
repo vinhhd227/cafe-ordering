@@ -100,9 +100,9 @@ services:
     image: cloudflare/cloudflared:latest
     container_name: cafe-cloudflared-prod
     restart: unless-stopped
-    command: tunnel --no-autoupdate run
+    command: tunnel --config /etc/cloudflared/config.yml --no-autoupdate run
     volumes:
-      - ~/.cloudflared:/etc/cloudflared:ro
+      - /home/vinhhd/.cloudflared:/etc/cloudflared:ro
     depends_on:
       - client
       - admin
@@ -112,7 +112,11 @@ services:
 
 volumes:
   cafe-db-data:
+    external: true
+    name: cafe-prod_cafe-db-data
   cafe-uploads:
+    external: true
+    name: cafe-prod_cafe-uploads
 
 networks:
   cafe-network:
