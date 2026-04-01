@@ -19,6 +19,7 @@ public class ListSavedMenusHandler(IReadRepositoryBase<SavedMenu> repository)
       m.PrimaryColor,
       m.Layout,
       m.MenuTemplate,
+      m.MenuFont,
       m.CategoryOrderJson,
       m.SelectedProductIdsJson,
       m.CreatedAt)).ToList();

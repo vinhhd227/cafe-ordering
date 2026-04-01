@@ -18,6 +18,7 @@ public class CreateSavedMenuHandler(IRepositoryBase<SavedMenu> repository)
       request.PrimaryColor,
       request.Layout,
       request.MenuTemplate,
+      request.MenuFont,
       request.CategoryOrderJson,
       request.SelectedProductIdsJson);
 
@@ -31,6 +32,7 @@ public class CreateSavedMenuHandler(IRepositoryBase<SavedMenu> repository)
       menu.PrimaryColor,
       menu.Layout,
       menu.MenuTemplate,
+      menu.MenuFont,
       menu.CategoryOrderJson,
       menu.SelectedProductIdsJson,
       menu.CreatedAt));

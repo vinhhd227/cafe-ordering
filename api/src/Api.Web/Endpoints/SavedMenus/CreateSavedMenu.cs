@@ -12,6 +12,7 @@ public sealed class CreateSavedMenuRequest
   public string PrimaryColor { get; set; } = "#10b981";
   public string Layout { get; set; } = "2col";
   public string MenuTemplate { get; set; } = "default";
+  public string MenuFont { get; set; } = "system-ui, sans-serif";
   public string CategoryOrderJson { get; set; } = "[]";
   public string SelectedProductIdsJson { get; set; } = "[]";
 }
@@ -35,6 +36,7 @@ public class CreateSavedMenu(IMediator mediator) : Endpoint<CreateSavedMenuReque
       req.PrimaryColor,
       req.Layout,
       req.MenuTemplate,
+      req.MenuFont,
       req.CategoryOrderJson,
       req.SelectedProductIdsJson), ct);
 

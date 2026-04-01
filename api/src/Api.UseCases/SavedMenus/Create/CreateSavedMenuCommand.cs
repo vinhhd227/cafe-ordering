@@ -9,6 +9,7 @@ public record CreateSavedMenuCommand(
   string PrimaryColor,
   string Layout,
   string MenuTemplate,
+  string MenuFont,
   string CategoryOrderJson,
   string SelectedProductIdsJson
 ) : ICommand<Result<SavedMenuDto>>;

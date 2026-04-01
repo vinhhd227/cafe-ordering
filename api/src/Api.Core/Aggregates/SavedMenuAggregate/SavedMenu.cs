@@ -10,6 +10,7 @@ public class SavedMenu : SoftDeletableEntity<int>, IAggregateRoot
   public string PrimaryColor { get; private set; } = "#10b981";
   public string Layout { get; private set; } = "2col";
   public string MenuTemplate { get; private set; } = "default";
+  public string MenuFont { get; private set; } = "system-ui, sans-serif";
   public string CategoryOrderJson { get; private set; } = "[]";
   public string SelectedProductIdsJson { get; private set; } = "[]";
 
@@ -20,6 +21,7 @@ public class SavedMenu : SoftDeletableEntity<int>, IAggregateRoot
     string primaryColor,
     string layout,
     string menuTemplate,
+    string menuFont,
     string categoryOrderJson,
     string selectedProductIdsJson)
   {
@@ -31,6 +33,7 @@ public class SavedMenu : SoftDeletableEntity<int>, IAggregateRoot
       PrimaryColor          = Guard.Against.NullOrWhiteSpace(primaryColor),
       Layout                = Guard.Against.NullOrWhiteSpace(layout),
       MenuTemplate          = Guard.Against.NullOrWhiteSpace(menuTemplate),
+      MenuFont              = Guard.Against.NullOrWhiteSpace(menuFont),
       CategoryOrderJson     = categoryOrderJson,
       SelectedProductIdsJson = selectedProductIdsJson,
     };
@@ -43,6 +46,7 @@ public class SavedMenu : SoftDeletableEntity<int>, IAggregateRoot
     string primaryColor,
     string layout,
     string menuTemplate,
+    string menuFont,
     string categoryOrderJson,
     string selectedProductIdsJson)
   {
@@ -52,6 +56,7 @@ public class SavedMenu : SoftDeletableEntity<int>, IAggregateRoot
     PrimaryColor          = Guard.Against.NullOrWhiteSpace(primaryColor);
     Layout                = Guard.Against.NullOrWhiteSpace(layout);
     MenuTemplate          = Guard.Against.NullOrWhiteSpace(menuTemplate);
+    MenuFont              = Guard.Against.NullOrWhiteSpace(menuFont);
     CategoryOrderJson     = categoryOrderJson;
     SelectedProductIdsJson = selectedProductIdsJson;
   }

@@ -8,6 +8,7 @@ public record SavedMenuDto(
   string PrimaryColor,
   string Layout,
   string MenuTemplate,
+  string MenuFont,
   string CategoryOrderJson,
   string SelectedProductIdsJson,
   DateTime CreatedAt
