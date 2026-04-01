@@ -102,7 +102,7 @@ services:
     restart: unless-stopped
     command: tunnel --config /etc/cloudflared/config.yml --no-autoupdate run
     volumes:
-      - /home/vinhhd/.cloudflared:/etc/cloudflared:ro
+      - /opt/cloudflared:/etc/cloudflared:ro
     depends_on:
       - client
       - admin
