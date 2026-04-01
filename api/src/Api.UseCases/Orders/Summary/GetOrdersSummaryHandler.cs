@@ -83,6 +83,46 @@ public class GetOrdersSummaryHandler(
 
     var totalItemsSold = completedDailyItems.Sum(d => d.Count);
 
+    // ── Hourly breakdown (Vietnam UTC+7) ──────────────────────────────────
+    var hourlyRevenue = Enumerable.Range(0, 24)
+      .Select(h =>
+      {
+        var cash  = cashDailyAmounts.Where(d => (d.Date.ToUniversalTime().Hour + 7) % 24 == h).Sum(d => d.Amount);
+        var bank  = bankDailyAmounts.Where(d => (d.Date.ToUniversalTime().Hour + 7) % 24 == h).Sum(d => d.Amount);
+        var count = allOrderDates.Count(d => (d.ToUniversalTime().Hour + 7) % 24 == h);
+        return new HourlyRevenueDto(h, cash + bank, count);
+      })
+      .ToList();
+
+    // ── Comparison: previous period & 30-day average ─────────────────────
+    decimal? prevPeriodRevenue = null;
+    decimal? avg30DayRevenue = null;
+
+    if (dateFrom.HasValue)
+    {
+      // Previous period: same duration as current period, ending the day before dateFrom
+      var periodDays = dateTo.HasValue
+        ? (int)(dateTo.Value.Date - dateFrom.Value.Date).TotalDays + 1
+        : 1;
+      var prevDateTo   = dateFrom.Value.AddDays(-1);
+      var prevDateFrom = prevDateTo.AddDays(-(periodDays - 1));
+
+      var prevCashSpec = new PaidOrdersTotalSpec(PaymentMethod.Cash,        dateFrom: prevDateFrom, dateTo: prevDateTo);
+      var prevBankSpec = new PaidOrdersTotalSpec(PaymentMethod.BankTransfer, dateFrom: prevDateFrom, dateTo: prevDateTo);
+      var prevCash     = (await repository.ListAsync(prevCashSpec, ct)).Sum();
+      var prevBank     = (await repository.ListAsync(prevBankSpec, ct)).Sum();
+      prevPeriodRevenue = prevCash + prevBank;
+
+      // 30-day average: revenue of the 30 days before dateFrom, divided by 30
+      var avg30DateTo   = dateFrom.Value.AddDays(-1);
+      var avg30DateFrom = avg30DateTo.AddDays(-29);
+      var avg30CashSpec = new PaidOrdersTotalSpec(PaymentMethod.Cash,        dateFrom: avg30DateFrom, dateTo: avg30DateTo);
+      var avg30BankSpec = new PaidOrdersTotalSpec(PaymentMethod.BankTransfer, dateFrom: avg30DateFrom, dateTo: avg30DateTo);
+      var avg30Cash     = (await repository.ListAsync(avg30CashSpec, ct)).Sum();
+      var avg30Bank     = (await repository.ListAsync(avg30BankSpec, ct)).Sum();
+      avg30DayRevenue = (avg30Cash + avg30Bank) / 30m * periodDays;
+    }
+
     // ── Top products & Top categories ─────────────────────────────────────
     var completedWithItemsSpec = new CompletedOrdersInRangeWithItemsSpec(dateFrom, dateTo);
     var completedOrdersWithItems = await repository.ListAsync(completedWithItemsSpec, ct);
@@ -96,7 +136,12 @@ public class GetOrdersSummaryHandler(
     // Top 5 products by quantity sold
     var productGroups = itemsFlat
       .GroupBy(i => new { i.ProductId, i.ProductName })
-      .Select(g => new { g.Key.ProductName, TotalQty = g.Sum(i => i.Quantity) })
+      .Select(g => new
+      {
+        g.Key.ProductName,
+        TotalQty     = g.Sum(i => i.Quantity),
+        TotalRevenue = g.Sum(i => (i.UnitPrice - i.Discount) * i.Quantity),
+      })
       .OrderByDescending(x => x.TotalQty)
       .Take(5)
       .ToList();
@@ -104,7 +149,8 @@ public class GetOrdersSummaryHandler(
     var maxQty = productGroups.FirstOrDefault()?.TotalQty ?? 1;
     var topProducts = productGroups
       .Select(p => new TopProductDto(p.ProductName, p.TotalQty,
-        (int)Math.Round(p.TotalQty * 100.0 / maxQty)))
+        (int)Math.Round(p.TotalQty * 100.0 / maxQty),
+        p.TotalRevenue))
       .ToList();
 
     // Top categories by revenue share
@@ -121,7 +167,8 @@ public class GetOrdersSummaryHandler(
         .Select(g => new { Name = g.Key, Revenue = g.Sum(i => i.TotalPrice) })
         .OrderByDescending(x => x.Revenue)
         .Select(x => new TopCategoryDto(x.Name,
-          totalRev > 0 ? (int)Math.Round((double)(x.Revenue / totalRev * 100)) : 0))
+          totalRev > 0 ? (int)Math.Round((double)(x.Revenue / totalRev * 100)) : 0,
+          x.Revenue))
         .ToList();
     }
 
@@ -139,7 +186,10 @@ public class GetOrdersSummaryHandler(
       totalGuestCount,
       dailyRevenue,
       topProducts,
-      topCategories
+      topCategories,
+      hourlyRevenue,
+      prevPeriodRevenue,
+      avg30DayRevenue
     ));
   }
 }

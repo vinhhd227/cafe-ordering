@@ -32,14 +32,21 @@ public class GetOrdersSummarySummary : Summary<GetOrdersSummary>
       DailyRevenue: [],
       TopProducts:
       [
-        new TopProductDto("Bạc xỉu", 28, 100),
-        new TopProductDto("Cà phê sữa đá", 22, 79),
+        new TopProductDto("Bạc xỉu", 28, 100, 700000),
+        new TopProductDto("Cà phê sữa đá", 22, 79, 550000),
       ],
       TopCategories:
       [
-        new TopCategoryDto("Cafe", 60),
-        new TopCategoryDto("Trà", 40),
-      ]
+        new TopCategoryDto("Cafe", 60, 1380000),
+        new TopCategoryDto("Trà", 40, 920000),
+      ],
+      HourlyRevenue:
+      [
+        new HourlyRevenueDto(8, 300000, 5),
+        new HourlyRevenueDto(9, 450000, 8),
+      ],
+      PrevPeriodRevenue: 2100000,
+      Avg30DayRevenue: 1950000
     ));
     Response(401, "Authentication required.");
     Response(403, "Insufficient permissions — Admin role required.");

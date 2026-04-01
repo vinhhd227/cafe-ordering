@@ -14,5 +14,8 @@ public record OrdersSummaryDto(
   int TotalGuestCount,
   List<DailyRevenueDto> DailyRevenue,
   List<TopProductDto> TopProducts,
-  List<TopCategoryDto> TopCategories
+  List<TopCategoryDto> TopCategories,
+  List<HourlyRevenueDto> HourlyRevenue,
+  decimal? PrevPeriodRevenue,
+  decimal? Avg30DayRevenue
 );
