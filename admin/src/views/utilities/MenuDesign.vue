@@ -30,6 +30,63 @@ const templateOptions = [
   { value: 'classic', label: 'Cổ điển' },
 ]
 
+// Font
+const menuFont = ref('Georgia, serif')
+const fontOptions = ref([
+  // System fonts
+  { label: 'Georgia (Serif)', value: 'Georgia, serif' },
+  { label: 'Times New Roman', value: "'Times New Roman', Times, serif" },
+  { label: 'Trebuchet MS', value: "'Trebuchet MS', sans-serif" },
+  { label: 'Arial', value: 'Arial, Helvetica, sans-serif' },
+  { label: 'System UI', value: 'system-ui, sans-serif' },
+  { label: 'Courier New', value: "'Courier New', Courier, monospace" },
+  // Google Fonts
+  { label: 'Playfair Display', value: "'Playfair Display', serif", googleFamily: 'Playfair+Display:wght@400;700;900' },
+  { label: 'Lora', value: "'Lora', serif", googleFamily: 'Lora:wght@400;700' },
+  { label: 'Cormorant Garamond', value: "'Cormorant Garamond', serif", googleFamily: 'Cormorant+Garamond:wght@400;700' },
+  { label: 'Montserrat', value: "'Montserrat', sans-serif", googleFamily: 'Montserrat:wght@400;700;900' },
+  { label: 'Raleway', value: "'Raleway', sans-serif", googleFamily: 'Raleway:wght@400;700' },
+  { label: 'Dancing Script', value: "'Dancing Script', cursive", googleFamily: 'Dancing+Script:wght@400;700' },
+])
+
+const loadedGoogleFonts = new Set()
+const ensureGoogleFont = async (googleFamily) => {
+  if (loadedGoogleFonts.has(googleFamily)) return
+  loadedGoogleFonts.add(googleFamily)
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = `https://fonts.googleapis.com/css2?family=${googleFamily}&display=swap`
+  document.head.appendChild(link)
+  await document.fonts.ready
+}
+
+watch(menuFont, async (val) => {
+  const opt = fontOptions.value.find(f => f.value === val)
+  if (opt?.googleFamily) await ensureGoogleFont(opt.googleFamily)
+})
+
+const fontFileInput = ref(null)
+const handleFontUpload = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+  const fontName = `UploadedFont-${Date.now()}`
+  const base64 = await new Promise(resolve => {
+    const reader = new FileReader()
+    reader.onload = e => resolve(e.target.result)
+    reader.readAsDataURL(file)
+  })
+  const style = document.createElement('style')
+  style.textContent = `@font-face { font-family: '${fontName}'; src: url('${base64}'); }`
+  document.head.appendChild(style)
+  const face = new FontFace(fontName, `url(${base64})`)
+  await face.load()
+  document.fonts.add(face)
+  const label = file.name.replace(/\.[^.]+$/, '')
+  fontOptions.value.push({ label, value: `'${fontName}', sans-serif`, isCustom: true })
+  menuFont.value = `'${fontName}', sans-serif`
+  event.target.value = ''
+}
+
 // Data
 const loading = ref(false)
 const errorMessage = ref('')
@@ -126,6 +183,19 @@ const previewCategories = computed(() =>
 const formatPrice = (price) =>
   new Intl.NumberFormat('vi-VN').format(price) + 'đ'
 
+// Split preview categories into 3 columns left→right (sequential, not interleaved)
+const classicColumns = computed(() => {
+  const cats = previewCategories.value
+  const total = cats.length
+  const col1Size = Math.ceil(total / 3)
+  const col2Size = Math.ceil((total - col1Size) / 2)
+  return [
+    cats.slice(0, col1Size),
+    cats.slice(col1Size, col1Size + col2Size),
+    cats.slice(col1Size + col2Size),
+  ]
+})
+
 // Export
 const previewRef = ref(null)
 const exporting = ref(false)
@@ -134,6 +204,7 @@ const downloadPng = async () => {
   if (!previewRef.value) return
   exporting.value = true
   try {
+    await document.fonts.ready
     const dataUrl = await toPng(previewRef.value, { pixelRatio: 2, cacheBust: true })
     const link = document.createElement('a')
     link.download = `menu-${cafeName.value.trim() || 'cafe'}.png`
@@ -150,6 +221,7 @@ const downloadPdf = async () => {
   if (!previewRef.value) return
   exporting.value = true
   try {
+    await document.fonts.ready
     const canvas = await html2canvas(previewRef.value, { scale: 2, useCORS: true })
     const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF({ orientation: isLandscape.value ? 'landscape' : 'portrait', unit: 'px', format: 'a4' })
@@ -195,6 +267,7 @@ const confirmSave = async () => {
       primaryColor: primaryColor.value,
       layout: layout.value,
       menuTemplate: menuTemplate.value,
+      menuFont: menuFont.value,
       categoryOrderJson: JSON.stringify(categoryOrder.value),
       selectedProductIdsJson: JSON.stringify([...selectedIds.value]),
     })
@@ -214,6 +287,11 @@ const applyMenu = (menu) => {
   primaryColor.value = menu.primaryColor
   layout.value = menu.layout
   menuTemplate.value = menu.menuTemplate
+  const restoredFont = menu.menuFont || 'Georgia, serif'
+  // Uploaded fonts không persist qua reload — fallback về Georgia nếu không còn trong danh sách
+  menuFont.value = fontOptions.value.some(f => f.value === restoredFont) || !restoredFont.includes('UploadedFont-')
+    ? restoredFont
+    : 'Georgia, serif'
 
   const order = JSON.parse(menu.categoryOrderJson ?? '[]')
   const ids = JSON.parse(menu.selectedProductIdsJson ?? '[]')
@@ -338,6 +416,36 @@ const confirmDeleteMenu = (menu) => {
               <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.menuDesign.layout') }}</p>
               <prime-select v-model="layout" :options="layoutOptions" option-label="label" option-value="value" class="app-input tw:w-full" />
             </div>
+          </div>
+
+          <div class="tw:space-y-1.5">
+            <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Font chữ</p>
+            <div class="tw:flex tw:gap-2">
+              <prime-select v-model="menuFont" :options="fontOptions" option-label="label" option-value="value" class="app-input tw:flex-1">
+                <template #option="{ option }">
+                  <span :style="{ fontFamily: option.value }">{{ option.label }}</span>
+                </template>
+                <template #value="{ value }">
+                  <span :style="{ fontFamily: value }">{{ fontOptions.find(f => f.value === value)?.label ?? value }}</span>
+                </template>
+              </prime-select>
+              <prime-button
+                severity="secondary"
+                outlined
+                v-tooltip.top="'Tải font từ máy (.ttf, .otf, .woff)'"
+                :class="btnIcon"
+                @click="fontFileInput.click()"
+              >
+                <iconify icon="ph:upload-simple-bold" />
+              </prime-button>
+            </div>
+            <input
+              ref="fontFileInput"
+              type="file"
+              accept=".ttf,.otf,.woff,.woff2"
+              class="tw:hidden"
+              @change="handleFontUpload"
+            />
           </div>
         </div>
 
@@ -487,8 +595,8 @@ const confirmDeleteMenu = (menu) => {
               ref="previewRef"
               class="tw:bg-white tw:shadow-2xl"
               :style="isLandscape
-                ? 'width: 842px; min-height: 595px; font-family: Segoe UI, sans-serif;'
-                : 'width: 595px; min-height: 842px; font-family: Segoe UI, sans-serif;'"
+                ? `width: 842px; min-height: 595px; font-family: ${menuFont};`
+                : `width: 595px; min-height: 842px; font-family: ${menuFont};`"
             >
               <div
                 :class="isLandscape ? 'tw:px-10 tw:py-5 tw:text-center' : 'tw:px-10 tw:py-8 tw:text-center'"
@@ -529,35 +637,30 @@ const confirmDeleteMenu = (menu) => {
               ref="previewRef"
               class="tw:shadow-2xl"
               :style="isLandscape
-                ? 'width: 842px; min-height: 595px; background: #d8d3c9; font-family: Courier New, Courier, monospace; color: #1a1a1a;'
-                : 'width: 595px; min-height: 842px; background: #d8d3c9; font-family: Courier New, Courier, monospace; color: #1a1a1a;'"
+                ? `width: 842px; min-height: 595px; background: #d8d3c9; font-family: ${menuFont}; color: #1a1a1a;`
+                : `width: 595px; min-height: 842px; background: #d8d3c9; font-family: ${menuFont}; color: #1a1a1a;`"
             >
               <!-- Classic landscape: 3-column newspaper style -->
               <div v-if="isLandscape" style="display: flex; min-height: 595px; gap: 0;">
 
-                <!-- Left column: category boxes, alternating white/transparent -->
+                <!-- Left column -->
                 <div style="flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 16px 14px; background: #e8e3da;">
-                  <template v-for="(cat, i) in previewCategories" :key="cat.id">
-                    <div
-                      v-if="i % 3 === 0"
-                      :style="Math.floor(i/3) % 2 === 0
-                        ? 'background: #ffffff; padding: 16px 18px;'
-                        : 'background: transparent; padding: 16px 18px;'"
-                    >
-                      <h2 style="font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">{{ cat.name }}</h2>
-                      <div v-for="product in cat.products" :key="product.id" style="margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 6px;">
-                          <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">{{ product.name }}</span>
-                          <span style="font-size: 10px; font-weight: 700; white-space: nowrap; flex-shrink: 0;">{{ formatPrice(product.price) }}</span>
-                        </div>
+                  <div
+                    v-for="(cat, j) in classicColumns[0]" :key="cat.id"
+                    :style="j % 2 === 0 ? 'background: #ffffff; padding: 16px 18px;' : 'background: transparent; padding: 16px 18px;'"
+                  >
+                    <h2 style="font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">{{ cat.name }}</h2>
+                    <div v-for="product in cat.products" :key="product.id" style="margin-bottom: 8px;">
+                      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 6px;">
+                        <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">{{ product.name }}</span>
+                        <span style="font-size: 10px; font-weight: 700; white-space: nowrap; flex-shrink: 0;">{{ formatPrice(product.price) }}</span>
                       </div>
                     </div>
-                  </template>
+                  </div>
                 </div>
 
                 <!-- Center column: full white background -->
                 <div style="flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 16px 14px; background: #ffffff;">
-                  <!-- Title block -->
                   <div style="text-align: center; padding: 12px 8px 16px;">
                     <p style="font-size: 8px; text-transform: uppercase; letter-spacing: 0.25em; color: #7a7570; margin: 0 0 8px;">{{ slogan || 'thực đơn' }}</p>
                     <div style="border-top: 1px solid #9a958d; margin-bottom: 8px;"></div>
@@ -566,41 +669,34 @@ const confirmDeleteMenu = (menu) => {
                     <p style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">{{ cafeName }}</p>
                     <p v-if="slogan" style="font-size: 8px; color: #7a7570; margin: 4px 0 0;">{{ slogan }}</p>
                   </div>
-                  <!-- Center categories: all transparent on white column -->
-                  <template v-for="(cat, i) in previewCategories" :key="cat.id">
-                    <div
-                      v-if="i % 3 === 1"
-                      style="background: transparent; padding: 16px 18px;"
-                    >
-                      <h2 style="font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">{{ cat.name }}</h2>
-                      <div v-for="product in cat.products" :key="product.id" style="margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 6px;">
-                          <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">{{ product.name }}</span>
-                          <span style="font-size: 10px; font-weight: 700; white-space: nowrap; flex-shrink: 0;">{{ formatPrice(product.price) }}</span>
-                        </div>
+                  <div
+                    v-for="cat in classicColumns[1]" :key="cat.id"
+                    style="background: transparent; padding: 16px 18px;"
+                  >
+                    <h2 style="font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">{{ cat.name }}</h2>
+                    <div v-for="product in cat.products" :key="product.id" style="margin-bottom: 8px;">
+                      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 6px;">
+                        <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">{{ product.name }}</span>
+                        <span style="font-size: 10px; font-weight: 700; white-space: nowrap; flex-shrink: 0;">{{ formatPrice(product.price) }}</span>
                       </div>
                     </div>
-                  </template>
+                  </div>
                 </div>
 
-                <!-- Right column: category boxes, alternating white/transparent -->
+                <!-- Right column -->
                 <div style="flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 16px 14px; background: #e8e3da;">
-                  <template v-for="(cat, i) in previewCategories" :key="cat.id">
-                    <div
-                      v-if="i % 3 === 2"
-                      :style="Math.floor(i/3) % 2 === 0
-                        ? 'background: #ffffff; padding: 16px 18px;'
-                        : 'background: transparent; padding: 16px 18px;'"
-                    >
-                      <h2 style="font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">{{ cat.name }}</h2>
-                      <div v-for="product in cat.products" :key="product.id" style="margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 6px;">
-                          <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">{{ product.name }}</span>
-                          <span style="font-size: 10px; font-weight: 700; white-space: nowrap; flex-shrink: 0;">{{ formatPrice(product.price) }}</span>
-                        </div>
+                  <div
+                    v-for="(cat, j) in classicColumns[2]" :key="cat.id"
+                    :style="j % 2 === 0 ? 'background: #ffffff; padding: 16px 18px;' : 'background: transparent; padding: 16px 18px;'"
+                  >
+                    <h2 style="font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">{{ cat.name }}</h2>
+                    <div v-for="product in cat.products" :key="product.id" style="margin-bottom: 8px;">
+                      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 6px;">
+                        <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">{{ product.name }}</span>
+                        <span style="font-size: 10px; font-weight: 700; white-space: nowrap; flex-shrink: 0;">{{ formatPrice(product.price) }}</span>
                       </div>
                     </div>
-                  </template>
+                  </div>
                 </div>
 
               </div>

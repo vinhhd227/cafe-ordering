@@ -38,14 +38,28 @@ git push origin main
 ```
 
 ### Bước 5 — Deploy
+
+Prod containers có thể đang chạy từ project name khác — `docker-compose down` không đủ. Dùng flow sau:
+
 ```bash
 cd /Users/vinhhd227/Source/cafe-ordering
-docker-compose -f docker-compose.prod.yml up --build -d
+
+# Build images mới
+docker-compose -f docker-compose.prod.yml --env-file .env.prod build
+
+# Stop và remove containers đang chạy theo tên cụ thể
+docker stop coffee-api-prod coffee-admin-prod coffee-client-prod cafe-cloudflared-prod cafe-nginx-uploads-prod cafe-db-prod 2>/dev/null || true
+docker rm   coffee-api-prod coffee-admin-prod coffee-client-prod cafe-cloudflared-prod cafe-nginx-uploads-prod cafe-db-prod 2>/dev/null || true
+
+# Start stack mới với đúng env file
+docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d
 ```
-Chờ các container khởi động. Kiểm tra health:
+
+Kiểm tra health:
 ```bash
-docker-compose -f docker-compose.prod.yml ps
+docker-compose -f docker-compose.prod.yml --env-file .env.prod ps
 ```
+Tất cả containers phải ở trạng thái `Up` (db và api phải `healthy`).
 
 ### Bước 6 — Quay lại branch gốc
 ```bash

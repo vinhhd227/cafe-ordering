@@ -231,6 +231,70 @@ src/
 └── components/                     ← Shared components
 ```
 
+## Dynamic font loading (MenuDesign pattern)
+
+Khi cần load font động trong một component (ví dụ: MenuDesign), dùng pattern sau:
+
+**fontOptions là `ref([])` không phải `const`** — vì user có thể thêm font upload vào danh sách:
+
+```js
+const fontOptions = ref([
+  { label: 'Georgia (Serif)', value: 'Georgia, serif' },
+  // Google Fonts có thêm field googleFamily
+  { label: 'Playfair Display', value: "'Playfair Display', serif", googleFamily: 'Playfair+Display:wght@400;700;900' },
+])
+```
+
+**Google Fonts — inject `<link>` động:**
+
+```js
+const loadedGoogleFonts = new Set()
+
+const ensureGoogleFont = async (googleFamily) => {
+  if (loadedGoogleFonts.has(googleFamily)) return
+  loadedGoogleFonts.add(googleFamily)
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = `https://fonts.googleapis.com/css2?family=${googleFamily}&display=swap`
+  document.head.appendChild(link)
+  await document.fonts.ready
+}
+
+watch(menuFont, async (val) => {
+  const opt = fontOptions.value.find(f => f.value === val)
+  if (opt?.googleFamily) await ensureGoogleFont(opt.googleFamily)
+})
+```
+
+**Upload font tùy chỉnh — base64 + FontFace API:**
+
+```js
+const handleFontUpload = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+  const fontName = `UploadedFont-${Date.now()}`
+  const base64 = await new Promise(resolve => {
+    const reader = new FileReader()
+    reader.onload = e => resolve(e.target.result)
+    reader.readAsDataURL(file)
+  })
+  // Inject @font-face CSS — cần thiết để html-to-image embed vào PNG export
+  const style = document.createElement('style')
+  style.textContent = `@font-face { font-family: '${fontName}'; src: url('${base64}'); }`
+  document.head.appendChild(style)
+  // FontFace API — render ngay trong preview
+  const face = new FontFace(fontName, `url(${base64})`)
+  await face.load()
+  document.fonts.add(face)
+  fontOptions.value.push({ label: file.name.replace(/\.[^.]+$/, ''), value: `'${fontName}', sans-serif`, isCustom: true })
+  menuFont.value = `'${fontName}', sans-serif`
+  event.target.value = '' // reset để upload lại cùng file
+}
+```
+
+- Font upload chỉ tồn tại trong session hiện tại (không persist qua reload)
+- Trước khi export PNG/PDF: `await document.fonts.ready` để đảm bảo font đã load
+
 ## Environment
 
 - `admin/.env` commit vào git (không chứa secret)
