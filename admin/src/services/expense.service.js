@@ -21,3 +21,6 @@ export const getExpenseSummary = ({ dateFrom, dateTo } = {}) =>
   api.get('/admin/expenses/summary', {
     params: { dateFrom, dateTo },
   })
+
+export const getExpenseItemNames = (q) =>
+  api.get('/admin/expenses/item-names', { params: { q } })

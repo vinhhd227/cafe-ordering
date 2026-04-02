@@ -47,7 +47,7 @@
       "payment": "Payment",
       "quantity": "Quantity",
       "unit": "Unit",
-      "unitPlaceholder": "box, kg, bottle…",
+      "unitPlaceholder": "kg, box, bottle…",
       "unitPrice": "Unit price",
       "totalAuto": "Total (auto)",
       "notes": "Notes",
