@@ -11,6 +11,6 @@ const merge = (modules) =>
 export const i18n = createI18n({
   legacy: false,
   locale: savedLocale,
-  fallbackLocale: 'en',
+  fallbackLocale: 'vi',
   messages: { en: merge(enModules), vi: merge(viModules) },
 })
