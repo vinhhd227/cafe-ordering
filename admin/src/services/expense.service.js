@@ -17,9 +17,9 @@ export const updateExpense = (id, data) =>
 export const deleteExpense = (id) =>
   api.delete(`/admin/expenses/${id}`)
 
-export const getExpenseSummary = ({ dateFrom, dateTo } = {}) =>
+export const getExpenseSummary = ({ dateFrom, dateTo, category, paymentMethod } = {}) =>
   api.get('/admin/expenses/summary', {
-    params: { dateFrom, dateTo },
+    params: { dateFrom, dateTo, category, paymentMethod },
   })
 
 export const getExpenseItemNames = (q) =>

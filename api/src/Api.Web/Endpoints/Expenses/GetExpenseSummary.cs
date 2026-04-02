@@ -6,8 +6,10 @@ namespace Api.Web.Endpoints.Expenses;
 
 public sealed class GetExpenseSummaryRequest
 {
-  [QueryParam] public DateTime? DateFrom { get; set; }
-  [QueryParam] public DateTime? DateTo   { get; set; }
+  [QueryParam] public DateTime? DateFrom      { get; set; }
+  [QueryParam] public DateTime? DateTo        { get; set; }
+  [QueryParam] public string?   Category      { get; set; }
+  [QueryParam] public string?   PaymentMethod { get; set; }
 }
 
 public class GetExpenseSummaryEndpoint(IMediator mediator)
@@ -24,7 +26,7 @@ public class GetExpenseSummaryEndpoint(IMediator mediator)
   public override async Task HandleAsync(GetExpenseSummaryRequest req, CancellationToken ct)
   {
     var result = await mediator.Send(
-      new GetExpenseSummaryQuery(req.DateFrom, req.DateTo), ct);
+      new GetExpenseSummaryQuery(req.DateFrom, req.DateTo, req.Category, req.PaymentMethod), ct);
 
     await this.SendResultAsync(result, ct);
   }

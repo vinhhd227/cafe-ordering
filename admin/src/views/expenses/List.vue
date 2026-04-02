@@ -127,6 +127,8 @@ const loadSummary = async () => {
     const res = await getExpenseSummary({
       dateFrom: toMidnight(dateFrom.value),
       dateTo: toMidnight(dateTo.value),
+      category: categoryFilter.value || undefined,
+      paymentMethod: paymentMethodFilter.value || undefined,
     });
     summary.value = res?.data;
   } catch {
@@ -249,7 +251,7 @@ watch(dateRange, (val) => {
 
 watch([categoryFilter, paymentMethodFilter], () => {
   first.value = 0;
-  loadExpenses();
+  loadAll();
 });
 
 const onPage = (e) => {

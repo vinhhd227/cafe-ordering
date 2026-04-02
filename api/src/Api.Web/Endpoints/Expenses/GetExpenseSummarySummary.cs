@@ -11,8 +11,10 @@ public class GetExpenseSummarySummary : Summary<GetExpenseSummaryEndpoint>
       "Returns aggregated revenue (from PAID orders) and expenses (by category) for a given period. " +
       "Profit = Revenue.Total - Expenses.Total. Used for the P&L dashboard. Requires Staff or Admin.";
 
-    Params["DateFrom"] = "Optional. Include data on or after this date (ISO 8601).";
-    Params["DateTo"]   = "Optional. Include data on or before this date (ISO 8601).";
+    Params["DateFrom"]      = "Optional. Include data on or after this date (ISO 8601).";
+    Params["DateTo"]        = "Optional. Include data on or before this date (ISO 8601).";
+    Params["Category"]      = "Optional. Filter expenses by category: INGREDIENT, SUPPLY, EQUIPMENT, OTHER. Revenue is always unfiltered.";
+    Params["PaymentMethod"] = "Optional. Filter expenses by payment method: CASH, BANK_TRANSFER. Revenue is always unfiltered.";
 
     Response<ExpenseSummaryDto>(200, "P&L summary returned successfully.");
     Response(401, "Authentication required.");
