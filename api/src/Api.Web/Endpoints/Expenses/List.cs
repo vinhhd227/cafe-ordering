@@ -6,11 +6,12 @@ namespace Api.Web.Endpoints.Expenses;
 
 public sealed class ListExpensesRequest
 {
-  [QueryParam] public string?   Category  { get; set; }
-  [QueryParam] public DateTime? DateFrom  { get; set; }
-  [QueryParam] public DateTime? DateTo    { get; set; }
-  [QueryParam] public int       Page      { get; set; } = 1;
-  [QueryParam] public int       PageSize  { get; set; } = 20;
+  [QueryParam] public string?   Category      { get; set; }
+  [QueryParam] public string?   PaymentMethod { get; set; }
+  [QueryParam] public DateTime? DateFrom      { get; set; }
+  [QueryParam] public DateTime? DateTo        { get; set; }
+  [QueryParam] public int       Page          { get; set; } = 1;
+  [QueryParam] public int       PageSize      { get; set; } = 20;
 }
 
 public class ListExpenses(IMediator mediator) : Endpoint<ListExpensesRequest, PagedExpensesDto>
@@ -26,7 +27,7 @@ public class ListExpenses(IMediator mediator) : Endpoint<ListExpensesRequest, Pa
   public override async Task HandleAsync(ListExpensesRequest req, CancellationToken ct)
   {
     var result = await mediator.Send(
-      new ListExpensesQuery(req.Category, req.DateFrom, req.DateTo, req.Page, req.PageSize), ct);
+      new ListExpensesQuery(req.Category, req.PaymentMethod, req.DateFrom, req.DateTo, req.Page, req.PageSize), ct);
 
     await this.SendResultAsync(result, ct);
   }

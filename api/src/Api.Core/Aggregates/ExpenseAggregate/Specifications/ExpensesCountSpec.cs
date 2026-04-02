@@ -1,3 +1,5 @@
+using Api.Core.Aggregates.OrderAggregate;
+
 namespace Api.Core.Aggregates.ExpenseAggregate.Specifications;
 
 /// <summary>
@@ -7,6 +9,7 @@ public class ExpensesCountSpec : Specification<Expense>
 {
   public ExpensesCountSpec(
     string? category = null,
+    string? paymentMethod = null,
     DateTime? dateFrom = null,
     DateTime? dateTo = null)
   {
@@ -16,6 +19,12 @@ public class ExpensesCountSpec : Specification<Expense>
     {
       var target = ExpenseCategory.FromName(category, true);
       Query.Where(e => e.Category == target);
+    }
+
+    if (!string.IsNullOrWhiteSpace(paymentMethod))
+    {
+      var target = PaymentMethod.FromName(paymentMethod, true);
+      Query.Where(e => e.PaymentMethod == target);
     }
 
     if (dateFrom.HasValue)

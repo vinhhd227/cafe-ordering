@@ -16,6 +16,9 @@
     },
     "filter": {
       "title": "Lọc chi phí",
+      "dateRange": "Khoảng thời gian",
+      "payment": "Phương thức thanh toán",
+      "allPayments": "Tất cả",
       "category": "Danh mục",
       "allCategories": "Tất cả danh mục",
       "clearFilters": "Xoá bộ lọc",

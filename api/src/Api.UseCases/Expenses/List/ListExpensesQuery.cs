@@ -4,6 +4,7 @@ namespace Api.UseCases.Expenses.List;
 
 public record ListExpensesQuery(
   string? Category = null,
+  string? PaymentMethod = null,
   DateTime? DateFrom = null,
   DateTime? DateTo = null,
   int Page = 1,

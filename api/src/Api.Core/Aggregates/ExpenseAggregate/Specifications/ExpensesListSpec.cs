@@ -1,12 +1,15 @@
+using Api.Core.Aggregates.OrderAggregate;
+
 namespace Api.Core.Aggregates.ExpenseAggregate.Specifications;
 
 /// <summary>
-///   Lấy danh sách Expense có phân trang, lọc theo category và khoảng ngày mua
+///   Lấy danh sách Expense có phân trang, lọc theo category, payment method và khoảng ngày mua
 /// </summary>
 public class ExpensesListSpec : Specification<Expense>
 {
   public ExpensesListSpec(
     string? category = null,
+    string? paymentMethod = null,
     DateTime? dateFrom = null,
     DateTime? dateTo = null,
     int page = 1,
@@ -20,6 +23,12 @@ public class ExpensesListSpec : Specification<Expense>
     {
       var target = ExpenseCategory.FromName(category, true);
       Query.Where(e => e.Category == target);
+    }
+
+    if (!string.IsNullOrWhiteSpace(paymentMethod))
+    {
+      var target = PaymentMethod.FromName(paymentMethod, true);
+      Query.Where(e => e.PaymentMethod == target);
     }
 
     if (dateFrom.HasValue)

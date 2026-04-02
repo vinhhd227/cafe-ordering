@@ -1,8 +1,8 @@
 import api from './axios'
 
-export const getExpenses = ({ category, dateFrom, dateTo, page = 1, pageSize = 20 } = {}) =>
+export const getExpenses = ({ category, paymentMethod, dateFrom, dateTo, page = 1, pageSize = 20 } = {}) =>
   api.get('/admin/expenses', {
-    params: { category, dateFrom, dateTo, page, pageSize },
+    params: { category, paymentMethod, dateFrom, dateTo, page, pageSize },
   })
 
 export const getExpense = (id) =>

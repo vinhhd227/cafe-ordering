@@ -21,8 +21,8 @@ public class ListExpensesHandler(IReadRepositoryBase<Expense> repository)
       ? request.DateTo.Value.ToUniversalTime()
       : (DateTime?)null;
 
-    var countSpec = new ExpensesCountSpec(request.Category, dateFrom, dateTo);
-    var listSpec  = new ExpensesListSpec(request.Category, dateFrom, dateTo, request.Page, request.PageSize);
+    var countSpec = new ExpensesCountSpec(request.Category, request.PaymentMethod, dateFrom, dateTo);
+    var listSpec  = new ExpensesListSpec(request.Category, request.PaymentMethod, dateFrom, dateTo, request.Page, request.PageSize);
 
     var totalCount = await repository.CountAsync(countSpec, ct);
     var expenses   = await repository.ListAsync(listSpec, ct);

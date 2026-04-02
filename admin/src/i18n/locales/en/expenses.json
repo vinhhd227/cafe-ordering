@@ -16,6 +16,9 @@
     },
     "filter": {
       "title": "Filter expenses",
+      "dateRange": "Date range",
+      "payment": "Payment method",
+      "allPayments": "All methods",
       "category": "Category",
       "allCategories": "All categories",
       "clearFilters": "Clear filters",
