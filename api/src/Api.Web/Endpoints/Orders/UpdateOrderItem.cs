@@ -16,7 +16,7 @@ public class UpdateOrderItem(IMediator mediator) : Endpoint<UpdateOrderItemReque
   public override void Configure()
   {
     Put("/api/admin/orders/{orderId}/items/{productId}");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "order.update");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
   }

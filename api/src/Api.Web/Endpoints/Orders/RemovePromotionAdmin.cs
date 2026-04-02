@@ -15,7 +15,7 @@ public class RemovePromotionAdmin(IMediator mediator) : Endpoint<RemovePromotion
   public override void Configure()
   {
     Delete("/api/admin/orders/{orderId}/promotions/{promotionId}");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "order.update");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
   }

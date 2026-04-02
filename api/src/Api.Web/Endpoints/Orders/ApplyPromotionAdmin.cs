@@ -16,7 +16,7 @@ public class ApplyPromotionAdmin(IMediator mediator) : Endpoint<ApplyPromotionAd
   public override void Configure()
   {
     Post("/api/admin/orders/{orderId}/promotions");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "order.update");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
   }

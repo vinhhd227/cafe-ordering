@@ -24,7 +24,7 @@ public class ListOrders(IMediator mediator) : Endpoint<ListOrdersRequest, PagedO
   public override void Configure()
   {
     Get("/api/admin/orders");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "order.read");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
   }

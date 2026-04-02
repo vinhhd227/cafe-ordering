@@ -14,7 +14,7 @@ public class GetOrder(IMediator mediator) : Endpoint<GetOrderRequest, OrderDto>
   public override void Configure()
   {
     Get("/api/admin/orders/{id}");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "order.read");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
   }

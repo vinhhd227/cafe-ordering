@@ -14,7 +14,7 @@ public class UpdateOrderStatus(IMediator mediator) : Endpoint<UpdateOrderStatusR
   public override void Configure()
   {
     Patch("/api/admin/orders/{id}/status");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "order.update");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
   }

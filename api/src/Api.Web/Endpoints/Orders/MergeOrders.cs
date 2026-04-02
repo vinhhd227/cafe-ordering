@@ -14,7 +14,7 @@ public class MergeOrders(IMediator mediator) : Endpoint<MergeOrdersRequest>
   public override void Configure()
   {
     Post("/api/admin/orders/merge");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "order.delete");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
   }

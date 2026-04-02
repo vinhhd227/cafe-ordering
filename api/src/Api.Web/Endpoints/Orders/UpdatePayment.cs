@@ -17,7 +17,7 @@ public class UpdatePayment(IMediator mediator) : Endpoint<UpdatePaymentRequest>
   public override void Configure()
   {
     Patch("/api/admin/orders/{id}/payment");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "order.update");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
   }

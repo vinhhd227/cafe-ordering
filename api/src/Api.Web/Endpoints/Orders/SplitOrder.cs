@@ -20,7 +20,7 @@ public class SplitOrder(IMediator mediator) : Endpoint<SplitOrderRequest, SplitO
   public override void Configure()
   {
     Post("/api/admin/orders/{id}/split");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "order.delete");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
   }

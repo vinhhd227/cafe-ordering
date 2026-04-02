@@ -10,7 +10,7 @@ public class SseStream(IOrderSseNotifier notifier) : EndpointWithoutRequest
   public override void Configure()
   {
     Get("/api/admin/orders/stream");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "order.read");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
     Options(b => b.WithMetadata(new SkipResponseBodyFormatterMetadata()));

@@ -13,7 +13,7 @@ public class GetAdmin(IMediator mediator) : EndpointWithoutRequest<List<AdminMen
   public override void Configure()
   {
     Get("/api/admin/menu");
-    Policies("StaffOrAdmin");
+    Policies("admin.access", "menu.read");
     DontAutoTag();
     Description(b => b.WithTags("Menu"));
   }
