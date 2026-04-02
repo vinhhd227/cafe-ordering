@@ -58,6 +58,11 @@ services:
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
       - cafe-uploads:/data/uploads:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/uploads/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - cafe-network
 
@@ -74,7 +79,7 @@ services:
       api:
         condition: service_healthy
       nginx-uploads:
-        condition: service_started
+        condition: service_healthy
     networks:
       - cafe-network
 
@@ -91,7 +96,7 @@ services:
       api:
         condition: service_healthy
       nginx-uploads:
-        condition: service_started
+        condition: service_healthy
     networks:
       - cafe-network
 
