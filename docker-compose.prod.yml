@@ -59,7 +59,7 @@ services:
       - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
       - cafe-uploads:/data/uploads:ro
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost/uploads/"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
       interval: 10s
       timeout: 5s
       retries: 3
