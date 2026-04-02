@@ -79,5 +79,21 @@ refactor/extract-jwt-service
 
 ## Merge Strategy
 
-- Merge `feature/*` → `dev`: **squash merge** (gộp thành 1 commit sạch)
-- Merge `dev` → `main`: **merge commit** (giữ history)
+- `feature/*` → `dev`: **rebase** rồi fast-forward
+  ```bash
+  git checkout feature/my-feature
+  git rebase dev
+  git checkout dev
+  git merge --ff-only feature/my-feature
+  ```
+- `dev` → `main`: **fast-forward only** (dev phải là linear extension của main)
+  ```bash
+  git checkout main
+  git merge --ff-only dev
+  git push origin main
+  ```
+
+**Quy tắc chung:**
+- Không dùng merge commit — giữ history tuyến tính
+- Rebase trước khi merge vào branch đích
+- Không force push lên `main` hoặc `dev` (trừ trường hợp đặc biệt có thỏa thuận)
