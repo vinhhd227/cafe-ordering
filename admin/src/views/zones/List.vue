@@ -8,6 +8,7 @@ import {
   deactivateZone,
 } from "@/services/zone.service";
 
+const { t } = useI18n();
 const { can } = usePermission();
 const cache = useTableCache('zones');
 
