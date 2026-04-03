@@ -32,6 +32,8 @@ public class GetOrderHandler(
       tableCode = table?.Code;
     }
 
+    var isManual = session?.Source == GuestSessionSource.Manual;
+
     var dto = new OrderDto(
       order.Id,
       order.OrderNumber,
@@ -63,7 +65,8 @@ public class GetOrderHandler(
         i.IsFreeGift,
         i.Note
       )).ToList(),
-      order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList()
+      order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList(),
+      isManual
     );
 
     return Result.Success(dto);

@@ -21,8 +21,11 @@ export const navGroups = [
       {
         labelKey: "nav.orders",
         icon: "ph:receipt-bold",
-        to: { name: "orders" },
         requiredClaim: "order.read",
+        children: [
+          { labelKey: "nav.ordersKanban", icon: "ph:kanban-bold", to: { name: "orders" } },
+          { labelKey: "nav.ordersList",   icon: "ph:list-bold",   to: { name: "ordersList" } },
+        ],
       },
       {
         labelKey: "nav.expenses",

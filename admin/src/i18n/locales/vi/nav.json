@@ -2,6 +2,8 @@
   "nav": {
     "dashboard": "Tổng quan",
     "orders": "Đơn hàng",
+    "ordersKanban": "Kanban",
+    "ordersList": "Danh sách",
     "expenses": "Chi phí",
     "tables": "Bàn",
     "zones": "Khu vực",

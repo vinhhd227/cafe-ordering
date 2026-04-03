@@ -43,20 +43,21 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   /// <summary>
   ///   Factory method for session-based orders (guest or authenticated).
   /// </summary>
-  public static Order Create(Guid sessionId, string orderNumber, string? deviceToken = null, string? customerId = null, int? guestCount = null)
+  public static Order Create(Guid sessionId, string orderNumber, string? deviceToken = null,
+    string? customerId = null, int? guestCount = null, DateTime? orderedAt = null)
   {
     Guard.Against.Default(sessionId, nameof(sessionId));
     Guard.Against.NullOrEmpty(orderNumber, nameof(orderNumber));
 
     var order = new Order
     {
-      SessionId = sessionId,
+      SessionId   = sessionId,
       OrderNumber = orderNumber,
       DeviceToken = deviceToken,
-      CustomerId = customerId,
-      GuestCount = guestCount,
-      Status = OrderStatus.Pending,
-      OrderDate = DateTime.UtcNow
+      CustomerId  = customerId,
+      GuestCount  = guestCount,
+      Status      = OrderStatus.Pending,
+      OrderDate   = orderedAt?.ToUniversalTime() ?? DateTime.UtcNow
     };
 
     return order;
@@ -241,6 +242,40 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   ///   Cập nhật số khách (dùng khi edit order).
   /// </summary>
   public void UpdateGuestCount(int? value) => GuestCount = value;
+
+  // ── Manual admin edit methods ────────────────────────────────────
+
+  /// <summary>
+  ///   Admin manual edit: xóa toàn bộ items + promotions, cập nhật OrderDate và GuestCount.
+  ///   Handler sẽ re-add items bằng AddItemManual().
+  /// </summary>
+  public void UpdateManually(DateTime? orderedAt, int? guestCount)
+  {
+    _items.Clear();
+    _promotions.Clear();
+    if (orderedAt.HasValue) OrderDate = orderedAt.Value.ToUniversalTime();
+    GuestCount = guestCount;
+  }
+
+  /// <summary>
+  ///   Admin manual add item — bypass status guard. Chỉ dùng cho manual admin edit.
+  /// </summary>
+  public void AddItemManual(int productId, string productName, decimal unitPrice, int quantity,
+    DrinkTemperature? temperature = null, IceLevel? iceLevel = null, SugarLevel? sugarLevel = null,
+    bool isTakeaway = false, string? note = null)
+  {
+    _items.Add(OrderItem.Create(Id, productId, productName, unitPrice, quantity,
+      temperature, iceLevel, sugarLevel, isTakeaway, false, note));
+  }
+
+  /// <summary>
+  ///   Admin manual status set — bypass state machine. Chỉ dùng cho manual admin edit.
+  /// </summary>
+  public void ForceSetStatus(OrderStatus status)
+  {
+    Status = status;
+    if (status == OrderStatus.Completed) CompletedAt ??= DateTime.UtcNow;
+  }
 
   /// <summary>
   ///   Set the quantity of an item. quantity = 0 removes the item.

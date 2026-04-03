@@ -607,29 +607,6 @@ onUnmounted(() => {
           <iconify icon="ph:plus-bold" class="tw:mr-1" />
           <span>{{ t("orders.newOrder") }}</span>
         </prime-button>
-        <!-- View toggle -->
-        <div
-          class="tw:flex tw:items-center tw:rounded-lg tw:border tw:border-white/10 tw:p-1 tw:gap-1"
-        >
-          <prime-button
-            severity="primary"
-            size="small"
-            v-tooltip.top="'Kanban'"
-            :class="btnIcon"
-          >
-            <iconify icon="ph:kanban-bold" />
-          </prime-button>
-          <prime-button
-            severity="secondary"
-            text
-            size="small"
-            v-tooltip.top="'List'"
-            :class="btnIcon"
-            @click="router.push({ name: 'ordersList' })"
-          >
-            <iconify icon="ph:list-bold" />
-          </prime-button>
-        </div>
         <!-- Widget settings -->
         <widget-settings-button
           :widgets="wDefs"
@@ -723,12 +700,12 @@ onUnmounted(() => {
 
     <!-- Kanban board -->
     <div
-      class="tw:grid tw:grid-cols-1 tw:gap-4 tw:md:grid-cols-2 tw:xl:grid-cols-4"
+      class="tw:flex tw:gap-4 tw:overflow-x-auto tw:pb-2"
     >
       <div
         v-for="col in STATUSES"
         :key="col.key"
-        :class="['tw:flex tw:flex-col tw:gap-3', col.key !== activeTab ? 'tw:hidden tw:md:flex' : '']"
+        class="tw:flex tw:flex-col tw:gap-3 tw:min-w-72 tw:flex-1"
       >
         <!-- Column header -->
         <div

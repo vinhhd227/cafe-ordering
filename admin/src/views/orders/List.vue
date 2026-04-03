@@ -483,29 +483,23 @@ const confirmPayment = async () => {
       <prime-button
         severity="success"
         size="small"
+        class="tw:h-8!"
         @click="router.push({ name: 'ordersCreate' })"
       >
         <iconify icon="ph:plus-bold" class="tw:mr-1" />
         <span>{{ t('orders.newOrder') }}</span>
       </prime-button>
-      <!-- View toggle -->
-      <div
-        class="tw:flex tw:items-center tw:rounded-lg tw:border tw:border-white/10 tw:p-1 tw:gap-1"
+      <!-- Manual Order -->
+      <prime-button
+        severity="secondary"
+        outlined
+        size="small"
+        class="tw:h-8!"
+        @click="router.push({ name: 'ordersCreateManual' })"
       >
-        <prime-button
-          severity="secondary"
-          text
-          size="small"
-          v-tooltip.top="'Kanban'"
-          :class="btnIcon"
-          @click="router.push({ name: 'orders' })"
-        >
-          <iconify icon="ph:kanban-bold" />
-        </prime-button>
-        <prime-button severity="primary" size="small" v-tooltip.top="'List'" :class="btnIcon">
-          <iconify icon="ph:list-bold" />
-        </prime-button>
-      </div>
+        <iconify icon="ph:pencil-line-bold" class="tw:mr-1" />
+        <span>{{ t('orders.newManualOrder') }}</span>
+      </prime-button>
       <!-- Widget settings -->
       <widget-settings-button
         :widgets="wDefs"
@@ -519,6 +513,7 @@ const confirmPayment = async () => {
         severity="secondary"
         outlined
         size="small"
+        class="tw:h-8!"
         :loading="loading"
         @click="loadOrders"
       >
@@ -925,7 +920,10 @@ const confirmPayment = async () => {
           <!-- Order # + amount -->
           <div class="tw:flex tw:items-start tw:justify-between tw:gap-2">
             <div>
-              <span class="tw:font-mono tw:font-bold tw:text-sm">{{ data.orderNumber }}</span>
+              <div class="tw:flex tw:items-center tw:gap-1.5">
+                <span class="tw:font-mono tw:font-bold tw:text-sm">{{ data.orderNumber }}</span>
+                <prime-tag v-if="data.isManual" value="Thủ công" severity="secondary" class="tw:text-[10px]! tw:px-1.5! tw:py-0!" />
+              </div>
               <p class="tw:text-[11px] app-text-muted tw:mt-0.5">{{ formatDate(data.orderDate) }}</p>
             </div>
             <div class="tw:text-right tw:shrink-0">
@@ -992,7 +990,15 @@ const confirmPayment = async () => {
       </template>
 
       <template #col-orderNumber="{ data }">
-        <span class="tw:font-mono tw:text-sm tw:font-semibold">{{ data.orderNumber }}</span>
+        <div class="tw:flex tw:flex-col tw:gap-0.5">
+          <span class="tw:font-mono tw:text-sm tw:font-semibold">{{ data.orderNumber }}</span>
+          <prime-tag
+            v-if="data.isManual"
+            value="Thủ công"
+            severity="secondary"
+            class="tw:text-[10px]! tw:px-1.5! tw:py-0! tw:self-start"
+          />
+        </div>
       </template>
 
       <template #col-orderDate="{ data }">

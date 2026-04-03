@@ -3,6 +3,7 @@
     "breadcrumb": "Orders",
     "title": "Order management",
     "newOrder": "New Order",
+    "newManualOrder": "Manual Entry",
     "refresh": "Refresh",
     "cancel": "Cancel",
     "status": {

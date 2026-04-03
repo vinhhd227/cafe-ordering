@@ -80,10 +80,11 @@ public class ListOrdersHandler(
     var bankAmounts    = await repository.ListAsync(bankSpec, ct);
     var tipAmounts     = await repository.ListAsync(tipSpec, ct);
 
-    // Build sessionId → tableId map (chỉ load sessions cho trang hiện tại)
-    var sessionIds = orders.Select(o => o.SessionId).Distinct().ToList();
-    var sessions   = await sessionRepository.ListAsync(new SessionsByIdsSpec(sessionIds), ct);
-    var sessionMap = sessions.ToDictionary(s => s.Id, s => s.TableId);
+    // Build sessionId → tableId/source map (chỉ load sessions cho trang hiện tại)
+    var sessionIds   = orders.Select(o => o.SessionId).Distinct().ToList();
+    var sessions     = await sessionRepository.ListAsync(new SessionsByIdsSpec(sessionIds), ct);
+    var sessionMap   = sessions.ToDictionary(s => s.Id, s => s.TableId);
+    var sessionSource = sessions.ToDictionary(s => s.Id, s => s.Source);
 
     // Build tableId → tableCode map — only load tables referenced by current page
     var tableIds = sessions.Select(s => s.TableId).OfType<int>().Distinct().ToList();
@@ -95,6 +96,9 @@ public class ListOrdersHandler(
       string? tableCode = null;
       if (sessionMap.TryGetValue(o.SessionId, out var tableId) && tableId.HasValue)
         tableMap.TryGetValue(tableId.Value, out tableCode);
+
+      var isManual = sessionSource.TryGetValue(o.SessionId, out var src)
+        && src == GuestSessionSource.Manual;
 
       return new OrderDto(
         o.Id,
@@ -127,7 +131,8 @@ public class ListOrdersHandler(
           i.IsFreeGift,
           i.Note
         )).ToList(),
-        o.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList()
+        o.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList(),
+        isManual
       );
     }).ToList();
 

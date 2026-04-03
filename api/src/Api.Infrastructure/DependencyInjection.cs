@@ -1,4 +1,5 @@
-﻿using Api.Infrastructure.Identity;
+﻿using Api.Core.Interfaces;
+using Api.Infrastructure.Identity;
 using Api.Infrastructure.Services;
 using Api.UseCases.Interfaces;
 using Api.UseCases.Orders.Interfaces;
@@ -85,6 +86,10 @@ public static class DependencyInjection
 
     // === SSE: Order real-time notifications ===
     services.AddSingleton<IOrderSseNotifier, OrderSseNotifier>();
+
+    // === Web Push Notifications ===
+    services.Configure<VapidSettings>(configuration.GetSection("Vapid"));
+    services.AddScoped<IPushNotificationService, PushNotificationService>();
 
     logger.LogInformation("{Project} services registered", "Infrastructure");
 

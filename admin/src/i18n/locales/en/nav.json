@@ -2,6 +2,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "orders": "Orders",
+    "ordersKanban": "Kanban",
+    "ordersList": "List",
     "expenses": "Expenses",
     "tables": "Tables",
     "zones": "Zones",

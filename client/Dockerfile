@@ -7,8 +7,9 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
+ARG BUILD_MODE=production
 COPY . .
-RUN pnpm build
+RUN pnpm build --mode $BUILD_MODE
 
 FROM nginx:1.27-alpine
 

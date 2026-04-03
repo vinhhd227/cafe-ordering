@@ -108,7 +108,8 @@ public class UpdateOrderItemHandler(
         i.IsFreeGift,
         i.Note
       )).ToList(),
-      order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList()
+      order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList(),
+      false
     );
 
     return Result.Success(dto);

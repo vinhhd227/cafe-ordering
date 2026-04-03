@@ -5,6 +5,20 @@ const store = useNotificationStore()
 const toast = useToast()
 const overlay = ref(null)
 
+// ── Push Notifications ─────────────────────────────────────────────
+const { isSupported: pushSupported, isSubscribed, loading: pushLoading, toggle: togglePush, permission: pushPermission } = usePushNotifications()
+
+async function handlePushToggle() {
+  if (!pushSupported) {
+    toast.add({ severity: 'warn', summary: t('notifications.pushNotSupported'), life: 4000 })
+    return
+  }
+  await togglePush()
+  if (pushPermission.value === 'denied') {
+    toast.add({ severity: 'warn', summary: t('notifications.pushDenied'), life: 5000 })
+  }
+}
+
 // ── Sound ──────────────────────────────────────────────────────────
 function playBeep() {
   if (!store.soundEnabled) return
@@ -102,6 +116,22 @@ function openOrder(orderId) {
             />
           </div>
           <div class="tw:flex tw:items-center tw:gap-0.5">
+            <!-- Push notifications toggle -->
+            <button
+              v-if="pushSupported"
+              type="button"
+              class="tw:flex tw:h-7 tw:w-7 tw:items-center tw:justify-center tw:rounded-lg tw:transition-colors hover:tw:bg-black/5"
+              :class="isSubscribed ? 'tw:text-emerald-400' : 'app-text-muted'"
+              :title="isSubscribed ? t('notifications.pushDisable') : t('notifications.pushEnable')"
+              :disabled="pushLoading"
+              @click="handlePushToggle"
+            >
+              <iconify
+                :icon="pushLoading ? 'ph:circle-notch-bold' : (isSubscribed ? 'ph:device-mobile-bold' : 'ph:device-mobile-slash-bold')"
+                class="tw:text-sm"
+                :class="pushLoading ? 'tw:animate-spin' : ''"
+              />
+            </button>
             <!-- Sound toggle -->
             <button
               type="button"

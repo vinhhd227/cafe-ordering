@@ -7,6 +7,10 @@
     "itemCount": "{n} item | {n} items",
     "itemUnit": "items",
     "sound": "Toggle sound",
+    "pushEnable": "Enable push notifications",
+    "pushDisable": "Disable push notifications",
+    "pushNotSupported": "Push notifications not supported in this browser",
+    "pushDenied": "Notification permission denied. Please allow it in browser settings.",
     "markAllRead": "Mark all as read",
     "clear": "Clear all"
   }

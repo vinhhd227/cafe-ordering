@@ -76,6 +76,18 @@ const routes = [
             component: () => import("@/views/orders/Edit.vue"),
             meta: { pageTitle: "orders.edit.title" },
           },
+          {
+            path: "create-manual",
+            name: "ordersCreateManual",
+            component: () => import("@/views/orders/CreateManual.vue"),
+            meta: { pageTitle: "orders.create.title" },
+          },
+          {
+            path: ":id/edit-manual",
+            name: "ordersEditManual",
+            component: () => import("@/views/orders/EditManual.vue"),
+            meta: { pageTitle: "orders.edit.title" },
+          },
         ],
       },
       {

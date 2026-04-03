@@ -7,6 +7,10 @@
     "itemCount": "{n} món",
     "itemUnit": "món",
     "sound": "Bật/tắt âm thanh",
+    "pushEnable": "Bật thông báo đẩy",
+    "pushDisable": "Tắt thông báo đẩy",
+    "pushNotSupported": "Trình duyệt không hỗ trợ thông báo đẩy",
+    "pushDenied": "Quyền thông báo bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.",
     "markAllRead": "Đánh dấu đã đọc",
     "clear": "Xóa tất cả"
   }

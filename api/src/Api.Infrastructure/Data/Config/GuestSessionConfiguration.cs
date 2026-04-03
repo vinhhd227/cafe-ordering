@@ -19,6 +19,10 @@ public class GuestSessionConfiguration : IEntityTypeConfiguration<GuestSession>
       .IsRequired()
       .HasDefaultValue(GuestSessionStatus.Active);
 
+    builder.Property(s => s.Source)
+      .IsRequired()
+      .HasDefaultValue(GuestSessionSource.QrCode);
+
     builder.Property(s => s.OpenedAt).IsRequired();
 
     builder.Property(s => s.ClosedAt);

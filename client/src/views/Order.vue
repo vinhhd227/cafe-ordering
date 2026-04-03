@@ -35,6 +35,10 @@ const loadError = ref("");
 const session = ref(null);
 const sessionError = ref("");
 
+/* ─── Image fallback ────────────────────────────────────── */
+const failedImages = ref(new Set())
+const onImageError = (id) => { failedImages.value = new Set([...failedImages.value, id]) }
+
 /* ─── Options dialog ───────────────────────────────────── */
 const showOptionsDialog = ref(false);
 const selectedProduct = ref(null);
@@ -463,11 +467,18 @@ onMounted(async () => {
                 :key="product.id"
                 class="app-panel tw:flex tw:flex-row tw:overflow-hidden tw:rounded-2xl tw:border tw:border-white/10 tw:shadow-sm tw:transition hover:tw:bg-white/5 tw:lg:flex-col"
               >
-                <img
-                  :src="product.imageUrl"
-                  :alt="product.name"
-                  class="tw:w-24 tw:shrink-0 tw:self-stretch tw:object-cover tw:lg:h-44 tw:lg:w-full tw:lg:shrink-0"
-                />
+                <div class="tw:w-24 tw:shrink-0 tw:self-stretch tw:overflow-hidden tw:lg:h-44 tw:lg:w-full tw:lg:shrink-0">
+                  <img
+                    v-if="product.imageUrl && !failedImages.has(product.id)"
+                    :src="product.imageUrl"
+                    :alt="product.name"
+                    class="tw:h-full tw:w-full tw:object-cover"
+                    @error="onImageError(product.id)"
+                  />
+                  <div v-else class="tw:flex tw:h-full tw:w-full tw:items-center tw:justify-center tw:bg-white/5">
+                    <iconify icon="ph:coffee-bold" class="tw:h-8 tw:w-8 tw:opacity-30 tw:lg:h-12 tw:lg:w-12" />
+                  </div>
+                </div>
                 <div
                   class="tw:flex tw:flex-1 tw:items-center tw:gap-3 tw:px-3 tw:py-3 tw:lg:flex-col tw:lg:items-start tw:lg:gap-0 tw:lg:p-4"
                 >
@@ -848,10 +859,11 @@ onMounted(async () => {
         <!-- Image -->
         <div class="tw:relative tw:h-36 tw:flex-none tw:overflow-hidden tw:bg-white/10 tw:sm:h-40">
           <img
-            v-if="selectedProduct?.imageUrl"
+            v-if="selectedProduct?.imageUrl && !failedImages.has(selectedProduct.id)"
             :src="selectedProduct.imageUrl"
             :alt="selectedProduct?.name"
             class="tw:h-full tw:w-full tw:object-contain"
+            @error="onImageError(selectedProduct.id)"
           />
           <div v-else class="tw:flex tw:h-full tw:w-full tw:items-center tw:justify-center app-text-subtle">
             <iconify icon="ph:coffee-bold" class="tw:h-20 tw:w-20" />

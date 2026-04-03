@@ -5,6 +5,7 @@ using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.ProductAggregate;
 using Api.Core.Aggregates.PromotionAggregate;
+using Api.Core.Aggregates.PushSubscriptionAggregate;
 using Api.Core.Aggregates.TableAggregate;
 using Api.Core.Aggregates.SavedMenuAggregate;
 using Api.Core.Aggregates.WifiProfileAggregate;
@@ -39,6 +40,7 @@ public class AppDbContext : DbContext
   public DbSet<Promotion> Promotions => Set<Promotion>();
   public DbSet<WifiProfile> WifiProfiles => Set<WifiProfile>();
   public DbSet<SavedMenu> SavedMenus => Set<SavedMenu>();
+  public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {

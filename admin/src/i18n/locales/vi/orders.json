@@ -3,6 +3,7 @@
     "breadcrumb": "Đơn hàng",
     "title": "Quản lý đơn hàng",
     "newOrder": "Tạo đơn",
+    "newManualOrder": "Nhập thủ công",
     "refresh": "Tải lại",
     "cancel": "Huỷ",
     "status": {

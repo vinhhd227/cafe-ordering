@@ -8,6 +8,7 @@ public class GuestSession : AuditableEntity<Guid>, IAggregateRoot
 
   public int? TableId { get; private set; }
   public GuestSessionStatus Status { get; private set; }
+  public GuestSessionSource Source { get; private set; } = GuestSessionSource.QrCode;
   public DateTime OpenedAt { get; private set; }
   public DateTime? ClosedAt { get; private set; }
   public string? CustomerId { get; private set; }
@@ -26,6 +27,23 @@ public class GuestSession : AuditableEntity<Guid>, IAggregateRoot
 
     session.RegisterDomainEvent(new SessionOpenedEvent(session.Id, tableId));
     return session;
+  }
+
+  /// <summary>
+  ///   Factory cho manual order — không fire domain event, không ảnh hưởng Table.ActiveSessionId.
+  /// </summary>
+  public static GuestSession CreateManual(int tableId)
+  {
+    Guard.Against.NegativeOrZero(tableId, nameof(tableId));
+
+    return new GuestSession
+    {
+      Id       = Guid.NewGuid(),
+      TableId  = tableId,
+      Source   = GuestSessionSource.Manual,
+      Status   = GuestSessionStatus.Active,
+      OpenedAt = DateTime.UtcNow
+    };
   }
 
   public void Close()

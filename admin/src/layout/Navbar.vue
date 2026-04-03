@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useThemeStore } from "@/stores/theme";
@@ -32,6 +32,33 @@ const visibleNavGroups = computed(() =>
 const profileMenu = ref();
 
 const isActive = (to) => route.name === to.name;
+
+const isParentActive = (item) => route.path.startsWith('/orders');
+
+const expandedMap = reactive({});
+
+const isExpanded = (labelKey) => !!expandedMap[labelKey];
+
+const toggleExpand = (labelKey) => { expandedMap[labelKey] = !expandedMap[labelKey]; };
+
+const handleParentClick = (item) => {
+  if (isCollapsed.value) {
+    router.push(item.children[0].to);
+    close();
+  } else {
+    toggleExpand(item.labelKey);
+  }
+};
+
+watch(route, () => {
+  visibleNavGroups.value.forEach(group => {
+    group.items.forEach(item => {
+      if (item.children && item.children.some(child => route.name === child.to.name)) {
+        expandedMap[item.labelKey] = true;
+      }
+    });
+  });
+}, { immediate: true });
 
 const fullName = computed(() => auth.user?.fullName || "Staff");
 
@@ -147,23 +174,66 @@ const toggleProfileMenu = (event) => {
 
         <!-- Nav items -->
         <div class="tw:space-y-0.5">
-          <router-link
-            v-for="item in group.items"
-            :key="item.to.name"
-            :to="item.to"
-            class="tw:flex tw:items-center tw:rounded-lg tw:py-2.5 tw:text-sm tw:font-medium tw:transition-all tw:duration-150 tw:no-underline"
-            :class="[
-              isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
-              isActive(item.to)
-                ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
-                : 'app-text-muted hover:tw:bg-white/5 hover:tw:text-white'
-            ]"
-            :title="isCollapsed ? t(item.labelKey) : undefined"
-            @click="close"
-          >
-            <iconify :icon="item.icon" class="tw:shrink-0 tw:text-base" />
-            <span v-if="!isCollapsed">{{ t(item.labelKey) }}</span>
-          </router-link>
+          <template v-for="item in group.items" :key="item.labelKey">
+            <!-- Item with children (expandable) -->
+            <template v-if="item.children">
+              <button
+                type="button"
+                class="tw:w-full tw:flex tw:items-center tw:rounded-lg tw:py-2.5 tw:text-sm tw:font-medium tw:transition-all tw:duration-150"
+                :class="[
+                  isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
+                  isParentActive(item)
+                    ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
+                    : 'app-text-muted hover:tw:bg-white/5 hover:tw:text-white'
+                ]"
+                :title="isCollapsed ? t(item.labelKey) : undefined"
+                @click="handleParentClick(item)"
+              >
+                <iconify :icon="item.icon" class="tw:shrink-0 tw:text-base" />
+                <span v-if="!isCollapsed" class="tw:flex-1 tw:text-left">{{ t(item.labelKey) }}</span>
+                <iconify
+                  v-if="!isCollapsed"
+                  icon="ph:caret-down-bold"
+                  class="tw:shrink-0 tw:text-xs tw:transition-transform tw:duration-200"
+                  :class="isExpanded(item.labelKey) ? 'tw:rotate-180' : ''"
+                />
+              </button>
+              <!-- Children -->
+              <div v-if="!isCollapsed && isExpanded(item.labelKey)" class="tw:ml-4 tw:mt-0.5 tw:space-y-0.5">
+                <router-link
+                  v-for="child in item.children"
+                  :key="child.to.name"
+                  :to="child.to"
+                  class="tw:flex tw:items-center tw:rounded-lg tw:py-2 tw:px-3 tw:text-sm tw:font-medium tw:transition-all tw:duration-150 tw:no-underline tw:gap-3"
+                  :class="isActive(child.to)
+                    ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
+                    : 'app-text-muted hover:tw:bg-white/5 hover:tw:text-white'"
+                  @click="close"
+                >
+                  <iconify :icon="child.icon" class="tw:shrink-0 tw:text-sm" />
+                  <span>{{ t(child.labelKey) }}</span>
+                </router-link>
+              </div>
+            </template>
+
+            <!-- Regular item -->
+            <router-link
+              v-else
+              :to="item.to"
+              class="tw:flex tw:items-center tw:rounded-lg tw:py-2.5 tw:text-sm tw:font-medium tw:transition-all tw:duration-150 tw:no-underline"
+              :class="[
+                isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
+                isActive(item.to)
+                  ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
+                  : 'app-text-muted hover:tw:bg-white/5 hover:tw:text-white'
+              ]"
+              :title="isCollapsed ? t(item.labelKey) : undefined"
+              @click="close"
+            >
+              <iconify :icon="item.icon" class="tw:shrink-0 tw:text-base" />
+              <span v-if="!isCollapsed">{{ t(item.labelKey) }}</span>
+            </router-link>
+          </template>
         </div>
       </div>
     </nav>

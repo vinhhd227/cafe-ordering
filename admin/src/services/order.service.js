@@ -43,3 +43,7 @@ export const autoApplyPromotions = (orderId) =>
 // Replace all items in a Pending order (also updates guestCount)
 export const editOrderItems = (orderId, items, guestCount = null) =>
   api.put(`/admin/orders/${orderId}/items`, { items, guestCount })
+
+// Manual order (admin) — create/update with full control over status/payment/time
+export const createManualOrder = (data) => api.post('/admin/orders', data)
+export const updateManualOrder = (orderId, data) => api.put(`/admin/orders/${orderId}`, data)

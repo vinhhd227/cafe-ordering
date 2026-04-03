@@ -733,6 +733,7 @@ const confirmSplit = async () => {
                 paymentTag(order.paymentStatus, order.paymentMethod).severity
               "
             />
+            <prime-tag v-if="order.isManual" value="Thủ công" severity="secondary" />
           </template>
         </h1>
         <p v-if="order" class="tw:mt-2 tw:text-sm app-text-muted">
@@ -740,15 +741,27 @@ const confirmSplit = async () => {
         </p>
         <prime-skeleton v-else width="14rem" height="1rem" class="tw:mt-2" />
       </div>
-      <prime-button
-        severity="secondary"
-        outlined
-        size="small"
-        @click="router.push({ name: 'ordersList' })"
-      >
-        <iconify icon="ph:arrow-left-bold" />
-        <span>{{ t('orders.detail.backToList') }}</span>
-      </prime-button>
+      <div class="tw:flex tw:gap-2">
+        <prime-button
+          v-if="order?.isManual"
+          severity="secondary"
+          outlined
+          size="small"
+          @click="router.push({ name: 'ordersEditManual', params: { id: orderId } })"
+        >
+          <iconify icon="ph:pencil-line-bold" />
+          <span>Sửa thủ công</span>
+        </prime-button>
+        <prime-button
+          severity="secondary"
+          outlined
+          size="small"
+          @click="router.push({ name: 'ordersList' })"
+        >
+          <iconify icon="ph:arrow-left-bold" />
+          <span>{{ t('orders.detail.backToList') }}</span>
+        </prime-button>
+      </div>
     </div>
 
     <!-- Error -->

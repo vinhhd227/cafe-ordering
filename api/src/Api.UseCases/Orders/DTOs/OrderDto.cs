@@ -39,7 +39,8 @@ public record OrderDto(
   DateTime? CompletedAt,
   DateTime? PaidAt,
   List<OrderItemDto> Items,
-  List<AppliedPromotionDto> Promotions
+  List<AppliedPromotionDto> Promotions,
+  bool IsManual
 );
 
 public record PagedOrdersDto(
