@@ -4,14 +4,12 @@ public static class LoggerConfigs
 {
   public static WebApplicationBuilder AddLoggerConfigs(this WebApplicationBuilder builder)
   {
-    // Add Serilog as an additional logging provider alongside OpenTelemetry
-    // This allows both Serilog (for console/file) and OpenTelemetry (for Aspire) to work together
-    builder.Logging.AddSerilog(new LoggerConfiguration()
-      .ReadFrom.Configuration(builder.Configuration)
+    // UseSerilog replaces all default logging providers (console, debug, etc.)
+    // WriteTo sinks are configured via appsettings.json / appsettings.*.json
+    builder.Host.UseSerilog((ctx, cfg) => cfg
+      .ReadFrom.Configuration(ctx.Configuration)
       .Enrich.FromLogContext()
-      .Enrich.WithProperty("Application", builder.Environment.ApplicationName)
-      .WriteTo.Console()
-      .CreateLogger());
+      .Enrich.WithProperty("Application", ctx.HostingEnvironment.ApplicationName));
 
     return builder;
   }
