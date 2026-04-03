@@ -226,6 +226,12 @@ const routes = [
         meta: { requiresAuth: true, adminOnly: true, section: "nav.groups.settings", pageTitle: "notificationConfigs.title" },
       },
       {
+        path: "notifications",
+        name: "notifications",
+        component: () => import("@/views/notifications/List.vue"),
+        meta: { requiresAuth: true, pageTitle: "notifications.list.title" },
+      },
+      {
         path: "profile",
         name: "profile",
         component: () => import("@/views/Profile.vue"),

@@ -24,6 +24,7 @@ public class NotificationService(
         string body,
         string? url = null,
         int? referenceId = null,
+        string? pushBody = null,
         CancellationToken ct = default)
     {
         try
@@ -74,7 +75,7 @@ public class NotificationService(
             {
                 await using var scope = scopeFactory.CreateAsyncScope();
                 var pushService = scope.ServiceProvider.GetRequiredService<IPushNotificationService>();
-                await pushService.SendToSnapshotsAsync(subSnapshots, title, body, url);
+                await pushService.SendToSnapshotsAsync(subSnapshots, title, body, url, pushBody);
             }, CancellationToken.None);
         }
         catch (Exception ex)

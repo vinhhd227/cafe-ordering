@@ -22,5 +22,6 @@ public interface IPushNotificationService
         string title,
         string body,
         string? url = null,
+        string? detail = null,
         CancellationToken ct = default);
 }

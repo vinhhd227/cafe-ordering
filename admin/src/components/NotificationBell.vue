@@ -52,8 +52,8 @@ const { connected: sseConnected } = useOrderSse({
   },
 })
 
-// Fetch notifications khi component mount
-onMounted(() => store.fetchNotifications())
+// Fetch notifications khi component mount (giới hạn 10 cho bell)
+onMounted(() => store.fetchNotifications(1, 10))
 
 // ── Helpers ────────────────────────────────────────────────────────
 function buildDetail(order) {
@@ -86,9 +86,14 @@ function typeIcon(type) {
 function toggleOverlay(event) {
   overlay.value?.toggle(event)
   if (overlay.value?.visible === false) {
-    // Overlay vừa mở → fetch lại danh sách
-    store.fetchNotifications()
+    // Overlay vừa mở → fetch lại danh sách (giới hạn 10)
+    store.fetchNotifications(1, 10)
   }
+}
+
+function goToNotificationsPage() {
+  overlay.value?.hide()
+  router.push({ name: 'notifications' })
 }
 
 async function openNotification(item) {
@@ -229,13 +234,14 @@ async function openNotification(item) {
         </div>
 
         <!-- Footer: xem tất cả -->
-        <div v-if="store.totalCount > store.items.length" class="tw:mt-3 tw:pt-3 tw:border-t tw:border-white/10 tw:text-center">
+        <div v-if="store.totalCount > 0" class="tw:mt-3 tw:pt-3 tw:border-t tw:border-white/10 tw:text-center">
           <button
             type="button"
-            class="tw:text-xs app-text-muted hover:tw:text-primary-400 tw:transition-colors"
-            @click="store.fetchNotifications(1, store.totalCount)"
+            class="tw:text-xs app-text-muted hover:tw:text-primary-400 tw:transition-colors tw:flex tw:items-center tw:gap-1 tw:mx-auto"
+            @click="goToNotificationsPage"
           >
-            {{ t('notifications.loadMore', { n: store.totalCount - store.items.length }) }}
+            <span>{{ t('notifications.viewAll') }}</span>
+            <iconify icon="ph:arrow-right-bold" class="tw:text-[10px]" />
           </button>
         </div>
       </div>

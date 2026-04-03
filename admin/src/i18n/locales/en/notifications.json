@@ -13,6 +13,18 @@
     "pushDenied": "Notification permission denied. Please allow it in browser settings.",
     "markAllRead": "Mark all as read",
     "clear": "Clear all",
-    "loadMore": "Load {n} more"
+    "loadMore": "Load {n} more",
+    "viewAll": "View all notifications",
+    "list": {
+      "breadcrumb": "My account",
+      "title": "Notifications",
+      "subtitle": "Your notification history",
+      "empty": "No notifications yet",
+      "loadError": "Failed to load notifications",
+      "allReadDone": "All notifications marked as read",
+      "justNow": "Just now",
+      "minutesAgo": "{n} min ago",
+      "hoursAgo": "{n} hr ago"
+    }
   }
 }

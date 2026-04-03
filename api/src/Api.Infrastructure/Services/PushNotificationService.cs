@@ -45,9 +45,10 @@ public class PushNotificationService(
         string title,
         string body,
         string? url = null,
+        string? detail = null,
         CancellationToken ct = default)
     {
-        var expired = await SendCoreAsync(snapshots, title, body, url);
+        var expired = await SendCoreAsync(snapshots, title, detail ?? body, url);
 
         if (expired.Count > 0)
         {

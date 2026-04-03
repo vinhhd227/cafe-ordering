@@ -13,5 +13,6 @@ public interface INotificationService
         string body,
         string? url = null,
         int? referenceId = null,
+        string? pushBody = null,
         CancellationToken ct = default);
 }

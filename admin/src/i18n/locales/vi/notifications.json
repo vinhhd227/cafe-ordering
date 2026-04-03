@@ -13,6 +13,18 @@
     "pushDenied": "Quyền thông báo bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.",
     "markAllRead": "Đánh dấu đã đọc",
     "clear": "Xóa tất cả",
-    "loadMore": "Xem thêm {n} thông báo"
+    "loadMore": "Xem thêm {n} thông báo",
+    "viewAll": "Xem tất cả thông báo",
+    "list": {
+      "breadcrumb": "Của tôi",
+      "title": "Thông báo",
+      "subtitle": "Lịch sử thông báo của bạn",
+      "empty": "Chưa có thông báo nào",
+      "loadError": "Không thể tải danh sách thông báo",
+      "allReadDone": "Đã đánh dấu tất cả là đã đọc",
+      "justNow": "Vừa xong",
+      "minutesAgo": "{n} phút trước",
+      "hoursAgo": "{n} giờ trước"
+    }
   }
 }

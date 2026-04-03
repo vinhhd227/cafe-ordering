@@ -28,12 +28,21 @@ public class PushOnOrderCreated(
                 ? $"Bàn {tableCode} · {order.Items.Count} món"
                 : $"{order.Items.Count} món";
 
+            var title = tableCode is not null
+                ? $"🛎 Bàn {tableCode} · {order.Items.Count} món"
+                : $"🛎 Đơn mới · {order.Items.Count} món";
+
+            var itemLines = order.Items
+                .Select(i => $"• {i.ProductName} x{i.Quantity}  {i.TotalPrice:N0}đ");
+            var pushBody = string.Join("\n", itemLines) + $"\n──────────────\nTổng: {order.FinalAmount:N0}đ";
+
             await notifications.SendAsync(
                 NotificationType.OrderCreated,
-                title: $"Đơn mới #{order.OrderNumber}",
+                title: title,
                 body: body,
                 url: $"/orders/{order.Id}",
                 referenceId: order.Id,
+                pushBody: pushBody,
                 ct: ct);
         }
         catch (Exception ex)
