@@ -8,6 +8,7 @@ import {
   setRolePermissions,
 } from "@/services/role.service";
 
+const { t } = useI18n();
 const cache = useTableCache("roles");
 const toast = useToast();
 const auth = useAuthStore();

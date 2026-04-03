@@ -27,6 +27,7 @@ import { getCategory } from "@/services/category.service";
 import { getProductTree } from "@/services/product.service";
 
 // ── Cache ──────────────────────────────────────────────────────────
+const { t } = useI18n();
 const { save: saveCache, restore: restoreCache } = useTableCache("promotions-list");
 
 // ── PrimeVue services ─────────────────────────────────────────────

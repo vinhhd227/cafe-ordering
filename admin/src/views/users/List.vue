@@ -6,6 +6,7 @@ import {
   deactivateUser,
 } from '@/services/user.service'
 
+const { t } = useI18n();
 const cache  = useTableCache('users')
 const router = useRouter()
 const { can } = usePermission()
