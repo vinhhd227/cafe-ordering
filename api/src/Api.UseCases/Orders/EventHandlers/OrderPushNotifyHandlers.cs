@@ -1,5 +1,6 @@
 using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
+using Api.Core.Aggregates.NotificationAggregate;
 using Api.Core.Aggregates.OrderAggregate.Events;
 using Api.Core.Aggregates.TableAggregate;
 using Api.Core.Aggregates.TableAggregate.Specifications;
@@ -9,11 +10,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Api.UseCases.Orders.EventHandlers;
 
-/// <summary>
-/// Gửi web push notification khi có đơn mới hoặc đơn thay đổi trạng thái.
-/// </summary>
 public class PushOnOrderCreated(
-    IPushNotificationService push,
+    INotificationService notifications,
     IReadRepositoryBase<GuestSession> sessionRepo,
     IReadRepositoryBase<Table> tableRepo,
     ILogger<PushOnOrderCreated> logger)
@@ -30,10 +28,12 @@ public class PushOnOrderCreated(
                 ? $"Bàn {tableCode} · {order.Items.Count} món"
                 : $"{order.Items.Count} món";
 
-            await push.SendToAllAsync(
+            await notifications.SendAsync(
+                NotificationType.OrderCreated,
                 title: $"Đơn mới #{order.OrderNumber}",
                 body: body,
                 url: $"/orders/{order.Id}",
+                referenceId: order.Id,
                 ct: ct);
         }
         catch (Exception ex)
@@ -52,7 +52,7 @@ public class PushOnOrderCreated(
 }
 
 public class PushOnOrderStatusChanged(
-    IPushNotificationService push,
+    INotificationService notifications,
     ILogger<PushOnOrderStatusChanged> logger)
     : INotificationHandler<OrderStatusChangedEvent>
 {
@@ -62,16 +62,26 @@ public class PushOnOrderStatusChanged(
         {
             var order = notification.Order;
 
-            // Chỉ push khi đơn hoàn thành hoặc bị hủy (status đáng quan tâm)
-            if (order.Status.Name is not ("COMPLETED" or "CANCELLED")) return;
-
-            var statusLabel = order.Status.Name == "COMPLETED" ? "Hoàn thành" : "Đã hủy";
-
-            await push.SendToAllAsync(
-                title: $"Đơn #{order.OrderNumber} — {statusLabel}",
-                body: $"Tổng: {order.FinalAmount:N0}đ",
-                url: $"/orders/{order.Id}",
-                ct: ct);
+            if (order.Status.Name == "COMPLETED")
+            {
+                await notifications.SendAsync(
+                    NotificationType.OrderCompleted,
+                    title: $"Đơn #{order.OrderNumber} — Hoàn thành",
+                    body: $"Tổng: {order.FinalAmount:N0}đ",
+                    url: $"/orders/{order.Id}",
+                    referenceId: order.Id,
+                    ct: ct);
+            }
+            else if (order.Status.Name == "CANCELLED")
+            {
+                await notifications.SendAsync(
+                    NotificationType.OrderCancelled,
+                    title: $"Đơn #{order.OrderNumber} — Đã hủy",
+                    body: $"Tổng: {order.FinalAmount:N0}đ",
+                    url: $"/orders/{order.Id}",
+                    referenceId: order.Id,
+                    ct: ct);
+            }
         }
         catch (Exception ex)
         {

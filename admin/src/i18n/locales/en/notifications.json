@@ -12,6 +12,7 @@
     "pushNotSupported": "Push notifications not supported in this browser",
     "pushDenied": "Notification permission denied. Please allow it in browser settings.",
     "markAllRead": "Mark all as read",
-    "clear": "Clear all"
+    "clear": "Clear all",
+    "loadMore": "Load {n} more"
   }
 }

@@ -1,0 +1,30 @@
+{
+  "notificationConfigs": {
+    "breadcrumb": "Settings",
+    "title": "Notification Settings",
+    "subtitle": "Manage notification types and target recipients by role.",
+    "noRoles": "Send to nobody",
+    "disabledHint": "This notification type is disabled and will not be sent to anyone.",
+    "saved": "Saved",
+    "saveError": "Failed to save",
+    "loadError": "Failed to load notification settings",
+    "retention": {
+      "title": "Auto Cleanup",
+      "label": "Notification retention",
+      "hint": "Notifications older than this many days will be automatically deleted every 24 hours.",
+      "days": "{n} days",
+      "save": "Save",
+      "saved": "Cleanup settings saved",
+      "saveError": "Failed to save"
+    },
+    "types": {
+      "orderCreated": "New Order",
+      "orderCancelled": "Order Cancelled",
+      "orderCompleted": "Order Completed",
+      "paymentReceived": "Payment Received",
+      "manualOrderCreated": "Manual Order Created",
+      "lowStock": "Low Stock",
+      "systemAlert": "System Alert"
+    }
+  }
+}

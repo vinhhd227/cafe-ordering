@@ -1,4 +1,5 @@
 using Api.Core.Aggregates.CategoryAggregate;
+using Api.Core.Aggregates.NotificationAggregate;
 using Api.Core.Aggregates.ProductAggregate;
 using Api.Core.Aggregates.TableAggregate;
 using Microsoft.Extensions.Logging;
@@ -77,6 +78,31 @@ public static class SeedData
 
         logger?.LogInformation("Seeded {Count} products", products.Length);
       }
+    }
+
+    if (!context.NotificationConfigs.Any())
+    {
+      var configs = new[]
+      {
+        NotificationConfig.Create(NotificationType.OrderCreated.Name,       ["Staff", "Admin"]),
+        NotificationConfig.Create(NotificationType.OrderCancelled.Name,     ["Staff", "Admin"]),
+        NotificationConfig.Create(NotificationType.OrderCompleted.Name,     ["Admin"]),
+        NotificationConfig.Create(NotificationType.PaymentReceived.Name,    ["Staff", "Admin"]),
+        NotificationConfig.Create(NotificationType.ManualOrderCreated.Name, ["Admin"]),
+        NotificationConfig.Create(NotificationType.LowStock.Name,           ["Admin"]),
+        NotificationConfig.Create(NotificationType.SystemAlert.Name,        ["Admin"]),
+      };
+      context.NotificationConfigs.AddRange(configs);
+      await context.SaveChangesAsync();
+
+      logger?.LogInformation("Seeded {Count} notification configs", configs.Length);
+    }
+
+    if (!context.NotificationSettings.Any())
+    {
+      context.NotificationSettings.Add(NotificationSettings.Create());
+      await context.SaveChangesAsync();
+      logger?.LogInformation("Seeded default NotificationSettings (RetentionDays=30)");
     }
 
     if (!context.Tables.Any())

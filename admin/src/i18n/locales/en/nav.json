@@ -18,11 +18,13 @@
     "roles": "Roles",
     "menuDesign": "Menu Design",
     "wifiQr": "WiFi QR Code",
+    "notificationConfigs": "Notification Settings",
     "groups": {
       "overview": "Overview",
       "operations": "Operations",
       "people": "People",
-      "utilities": "Utilities"
+      "utilities": "Utilities",
+      "settings": "Settings"
     }
   }
 }

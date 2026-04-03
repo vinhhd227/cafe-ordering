@@ -117,4 +117,15 @@ export const navGroups = [
       },
     ],
   },
+  {
+    labelKey: "nav.groups.settings",
+    items: [
+      {
+        labelKey: "nav.notificationConfigs",
+        icon: "ph:bell-ringing-bold",
+        to: { name: "notificationConfigs" },
+        adminOnly: true,
+      },
+    ],
+  },
 ];

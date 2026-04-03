@@ -220,6 +220,12 @@ const routes = [
         meta: { requiresAuth: true, requiredClaim: "utility.read", section: "nav.groups.utilities", pageTitle: "utilities.wifiQr.title" },
       },
       {
+        path: "settings/notification-configs",
+        name: "notificationConfigs",
+        component: () => import("@/views/settings/NotificationConfigs.vue"),
+        meta: { requiresAuth: true, adminOnly: true, section: "nav.groups.settings", pageTitle: "notificationConfigs.title" },
+      },
+      {
         path: "profile",
         name: "profile",
         component: () => import("@/views/Profile.vue"),

@@ -12,6 +12,7 @@
     "pushNotSupported": "Trình duyệt không hỗ trợ thông báo đẩy",
     "pushDenied": "Quyền thông báo bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.",
     "markAllRead": "Đánh dấu đã đọc",
-    "clear": "Xóa tất cả"
+    "clear": "Xóa tất cả",
+    "loadMore": "Xem thêm {n} thông báo"
   }
 }

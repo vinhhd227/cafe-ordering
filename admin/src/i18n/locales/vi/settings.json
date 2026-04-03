@@ -1,0 +1,30 @@
+{
+  "notificationConfigs": {
+    "breadcrumb": "Cài đặt",
+    "title": "Cài đặt thông báo",
+    "subtitle": "Quản lý loại thông báo và đối tượng nhận theo vai trò.",
+    "noRoles": "Không gửi cho ai",
+    "disabledHint": "Loại thông báo này đang tắt, sẽ không gửi đến bất kỳ ai.",
+    "saved": "Đã lưu",
+    "saveError": "Lưu thất bại",
+    "loadError": "Không thể tải cài đặt thông báo",
+    "retention": {
+      "title": "Tự động dọn dẹp",
+      "label": "Thời gian lưu thông báo",
+      "hint": "Thông báo cũ hơn số ngày này sẽ bị xóa tự động mỗi 24 giờ.",
+      "days": "{n} ngày",
+      "save": "Lưu",
+      "saved": "Đã lưu cài đặt dọn dẹp",
+      "saveError": "Lưu thất bại"
+    },
+    "types": {
+      "orderCreated": "Đơn hàng mới",
+      "orderCancelled": "Đơn hàng bị hủy",
+      "orderCompleted": "Đơn hàng hoàn thành",
+      "paymentReceived": "Thanh toán thành công",
+      "manualOrderCreated": "Đơn tạo thủ công",
+      "lowStock": "Nguyên liệu sắp hết",
+      "systemAlert": "Cảnh báo hệ thống"
+    }
+  }
+}

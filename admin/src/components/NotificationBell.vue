@@ -39,9 +39,9 @@ function playBeep() {
 
 // ── SSE ────────────────────────────────────────────────────────────
 const { connected: sseConnected } = useOrderSse({
-  onOrderCreated(order) {
-    store.add(order)
-    if (store.creatingOrder) return // suppress toast when current user just placed this order
+  async onOrderCreated(order) {
+    await store.onNewOrder()
+    if (store.creatingOrder) return
     playBeep()
     toast.add({
       severity: 'info',
@@ -51,6 +51,9 @@ const { connected: sseConnected } = useOrderSse({
     })
   },
 })
+
+// Fetch notifications khi component mount
+onMounted(() => store.fetchNotifications())
 
 // ── Helpers ────────────────────────────────────────────────────────
 function buildDetail(order) {
@@ -66,15 +69,32 @@ function formatTime(at) {
   return new Date(at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
 }
 
+function typeIcon(type) {
+  const map = {
+    ORDER_CREATED: 'ph:receipt-bold',
+    ORDER_CANCELLED: 'ph:x-circle-bold',
+    ORDER_COMPLETED: 'ph:check-circle-bold',
+    PAYMENT_RECEIVED: 'ph:currency-circle-dollar-bold',
+    MANUAL_ORDER_CREATED: 'ph:pencil-bold',
+    LOW_STOCK: 'ph:warning-bold',
+    SYSTEM_ALERT: 'ph:bell-bold',
+  }
+  return map[type] ?? 'ph:bell-bold'
+}
+
 // ── Actions ────────────────────────────────────────────────────────
 function toggleOverlay(event) {
   overlay.value?.toggle(event)
+  if (overlay.value?.visible === false) {
+    // Overlay vừa mở → fetch lại danh sách
+    store.fetchNotifications()
+  }
 }
 
-function openOrder(orderId) {
-  store.markRead(orderId)
+async function openNotification(item) {
+  await store.markRead(item.id)
   overlay.value?.hide()
-  router.push({ name: 'ordersDetail', params: { id: orderId } })
+  if (item.url) router.push(item.url)
 }
 </script>
 
@@ -154,22 +174,17 @@ function openOrder(orderId) {
             >
               <iconify icon="ph:check-circle-bold" class="tw:text-sm" />
             </button>
-            <!-- Clear -->
-            <button
-              v-if="store.items.length > 0"
-              type="button"
-              class="tw:flex tw:h-7 tw:w-7 tw:items-center tw:justify-center tw:rounded-lg tw:transition-colors app-text-muted hover:tw:bg-black/5"
-              :title="t('notifications.clear')"
-              @click="store.clear()"
-            >
-              <iconify icon="ph:trash-bold" class="tw:text-sm" />
-            </button>
           </div>
+        </div>
+
+        <!-- Loading -->
+        <div v-if="store.loading" class="tw:py-8 tw:flex tw:justify-center">
+          <iconify icon="ph:circle-notch-bold" class="tw:text-2xl tw:animate-spin app-text-muted" />
         </div>
 
         <!-- Empty state -->
         <div
-          v-if="store.items.length === 0"
+          v-else-if="store.items.length === 0"
           class="tw:py-8 tw:text-center app-text-muted tw:text-sm"
         >
           <iconify icon="ph:bell-slash-bold" class="tw:text-2xl tw:mb-2 tw:mx-auto tw:block" />
@@ -182,35 +197,46 @@ function openOrder(orderId) {
             v-for="noti in store.items"
             :key="noti.id"
             class="tw:flex tw:items-start tw:gap-3 tw:rounded-xl tw:p-2.5 tw:cursor-pointer tw:transition-colors hover:tw:bg-black/5"
-            :class="!noti.read ? 'app-card tw:border' : ''"
-            @click="openOrder(noti.order.id)"
+            :class="!noti.isRead ? 'app-card tw:border' : ''"
+            @click="openNotification(noti)"
           >
             <!-- Icon -->
             <div
               class="tw:mt-0.5 tw:flex tw:h-7 tw:w-7 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-lg"
-              :class="noti.read ? 'tw:bg-white/5' : 'tw:bg-emerald-500/15'"
+              :class="noti.isRead ? 'tw:bg-white/5' : 'tw:bg-emerald-500/15'"
             >
               <iconify
-                icon="ph:receipt-bold"
+                :icon="typeIcon(noti.type)"
                 class="tw:text-sm"
-                :class="noti.read ? 'app-text-muted' : 'tw:text-emerald-400'"
+                :class="noti.isRead ? 'app-text-muted' : 'tw:text-emerald-400'"
               />
             </div>
             <!-- Text -->
             <div class="tw:min-w-0 tw:flex-1">
               <p
                 class="tw:text-xs tw:font-semibold tw:truncate"
-                :class="noti.read ? 'app-text-muted' : 'tw:text-emerald-400'"
+                :class="noti.isRead ? 'app-text-muted' : 'tw:text-emerald-400'"
               >
-                {{ t('notifications.newOrder') }} · {{ noti.order.orderNumber }}
+                {{ noti.title }}
               </p>
-              <p class="tw:text-xs app-text-muted tw:mt-0.5 tw:truncate">{{ buildDetail(noti.order) }}</p>
+              <p class="tw:text-xs app-text-muted tw:mt-0.5 tw:truncate">{{ noti.body }}</p>
             </div>
             <!-- Time -->
             <span class="tw:text-[10px] app-text-muted tw:shrink-0 tw:mt-0.5 tw:tabular-nums">
-              {{ formatTime(noti.at) }}
+              {{ formatTime(noti.createdAt) }}
             </span>
           </div>
+        </div>
+
+        <!-- Footer: xem tất cả -->
+        <div v-if="store.totalCount > store.items.length" class="tw:mt-3 tw:pt-3 tw:border-t tw:border-white/10 tw:text-center">
+          <button
+            type="button"
+            class="tw:text-xs app-text-muted hover:tw:text-primary-400 tw:transition-colors"
+            @click="store.fetchNotifications(1, store.totalCount)"
+          >
+            {{ t('notifications.loadMore', { n: store.totalCount - store.items.length }) }}
+          </button>
         </div>
       </div>
     </prime-popover>

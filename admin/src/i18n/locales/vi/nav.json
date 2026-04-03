@@ -18,11 +18,13 @@
     "roles": "Vai trò",
     "menuDesign": "Thiết kế menu",
     "wifiQr": "Tạo QR wifi",
+    "notificationConfigs": "Cài đặt thông báo",
     "groups": {
       "overview": "Tổng quan",
       "operations": "Vận hành",
       "people": "Nhân sự",
-      "utilities": "Tiện ích"
+      "utilities": "Tiện ích",
+      "settings": "Cài đặt"
     }
   }
 }

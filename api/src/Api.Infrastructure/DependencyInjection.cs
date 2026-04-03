@@ -1,4 +1,5 @@
-﻿using Api.Core.Interfaces;
+﻿using Api.Core.Aggregates.NotificationAggregate;
+using Api.Core.Interfaces;
 using Api.Infrastructure.Identity;
 using Api.Infrastructure.Services;
 using Api.UseCases.Interfaces;
@@ -90,6 +91,10 @@ public static class DependencyInjection
     // === Web Push Notifications ===
     services.Configure<VapidSettings>(configuration.GetSection("Vapid"));
     services.AddScoped<IPushNotificationService, PushNotificationService>();
+
+    // === Notification Service ===
+    services.AddScoped<INotificationService, NotificationService>();
+    services.AddHostedService<NotificationCleanupService>();
 
     logger.LogInformation("{Project} services registered", "Infrastructure");
 
