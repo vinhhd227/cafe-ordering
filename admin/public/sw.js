@@ -12,8 +12,8 @@ self.addEventListener('push', (event) => {
   const title = data.title ?? 'Cafe Ordering'
   const options = {
     body: data.body ?? '',
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
+    icon: '/apple-touch-icon-v2.png',
+    badge: '/apple-touch-icon-v2.png',
     tag: data.url ?? 'default',       // group notifications by URL
     renotify: true,
     data: { url: data.url ?? '/' },
