@@ -24,7 +24,16 @@
       "allReadDone": "All notifications marked as read",
       "justNow": "Just now",
       "minutesAgo": "{n} min ago",
-      "hoursAgo": "{n} hr ago"
+      "hoursAgo": "{n} hr ago",
+      "groupNew": "New",
+      "groupToday": "Today",
+      "groupBefore": "Earlier",
+      "tabAll": "All",
+      "tabUnread": "Unread",
+      "emptyUnread": "No unread notifications",
+      "markRead": "Mark as read",
+      "delete": "Delete this notification",
+      "deleteDone": "Notification deleted"
     }
   }
 }

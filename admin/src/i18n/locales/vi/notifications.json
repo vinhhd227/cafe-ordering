@@ -24,7 +24,16 @@
       "allReadDone": "Đã đánh dấu tất cả là đã đọc",
       "justNow": "Vừa xong",
       "minutesAgo": "{n} phút trước",
-      "hoursAgo": "{n} giờ trước"
+      "hoursAgo": "{n} giờ trước",
+      "groupNew": "Mới",
+      "groupToday": "Hôm nay",
+      "groupBefore": "Trước đó",
+      "tabAll": "Tất cả",
+      "tabUnread": "Chưa đọc",
+      "emptyUnread": "Không có thông báo chưa đọc",
+      "markRead": "Đánh dấu đã đọc",
+      "delete": "Xoá thông báo này",
+      "deleteDone": "Đã xoá thông báo"
     }
   }
 }

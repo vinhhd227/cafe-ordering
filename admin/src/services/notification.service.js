@@ -4,6 +4,7 @@ export const getNotifications = (params) => api.get('/admin/notifications', { pa
 export const getUnreadCount = () => api.get('/admin/notifications/unread-count')
 export const markRead = (id) => api.put(`/admin/notifications/${id}/read`, {})
 export const markAllRead = () => api.put('/admin/notifications/read-all', {})
+export const deleteNotification = (id) => api.delete(`/admin/notifications/${id}`)
 export const getNotificationConfigs = () => api.get('/admin/notification-configs')
 export const updateNotificationConfig = (id, data) => api.put(`/admin/notification-configs/${id}`, data)
 export const getNotificationSettings = () => api.get('/admin/notification-settings')
