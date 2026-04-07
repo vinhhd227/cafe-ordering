@@ -110,3 +110,11 @@ api/src/Api.Web/uploads/
 
 # Database backups
 backups/
+
+# ==========================================
+# 5. Docs — Wiki working directories
+# ==========================================
+docs/raw/
+docs/outputs/
+!docs/raw/.gitkeep
+!docs/outputs/.gitkeep
