@@ -83,6 +83,11 @@ export const useAuthStore = defineStore('auth', {
             })()
                 .catch((err) => {
                     this.clearTokenRefresh()
+                    // Refresh token không còn hợp lệ → force logout ngay, không chờ lần thứ 2
+                    const status = err?.response?.status
+                    if (status === 401 || status === 403) {
+                        this.logout()
+                    }
                     throw err
                 })
                 .finally(() => {
@@ -144,7 +149,11 @@ export const useAuthStore = defineStore('auth', {
             this.refreshAttempts = 0
             this.refreshing = false
             this._refreshPromise = null
-            logoutRequest()
+            this.hydrated = false
+            logoutRequest().catch(() => {})
+            if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+                window.location.replace('/login')
+            }
         },
     },
 })

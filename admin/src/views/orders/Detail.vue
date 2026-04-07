@@ -11,6 +11,8 @@ import {
   mergeOrders,
   splitOrder,
   updateOrderItem,
+  updateOrderDate,
+  deleteOrder,
 } from "@/services/order.service";
 import { ORDER_STATUS, ORDER_STATUS_MAP } from "@/constants/orderStatus";
 import { PAYMENT_STATUS, PAYMENT_STATUS_MAP } from "@/constants/paymentStatus";
@@ -23,6 +25,7 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm();
+const { can } = usePermission();
 const orderId = Number(route.params.id);
 
 // ── State ──────────────────────────────────────────────────────────
@@ -183,6 +186,55 @@ const confirmPayment = async () => {
     payLoading.value = false;
   }
 };
+
+// ── Edit order date ───────────────────────────────────────────────
+const editDatePanel = ref(null);
+const editDate = ref(null);
+const editDateLoading = ref(false);
+
+const openEditDatePanel = (event) => {
+  editDate.value = order.value ? new Date(order.value.orderDate) : new Date();
+  editDatePanel.value.toggle(event);
+};
+
+const handleUpdateOrderDate = async () => {
+  if (!editDate.value) return;
+  editDateLoading.value = true;
+  try {
+    await updateOrderDate(orderId, editDate.value.toISOString());
+    order.value.orderDate = editDate.value.toISOString();
+    editDatePanel.value.hide();
+    toast.add({ severity: "success", summary: t("orders.detail.info.orderDateUpdated"), life: 3000 });
+  } catch (err) {
+    toast.add({
+      severity: "error",
+      summary: err?.response?.data?.errors?.join(", ") || "Failed to update order date.",
+      life: 3000,
+    });
+  } finally {
+    editDateLoading.value = false;
+  }
+};
+
+// ── Delete order ──────────────────────────────────────────────────
+const handleDeleteOrder = () => {
+  confirm.require({
+    message: t('orders.detail.deleteOrderConfirmMsg', { orderNumber: order.value?.orderNumber }),
+    header: t('orders.detail.deleteOrderConfirmHeader'),
+    icon: 'ph:trash-bold',
+    rejectProps: { severity: 'secondary', outlined: true, size: 'small', label: t('common.cancel') },
+    acceptProps: { severity: 'danger', size: 'small', label: t('orders.detail.deleteOrder') },
+    accept: async () => {
+      try {
+        await deleteOrder(orderId)
+        toast.add({ severity: 'success', summary: t('orders.detail.deleteOrderSuccess', { orderNumber: order.value?.orderNumber }), life: 3000 })
+        router.push({ name: 'ordersList' })
+      } catch (err) {
+        errorMessage.value = err?.response?.data?.errors?.join(', ') || err?.response?.data?.title || 'Failed to delete order.'
+      }
+    },
+  })
+}
 
 // ── Item editing ──────────────────────────────────────────────────
 const itemUpdating = ref(null); // productId currently being updated
@@ -395,6 +447,7 @@ const confirmSplit = async () => {
 
 <template>
   <prime-confirm-popup />
+  <prime-confirm-dialog />
 
   <!-- Split result toast with navigate link -->
   <prime-toast group="split-result" position="bottom-right">
@@ -817,12 +870,42 @@ const confirmSplit = async () => {
                     order.orderNumber
                   }}</span>
                 </div>
-                <div class="tw:flex tw:justify-between tw:text-sm">
+                <div class="tw:flex tw:justify-between tw:text-sm tw:items-center">
                   <span class="app-text-muted">{{ t('orders.detail.info.date') }}</span>
-                  <span class="tw:font-medium">{{
-                    formatDate(order.orderDate)
-                  }}</span>
+                  <div class="tw:flex tw:items-center tw:gap-1">
+                    <span class="tw:font-medium">{{ formatDate(order.orderDate) }}</span>
+                    <prime-button
+                      :class="btnIcon"
+                      severity="secondary"
+                      text
+                      v-tooltip.top="t('orders.detail.info.editOrderDateTooltip')"
+                      @click="openEditDatePanel($event)"
+                    >
+                      <iconify icon="ph:pencil-simple-bold" />
+                    </prime-button>
+                  </div>
                 </div>
+                <prime-popover ref="editDatePanel">
+                  <div class="tw:flex tw:flex-col tw:gap-3 tw:min-w-56">
+                    <p class="tw:text-sm tw:font-semibold">{{ t('orders.detail.info.editOrderDate') }}</p>
+                    <prime-date-picker
+                      v-model="editDate"
+                      show-time
+                      hour-format="24"
+                      inline
+                      date-format="dd/mm/yy"
+                    />
+                    <prime-button
+                      severity="success"
+                      size="small"
+                      :loading="editDateLoading"
+                      @click="handleUpdateOrderDate"
+                    >
+                      <iconify icon="ph:floppy-disk-bold" />
+                      <span>{{ t('common.save') }}</span>
+                    </prime-button>
+                  </div>
+                </prime-popover>
                 <div class="tw:flex tw:justify-between tw:text-sm">
                   <span class="app-text-muted">{{ t('orders.detail.info.status') }}</span>
                   <prime-tag
@@ -974,6 +1057,25 @@ const confirmSplit = async () => {
               >
                 <iconify icon="ph:git-merge-bold" />
                 <span>Merge with another</span>
+              </prime-button>
+            </template>
+          </prime-card>
+
+          <!-- Delete card (CANCELLED orders only) -->
+          <prime-card
+            v-if="order.status === ORDER_STATUS.CANCELLED && can('order.delete')"
+            class="app-card tw:rounded-2xl tw:border"
+          >
+            <template #content>
+              <prime-button
+                severity="danger"
+                outlined
+                size="small"
+                class="tw:w-full"
+                @click="handleDeleteOrder"
+              >
+                <iconify icon="ph:trash-bold" />
+                <span>{{ t('orders.detail.deleteOrder') }}</span>
               </prime-button>
             </template>
           </prime-card>

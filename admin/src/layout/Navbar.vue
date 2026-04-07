@@ -118,10 +118,7 @@ const profileItems = computed(() => [
   { separator: true },
   {
     label: t('auth.logout'),
-    command: () => {
-      auth.logout();
-      window.location.replace("/login");
-    },
+    command: () => auth.logout(),
   },
 ]);
 

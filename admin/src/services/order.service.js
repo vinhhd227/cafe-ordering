@@ -47,3 +47,9 @@ export const editOrderItems = (orderId, items, guestCount = null) =>
 // Manual order (admin) — create/update with full control over status/payment/time
 export const createManualOrder = (data) => api.post('/admin/orders', data)
 export const updateManualOrder = (orderId, data) => api.put(`/admin/orders/${orderId}`, data)
+
+export const updateOrderDate = (orderId, orderDate) =>
+  api.patch(`/admin/orders/${orderId}/order-date`, { orderDate })
+
+export const deleteOrder = (orderId) =>
+  api.delete(`/admin/orders/${orderId}`)

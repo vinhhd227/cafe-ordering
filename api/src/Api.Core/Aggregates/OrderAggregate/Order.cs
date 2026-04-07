@@ -269,6 +269,11 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   }
 
   /// <summary>
+  ///   Cập nhật ngày đặt của order (dùng để điều chỉnh doanh thu theo ngày thanh toán thực tế).
+  /// </summary>
+  public void UpdateOrderDate(DateTime newDate) => OrderDate = newDate.ToUniversalTime();
+
+  /// <summary>
   ///   Admin manual status set — bypass state machine. Chỉ dùng cho manual admin edit.
   /// </summary>
   public void ForceSetStatus(OrderStatus status)
