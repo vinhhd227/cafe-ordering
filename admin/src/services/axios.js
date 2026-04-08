@@ -38,15 +38,11 @@ api.interceptors.response.use(
         !original.url?.includes('/auth/login')
       ) {
         original._retry = true
-        try {
-          await auth.doRefreshToken()
-          return api(original)
-        } catch (refreshError) {
-          return Promise.reject(refreshError)
-        }
+        await auth.doRefreshToken()
+        return api(original)
       }
 
-      return Promise.reject(error)
+      throw error
     }
 )
 
