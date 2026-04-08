@@ -8,10 +8,10 @@ updated: 2026-04-08
 
 Hệ thống dùng **JWT Access Token + Refresh Token** với cơ chế xoay vòng (token rotation).
 
-| Token | Thời hạn | Lưu trữ |
-|-------|----------|---------|
-| Access Token | 15 phút | Memory (Pinia store) |
-| Refresh Token | 7 ngày | HttpOnly cookie (`refreshToken`, path `/api/auth`) |
+| Token         | Thời hạn | Lưu trữ                                            |
+| ------------- | -------- | -------------------------------------------------- |
+| Access Token  | 15 phút  | Memory (Pinia store)                               |
+| Refresh Token | 7 ngày   | HttpOnly cookie (`refreshToken`, path `/api/auth`) |
 
 > `expiresAt` trong response là thời hạn của **refresh token** (7 ngày), không phải access token.
 > Access token hết hạn được xử lý qua reactive 401 path (interceptor tự refresh).
