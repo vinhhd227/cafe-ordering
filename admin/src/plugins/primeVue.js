@@ -66,6 +66,7 @@ import MultiSelect from 'primevue/multiselect';
 import TreeSelect from "primevue/treeselect";
 import Drawer from "primevue/drawer";
 import AutoComplete from "primevue/autocomplete";
+import Slider from 'primevue/slider';
 
 import ConfirmationService from "primevue/confirmationservice";
 import Chart from "primevue/chart";
@@ -202,5 +203,6 @@ export default {
     app.component("prime-tree-select", TreeSelect);
     app.component("prime-drawer", Drawer);
     app.component("prime-auto-complete", AutoComplete);
+    app.component("prime-slider", Slider);
   },
 };
