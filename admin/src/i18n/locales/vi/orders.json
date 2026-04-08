@@ -24,20 +24,24 @@
       "UNKNOWN": "Không xác định"
     },
     "temperature": {
+      "label": "Nhiệt độ",
       "HOT": "Nóng",
       "COLD": "Lạnh"
     },
     "iceLevel": {
+      "label": "Đá",
       "LESS": "Ít đá",
       "NORMAL": "Bình thường",
       "MORE": "Nhiều đá"
     },
     "sugarLevel": {
+      "label": "Đường",
       "LESS": "Ít đường",
       "NORMAL": "Bình thường",
       "MORE": "Nhiều đường"
     },
     "serving": {
+      "label": "Phục vụ",
       "dineIn": "Tại quán",
       "takeaway": "Mang đi"
     },
@@ -232,6 +236,33 @@
         "cancelOrder": "Huỷ đơn",
         "remove": "Xoá"
       }
+    },
+    "manual": {
+      "title": "Nhập order thủ công",
+      "badge": "Thủ công",
+      "noProducts": "Không có sản phẩm",
+      "orderInfo": "Thông tin order",
+      "table": "Bàn *",
+      "tablePlaceholder": "Chọn bàn...",
+      "orderedAt": "Thời gian",
+      "orderedAtPlaceholder": "Mặc định: bây giờ",
+      "guestCount": "Số khách",
+      "orderStatus": "Trạng thái",
+      "paymentStatus": "TT thanh toán",
+      "paymentMethod": "Phương thức",
+      "amountReceived": "Số tiền nhận",
+      "tip": "Tiền tip",
+      "note": "Ghi chú",
+      "notePlaceholder": "Yêu cầu đặc biệt...",
+      "quantity": "Số lượng",
+      "addToCart": "Thêm vào giỏ",
+      "cart": "Giỏ hàng",
+      "cartCount": "{n} sản phẩm",
+      "cartEmpty": "Chưa có sản phẩm nào",
+      "subtotal": "Tạm tính",
+      "submit": "Tạo order thủ công",
+      "successSummary": "Tạo order thành công",
+      "errorFallback": "Tạo order thất bại."
     },
     "edit": {
       "title": "Sửa order",

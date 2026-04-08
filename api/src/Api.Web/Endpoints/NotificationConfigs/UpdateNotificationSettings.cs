@@ -10,7 +10,7 @@ public class UpdateNotificationSettingsEndpoint(IMediator mediator)
     public override void Configure()
     {
         Put("/api/admin/notification-settings");
-        Policies("AdminOnly");
+        Policies("admin.access", "notification.config");
         DontAutoTag();
         Description(b => b.WithTags("NotificationConfigs"));
     }

@@ -24,20 +24,24 @@
       "UNKNOWN": "Unknown"
     },
     "temperature": {
+      "label": "Temperature",
       "HOT": "Hot",
       "COLD": "Cold"
     },
     "iceLevel": {
+      "label": "Ice",
       "LESS": "Less",
       "NORMAL": "Normal",
       "MORE": "More"
     },
     "sugarLevel": {
+      "label": "Sugar",
       "LESS": "Less",
       "NORMAL": "Normal",
       "MORE": "More"
     },
     "serving": {
+      "label": "Serving",
       "dineIn": "Dine-in",
       "takeaway": "Takeaway"
     },
@@ -232,6 +236,33 @@
         "cancelOrder": "Cancel Order",
         "remove": "Remove"
       }
+    },
+    "manual": {
+      "title": "Manual Order Entry",
+      "badge": "Manual",
+      "noProducts": "No products",
+      "orderInfo": "Order info",
+      "table": "Table *",
+      "tablePlaceholder": "Select table...",
+      "orderedAt": "Time",
+      "orderedAtPlaceholder": "Default: now",
+      "guestCount": "Guests",
+      "orderStatus": "Status",
+      "paymentStatus": "Payment status",
+      "paymentMethod": "Method",
+      "amountReceived": "Amount received",
+      "tip": "Tip",
+      "note": "Note",
+      "notePlaceholder": "Special requests...",
+      "quantity": "Quantity",
+      "addToCart": "Add to cart",
+      "cart": "Cart",
+      "cartCount": "{n} item(s)",
+      "cartEmpty": "No items yet",
+      "subtotal": "Subtotal",
+      "submit": "Create manual order",
+      "successSummary": "Order created",
+      "errorFallback": "Failed to create order."
     },
     "edit": {
       "title": "Edit order",

@@ -124,7 +124,7 @@ export const navGroups = [
         labelKey: "nav.notificationConfigs",
         icon: "ph:bell-ringing-bold",
         to: { name: "notificationConfigs" },
-        adminOnly: true,
+        requiredClaim: "notification.config",
       },
     ],
   },

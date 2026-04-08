@@ -80,7 +80,7 @@ const routes = [
             path: "create-manual",
             name: "ordersCreateManual",
             component: () => import("@/views/orders/CreateManual.vue"),
-            meta: { pageTitle: "orders.create.title" },
+            meta: { requiresAuth: true, requiredClaim: "order.createManual", pageTitle: "orders.create.title" },
           },
           {
             path: ":id/edit-manual",
@@ -223,7 +223,7 @@ const routes = [
         path: "settings/notification-configs",
         name: "notificationConfigs",
         component: () => import("@/views/settings/NotificationConfigs.vue"),
-        meta: { requiresAuth: true, adminOnly: true, section: "nav.groups.settings", pageTitle: "notificationConfigs.title" },
+        meta: { requiresAuth: true, requiredClaim: "notification.config", section: "nav.groups.settings", pageTitle: "notificationConfigs.title" },
       },
       {
         path: "notifications",

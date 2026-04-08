@@ -33,7 +33,7 @@ public class CreateManualOrder(IMediator mediator) : Endpoint<CreateManualOrderR
   public override void Configure()
   {
     Post("/api/admin/orders");
-    Policies("admin.access", "order.create");
+    Policies("admin.access", "order.createManual");
     DontAutoTag();
     Description(b => b.WithTags("Orders"));
   }

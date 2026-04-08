@@ -10,7 +10,7 @@ public class ListNotificationConfigsEndpoint(IMediator mediator)
     public override void Configure()
     {
         Get("/api/admin/notification-configs");
-        Policies("AdminOnly");
+        Policies("admin.access", "notification.config");
         DontAutoTag();
         Description(b => b.WithTags("NotificationConfigs"));
     }

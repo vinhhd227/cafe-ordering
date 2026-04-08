@@ -17,13 +17,14 @@ public static class IdentitySeedData
     [
       "admin.access",
       "menu.read",
-      "order.create", "order.read", "order.update", "order.delete",
+      "order.create", "order.createManual", "order.read", "order.update", "order.delete",
       "product.create", "product.read", "product.update", "product.delete",
       "staff.create", "staff.read", "staff.update", "staff.deactivate",
       "table.create", "table.read", "table.update",
       "zone.create", "zone.read", "zone.update", "zone.delete",
       "expense.read", "expense.create", "expense.update", "expense.delete",
       "promotion.create", "promotion.read", "promotion.update", "promotion.delete",
+      "notification.config",
       "report.read",
       "utility.read", "utility.create", "utility.update", "utility.delete"
     ],
@@ -31,7 +32,7 @@ public static class IdentitySeedData
     [
       "admin.access",
       "menu.read",
-      "order.read", "order.update",
+      "order.createManual", "order.read", "order.update",
       "product.read",
       "table.read", "table.update",
       "zone.read",

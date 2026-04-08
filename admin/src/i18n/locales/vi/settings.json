@@ -13,6 +13,8 @@
       "label": "Thời gian lưu thông báo",
       "hint": "Thông báo cũ hơn số ngày này sẽ bị xóa tự động mỗi 24 giờ.",
       "days": "{n} ngày",
+      "daySuffix": " ngày",
+      "custom": "Tuỳ chỉnh",
       "save": "Lưu",
       "saved": "Đã lưu cài đặt dọn dẹp",
       "saveError": "Lưu thất bại"

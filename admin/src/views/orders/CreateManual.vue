@@ -99,16 +99,16 @@ const tableOptions = computed(() =>
 );
 
 const paymentStatusOptions = computed(() => [
-  { label: "Chưa thanh toán", value: PAYMENT_STATUS.UNPAID },
-  { label: "Đã thanh toán", value: PAYMENT_STATUS.PAID },
-  { label: "Hoàn tiền", value: PAYMENT_STATUS.REFUNDED },
-  { label: "Huỷ", value: PAYMENT_STATUS.VOIDED },
+  { label: t("orders.paymentStatus.UNPAID"), value: PAYMENT_STATUS.UNPAID },
+  { label: t("orders.paymentStatus.PAID"), value: PAYMENT_STATUS.PAID },
+  { label: t("orders.paymentStatus.REFUNDED"), value: PAYMENT_STATUS.REFUNDED },
+  { label: t("orders.paymentStatus.VOIDED"), value: PAYMENT_STATUS.VOIDED },
 ]);
 
 const paymentMethodOptions = computed(() => [
-  { label: "Không xác định", value: PAYMENT_METHOD.UNKNOWN },
-  { label: "Tiền mặt", value: PAYMENT_METHOD.CASH },
-  { label: "Chuyển khoản", value: PAYMENT_METHOD.BANK_TRANSFER },
+  { label: t("orders.paymentMethod.UNKNOWN"), value: PAYMENT_METHOD.UNKNOWN },
+  { label: t("orders.paymentMethod.CASH"), value: PAYMENT_METHOD.CASH },
+  { label: t("orders.paymentMethod.BANK_TRANSFER"), value: PAYMENT_METHOD.BANK_TRANSFER },
 ]);
 
 const statusOptions = computed(() =>
@@ -206,13 +206,13 @@ const submit = async () => {
       amountReceived: amountReceived.value,
       tipAmount: tipAmount.value ?? 0,
     });
-    toast.add({ severity: "success", summary: "Tạo order thành công", detail: res.data?.orderNumber, life: 3000 });
+    toast.add({ severity: "success", summary: t("orders.manual.successSummary"), detail: res.data?.orderNumber, life: 3000 });
     router.push({ name: "ordersDetail", params: { id: res.data.id } });
   } catch (err) {
     errorMessage.value =
       err?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
       err?.response?.data?.message ||
-      "Tạo order thất bại.";
+      t("orders.manual.errorFallback");
   } finally {
     saving.value = false;
   }
@@ -239,7 +239,7 @@ onMounted(async () => {
     <div class="tw:space-y-4">
       <!-- Temperature -->
       <div v-if="selectedProduct?.hasTemperatureOption" class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.temperature.label", "Nhiệt độ") }}</p>
+        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.temperature.label") }}</p>
         <prime-select-button
           v-model="pendingOptions.temperature"
           :options="temperatureOptions"
@@ -251,7 +251,7 @@ onMounted(async () => {
       </div>
       <!-- Ice level -->
       <div v-if="selectedProduct?.hasIceLevelOption && pendingOptions.temperature !== DRINK_TEMPERATURE.HOT" class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.iceLevel.label", "Đá") }}</p>
+        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.iceLevel.label") }}</p>
         <prime-select-button
           v-model="pendingOptions.iceLevel"
           :options="iceLevelOptions"
@@ -262,7 +262,7 @@ onMounted(async () => {
       </div>
       <!-- Sugar level -->
       <div v-if="selectedProduct?.hasSugarLevelOption" class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.sugarLevel.label", "Đường") }}</p>
+        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.sugarLevel.label") }}</p>
         <prime-select-button
           v-model="pendingOptions.sugarLevel"
           :options="sugarLevelOptions"
@@ -273,7 +273,7 @@ onMounted(async () => {
       </div>
       <!-- Serving -->
       <div class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.serving.label", "Phục vụ") }}</p>
+        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.serving.label") }}</p>
         <prime-select-button
           v-model="pendingOptions.isTakeaway"
           :options="servingOptions"
@@ -284,12 +284,12 @@ onMounted(async () => {
       </div>
       <!-- Note -->
       <div class="tw:space-y-1.5">
-        <label for="manual-note" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.create.note", "Ghi chú") }}</label>
-        <prime-input-text id="manual-note" v-model="pendingOptions.note" :placeholder="t('orders.create.notePlaceholder', 'Yêu cầu đặc biệt...')" class="app-input tw:w-full" />
+        <label for="manual-note" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.note") }}</label>
+        <prime-input-text id="manual-note" v-model="pendingOptions.note" :placeholder="t('orders.manual.notePlaceholder')" class="app-input tw:w-full" />
       </div>
       <!-- Quantity -->
       <div class="tw:flex tw:items-center tw:justify-between">
-        <span class="tw:text-sm app-text-muted">{{ t("orders.create.quantity", "Số lượng") }}</span>
+        <span class="tw:text-sm app-text-muted">{{ t("orders.manual.quantity") }}</span>
         <div class="tw:flex tw:items-center tw:gap-3">
           <prime-button :class="btnIcon" severity="secondary" outlined :disabled="pendingQuantity <= 1" @click="pendingQuantity--">
             <iconify icon="ph:minus-bold" />
@@ -305,7 +305,7 @@ onMounted(async () => {
       <prime-button severity="secondary" outlined @click="showOptionsDialog = false">{{ t("orders.cancel", "Huỷ") }}</prime-button>
       <prime-button severity="success" @click="confirmAddToCart">
         <iconify icon="ph:plus-bold" />
-        <span>{{ t("orders.create.addToCart", "Thêm vào giỏ") }}</span>
+        <span>{{ t("orders.manual.addToCart") }}</span>
       </prime-button>
     </template>
   </prime-dialog>
@@ -320,8 +320,8 @@ onMounted(async () => {
         <div>
           <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t("orders.breadcrumb") }}</p>
           <h1 class="tw:text-2xl tw:font-semibold tw:flex tw:items-center tw:gap-2">
-            Nhập order thủ công
-            <prime-tag value="Thủ công" severity="secondary" />
+            {{ t("orders.manual.title") }}
+            <prime-tag :value="t('orders.manual.badge')" severity="secondary" />
           </h1>
         </div>
       </div>
@@ -361,7 +361,7 @@ onMounted(async () => {
             </div>
           </div>
           <p v-if="!visibleCategories.length && !loadingMenu" class="tw:text-sm app-text-muted tw:text-center tw:py-6">
-            Không có sản phẩm
+            {{ t("orders.manual.noProducts") }}
           </p>
         </div>
       </div>
@@ -371,18 +371,18 @@ onMounted(async () => {
 
         <!-- Order metadata -->
         <div :class="[appCard, cardRing, 'tw:rounded-xl tw:p-4 tw:space-y-4']">
-          <p class="tw:text-sm tw:font-semibold">Thông tin order</p>
+          <p class="tw:text-sm tw:font-semibold">{{ t("orders.manual.orderInfo") }}</p>
 
           <!-- Table -->
           <div class="tw:space-y-1.5">
-            <label for="manual-table" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Bàn *</label>
+            <label for="manual-table" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.table") }}</label>
             <prime-select
               id="manual-table"
               v-model="selectedTableId"
               :options="tableOptions"
               option-label="label"
               option-value="value"
-              placeholder="Chọn bàn..."
+              :placeholder="t('orders.manual.tablePlaceholder')"
               :loading="loadingTables"
               class="app-input tw:w-full"
             />
@@ -391,20 +391,20 @@ onMounted(async () => {
           <!-- Ordered at + Guest count -->
           <div class="tw:grid tw:grid-cols-2 tw:gap-3">
             <div class="tw:space-y-1.5">
-              <label for="manual-date" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Thời gian</label>
+              <label for="manual-date" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.orderedAt") }}</label>
               <prime-date-picker
                 id="manual-date"
                 v-model="orderedAt"
                 :show-time="true"
                 :hour-format="'24'"
                 date-format="dd/mm/yy"
-                :placeholder="'Mặc định: bây giờ'"
+                :placeholder="t('orders.manual.orderedAtPlaceholder')"
                 show-button-bar
                 class="app-input tw:w-full"
               />
             </div>
             <div class="tw:space-y-1.5">
-              <label for="manual-guests" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Số khách</label>
+              <label for="manual-guests" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.guestCount") }}</label>
               <prime-input-number
                 id="manual-guests"
                 v-model="guestCount"
@@ -419,7 +419,7 @@ onMounted(async () => {
 
           <!-- Status -->
           <div class="tw:space-y-1.5">
-            <label for="manual-status" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Trạng thái</label>
+            <label for="manual-status" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.orderStatus") }}</label>
             <prime-select
               id="manual-status"
               v-model="orderStatus"
@@ -433,7 +433,7 @@ onMounted(async () => {
           <!-- Payment status + method -->
           <div class="tw:grid tw:grid-cols-2 tw:gap-3">
             <div class="tw:space-y-1.5">
-              <label for="manual-pay-status" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">TT thanh toán</label>
+              <label for="manual-pay-status" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.paymentStatus") }}</label>
               <prime-select
                 id="manual-pay-status"
                 v-model="paymentStatus"
@@ -444,7 +444,7 @@ onMounted(async () => {
               />
             </div>
             <div class="tw:space-y-1.5">
-              <label for="manual-pay-method" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Phương thức</label>
+              <label for="manual-pay-method" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.paymentMethod") }}</label>
               <prime-select
                 id="manual-pay-method"
                 v-model="paymentMethod"
@@ -459,7 +459,7 @@ onMounted(async () => {
           <!-- Amount received + tip -->
           <div v-if="paymentStatus === PAYMENT_STATUS.PAID" class="tw:grid tw:grid-cols-2 tw:gap-3">
             <div class="tw:space-y-1.5">
-              <label for="manual-amount" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Số tiền nhận</label>
+              <label for="manual-amount" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.amountReceived") }}</label>
               <prime-input-number
                 id="manual-amount"
                 v-model="amountReceived"
@@ -471,7 +471,7 @@ onMounted(async () => {
               />
             </div>
             <div class="tw:space-y-1.5">
-              <label for="manual-tip" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Tiền tip</label>
+              <label for="manual-tip" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.tip") }}</label>
               <prime-input-number
                 id="manual-tip"
                 v-model="tipAmount"
@@ -488,13 +488,13 @@ onMounted(async () => {
         <!-- Cart -->
         <div :class="[appCard, cardRing, 'tw:rounded-xl tw:p-4 tw:flex tw:flex-col tw:gap-3']">
           <div class="tw:flex tw:items-center tw:justify-between">
-            <p class="tw:text-sm tw:font-semibold">Giỏ hàng</p>
-            <span class="tw:text-xs app-text-muted">{{ cart.length }} sản phẩm</span>
+            <p class="tw:text-sm tw:font-semibold">{{ t("orders.manual.cart") }}</p>
+            <span class="tw:text-xs app-text-muted">{{ t("orders.manual.cartCount", { n: cart.length }) }}</span>
           </div>
 
           <!-- Empty state -->
           <div v-if="!cart.length" class="tw:text-sm app-text-muted tw:text-center tw:py-4">
-            Chưa có sản phẩm nào
+            {{ t("orders.manual.cartEmpty") }}
           </div>
 
           <!-- Item list -->
@@ -523,7 +523,7 @@ onMounted(async () => {
 
           <!-- Total -->
           <div v-if="cart.length" class="tw:border-t tw:border-white/10 tw:pt-3 tw:flex tw:justify-between tw:items-center">
-            <span class="tw:text-sm app-text-muted">Tạm tính</span>
+            <span class="tw:text-sm app-text-muted">{{ t("orders.manual.subtotal") }}</span>
             <span class="tw:font-semibold">{{ formatVnd(cartTotal) }}</span>
           </div>
 
@@ -536,7 +536,7 @@ onMounted(async () => {
             @click="submit"
           >
             <iconify icon="ph:pencil-line-bold" />
-            <span>Tạo order thủ công</span>
+            <span>{{ t("orders.manual.submit") }}</span>
           </prime-button>
         </div>
 

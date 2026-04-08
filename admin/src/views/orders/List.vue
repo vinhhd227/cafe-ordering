@@ -282,6 +282,7 @@ const handleDeleteOrder = (order) => {
         <span>{{ t('orders.newOrder') }}</span>
       </prime-button>
       <prime-button
+        v-if="can('order.createManual')"
         severity="secondary"
         outlined
         size="small"

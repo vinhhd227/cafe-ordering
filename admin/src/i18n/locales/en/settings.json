@@ -13,6 +13,8 @@
       "label": "Notification retention",
       "hint": "Notifications older than this many days will be automatically deleted every 24 hours.",
       "days": "{n} days",
+      "daySuffix": " days",
+      "custom": "Custom",
       "save": "Save",
       "saved": "Cleanup settings saved",
       "saveError": "Failed to save"

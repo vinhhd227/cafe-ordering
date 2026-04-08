@@ -51,7 +51,7 @@ async function loadConfigs() {
     ])
     configs.value = (configsRes.data ?? []).map(c => ({ ...c, _roles: [...c.targetRoles] }))
     dirty.value = {}
-    retentionDays.value = settingsRes.retentionDays ?? 30
+    retentionDays.value = settingsRes.data?.retentionDays ?? 30
     retentionDirty.value = false
   } catch {
     errorMessage.value = t('notificationConfigs.loadError')
@@ -64,7 +64,7 @@ async function saveRetention() {
   retentionSaving.value = true
   try {
     const res = await updateNotificationSettings({ retentionDays: retentionDays.value })
-    retentionDays.value = res.retentionDays
+    retentionDays.value = res.data?.retentionDays ?? retentionDays.value
     retentionDirty.value = false
     toast.add({ severity: 'success', summary: t('notificationConfigs.retention.saved'), life: 2500 })
   } catch {
@@ -149,44 +149,54 @@ onMounted(loadConfigs)
         </div>
       </div>
 
-      <div class="tw:flex tw:flex-wrap tw:items-end tw:gap-4">
-        <div class="tw:flex-1 tw:min-w-48 tw:space-y-2">
-          <label for="retention-days" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
-            {{ t('notificationConfigs.retention.label') }}
-          </label>
-          <div class="tw:flex tw:items-center tw:gap-3">
+      <div class="tw:space-y-3">
+        <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+          {{ t('notificationConfigs.retention.label') }}
+        </label>
+
+        <!-- Preset chips -->
+        <div class="tw:flex tw:flex-wrap tw:gap-2">
+          <prime-button
+            v-for="preset in [7, 14, 30, 60, 90]"
+            :key="preset"
+            size="small"
+            :severity="retentionDays === preset ? 'success' : 'secondary'"
+            :outlined="retentionDays !== preset"
+            :disabled="loading || retentionSaving"
+            @click="retentionDays = preset; retentionDirty = true"
+          >
+            {{ t('notificationConfigs.retention.days', { n: preset }) }}
+          </prime-button>
+
+          <!-- Custom input inline -->
+          <div class="tw:flex tw:items-center tw:gap-2">
+            <span class="tw:text-xs app-text-muted">{{ t('notificationConfigs.retention.custom') }}:</span>
             <prime-input-number
               id="retention-days"
               v-model="retentionDays"
               :min="1"
               :max="365"
               :disabled="loading || retentionSaving"
-              suffix=" ngày"
-              class="tw:w-36"
-              @input="retentionDirty = true"
-            />
-            <prime-slider
-              v-model="retentionDays"
-              :min="1"
-              :max="365"
-              :step="1"
-              :disabled="loading || retentionSaving"
-              class="tw:flex-1"
-              @change="retentionDirty = true"
+              :use-grouping="false"
+              :suffix="t('notificationConfigs.retention.daySuffix')"
+              class="tw:w-28"
+              @input="(e) => { retentionDays = e.value; retentionDirty = true }"
             />
           </div>
         </div>
 
-        <prime-button
-          v-if="retentionDirty"
-          severity="success"
-          size="small"
-          :loading="retentionSaving"
-          @click="saveRetention"
-        >
-          <iconify icon="ph:floppy-disk-bold" />
-          <span>{{ t('notificationConfigs.retention.save') }}</span>
-        </prime-button>
+        <!-- Save button -->
+        <div v-if="retentionDirty">
+          <prime-button
+            severity="success"
+            size="small"
+            :loading="retentionSaving"
+            @click="saveRetention"
+          >
+            <iconify icon="ph:floppy-disk-bold" />
+            <span>{{ t('notificationConfigs.retention.save') }}</span>
+          </prime-button>
+        </div>
       </div>
     </div>
 

@@ -15,6 +15,7 @@ public static class PermissionRegistry
 
       // Orders
       ["order.create"]       = "Place new orders",
+      ["order.createManual"] = "Create manual orders (staff-entered)",
       ["order.read"]         = "View orders and details",
       ["order.update"]       = "Update order status",
       ["order.delete"]       = "Delete orders",
@@ -60,6 +61,9 @@ public static class PermissionRegistry
       ["promotion.create"]   = "Create new promotions",
       ["promotion.update"]   = "Edit promotion information",
       ["promotion.delete"]   = "Delete promotions",
+
+      // Notification config
+      ["notification.config"] = "Manage notification types and retention settings",
 
       // Reports
       ["report.read"]        = "View reports and analytics",
