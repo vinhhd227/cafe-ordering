@@ -3,6 +3,7 @@ using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
 using Api.Core.Aggregates.TableAggregate;
 using Api.Core.Aggregates.TableAggregate.Specifications;
 using Api.UseCases.Sessions.GetOrCreate;
+using Microsoft.Extensions.Configuration;
 
 namespace Api.UnitTests.UseCases.Sessions;
 
@@ -10,11 +11,13 @@ public class GetOrCreateSessionHandlerTests
 {
   private readonly IRepositoryBase<Table> _tableRepo = Substitute.For<IRepositoryBase<Table>>();
   private readonly IRepositoryBase<GuestSession> _sessionRepo = Substitute.For<IRepositoryBase<GuestSession>>();
+  private readonly IConfiguration _configuration = Substitute.For<IConfiguration>();
   private readonly GetOrCreateSessionHandler _handler;
 
   public GetOrCreateSessionHandlerTests()
   {
-    _handler = new GetOrCreateSessionHandler(_tableRepo, _sessionRepo);
+    _configuration["QrEnforcementEnabled"].Returns("false");
+    _handler = new GetOrCreateSessionHandler(_tableRepo, _sessionRepo, _configuration);
   }
 
   [Fact]
@@ -23,7 +26,7 @@ public class GetOrCreateSessionHandlerTests
     _tableRepo.FirstOrDefaultAsync(Arg.Any<TableByIdSpec>(), Arg.Any<CancellationToken>())
               .Returns((Table?)null);
 
-    var result = await _handler.Handle(new GetOrCreateSessionCommand(99), default);
+    var result = await _handler.Handle(new GetOrCreateSessionCommand(99, null), default);
 
     result.Status.Should().Be(ResultStatus.NotFound);
   }
@@ -36,7 +39,7 @@ public class GetOrCreateSessionHandlerTests
     _tableRepo.FirstOrDefaultAsync(Arg.Any<TableByIdSpec>(), Arg.Any<CancellationToken>())
               .Returns(table);
 
-    var result = await _handler.Handle(new GetOrCreateSessionCommand(1), default);
+    var result = await _handler.Handle(new GetOrCreateSessionCommand(1, null), default);
 
     result.Status.Should().Be(ResultStatus.Error);
   }
@@ -52,7 +55,7 @@ public class GetOrCreateSessionHandlerTests
     _sessionRepo.FirstOrDefaultAsync(Arg.Any<ActiveSessionByTableIdSpec>(), Arg.Any<CancellationToken>())
                 .Returns(existingSession);
 
-    var result = await _handler.Handle(new GetOrCreateSessionCommand(1), default);
+    var result = await _handler.Handle(new GetOrCreateSessionCommand(1, null), default);
 
     result.IsSuccess.Should().BeTrue();
     result.Value.SessionId.Should().Be(existingSession.Id);
@@ -71,7 +74,7 @@ public class GetOrCreateSessionHandlerTests
     _sessionRepo.FirstOrDefaultAsync(Arg.Any<ActiveSessionByTableIdSpec>(), Arg.Any<CancellationToken>())
                 .Returns((GuestSession?)null);
 
-    var result = await _handler.Handle(new GetOrCreateSessionCommand(1), default);
+    var result = await _handler.Handle(new GetOrCreateSessionCommand(1, null), default);
 
     result.IsSuccess.Should().BeTrue();
     result.Value.TableId.Should().Be(1);
@@ -91,7 +94,7 @@ public class GetOrCreateSessionHandlerTests
     _sessionRepo.FirstOrDefaultAsync(Arg.Any<ActiveSessionByTableIdSpec>(), Arg.Any<CancellationToken>())
                 .Returns((GuestSession?)null);
 
-    var result = await _handler.Handle(new GetOrCreateSessionCommand(1), default);
+    var result = await _handler.Handle(new GetOrCreateSessionCommand(1, null), default);
 
     result.IsSuccess.Should().BeTrue();
     table.Status.Should().Be(TableStatus.Occupied); // re-opened

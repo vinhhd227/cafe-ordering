@@ -17,10 +17,10 @@ public class LoginHandlerTests
   public async Task Handle_WhenCredentialsAreValid_ShouldReturnTokens()
   {
     var authDto = new AuthResponseDto("access-token", "refresh-token", DateTime.UtcNow.AddDays(7));
-    _identityService.LoginAsync("john.doe", "Password@123")
+    _identityService.LoginAsync("john.doe", "Password@123", AppType.Admin)
                     .Returns(Result.Success(authDto));
 
-    var result = await _handler.Handle(new LoginCommand("john.doe", "Password@123"), default);
+    var result = await _handler.Handle(new LoginCommand("john.doe", "Password@123", AppType.Admin), default);
 
     result.IsSuccess.Should().BeTrue();
     result.Value.AccessToken.Should().Be("access-token");
@@ -30,10 +30,10 @@ public class LoginHandlerTests
   [Fact]
   public async Task Handle_WhenCredentialsAreInvalid_ShouldReturnUnauthorized()
   {
-    _identityService.LoginAsync(Arg.Any<string>(), Arg.Any<string>())
+    _identityService.LoginAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<AppType>())
                     .Returns(Result<AuthResponseDto>.Unauthorized());
 
-    var result = await _handler.Handle(new LoginCommand("john.doe", "wrong-password"), default);
+    var result = await _handler.Handle(new LoginCommand("john.doe", "wrong-password", AppType.Admin), default);
 
     result.Status.Should().Be(ResultStatus.Unauthorized);
   }
@@ -41,10 +41,10 @@ public class LoginHandlerTests
   [Fact]
   public async Task Handle_WhenAccountIsDeactivated_ShouldReturnUnauthorized()
   {
-    _identityService.LoginAsync(Arg.Any<string>(), Arg.Any<string>())
+    _identityService.LoginAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<AppType>())
                     .Returns(Result<AuthResponseDto>.Unauthorized());
 
-    var result = await _handler.Handle(new LoginCommand("deactivated-user", "Password@123"), default);
+    var result = await _handler.Handle(new LoginCommand("deactivated-user", "Password@123", AppType.Admin), default);
 
     result.IsSuccess.Should().BeFalse();
     result.Status.Should().Be(ResultStatus.Unauthorized);
@@ -53,11 +53,11 @@ public class LoginHandlerTests
   [Fact]
   public async Task Handle_ShouldForwardUsernameAndPasswordToIdentityService()
   {
-    _identityService.LoginAsync(Arg.Any<string>(), Arg.Any<string>())
+    _identityService.LoginAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<AppType>())
                     .Returns(Result<AuthResponseDto>.Unauthorized());
 
-    await _handler.Handle(new LoginCommand("john.doe", "Secret@123"), default);
+    await _handler.Handle(new LoginCommand("john.doe", "Secret@123", AppType.Admin), default);
 
-    await _identityService.Received(1).LoginAsync("john.doe", "Secret@123");
+    await _identityService.Received(1).LoginAsync("john.doe", "Secret@123", AppType.Admin);
   }
 }
