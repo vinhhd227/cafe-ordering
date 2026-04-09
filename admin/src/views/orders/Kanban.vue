@@ -602,6 +602,7 @@ onUnmounted(() => {
         <prime-button
           severity="success"
           size="small"
+          class="tw:h-8!"
           @click="router.push({ name: 'ordersCreate' })"
         >
           <iconify icon="ph:plus-bold" class="tw:mr-1" />
@@ -622,6 +623,7 @@ onUnmounted(() => {
           size="small"
           :loading="loading"
           @click="loadOrders"
+          class="tw:h-8!"
         >
           <iconify icon="ph:arrows-clockwise-bold" class="tw:mr-1" />
           <span>{{ t("orders.refresh") }}</span>

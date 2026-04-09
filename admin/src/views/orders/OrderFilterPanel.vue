@@ -8,6 +8,16 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+
+const dateRange = computed({
+  get: () => (props.filters.dateFrom || props.filters.dateTo)
+    ? [props.filters.dateFrom ?? null, props.filters.dateTo ?? null]
+    : null,
+  set: (val) => {
+    props.filters.dateFrom = val?.[0] ?? null
+    props.filters.dateTo   = val?.[1] ?? null
+  },
+})
 </script>
 
 <template>
@@ -29,23 +39,15 @@ const { t } = useI18n()
       <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
         {{ t('orders.filter.dateRange') }}
       </label>
-      <div class="tw:flex tw:items-center tw:gap-2">
-        <prime-date-picker
-          v-model="filters.dateFrom"
-          :placeholder="t('orders.filter.dateFrom')"
-          date-format="dd/mm/yy"
-          show-button-bar
-          class="app-input tw:flex-1"
-        />
-        <span class="app-text-muted tw:text-sm">–</span>
-        <prime-date-picker
-          v-model="filters.dateTo"
-          :placeholder="t('orders.filter.dateTo')"
-          date-format="dd/mm/yy"
-          show-button-bar
-          class="app-input tw:flex-1"
-        />
-      </div>
+      <prime-date-picker
+        v-model="dateRange"
+        selection-mode="range"
+        :number-of-months="2"
+        :placeholder="t('orders.filter.dateRange')"
+        date-format="dd/mm/yy"
+        show-button-bar
+        class="app-input tw:w-full"
+      />
     </div>
 
     <!-- Order status -->
