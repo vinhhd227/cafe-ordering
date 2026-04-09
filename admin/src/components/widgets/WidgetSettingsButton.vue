@@ -19,7 +19,7 @@ const visible = ref(false)
   <div class="tw:relative tw:inline-flex">
     <prime-button
       v-tooltip.bottom="'Widget settings'"
-      :class="btnIcon"
+      :class="[btnIcon, 'tw:h-8! tw:w-8!']"
       severity="secondary"
       outlined
       @click="visible = true"

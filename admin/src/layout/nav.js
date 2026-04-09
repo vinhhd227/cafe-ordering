@@ -10,8 +10,12 @@ export const navGroups = [
       {
         labelKey: "nav.reports",
         icon: "ph:chart-bar-bold",
-        to: { name: "reports" },
         requiredClaim: "report.read",
+        matchNames: ["reports", "reportsDaily"],
+        children: [
+          { labelKey: "nav.reportsSummary", icon: "ph:chart-line-bold", to: { name: "reports" } },
+          { labelKey: "nav.reportsDaily",   icon: "ph:calendar-check-bold", to: { name: "reportsDaily" } },
+        ],
       },
     ],
   },
@@ -22,6 +26,7 @@ export const navGroups = [
         labelKey: "nav.orders",
         icon: "ph:receipt-bold",
         requiredClaim: "order.read",
+        matchPrefix: "orders",
         children: [
           { labelKey: "nav.ordersKanban", icon: "ph:kanban-bold", to: { name: "orders" } },
           { labelKey: "nav.ordersList",   icon: "ph:list-bold",   to: { name: "ordersList" } },

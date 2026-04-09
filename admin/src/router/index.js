@@ -44,6 +44,12 @@ const routes = [
         meta: { requiresAuth: true, requiredClaim: "report.read", section: "nav.groups.overview", pageTitle: "report.title" },
       },
       {
+        path: "reports/daily",
+        name: "reportsDaily",
+        component: () => import("@/views/reports/Daily.vue"),
+        meta: { requiresAuth: true, requiredClaim: "report.read", section: "nav.groups.overview", pageTitle: "report.daily.title" },
+      },
+      {
         path: "orders",
         meta: { requiresAuth: true, requiredClaim: "order.read", section: "nav.groups.operations" },
         children: [

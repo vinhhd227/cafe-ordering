@@ -33,7 +33,20 @@ const profileMenu = ref();
 
 const isActive = (to) => route.name === to.name;
 
-const isParentActive = (item) => route.path.startsWith('/orders');
+const isParentActive = (item) => {
+  const routeName = typeof route.name === "string" ? route.name : "";
+  if (!routeName) return false;
+
+  if (Array.isArray(item.matchNames) && item.matchNames.includes(routeName)) {
+    return true;
+  }
+
+  if (typeof item.matchPrefix === "string" && routeName.startsWith(item.matchPrefix)) {
+    return true;
+  }
+
+  return item.children?.some((child) => child.to?.name === routeName) ?? false;
+};
 
 const expandedMap = reactive({});
 

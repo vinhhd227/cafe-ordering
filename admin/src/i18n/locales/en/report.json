@@ -75,6 +75,97 @@
       "yesterday": "yesterday",
       "prevPeriod": "prev period"
     },
+    "daily": {
+      "title": "Daily Report",
+      "subtitle": "Detailed revenue and orders by day.",
+      "breadcrumb": "Overview",
+      "tabs": {
+        "day": "By Day",
+        "dateRange": "Date Range",
+        "monthly": "Monthly Comparison"
+      },
+      "shortcuts": {
+        "today": "Today",
+        "yesterday": "Yesterday"
+      },
+      "actions": {
+        "refresh": "Refresh",
+        "export": "Export",
+        "exportCsv": "Export CSV",
+        "exportPdf": "Export PDF"
+      },
+      "metrics": {
+        "revenue": "Total Revenue",
+        "orders": "Orders",
+        "avgPerOrder": "Avg / Order",
+        "itemsPerOrder": "Items / Order",
+        "vsYesterday": "vs yesterday",
+        "vsMonthAvg": "monthly avg",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "pending": "Pending",
+        "totalItems": "Total items sold"
+      },
+      "payment": {
+        "title": "Payments",
+        "cash": "Cash",
+        "transfer": "Bank Transfer"
+      },
+      "stats": {
+        "peakHour": "Peak Hour",
+        "estimatedGuests": "Est. guests",
+        "yesterday": "Yesterday",
+        "avg7Days": "7-day avg",
+        "avg30Days": "30-day avg"
+      },
+      "topProducts": {
+        "title": "Top Products",
+        "subtitle": "Top 5 by revenue"
+      },
+      "topCategories": {
+        "title": "Top Categories",
+        "subtitle": "By revenue",
+        "trendUp": "▲ vs yest.",
+        "trendDown": "▼ vs yest.",
+        "trendStable": "= stable"
+      },
+      "hourlyChart": {
+        "title": "Revenue by Hour",
+        "subtitle": "Hourly breakdown for the day",
+        "peakLabel": "Peak hour",
+        "today": "Today",
+        "avg7Days": "7-day avg"
+      },
+      "ordersTable": {
+        "title": "Order Details",
+        "filterAll": "All",
+        "filterCash": "Cash",
+        "filterTransfer": "Bank Transfer",
+        "colTime": "Time",
+        "colTable": "Table",
+        "colItems": "Items",
+        "colAmount": "Amount",
+        "colPayment": "Payment",
+        "colStatus": "Status",
+        "viewDetail": "View detail",
+        "drawerTitle": "Order detail",
+        "showing": "Showing {shown} of {total} orders",
+        "total": "Total",
+        "noData": "No orders on this day.",
+        "status": {
+          "completed": "Completed",
+          "processing": "Processing",
+          "pending": "Pending",
+          "cancelled": "Cancelled"
+        },
+        "payment": {
+          "cash": "Cash",
+          "transfer": "Bank Transfer"
+        }
+      },
+      "error": "Failed to load daily report data.",
+      "tableNum": "Table {n}"
+    },
     "error": "Failed to load report data.",
     "empty": "No orders in the selected period.",
     "export": "Export",

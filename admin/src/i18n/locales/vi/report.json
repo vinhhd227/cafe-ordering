@@ -75,6 +75,97 @@
       "yesterday": "hôm qua",
       "prevPeriod": "kỳ trước"
     },
+    "daily": {
+      "title": "Báo cáo ngày",
+      "subtitle": "Doanh thu và đơn hàng chi tiết theo ngày.",
+      "breadcrumb": "Tổng quan",
+      "tabs": {
+        "day": "Theo ngày",
+        "dateRange": "Khoảng thời gian",
+        "monthly": "So sánh tháng"
+      },
+      "shortcuts": {
+        "today": "Hôm nay",
+        "yesterday": "Hôm qua"
+      },
+      "actions": {
+        "refresh": "Làm mới",
+        "export": "Xuất",
+        "exportCsv": "Xuất CSV",
+        "exportPdf": "Xuất PDF"
+      },
+      "metrics": {
+        "revenue": "Tổng doanh thu",
+        "orders": "Đơn hàng",
+        "avgPerOrder": "TB / Đơn",
+        "itemsPerOrder": "Ly / Đơn",
+        "vsYesterday": "so hôm qua",
+        "vsMonthAvg": "TB tháng",
+        "completed": "Hoàn thành",
+        "cancelled": "Hủy",
+        "pending": "Đang xử lý",
+        "totalItems": "Tổng ly bán"
+      },
+      "payment": {
+        "title": "Thanh toán",
+        "cash": "Tiền mặt",
+        "transfer": "Chuyển khoản"
+      },
+      "stats": {
+        "peakHour": "Giờ cao điểm",
+        "estimatedGuests": "Lượt khách ước tính",
+        "yesterday": "Hôm qua",
+        "avg7Days": "TB 7 ngày",
+        "avg30Days": "TB 30 ngày"
+      },
+      "topProducts": {
+        "title": "Sản phẩm bán chạy",
+        "subtitle": "Top 5 theo doanh thu"
+      },
+      "topCategories": {
+        "title": "Danh mục nổi bật",
+        "subtitle": "Theo doanh thu",
+        "trendUp": "▲ vs hôm qua",
+        "trendDown": "▼ vs hôm qua",
+        "trendStable": "= ổn định"
+      },
+      "hourlyChart": {
+        "title": "Doanh thu theo giờ",
+        "subtitle": "Chi tiết từng giờ trong ngày",
+        "peakLabel": "Giờ cao điểm",
+        "today": "Hôm nay",
+        "avg7Days": "TB 7 ngày"
+      },
+      "ordersTable": {
+        "title": "Chi tiết đơn hàng",
+        "filterAll": "Tất cả",
+        "filterCash": "Tiền mặt",
+        "filterTransfer": "Chuyển khoản",
+        "colTime": "Giờ đặt",
+        "colTable": "Bàn",
+        "colItems": "Sản phẩm",
+        "colAmount": "Tổng tiền",
+        "colPayment": "Thanh toán",
+        "colStatus": "Trạng thái",
+        "viewDetail": "Xem chi tiết",
+        "drawerTitle": "Chi tiết đơn hàng",
+        "showing": "Hiển thị {shown} / {total} đơn",
+        "total": "Tổng",
+        "noData": "Không có đơn hàng trong ngày này.",
+        "status": {
+          "completed": "Hoàn thành",
+          "processing": "Đang xử lý",
+          "pending": "Chờ xử lý",
+          "cancelled": "Đã hủy"
+        },
+        "payment": {
+          "cash": "Tiền mặt",
+          "transfer": "Chuyển khoản"
+        }
+      },
+      "error": "Không thể tải dữ liệu báo cáo.",
+      "tableNum": "Bàn {n}"
+    },
     "error": "Không thể tải dữ liệu báo cáo.",
     "empty": "Không có đơn hàng trong khoảng thời gian này.",
     "export": "Xuất",
