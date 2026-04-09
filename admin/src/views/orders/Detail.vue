@@ -216,6 +216,12 @@ const handleUpdateOrderDate = async () => {
   }
 };
 
+// ── Copy ──────────────────────────────────────────────────────────
+const copyOrderNumber = async (orderNumber) => {
+  await navigator.clipboard.writeText(orderNumber)
+  toast.add({ severity: 'success', summary: t('orders.list.copyOrderNumberSuccess'), life: 2000 })
+}
+
 // ── Delete order ──────────────────────────────────────────────────
 const handleDeleteOrder = () => {
   confirm.require({
@@ -864,11 +870,20 @@ const confirmSplit = async () => {
             <template #content>
               <p class="tw:text-sm tw:font-semibold tw:mb-4">{{ t('orders.detail.info.title') }}</p>
               <div class="tw:space-y-3">
-                <div class="tw:flex tw:justify-between tw:text-sm">
+                <div class="tw:flex tw:justify-between tw:text-sm tw:items-center">
                   <span class="app-text-muted">{{ t('orders.detail.info.orderNumber') }}</span>
-                  <span class="tw:font-mono tw:font-semibold">{{
-                    order.orderNumber
-                  }}</span>
+                  <div class="tw:flex tw:items-center tw:gap-1">
+                    <span class="tw:font-mono tw:font-semibold">{{ order.orderNumber }}</span>
+                    <prime-button
+                      :class="btnIcon"
+                      severity="secondary"
+                      text
+                      v-tooltip.top="t('orders.list.copyOrderNumber')"
+                      @click="copyOrderNumber(order.orderNumber)"
+                    >
+                      <iconify icon="ph:copy" class="tw:text-xs" />
+                    </prime-button>
+                  </div>
                 </div>
                 <div class="tw:flex tw:justify-between tw:text-sm tw:items-center">
                   <span class="app-text-muted">{{ t('orders.detail.info.date') }}</span>

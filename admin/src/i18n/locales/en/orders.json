@@ -90,6 +90,8 @@
     },
     "list": {
       "subtitle": "Full order history with payment status.",
+      "copyOrderNumber": "Copy order number",
+      "copyOrderNumberSuccess": "Order number copied",
       "col": {
         "orderNumber": "Order #",
         "date": "Date",

@@ -244,6 +244,12 @@ const onPaid = (order, { paymentMethod }) => {
   payOrder.value = null;
 };
 
+// ── Copy ──────────────────────────────────────────────────────────
+const copyOrderNumber = async (orderNumber) => {
+  await navigator.clipboard.writeText(orderNumber)
+  toast.add({ severity: 'success', summary: t('orders.list.copyOrderNumberSuccess'), life: 2000 })
+}
+
 // ── Delete ────────────────────────────────────────────────────────
 const handleDeleteOrder = (order) => {
   confirm.require({
@@ -272,15 +278,13 @@ const handleDeleteOrder = (order) => {
   <section class="tw:space-y-8">
     <!-- Header -->
     <page-header :subtitle="t('orders.list.subtitle')">
-      <prime-button
-        severity="success"
-        size="small"
-        class="tw:h-8!"
-        @click="router.push({ name: 'ordersCreate' })"
-      >
-        <iconify icon="ph:plus-bold" class="tw:mr-1" />
-        <span>{{ t('orders.newOrder') }}</span>
-      </prime-button>
+      <widget-settings-button
+        :widgets="wDefs"
+        :hidden-count="wHidden"
+        :cols-per-row="wCols"
+        @toggle="wToggle"
+        @update:cols-per-row="wSetCols"
+      />
       <prime-button
         v-if="can('order.createManual')"
         severity="secondary"
@@ -292,13 +296,6 @@ const handleDeleteOrder = (order) => {
         <iconify icon="ph:pencil-line-bold" class="tw:mr-1" />
         <span>{{ t('orders.newManualOrder') }}</span>
       </prime-button>
-      <widget-settings-button
-        :widgets="wDefs"
-        :hidden-count="wHidden"
-        :cols-per-row="wCols"
-        @toggle="wToggle"
-        @update:cols-per-row="wSetCols"
-      />
       <prime-button
         severity="secondary"
         outlined
@@ -560,7 +557,19 @@ const handleDeleteOrder = (order) => {
 
       <template #col-orderNumber="{ data }">
         <div class="tw:flex tw:flex-col tw:gap-0.5">
-          <span class="tw:font-mono tw:text-sm tw:font-semibold">{{ data.orderNumber }}</span>
+          <div class="tw:flex tw:items-center tw:gap-1">
+            <span class="tw:font-mono tw:text-sm tw:font-semibold">{{ data.orderNumber }}</span>
+            <prime-button
+              :class="btnIcon"
+              size="small"
+              severity="secondary"
+              text
+              v-tooltip.top="t('orders.list.copyOrderNumber')"
+              @click.stop="copyOrderNumber(data.orderNumber)"
+            >
+              <iconify icon="ph:copy" class="tw:text-xs" />
+            </prime-button>
+          </div>
           <prime-tag
             v-if="data.isManual"
             value="Thủ công"

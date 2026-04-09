@@ -90,6 +90,8 @@
     },
     "list": {
       "subtitle": "Lịch sử đơn hàng với trạng thái thanh toán.",
+      "copyOrderNumber": "Sao chép mã đơn",
+      "copyOrderNumberSuccess": "Đã sao chép mã đơn",
       "col": {
         "orderNumber": "Mã đơn",
         "date": "Ngày",
