@@ -9,7 +9,7 @@ import MonthlyReport from './Monthly.vue'
 const { t } = useI18n()
 
 // ── Tab ────────────────────────────────────────────────────────────
-const activeTab = ref('day')
+const activeTab = ref('range')
 
 // ── Helpers ────────────────────────────────────────────────────────
 const toMidnight = (d) => {
@@ -42,15 +42,10 @@ const todayMidnight = () => {
   return d
 }
 
-const selectedDay = ref(todayMidnight())
-const dateRange   = ref([firstOfMonth(), todayMidnight()])
+const dateRange = ref([firstOfMonth(), todayMidnight()])
 
-const dateFrom = computed(() =>
-  activeTab.value === 'day' ? selectedDay.value : (dateRange.value?.[0] ?? null)
-)
-const dateTo = computed(() =>
-  activeTab.value === 'day' ? selectedDay.value : (dateRange.value?.[1] ?? null)
-)
+const dateFrom = computed(() => dateRange.value?.[0] ?? null)
+const dateTo   = computed(() => dateRange.value?.[1] ?? null)
 
 // ── Quick presets (computed so labels react to locale changes) ──────
 const presets = computed(() => [
@@ -102,7 +97,6 @@ const error   = ref('')
 const data    = ref(null)
 
 const periodLabel = computed(() => {
-  if (activeTab.value === 'day') return t('report.comparison.yesterday')
   const f = dateFrom.value
   const t2 = dateTo.value
   if (!f || !t2) return t('report.comparison.prevPeriod')
@@ -432,8 +426,7 @@ const load = async () => {
   }
 }
 
-watch(selectedDay, () => { if (activeTab.value === 'day') load() })
-watch(dateRange, (val) => { if (activeTab.value === 'range' && val?.[0] && val?.[1]) load() })
+watch(dateRange, (val) => { if (val?.[0] && val?.[1]) load() })
 watch(activeTab, () => { data.value = null; load() })
 onMounted(load)
 </script>
@@ -471,15 +464,6 @@ onMounted(load)
     <div class="tw:flex tw:gap-1 tw:self-start tw:bg-black/10 tw:dark:bg-white/5 tw:rounded-lg tw:p-0.5 tw:w-fit">
       <button
         class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
-        :class="activeTab === 'day'
-          ? 'tw:bg-white tw:dark:bg-white/15 tw:text-surface-900 tw:dark:text-white tw:shadow-sm'
-          : 'app-text-muted'"
-        @click="activeTab = 'day'"
-      >
-        {{ t('report.tabs.day') }}
-      </button>
-      <button
-        class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
         :class="activeTab === 'range'
           ? 'tw:bg-white tw:dark:bg-white/15 tw:text-surface-900 tw:dark:text-white tw:shadow-sm'
           : 'app-text-muted'"
@@ -500,164 +484,6 @@ onMounted(load)
 
     <!-- Monthly comparison tab -->
     <monthly-report v-if="activeTab === 'monthly'" />
-
-    <!-- Single-day tab content -->
-    <template v-if="activeTab === 'day'">
-
-    <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-2">
-      <prime-date-picker
-        v-model="selectedDay"
-        date-format="dd/mm/yy"
-        show-button-bar
-        class="app-input tw:w-44"
-        size="small"
-      />
-      <prime-button
-        size="small" severity="secondary" outlined class="tw:text-xs"
-        @click="selectedDay = todayMidnight()"
-      >{{ t('report.presets.today') }}</prime-button>
-      <prime-button
-        size="small" severity="secondary" outlined class="tw:text-xs"
-        @click="() => { const d = new Date(); d.setDate(d.getDate() - 1); d.setHours(0,0,0,0); selectedDay = d }"
-      >{{ t('report.presets.yesterday') }}</prime-button>
-    </div>
-
-    <prime-message v-if="error" severity="error" size="small" variant="simple" :closable="true" @close="error = ''">{{ error }}</prime-message>
-
-    <template v-if="!data && loading">
-      <div class="tw:grid tw:gap-3 tw:grid-cols-1 tw:sm:grid-cols-2">
-        <prime-skeleton v-for="n in 2" :key="n" height="5.5rem" class="tw:rounded-xl" />
-      </div>
-    </template>
-
-    <div v-if="data" class="tw:space-y-8">
-      <p class="tw:text-sm app-text-muted">
-        {{ selectedDay.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) }}
-      </p>
-      <div v-if="data.totalOrders > 0" class="tw:grid tw:gap-3 tw:grid-cols-1 tw:sm:grid-cols-2">
-        <widget-orders-revenue
-          :total="data.totalRevenue"
-          :cash="data.cashRevenue"
-          :bank="data.bankRevenue"
-          :prev-period-revenue="data.prevPeriodRevenue"
-          :avg30-day-revenue="data.avg30DayRevenue"
-          :period-label="periodLabel"
-        />
-        <prime-card
-          :pt="{
-            root: { class: `${appCard} ${cardRing} tw:p-4` },
-            header: { class: 'tw:flex tw:justify-between tw:gap-3 tw:min-w-0 tw:mb-3' },
-            body: { class: 'tw:p-0! tw:h-full' },
-            content: { class: 'tw:h-full tw:flex tw:flex-col tw:justify-between' },
-          }"
-        >
-          <template #header>
-            <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:truncate app-text-subtle">
-              {{ t('report.widgets.dayStats') }}
-            </p>
-            <iconify icon="ph:chart-bar-bold" class="tw:text-violet-400 tw:opacity-70 tw:shrink-0" />
-          </template>
-          <template #content>
-            <div class="tw:grid tw:grid-cols-2 tw:gap-x-4 tw:mt-1">
-              <!-- Đơn hoàn thành / tổng -->
-              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
-                <div class="tw:flex tw:items-center tw:gap-1.5">
-                  <iconify icon="ph:receipt-bold" class="tw:text-green-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.dayStats_orders') }}</span>
-                </div>
-                <span class="tw:text-xs tw:font-semibold">
-                  {{ data.totalOrders }}
-                  <span v-if="data.totalOrders > 0" class="app-text-muted tw:font-normal tw:text-[10px] tw:ml-0.5">
-                    {{ Math.round(data.completedOrders / data.totalOrders * 100) }}%
-                  </span>
-                </span>
-              </div>
-              <!-- TB / đơn -->
-              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
-                <div class="tw:flex tw:items-center tw:gap-1.5">
-                  <iconify icon="ph:coins-bold" class="tw:text-rose-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgOrder') }}</span>
-                </div>
-                <span class="tw:text-xs tw:font-semibold">{{ fmt(avgOrderValue) }}</span>
-              </div>
-              <!-- Giờ cao điểm -->
-              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
-                <div class="tw:flex tw:items-center tw:gap-1.5">
-                  <iconify icon="ph:clock-countdown-bold" class="tw:text-violet-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.peakHour') }}</span>
-                </div>
-                <span class="tw:text-xs tw:font-semibold">
-                  <template v-if="peakHour && peakHour.revenue > 0">
-                    {{ String(peakHour.hour).padStart(2, '0') }}:00
-                    <span class="app-text-muted tw:font-normal tw:text-[10px]">
-                      {{ Math.round(peakHour.revenue / 1000) }}K
-                      <template v-if="data.totalRevenue > 0">· {{ Math.round(peakHour.revenue / data.totalRevenue * 100) }}%</template>
-                    </span>
-                  </template>
-                  <template v-else>—</template>
-                </span>
-              </div>
-              <!-- Ly / đơn -->
-              <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
-                <div class="tw:flex tw:items-center tw:gap-1.5">
-                  <iconify icon="ph:coffee-bold" class="tw:text-cyan-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.itemsPerOrder') }}</span>
-                </div>
-                <span class="tw:text-xs tw:font-semibold">{{ avgItemsPerOrder.toFixed(1) }}</span>
-              </div>
-            </div>
-          </template>
-        </prime-card>
-      </div>
-
-      <div v-if="data.topProducts?.length || data.topCategories?.length" class="tw:grid tw:grid-cols-1 tw:gap-4 tw:sm:grid-cols-2">
-        <widget-top-products
-          v-if="data.topProducts?.length"
-          :title="t('report.topProducts.title')"
-          :subtitle="t('report.topProducts.subtitle')"
-          :unit="t('report.topProducts.unit')"
-          :items="data.topProducts"
-        />
-        <widget-top-categories
-          v-if="data.topCategories?.length"
-          :title="t('report.topCategories.title')"
-          :subtitle="t('report.topCategories.subtitle')"
-          :items="data.topCategories"
-        />
-      </div>
-
-      <!-- Hourly revenue chart -->
-      <prime-card
-        v-if="data.totalOrders > 0"
-        :pt="{
-          root: { class: `${appCard} ${cardRing} tw:p-4` },
-          body: { class: 'tw:p-0!' },
-          header: { class: 'tw:flex tw:items-center tw:gap-2 tw:mb-4' },
-          content: { class: 'tw:h-52' },
-        }"
-      >
-        <template #header>
-          <iconify icon="ph:clock-bold" class="app-text-subtle" />
-          <span class="tw:text-sm tw:font-medium">{{ t('report.hourlyChart.title') }}</span>
-          <prime-tag
-            v-if="peakHour?.revenue > 0"
-            :value="`${t('report.hourlyChart.peak')}: ${String(peakHour.hour).padStart(2,'0')}:00`"
-            severity="warn"
-            class="tw:ml-auto tw:text-[10px]!"
-          />
-        </template>
-        <template #content>
-          <prime-chart type="bar" :data="hourlyChartData" :options="hourlyChartOptions" class="tw:h-full" />
-        </template>
-      </prime-card>
-
-      <div v-if="data.totalOrders === 0" class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:py-16 app-text-subtle">
-        <iconify icon="ph:chart-bar-bold" class="tw:text-4xl tw:mb-2 tw:opacity-30" />
-        <p class="tw:text-sm">{{ t('report.empty') }}</p>
-      </div>
-    </div>
-
-    </template> <!-- end day tab -->
 
     <!-- Date range tab content -->
     <template v-if="activeTab === 'range'">
