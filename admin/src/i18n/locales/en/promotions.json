@@ -1,0 +1,106 @@
+{
+  "promotions": {
+    "breadcrumb": "Operations",
+    "title": "Promotions",
+    "subtitle": "Manage discount codes and promotional campaigns.",
+    "refresh": "Refresh",
+    "newPromotion": "New promotion",
+    "buyXGetY": "Buy {x} Get {y}",
+    "dialog": {
+      "createHeader": "New promotion",
+      "editHeader": "Edit promotion"
+    },
+    "form": {
+      "name": "Name",
+      "code": "Promo code",
+      "codeHint": "(blank = auto-generate)",
+      "visibility": "Visibility",
+      "discountType": "Discount type",
+      "scope": "Scope",
+      "discountValue": "Discount value",
+      "maxDiscountAmount": "Max discount amount",
+      "maxDiscountAmountHint": "(blank = no cap)",
+      "buyQuantity": "Buy quantity",
+      "getQuantity": "Get quantity",
+      "applicableProducts": "Applicable products",
+      "applicableCategories": "Applicable categories",
+      "freeItem": "Free item (Y) is",
+      "freeItemFromProducts": "Free item from products",
+      "freeItemFromCategories": "Free item from categories",
+      "minOrderAmount": "Min order amount",
+      "maxUsage": "Max usage",
+      "maxUsageHint": "(blank = unlimited)",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "endDateHint": "(blank = no expiry)",
+      "description": "Description",
+      "activeLabel": "Active",
+      "saveChanges": "Save changes",
+      "addPromotion": "Add promotion",
+      "namePlaceholder": "e.g. Summer sale 20%…",
+      "codePlaceholder": "SUMMER20",
+      "noCap": "No cap",
+      "noMinimum": "No minimum",
+      "unlimited": "Unlimited",
+      "descriptionPlaceholder": "Optional description…",
+      "selectProducts": "Select products…",
+      "selectCategories": "Select categories…",
+      "giftSource": {
+        "same": "Same product(s) as X",
+        "separate": "Separate product(s)"
+      },
+      "error": {
+        "nameRequired": "Promotion name is required.",
+        "discountValueRequired": "Discount value is required.",
+        "buyGetQuantityRequired": "Buy quantity and Get quantity are required for Buy X Get Y.",
+        "saveFailed": "Failed to save promotion."
+      }
+    },
+    "filter": {
+      "title": "Filter promotions",
+      "filtersTooltip": "Filters",
+      "status": "Status",
+      "allStatuses": "All",
+      "discountType": "Discount type",
+      "allTypes": "All types",
+      "scope": "Scope",
+      "allScopes": "All scopes",
+      "clearFilters": "Clear filters"
+    },
+    "col": {
+      "name": "Name",
+      "type": "Type",
+      "scope": "Scope",
+      "discount": "Discount",
+      "validity": "Validity",
+      "usage": "Usage",
+      "visibility": "Visibility",
+      "active": "Active",
+      "actions": "Actions"
+    },
+    "toast": {
+      "created": "Promotion created.",
+      "updated": "Promotion updated.",
+      "deleted": "Promotion deleted.",
+      "activated": "Promotion activated.",
+      "deactivated": "Promotion deactivated.",
+      "toggleFailed": "Failed to toggle promotion.",
+      "deleteFailed": "Failed to delete promotion.",
+      "loadFailed": "Failed to load promotions."
+    },
+    "confirm": {
+      "deleteMessage": "Delete \"{name}\"? This cannot be undone.",
+      "deleteHeader": "Confirm delete",
+      "deleteAccept": "Delete",
+      "deleteReject": "Cancel"
+    },
+    "tag": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "drawer": {
+      "activate": "Activate",
+      "deactivate": "Deactivate"
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "promotions": {
+    "breadcrumb": "Vận hành",
+    "title": "Khuyến mãi",
+    "subtitle": "Quản lý mã giảm giá và chương trình khuyến mãi.",
+    "refresh": "Làm mới",
+    "newPromotion": "Thêm khuyến mãi",
+    "buyXGetY": "Mua {x} tặng {y}",
+    "dialog": {
+      "createHeader": "Thêm khuyến mãi",
+      "editHeader": "Sửa khuyến mãi"
+    },
+    "form": {
+      "name": "Tên",
+      "code": "Mã khuyến mãi",
+      "codeHint": "(để trống = tự sinh)",
+      "visibility": "Hiển thị",
+      "discountType": "Loại giảm giá",
+      "scope": "Phạm vi",
+      "discountValue": "Giá trị giảm",
+      "maxDiscountAmount": "Giới hạn giảm tối đa",
+      "maxDiscountAmountHint": "(để trống = không giới hạn)",
+      "buyQuantity": "Số lượng mua",
+      "getQuantity": "Số lượng tặng",
+      "applicableProducts": "Sản phẩm áp dụng",
+      "applicableCategories": "Danh mục áp dụng",
+      "freeItem": "Sản phẩm tặng (Y) là",
+      "freeItemFromProducts": "Sản phẩm tặng từ danh sách",
+      "freeItemFromCategories": "Danh mục tặng từ danh sách",
+      "minOrderAmount": "Giá trị đơn tối thiểu",
+      "maxUsage": "Số lần dùng tối đa",
+      "maxUsageHint": "(để trống = không giới hạn)",
+      "startDate": "Ngày bắt đầu",
+      "endDate": "Ngày kết thúc",
+      "endDateHint": "(để trống = không hết hạn)",
+      "description": "Mô tả",
+      "activeLabel": "Hoạt động",
+      "saveChanges": "Lưu thay đổi",
+      "addPromotion": "Thêm khuyến mãi",
+      "namePlaceholder": "Ví dụ: Sale hè 20%…",
+      "codePlaceholder": "SALE20",
+      "noCap": "Không giới hạn",
+      "noMinimum": "Không yêu cầu",
+      "unlimited": "Không giới hạn",
+      "descriptionPlaceholder": "Mô tả tùy chọn…",
+      "selectProducts": "Chọn sản phẩm…",
+      "selectCategories": "Chọn danh mục…",
+      "giftSource": {
+        "same": "Giống sản phẩm X",
+        "separate": "Sản phẩm riêng"
+      },
+      "error": {
+        "nameRequired": "Tên khuyến mãi là bắt buộc.",
+        "discountValueRequired": "Giá trị giảm là bắt buộc.",
+        "buyGetQuantityRequired": "Số lượng mua và tặng là bắt buộc cho Mua X Tặng Y.",
+        "saveFailed": "Lưu khuyến mãi thất bại."
+      }
+    },
+    "filter": {
+      "title": "Bộ lọc",
+      "filtersTooltip": "Bộ lọc",
+      "status": "Trạng thái",
+      "allStatuses": "Tất cả",
+      "discountType": "Loại giảm giá",
+      "allTypes": "Tất cả loại",
+      "scope": "Phạm vi",
+      "allScopes": "Tất cả phạm vi",
+      "clearFilters": "Xoá bộ lọc"
+    },
+    "col": {
+      "name": "Tên",
+      "type": "Loại",
+      "scope": "Phạm vi",
+      "discount": "Giảm giá",
+      "validity": "Thời hạn",
+      "usage": "Sử dụng",
+      "visibility": "Hiển thị",
+      "active": "Kích hoạt",
+      "actions": "Thao tác"
+    },
+    "toast": {
+      "created": "Đã thêm khuyến mãi.",
+      "updated": "Đã cập nhật khuyến mãi.",
+      "deleted": "Đã xóa khuyến mãi.",
+      "activated": "Đã kích hoạt khuyến mãi.",
+      "deactivated": "Đã tắt khuyến mãi.",
+      "toggleFailed": "Cập nhật trạng thái thất bại.",
+      "deleteFailed": "Xóa khuyến mãi thất bại.",
+      "loadFailed": "Tải danh sách khuyến mãi thất bại."
+    },
+    "confirm": {
+      "deleteMessage": "Xóa \"{name}\"? Hành động này không thể hoàn tác.",
+      "deleteHeader": "Xác nhận xóa",
+      "deleteAccept": "Xóa",
+      "deleteReject": "Hủy"
+    },
+    "tag": {
+      "active": "Hoạt động",
+      "inactive": "Không hoạt động"
+    },
+    "drawer": {
+      "activate": "Kích hoạt",
+      "deactivate": "Tắt"
+    }
+  }
+}

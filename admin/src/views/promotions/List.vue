@@ -69,7 +69,7 @@ const formatDate = (dateStr) => {
 const discountValueLabel = (promo) => {
   if (promo.discountType === PROMOTION_DISCOUNT_TYPE.PERCENTAGE) return `${promo.discountValue}%`;
   if (promo.discountType === PROMOTION_DISCOUNT_TYPE.FIXED)      return formatVnd(promo.discountValue);
-  return `Buy ${promo.buyQuantity ?? 0} Get ${promo.getQuantity ?? 0}`;
+  return t('promotions.buyXGetY', { x: promo.buyQuantity ?? 0, y: promo.getQuantity ?? 0 });
 };
 
 // ── Filter helpers ─────────────────────────────────────────────────
@@ -119,7 +119,7 @@ const loadPromotions = async () => {
     saveCurrentState();
   } catch (err) {
     errorMessage.value =
-      err?.response?.data?.message || "Failed to load promotions.";
+      err?.response?.data?.message || t('promotions.toast.loadFailed');
   } finally {
     loading.value = false;
   }
@@ -245,7 +245,7 @@ const fIsActive          = ref(true);
 
 const isEditMode  = computed(() => editingPromotion.value !== null);
 const dialogHeader = computed(() =>
-  isEditMode.value ? "Edit promotion" : "New promotion"
+  isEditMode.value ? t('promotions.dialog.editHeader') : t('promotions.dialog.createHeader')
 );
 
 const isBuyXGetY      = computed(() => fDiscountType.value === PROMOTION_DISCOUNT_TYPE.BUY_X_GET_Y);
@@ -255,10 +255,10 @@ const isCategoryScope = computed(() => fScope.value === PROMOTION_SCOPE.CATEGORY
 
 // Gift source options for BUY_X_GET_Y
 const GIFT_SOURCE = { SAME: 'SAME', SEPARATE: 'SEPARATE' };
-const GIFT_SOURCE_OPTIONS = [
-  { label: 'Same product(s) as X', value: GIFT_SOURCE.SAME,     icon: 'ph:repeat-bold' },
-  { label: 'Separate product(s)',   value: GIFT_SOURCE.SEPARATE, icon: 'ph:shuffle-bold' },
-];
+const GIFT_SOURCE_OPTIONS = computed(() => [
+  { label: t('promotions.form.giftSource.same'),     value: GIFT_SOURCE.SAME,     icon: 'ph:repeat-bold' },
+  { label: t('promotions.form.giftSource.separate'), value: GIFT_SOURCE.SEPARATE, icon: 'ph:shuffle-bold' },
+]);
 const fGiftSource = ref(GIFT_SOURCE.SAME);
 
 const resetForm = () => {
@@ -366,15 +366,15 @@ watch(fGiftSource, (newVal) => {
 const submitForm = async () => {
   formError.value = "";
   if (!fName.value.trim()) {
-    formError.value = "Promotion name is required.";
+    formError.value = t('promotions.form.error.nameRequired');
     return;
   }
   if (!isBuyXGetY.value && (fDiscountValue.value === null || fDiscountValue.value < 0)) {
-    formError.value = "Discount value is required.";
+    formError.value = t('promotions.form.error.discountValueRequired');
     return;
   }
   if (isBuyXGetY.value && (!fBuyQuantity.value || !fGetQuantity.value)) {
-    formError.value = "Buy quantity and Get quantity are required for Buy X Get Y.";
+    formError.value = t('promotions.form.error.buyGetQuantityRequired');
     return;
   }
 
@@ -404,10 +404,10 @@ const submitForm = async () => {
 
     if (isEditMode.value) {
       await updatePromotion(editingPromotion.value.id, payload);
-      toast.add({ severity: "success", summary: "Updated", detail: "Promotion updated.", life: 3000 });
+      toast.add({ severity: "success", summary: t('promotions.toast.updated'), life: 3000 });
     } else {
       await createPromotion(payload);
-      toast.add({ severity: "success", summary: "Created", detail: "Promotion created.", life: 3000 });
+      toast.add({ severity: "success", summary: t('promotions.toast.created'), life: 3000 });
     }
 
     dialogVisible.value = false;
@@ -417,24 +417,24 @@ const submitForm = async () => {
     formError.value =
       err?.response?.data?.errors?.join(", ") ||
       err?.response?.data?.title ||
-      "Failed to save promotion.";
+      t('promotions.form.error.saveFailed');
   } finally {
     formLoading.value = false;
   }
 };
 
 // ── Column definitions ────────────────────────────────────────────
-const columns = [
-  { field: 'name',   header: 'Name',     width: '14rem' },
-  { key: 'type',     header: 'Type',     width: '10rem' },
-  { key: 'scope',    header: 'Scope',    width: '10rem' },
-  { key: 'discount', header: 'Discount', width: '9rem' },
-  { key: 'validity', header: 'Validity', width: '12rem' },
-  { key: 'usage',    header: 'Usage',    width: '7rem' },
-  { key: 'visibility', header: 'Visibility', width: '8rem' },
-  { key: 'isActive', header: 'Active',   width: '6rem' },
-  { key: 'actions',  header: 'Actions',  width: '8rem', toggleable: false },
-];
+const columns = computed(() => [
+  { field: 'name',     header: t('promotions.col.name'),       width: '14rem' },
+  { key: 'type',       header: t('promotions.col.type'),       width: '10rem' },
+  { key: 'scope',      header: t('promotions.col.scope'),      width: '10rem' },
+  { key: 'discount',   header: t('promotions.col.discount'),   width: '9rem' },
+  { key: 'validity',   header: t('promotions.col.validity'),   width: '12rem' },
+  { key: 'usage',      header: t('promotions.col.usage'),      width: '7rem' },
+  { key: 'visibility', header: t('promotions.col.visibility'), width: '8rem' },
+  { key: 'isActive',   header: t('promotions.col.active'),     width: '6rem' },
+  { key: 'actions',    header: t('promotions.col.actions'),    width: '8rem', toggleable: false },
+]);
 
 // ── Mobile drawer ──────────────────────────────────────────────────
 const drawerPromo = ref(null);
@@ -455,13 +455,12 @@ const handleToggle = async (promo) => {
     }
     toast.add({
       severity: "success",
-      summary: "Updated",
-      detail: `Promotion ${updated?.isActive ? "activated" : "deactivated"}.`,
+      summary: updated?.isActive ? t('promotions.toast.activated') : t('promotions.toast.deactivated'),
       life: 2500,
     });
   } catch (err) {
     errorMessage.value =
-      err?.response?.data?.title || "Failed to toggle promotion.";
+      err?.response?.data?.title || t('promotions.toast.toggleFailed');
   } finally {
     togglingId.value = null;
   }
@@ -470,22 +469,22 @@ const handleToggle = async (promo) => {
 // ── Delete ────────────────────────────────────────────────────────
 const handleDelete = (promo) => {
   confirm.require({
-    message: `Delete "${promo.name}"? This cannot be undone.`,
-    header:  "Confirm delete",
+    message: t('promotions.confirm.deleteMessage', { name: promo.name }),
+    header:  t('promotions.confirm.deleteHeader'),
     acceptSeverity: "danger",
-    acceptLabel:    "Delete",
-    rejectLabel:    "Cancel",
+    acceptLabel:    t('promotions.confirm.deleteAccept'),
+    rejectLabel:    t('promotions.confirm.deleteReject'),
     accept: async () => {
       try {
         await deletePromotion(promo.id);
-        toast.add({ severity: "success", summary: "Deleted", detail: "Promotion deleted.", life: 3000 });
+        toast.add({ severity: "success", summary: t('promotions.toast.deleted'), life: 3000 });
         if (promotions.value.length === 1 && first.value > 0) {
           first.value = Math.max(0, first.value - rows.value);
         }
         await loadPromotions();
       } catch (err) {
         errorMessage.value =
-          err?.response?.data?.title || "Failed to delete promotion.";
+          err?.response?.data?.title || t('promotions.toast.deleteFailed');
       }
     },
   });
@@ -507,11 +506,11 @@ const handleDelete = (promo) => {
       <!-- Name -->
       <div class="tw:space-y-1.5">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-          Name <span class="tw:text-red-400">*</span>
+          {{ t('promotions.form.name') }} <span class="tw:text-red-400">*</span>
         </label>
         <prime-input-text
           v-model="fName"
-          placeholder="e.g. Summer sale 20%…"
+          :placeholder="t('promotions.form.namePlaceholder')"
           class="app-input tw:w-full"
         />
       </div>
@@ -520,18 +519,18 @@ const handleDelete = (promo) => {
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Promo code
-            <span class="tw:normal-case tw:opacity-60">(blank = auto-generate)</span>
+            {{ t('promotions.form.code') }}
+            <span class="tw:normal-case tw:opacity-60">{{ t('promotions.form.codeHint') }}</span>
           </label>
           <prime-input-text
             v-model="fCode"
-            placeholder="SUMMER20"
+            :placeholder="t('promotions.form.codePlaceholder')"
             class="app-input tw:w-full tw:uppercase"
           />
         </div>
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Visibility
+            {{ t('promotions.form.visibility') }}
           </label>
           <prime-select
             v-model="fCodeVisibility"
@@ -560,7 +559,7 @@ const handleDelete = (promo) => {
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Discount type
+            {{ t('promotions.form.discountType') }}
           </label>
           <prime-select
             v-model="fDiscountType"
@@ -585,7 +584,7 @@ const handleDelete = (promo) => {
         </div>
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Scope
+            {{ t('promotions.form.scope') }}
           </label>
           <prime-select
             v-model="fScope"
@@ -613,7 +612,7 @@ const handleDelete = (promo) => {
       <!-- Discount value (conditional) -->
       <div v-if="!isBuyXGetY" class="tw:space-y-1.5">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-          Discount value <span class="tw:text-red-400">*</span>
+          {{ t('promotions.form.discountValue') }} <span class="tw:text-red-400">*</span>
           <span class="tw:normal-case tw:opacity-60">
             {{ fDiscountType === 'PERCENTAGE' ? '(%)' : '(₫)' }}
           </span>
@@ -634,15 +633,15 @@ const handleDelete = (promo) => {
       <!-- Max discount amount (only for PERCENTAGE) -->
       <div v-if="isPercentage" class="tw:space-y-1.5">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-          Max discount amount
-          <span class="tw:normal-case tw:opacity-60">(blank = no cap)</span>
+          {{ t('promotions.form.maxDiscountAmount') }}
+          <span class="tw:normal-case tw:opacity-60">{{ t('promotions.form.maxDiscountAmountHint') }}</span>
         </label>
         <prime-input-number
           v-model="fMaxDiscountAmount"
           :min="0"
           :use-grouping="true"
           suffix=" ₫"
-          placeholder="No cap"
+          :placeholder="t('promotions.form.noCap')"
           class="app-input tw:w-full"
           @input="(e) => (fMaxDiscountAmount = e.value)"
         />
@@ -652,7 +651,7 @@ const handleDelete = (promo) => {
       <div v-if="isBuyXGetY" class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Buy quantity <span class="tw:text-red-400">*</span>
+            {{ t('promotions.form.buyQuantity') }} <span class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
             v-model="fBuyQuantity"
@@ -664,7 +663,7 @@ const handleDelete = (promo) => {
         </div>
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Get quantity <span class="tw:text-red-400">*</span>
+            {{ t('promotions.form.getQuantity') }} <span class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
             v-model="fGetQuantity"
@@ -679,13 +678,13 @@ const handleDelete = (promo) => {
       <!-- Applicable products (only for PRODUCT scope) -->
       <div v-show="isProductScope" class="tw:space-y-1.5">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-          Applicable products
+          {{ t('promotions.form.applicableProducts') }}
         </label>
         <prime-tree-select
           v-model="fApplicableProductTree"
           :options="productTreeNodes"
           selection-mode="checkbox"
-          placeholder="Select products…"
+          :placeholder="t('promotions.form.selectProducts')"
           class="app-input tw:w-full"
         />
       </div>
@@ -693,14 +692,14 @@ const handleDelete = (promo) => {
       <!-- Applicable categories (only for CATEGORY scope) -->
       <div v-if="isCategoryScope" class="tw:space-y-1.5">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-          Applicable categories
+          {{ t('promotions.form.applicableCategories') }}
         </label>
         <prime-multi-select
           v-model="fApplicableCategoryIds"
           :options="categoryOptions"
           option-label="name"
           option-value="id"
-          placeholder="Select categories…"
+          :placeholder="t('promotions.form.selectCategories')"
           filter
           display="chip"
           class="app-input tw:w-full"
@@ -711,7 +710,7 @@ const handleDelete = (promo) => {
       <div v-if="isBuyXGetY" class="tw:space-y-3">
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Free item (Y) is
+            {{ t('promotions.form.freeItem') }}
           </label>
           <prime-select-button
             v-model="fGiftSource"
@@ -733,26 +732,26 @@ const handleDelete = (promo) => {
         <template v-if="fGiftSource === 'SEPARATE'">
           <div class="tw:space-y-1.5">
             <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-              Free item from products
+              {{ t('promotions.form.freeItemFromProducts') }}
             </label>
             <prime-tree-select
               v-model="fGetFromProductTree"
               :options="productTreeNodes"
               selection-mode="checkbox"
-              placeholder="Select products…"
+              :placeholder="t('promotions.form.selectProducts')"
               class="app-input tw:w-full"
             />
           </div>
           <div class="tw:space-y-1.5">
             <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-              Free item from categories
+              {{ t('promotions.form.freeItemFromCategories') }}
             </label>
             <prime-multi-select
               v-model="fGetFromCategoryIds"
               :options="categoryOptions"
               option-label="name"
               option-value="id"
-              placeholder="Select categories…"
+              :placeholder="t('promotions.form.selectCategories')"
               filter
               display="chip"
               class="app-input tw:w-full"
@@ -765,27 +764,27 @@ const handleDelete = (promo) => {
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Min order amount
+            {{ t('promotions.form.minOrderAmount') }}
           </label>
           <prime-input-number
             v-model="fMinOrderAmount"
             :min="0"
             :use-grouping="true"
             suffix=" ₫"
-            placeholder="No minimum"
+            :placeholder="t('promotions.form.noMinimum')"
             class="app-input tw:w-full"
             @input="(e) => (fMinOrderAmount = e.value)"
           />
         </div>
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Max usage
-            <span class="tw:normal-case tw:opacity-60">(blank = unlimited)</span>
+            {{ t('promotions.form.maxUsage') }}
+            <span class="tw:normal-case tw:opacity-60">{{ t('promotions.form.maxUsageHint') }}</span>
           </label>
           <prime-input-number
             v-model="fMaxUsage"
             :min="1"
-            placeholder="Unlimited"
+            :placeholder="t('promotions.form.unlimited')"
             class="app-input tw:w-full"
             @input="(e) => (fMaxUsage = e.value)"
           />
@@ -796,7 +795,7 @@ const handleDelete = (promo) => {
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            Start date <span class="tw:text-red-400">*</span>
+            {{ t('promotions.form.startDate') }} <span class="tw:text-red-400">*</span>
           </label>
           <prime-date-picker
             v-model="fStartDate"
@@ -807,8 +806,8 @@ const handleDelete = (promo) => {
         </div>
         <div class="tw:space-y-1.5">
           <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-            End date
-            <span class="tw:normal-case tw:opacity-60">(blank = no expiry)</span>
+            {{ t('promotions.form.endDate') }}
+            <span class="tw:normal-case tw:opacity-60">{{ t('promotions.form.endDateHint') }}</span>
           </label>
           <prime-date-picker
             v-model="fEndDate"
@@ -822,12 +821,12 @@ const handleDelete = (promo) => {
       <!-- Description -->
       <div class="tw:space-y-1.5">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-          Description
+          {{ t('promotions.form.description') }}
         </label>
         <prime-textarea
           v-model="fDescription"
           :rows="2"
-          placeholder="Optional description…"
+          :placeholder="t('promotions.form.descriptionPlaceholder')"
           class="app-input tw:w-full"
           auto-resize
         />
@@ -836,7 +835,7 @@ const handleDelete = (promo) => {
       <!-- Active toggle (edit only) -->
       <div v-if="isEditMode" class="tw:flex tw:items-center tw:justify-between">
         <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
-          Active
+          {{ t('promotions.form.activeLabel') }}
         </label>
         <prime-toggle-switch v-model="fIsActive" />
       </div>
@@ -846,7 +845,7 @@ const handleDelete = (promo) => {
 
     <template #footer>
       <prime-button severity="secondary" outlined @click="dialogVisible = false">
-        Cancel
+        {{ t('common.cancel') }}
       </prime-button>
       <prime-button
         :severity="isEditMode ? 'primary' : 'success'"
@@ -854,7 +853,7 @@ const handleDelete = (promo) => {
         @click="submitForm"
       >
         <iconify :icon="isEditMode ? 'ph:check-bold' : 'ph:plus-bold'" />
-        <span>{{ isEditMode ? "Save changes" : "Add promotion" }}</span>
+        <span>{{ isEditMode ? t('promotions.form.saveChanges') : t('promotions.form.addPromotion') }}</span>
       </prime-button>
     </template>
   </prime-dialog>
@@ -864,12 +863,10 @@ const handleDelete = (promo) => {
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
         <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
-          Operations
+          {{ t('promotions.breadcrumb') }}
         </p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Promotions</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
-          Manage discount codes and promotional campaigns.
-        </p>
+        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('promotions.title') }}</h1>
+        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('promotions.subtitle') }}</p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
         <prime-button
@@ -880,11 +877,11 @@ const handleDelete = (promo) => {
           @click="loadPromotions"
         >
           <iconify icon="ph:arrows-clockwise-bold" class="tw:mr-1" />
-          <span>Refresh</span>
+          <span>{{ t('promotions.refresh') }}</span>
         </prime-button>
         <prime-button severity="success" size="small" @click="openCreateDialog">
           <iconify icon="ph:plus-bold" class="tw:mr-1" />
-          <span>New promotion</span>
+          <span>{{ t('promotions.newPromotion') }}</span>
         </prime-button>
       </div>
     </div>
@@ -917,7 +914,7 @@ const handleDelete = (promo) => {
           <prime-button
             :severity="hasActiveFilters ? 'success' : 'secondary'"
             :outlined="!hasActiveFilters"
-            v-tooltip.top="'Filters'"
+            v-tooltip.top="t('promotions.filter.filtersTooltip')"
             @click="filterPanel.toggle($event)"
             :class="btnIcon"
           >
@@ -935,17 +932,17 @@ const handleDelete = (promo) => {
           <!-- Filter popover -->
           <prime-popover ref="filterPanel">
             <div class="tw:flex tw:flex-col tw:gap-4 tw:w-60">
-              <p class="tw:text-sm tw:font-semibold">Filter promotions</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('promotions.filter.title') }}</p>
 
               <!-- Status -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Status</label>
+                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('promotions.filter.status') }}</label>
                 <prime-select
                   v-model="isActiveFilter"
-                  :options="[{ label: 'Active', value: true }, { label: 'Inactive', value: false }]"
+                  :options="[{ label: t('promotions.tag.active'), value: true }, { label: t('promotions.tag.inactive'), value: false }]"
                   option-label="label"
                   option-value="value"
-                  placeholder="All"
+                  :placeholder="t('promotions.filter.allStatuses')"
                   show-clear
                   class="app-input tw:w-full"
                 />
@@ -953,13 +950,13 @@ const handleDelete = (promo) => {
 
               <!-- Discount type -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Discount type</label>
+                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('promotions.filter.discountType') }}</label>
                 <prime-select
                   v-model="discountTypeFilter"
                   :options="PROMOTION_DISCOUNT_TYPE_OPTIONS"
                   option-label="label"
                   option-value="value"
-                  placeholder="All types"
+                  :placeholder="t('promotions.filter.allTypes')"
                   show-clear
                   class="app-input tw:w-full"
                 >
@@ -974,13 +971,13 @@ const handleDelete = (promo) => {
 
               <!-- Scope -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Scope</label>
+                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('promotions.filter.scope') }}</label>
                 <prime-select
                   v-model="scopeFilter"
                   :options="PROMOTION_SCOPE_OPTIONS"
                   option-label="label"
                   option-value="value"
-                  placeholder="All scopes"
+                  :placeholder="t('promotions.filter.allScopes')"
                   show-clear
                   class="app-input tw:w-full"
                 >
@@ -1001,7 +998,7 @@ const handleDelete = (promo) => {
                 @click="clearFilters"
               >
                 <iconify icon="ph:x-bold" />
-                <span>Clear filters</span>
+                <span>{{ t('promotions.filter.clearFilters') }}</span>
               </prime-button>
             </div>
           </prime-popover>
@@ -1013,7 +1010,7 @@ const handleDelete = (promo) => {
           <div class="tw:flex tw:items-start tw:justify-between tw:gap-1">
             <span class="tw:font-semibold tw:text-sm tw:leading-snug">{{ data.name }}</span>
             <prime-tag
-              :value="data.isActive ? 'Active' : 'Inactive'"
+              :value="data.isActive ? t('promotions.tag.active') : t('promotions.tag.inactive')"
               :severity="data.isActive ? 'success' : 'danger'"
               class="tw:text-[11px]! tw:px-1.5! tw:py-0.5! tw:flex-shrink-0"
             />
@@ -1108,7 +1105,7 @@ const handleDelete = (promo) => {
             severity="secondary"
             outlined
             size="small"
-            v-tooltip.top="'Edit'"
+            v-tooltip.top="t('common.edit')"
             :class="btnIcon"
             @click="openEditDialog(data)"
           >
@@ -1118,7 +1115,7 @@ const handleDelete = (promo) => {
             severity="danger"
             outlined
             size="small"
-            v-tooltip.top="'Delete'"
+            v-tooltip.top="t('common.delete')"
             :class="btnIcon"
             @click="handleDelete(data)"
           >
@@ -1140,7 +1137,7 @@ const handleDelete = (promo) => {
           <span class="tw:font-medium">{{ drawerPromo?.name }}</span>
           <prime-tag
             v-if="drawerPromo"
-            :value="drawerPromo.isActive ? 'Active' : 'Inactive'"
+            :value="drawerPromo.isActive ? t('promotions.tag.active') : t('promotions.tag.inactive')"
             :severity="drawerPromo.isActive ? 'success' : 'danger'"
             class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
           />
@@ -1148,7 +1145,7 @@ const handleDelete = (promo) => {
       </template>
       <div v-if="drawerPromo" class="tw:flex tw:flex-col tw:gap-2 tw:pb-4">
         <prime-button
-          :label="drawerPromo.isActive ? 'Deactivate' : 'Activate'"
+          :label="drawerPromo.isActive ? t('promotions.drawer.deactivate') : t('promotions.drawer.activate')"
           :severity="drawerPromo.isActive ? 'danger' : 'success'"
           outlined fluid
           :loading="togglingId === drawerPromo.id"
@@ -1158,10 +1155,10 @@ const handleDelete = (promo) => {
             <iconify :icon="drawerPromo.isActive ? 'ph:toggle-left-bold' : 'ph:toggle-right-bold'" />
           </template>
         </prime-button>
-        <prime-button label="Edit" severity="secondary" outlined fluid @click="openEditDialog(drawerPromo); drawerVisible = false">
+        <prime-button :label="t('common.edit')" severity="secondary" outlined fluid @click="openEditDialog(drawerPromo); drawerVisible = false">
           <template #icon><iconify icon="ph:pencil-bold" /></template>
         </prime-button>
-        <prime-button label="Delete" severity="danger" outlined fluid @click="handleDelete(drawerPromo); drawerVisible = false">
+        <prime-button :label="t('common.delete')" severity="danger" outlined fluid @click="handleDelete(drawerPromo); drawerVisible = false">
           <template #icon><iconify icon="ph:trash-bold" /></template>
         </prime-button>
       </div>
