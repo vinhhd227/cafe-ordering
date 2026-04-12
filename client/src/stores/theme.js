@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 
 export const useThemeStore = defineStore("theme", {
   state: () => ({
-    isDark: true,
+    isDark: false,
     initialized: false,
   }),
   actions: {
@@ -17,8 +17,8 @@ export const useThemeStore = defineStore("theme", {
     init() {
       if (this.initialized) return;
       const savedTheme = localStorage.getItem("theme");
-      // Default to dark if no saved preference
-      this.applyTheme(savedTheme ? savedTheme === "dark" : true);
+      // Default to light if no saved preference
+      this.applyTheme(savedTheme ? savedTheme === "dark" : false);
       this.initialized = true;
     },
   },

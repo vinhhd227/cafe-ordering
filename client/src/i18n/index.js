@@ -2,7 +2,7 @@ import { createI18n } from 'vue-i18n'
 import en from './locales/en.json'
 import vi from './locales/vi.json'
 
-const savedLocale = localStorage.getItem('locale') ?? 'en'
+const savedLocale = localStorage.getItem('locale') ?? 'vi'
 
 export const i18n = createI18n({
   legacy: false,
