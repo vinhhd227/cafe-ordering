@@ -6,13 +6,17 @@ namespace Api.Core.Aggregates.PromotionAggregate.Specifications;
 /// </summary>
 public class PublicActivePromotionsSpec : Specification<Promotion>
 {
-  public PublicActivePromotionsSpec(DateTime utcNow) =>
+  public PublicActivePromotionsSpec(DateTime utcNow)
+  {
+    // Must capture as local variable — EF Core cannot translate static SmartEnum field access
+    var publicVisibility = CodeVisibility.Public;
     Query
       .Where(p => !p.IsDeleted
                && p.IsActive
-               && p.CodeVisibility == CodeVisibility.Public
+               && p.CodeVisibility == publicVisibility
                && p.StartDate <= utcNow
                && (p.EndDate == null || p.EndDate >= utcNow)
                && (p.MaxUsage == null || p.CurrentUsage < p.MaxUsage))
       .OrderBy(p => p.Name);
+  }
 }
