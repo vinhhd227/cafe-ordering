@@ -21,7 +21,7 @@
     --app-bg: #0b1119;
     --app-surface: #0f1622;
     --app-surface-muted: #0c141f;
-    --app-panel-bg: rgba(15, 22, 34, 0.85);
+    --app-panel-bg: rgba(255, 255, 255, 0.05);
 
     --app-header-bg: rgba(15, 22, 34, 0.65);
     --app-sidebar-bg: rgba(12, 18, 28, 0.88);
@@ -44,6 +44,8 @@
 .app-panel {
     background: var(--app-panel-bg);
     border-color: var(--app-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .app-card {
