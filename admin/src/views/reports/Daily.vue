@@ -216,14 +216,87 @@ const categoryColor = (idx) => CATEGORY_COLORS[idx % CATEGORY_COLORS.length]
 
 
 // ── Export actions ────────────────────────────────────────────────────
+const exportCsv = () => {
+  const dateStr = toApiDate(selectedDate.value)
+  const rows = filteredOrders.value
+
+  const headers = [
+    'ID',
+    t('report.daily.ordersTable.colTime'),
+    t('report.daily.ordersTable.colTable'),
+    t('report.daily.ordersTable.colItems'),
+    t('report.daily.ordersTable.colAmount'),
+    t('report.daily.ordersTable.colPayment'),
+    t('report.daily.ordersTable.colStatus'),
+  ]
+
+  const csvRows = rows.map(o => [
+    o.orderId,
+    fmtTime(o.createdAt),
+    o.tableNumber != null ? t('report.daily.tableNum', { n: o.tableNumber }) : '',
+    o.items.map(i => `${i.name} x${i.quantity}`).join('; '),
+    o.totalAmount,
+    paymentBadge(o.paymentMethod).label,
+    statusBadge(o.status).label,
+  ])
+
+  const csvContent = [headers, ...csvRows]
+    .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `bao-cao-ngay-${dateStr}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+const reportSection = ref(null)
+const exporting = ref(false)
+
+const exportPdf = async () => {
+  if (!reportSection.value) return
+  exporting.value = true
+  try {
+    const { toPng } = await import('html-to-image')
+    const { jsPDF } = await import('jspdf')
+    const el = reportSection.value
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--app-bg').trim() || '#ffffff'
+    const pad = 24
+    const dataUrl = await toPng(el, {
+      pixelRatio: 2,
+      backgroundColor: bg,
+      width: el.offsetWidth + pad * 2,
+      height: el.offsetHeight + pad * 2,
+      style: { padding: `${pad}px` },
+    })
+    const img = new Image()
+    img.src = dataUrl
+    await new Promise(r => { img.onload = r })
+    const pw = img.naturalWidth / 2
+    const ph = img.naturalHeight / 2
+    const pdf = new jsPDF({
+      orientation: pw > ph ? 'landscape' : 'portrait',
+      unit: 'px',
+      format: [pw, ph],
+    })
+    pdf.addImage(dataUrl, 'PNG', 0, 0, pw, ph)
+    pdf.save(`bao-cao-ngay-${toApiDate(selectedDate.value)}.pdf`)
+  } finally {
+    exporting.value = false
+  }
+}
+
 const exportItems = computed(() => [
-  { label: t('report.daily.actions.exportCsv'), command: () => {} },
-  { label: t('report.daily.actions.exportPdf'), command: () => {} },
+  { label: t('report.daily.actions.exportCsv'), command: exportCsv },
+  { label: t('report.daily.actions.exportPdf'), command: exportPdf },
 ])
 </script>
 
 <template>
-  <section class="tw:space-y-6">
+  <section ref="reportSection" class="tw:space-y-6">
 
     <!-- ── Header ──────────────────────────────────────────────────── -->
     <div>
@@ -276,6 +349,7 @@ const exportItems = computed(() => [
           class="tw:h-8!"
           :label="t('report.daily.actions.export')"
           :model="exportItems"
+          :loading="exporting"
           severity="secondary"
           outlined
           size="small"
