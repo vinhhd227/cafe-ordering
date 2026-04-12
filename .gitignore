@@ -118,3 +118,4 @@ docs/raw/
 docs/outputs/
 !docs/raw/.gitkeep
 !docs/outputs/.gitkeep
+tmp-*.txt
