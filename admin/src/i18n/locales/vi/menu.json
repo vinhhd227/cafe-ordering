@@ -1,0 +1,17 @@
+{
+  "menu": {
+    "title": "Menu builder",
+    "subtitle": "Kích hoạt hoặc ẩn danh mục và sản phẩm.",
+    "breadcrumb": "Vận hành",
+    "refresh": "Làm mới",
+    "stats": {
+      "categories": "Danh mục",
+      "categoriesActive": "{active} / {total} đang mở",
+      "products": "Sản phẩm",
+      "productsActive": "{active} / {total} đang phục vụ",
+      "noImage": "Chưa có ảnh",
+      "noImageHint": "sản phẩm thiếu hình"
+    },
+    "emptyCategory": "Danh mục này chưa có sản phẩm."
+  }
+}

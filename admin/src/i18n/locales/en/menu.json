@@ -1,0 +1,17 @@
+{
+  "menu": {
+    "title": "Menu builder",
+    "subtitle": "Activate or deactivate categories and products at a glance.",
+    "breadcrumb": "Operations",
+    "refresh": "Refresh",
+    "stats": {
+      "categories": "Categories",
+      "categoriesActive": "{active} / {total} active",
+      "products": "Products",
+      "productsActive": "{active} / {total} serving",
+      "noImage": "No image",
+      "noImageHint": "products missing photo"
+    },
+    "emptyCategory": "No products in this category."
+  }
+}

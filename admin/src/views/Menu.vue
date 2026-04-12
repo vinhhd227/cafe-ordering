@@ -1,8 +1,11 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { getAdminMenu } from "@/services/menu.service";
 import { toggleCategoryActive } from "@/services/category.service";
 import { toggleProductActive } from "@/services/product.service";
+
+const { t } = useI18n();
 
 // ── State ──────────────────────────────────────────────────────────
 const menuData = ref([]);
@@ -13,18 +16,24 @@ const openPanels = ref([]);
 
 // ── Computed stats ─────────────────────────────────────────────────
 const stats = computed(() => {
+  let activeCategories = 0;
   let activeProducts = 0;
-  let inactiveProducts = 0;
+  let totalProducts = 0;
+  let noImageProducts = 0;
   for (const cat of menuData.value) {
+    if (cat.isActive) activeCategories++;
     for (const p of cat.products) {
+      totalProducts++;
       if (p.isActive) activeProducts++;
-      else inactiveProducts++;
+      if (!p.imageUrl) noImageProducts++;
     }
   }
   return {
     totalCategories: menuData.value.length,
+    activeCategories,
     activeProducts,
-    inactiveProducts,
+    totalProducts,
+    noImageProducts,
   };
 });
 
@@ -129,40 +138,61 @@ const toggleProduct = async (product) => {
     </div>
 
     <!-- ── Summary Stats ──────────────────────────────────────────── -->
-    <div class="tw:grid tw:grid-cols-3 tw:gap-3">
-      <prime-card class="app-card tw:rounded-xl tw:border">
+    <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-3 tw:gap-3">
+      <!-- Card 1: Danh mục -->
+      <prime-card :pt="{ root: { class: [appCard, 'tw:rounded-xl!'] } }">
         <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle"
-          >
-            Categories
+          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle">
+            {{ t('menu.stats.categories') }}
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ stats.totalCategories }}
+            {{ stats.activeCategories }}
+            <span class="tw:text-base tw:font-normal app-text-muted">/ {{ stats.totalCategories }}</span>
+          </p>
+          <p class="tw:mt-1 tw:text-xs app-text-muted">
+            {{ t('menu.stats.categoriesActive', { active: stats.activeCategories, total: stats.totalCategories }) }}
           </p>
         </template>
       </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
+
+      <!-- Card 2: Sản phẩm + progress bar -->
+      <prime-card :pt="{ root: { class: [appCard, 'tw:rounded-xl!'] } }">
         <template #content>
-          <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400"
-          >
-            Active products
+          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400">
+            {{ t('menu.stats.products') }}
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
             {{ stats.activeProducts }}
+            <span class="tw:text-base tw:font-normal app-text-muted">/ {{ stats.totalProducts }}</span>
+          </p>
+          <div class="tw:mt-2 tw:h-1.5 tw:rounded-full tw:bg-white/10 tw:overflow-hidden">
+            <div
+              class="tw:h-full tw:rounded-full tw:bg-emerald-400 tw:transition-all"
+              :style="{ width: stats.totalProducts ? `${Math.round(stats.activeProducts / stats.totalProducts * 100)}%` : '0%' }"
+            />
+          </div>
+          <p class="tw:mt-1 tw:text-xs app-text-muted">
+            {{ t('menu.stats.productsActive', { active: stats.activeProducts, total: stats.totalProducts }) }}
           </p>
         </template>
       </prime-card>
-      <prime-card class="app-card tw:rounded-xl tw:border">
+
+      <!-- Card 3: Chưa có ảnh -->
+      <prime-card :pt="{ root: { class: [appCard, 'tw:rounded-xl!'] } }">
         <template #content>
           <p
-            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-red-400"
+            class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em]"
+            :class="stats.noImageProducts > 0 ? 'tw:text-amber-400' : 'app-text-subtle'"
           >
-            Inactive products
+            {{ t('menu.stats.noImage') }}
           </p>
-          <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
-            {{ stats.inactiveProducts }}
+          <p class="tw:mt-2 tw:text-2xl tw:font-semibold"
+            :class="stats.noImageProducts > 0 ? 'tw:text-amber-400' : ''"
+          >
+            {{ stats.noImageProducts }}
+          </p>
+          <p class="tw:mt-1 tw:text-xs app-text-muted">
+            {{ t('menu.stats.noImageHint') }}
           </p>
         </template>
       </prime-card>
@@ -216,11 +246,10 @@ const toggleProduct = async (product) => {
           v-for="cat in menuData"
           :key="cat.id"
           :value="String(cat.id)"
-          class="app-card tw:rounded-2xl tw:border tw:overflow-hidden tw:transition-opacity"
-          :class="{ 'tw:opacity-60': !cat.isActive }"
+          :pt="{ root: { class: [appCard, 'tw:rounded-2xl!', 'tw:overflow-hidden!', 'tw:transition-opacity!', { 'tw:opacity-60': !cat.isActive }] } }"
         >
           <!-- ── Category header ─────────────────────────────────── -->
-          <prime-accordion-header>
+          <prime-accordion-header :pt="{ root: { class: 'tw:bg-transparent!' } }">
             <div
               class="tw:flex tw:w-full tw:items-center tw:gap-3 tw:min-w-0 tw:py-0.5"
             >
@@ -271,7 +300,7 @@ const toggleProduct = async (product) => {
           </prime-accordion-header>
 
           <!-- ── Product grid ────────────────────────────────────── -->
-          <prime-accordion-content>
+          <prime-accordion-content :pt="{ content: { class: 'tw:bg-transparent!' } }">
             <div class="tw:px-4 tw:pb-4 tw:pt-2">
               <!-- Empty state -->
               <div
@@ -291,12 +320,8 @@ const toggleProduct = async (product) => {
                 <div
                   v-for="product in cat.products"
                   :key="product.id"
-                  class="tw:rounded-xl tw:border tw:p-3 tw:flex tw:flex-col tw:gap-2 tw:transition-opacity"
-                  :class="[
-                    product.isActive
-                      ? 'tw:border-white/10 tw:bg-white/5'
-                      : 'tw:border-white/5 tw:bg-white/2 tw:opacity-50',
-                  ]"
+                  class="tw:rounded-xl tw:border tw:p-3 tw:flex tw:flex-col tw:gap-2 tw:transition-opacity tw:border-white/10 tw:bg-white/5"
+                  :class="{ 'tw:opacity-50': !product.isActive }"
                 >
                   <!-- Image row + toggle -->
                   <div
