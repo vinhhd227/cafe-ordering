@@ -69,6 +69,7 @@ public class GetDailyOrdersHandler(
         items,
         totalAmount,
         paymentMethod,
+        o.PaymentStatus.Name.ToLowerInvariant(),
         o.Status.Name.ToLowerInvariant()
       );
     }).ToList();

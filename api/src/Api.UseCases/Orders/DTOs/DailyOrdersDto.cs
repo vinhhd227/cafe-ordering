@@ -9,6 +9,7 @@ public record DailyOrderDto(
   List<DailyOrderItemSnapshotDto> Items,
   decimal TotalAmount,
   string PaymentMethod,
+  string PaymentStatus,
   string Status
 );
 

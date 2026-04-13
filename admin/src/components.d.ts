@@ -15,6 +15,7 @@ declare module 'vue' {
     AppTable: typeof import('./components/AppTable.vue')['default']
     NotificationBell: typeof import('./components/NotificationBell.vue')['default']
     PageHeader: typeof import('./components/PageHeader.vue')['default']
+    PaymentQrCustomizer: typeof import('./components/PaymentQrCustomizer.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     WidgetOrdersRevenue: typeof import('./components/widgets/orders/WidgetOrdersRevenue.vue')['default']

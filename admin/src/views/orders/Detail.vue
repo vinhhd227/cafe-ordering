@@ -839,7 +839,7 @@ const confirmSplit = async () => {
       v-if="loading"
       class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3"
     >
-      <prime-card class="app-card tw:rounded-2xl tw:border">
+      <prime-card :class="[appCard, 'tw:rounded-2xl']">
         <template #content>
           <prime-skeleton
             v-for="i in 4"
@@ -849,7 +849,7 @@ const confirmSplit = async () => {
           />
         </template>
       </prime-card>
-      <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-2">
+      <prime-card :class="[appCard, 'tw:rounded-2xl tw:lg:col-span-2']">
         <template #content>
           <prime-skeleton
             v-for="i in 5"
@@ -866,7 +866,7 @@ const confirmSplit = async () => {
         <!-- Left: Info + Status actions -->
         <div class="tw:space-y-4">
           <!-- Order info card -->
-          <prime-card class="app-card tw:rounded-2xl tw:border">
+          <prime-card :class="[appCard, 'tw:rounded-2xl']">
             <template #content>
               <p class="tw:text-sm tw:font-semibold tw:mb-4">{{ t('orders.detail.info.title') }}</p>
               <div class="tw:space-y-3">
@@ -993,7 +993,7 @@ const confirmSplit = async () => {
           <!-- Status action card -->
           <prime-card
             v-if="order.status !== ORDER_STATUS.COMPLETED && order.status !== ORDER_STATUS.CANCELLED"
-            class="app-card tw:rounded-2xl tw:border"
+            :class="[appCard, 'tw:rounded-2xl']"
           >
             <template #content>
               <p class="tw:text-sm tw:font-semibold tw:mb-4">{{ t('orders.detail.actions.title') }}</p>
@@ -1059,7 +1059,7 @@ const confirmSplit = async () => {
             v-else-if="
               order.status === ORDER_STATUS.COMPLETED && order.paymentStatus === PAYMENT_STATUS.UNPAID
             "
-            class="app-card tw:rounded-2xl tw:border"
+            :class="[appCard, 'tw:rounded-2xl']"
           >
             <template #content>
               <p class="tw:text-sm tw:font-semibold tw:mb-4">{{ t('orders.detail.actions.title') }}</p>
@@ -1079,7 +1079,7 @@ const confirmSplit = async () => {
           <!-- Delete card (CANCELLED orders only) -->
           <prime-card
             v-if="order.status === ORDER_STATUS.CANCELLED && can('order.delete')"
-            class="app-card tw:rounded-2xl tw:border"
+            :class="[appCard, 'tw:rounded-2xl']"
           >
             <template #content>
               <prime-button
@@ -1099,7 +1099,7 @@ const confirmSplit = async () => {
         <!-- Right: Items + Payment -->
         <div class="tw:lg:col-span-2 tw:space-y-4">
           <!-- Items card -->
-          <prime-card class="app-card tw:rounded-2xl tw:border">
+          <prime-card :class="[appCard, 'tw:rounded-2xl']">
             <template #content>
               <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
                 <p class="tw:text-sm tw:font-semibold">
@@ -1277,7 +1277,7 @@ const confirmSplit = async () => {
           </prime-card>
 
           <!-- Payment card -->
-          <prime-card class="app-card tw:rounded-2xl tw:border">
+          <prime-card :class="[appCard, 'tw:rounded-2xl']">
             <template #content>
               <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
                 <p class="tw:text-sm tw:font-semibold">{{ t('orders.pay.title') }}</p>
@@ -1466,7 +1466,7 @@ const confirmSplit = async () => {
     </template>
 
     <!-- Not found -->
-    <prime-card v-else-if="!loading" class="app-card tw:rounded-2xl tw:border">
+    <prime-card v-else-if="!loading" :class="[appCard, 'tw:rounded-2xl']">
       <template #content>
         <div
           class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted"

@@ -174,8 +174,9 @@ const paymentFilterOptions = computed(() => [
 ])
 
 const filteredOrders = computed(() => {
-  if (!paymentFilter.value) return orders.value
-  return orders.value.filter(o => o.paymentMethod === paymentFilter.value)
+  let list = orders.value.filter(o => o.status !== 'cancelled' && o.paymentStatus !== 'unpaid')
+  if (paymentFilter.value) list = list.filter(o => o.paymentMethod === paymentFilter.value)
+  return list
 })
 
 const filteredTotal = computed(() => filteredOrders.value.reduce((s, o) => s + (o.totalAmount ?? 0), 0))
@@ -837,7 +838,7 @@ const exportItems = computed(() => [
         <template #footer>
           <div class="tw:flex tw:justify-between tw:items-center tw:text-xs app-text-muted tw:pt-1">
             <span>
-              {{ t('report.daily.ordersTable.showing', { shown: filteredOrders.length, total: orders.length }) }}
+              {{ t('report.daily.ordersTable.showing', { shown: filteredOrders.length, total: orders.filter(o => o.status !== 'cancelled' && o.paymentStatus !== 'unpaid').length }) }}
             </span>
             <span class="tw:font-semibold tw:text-sm tw:tabular-nums">
               {{ t('report.daily.ordersTable.total') }}: {{ fmt(filteredTotal) }}
