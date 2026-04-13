@@ -29,12 +29,12 @@ const search = ref("");
 const stats = ref({ total: 0 });
 
 // --- Column definitions ---
-const columns = [
-  { key: 'role',    header: 'Role',    width: '14rem' },
-  { key: 'users',   header: 'Users',   width: '7rem' },
-  { key: 'created', header: 'Created' },
-  { key: 'actions', header: 'Actions', width: '13rem', toggleable: false },
-];
+const columns = computed(() => [
+  { key: 'role',    header: t('roles.table.colRole'),    width: '14rem' },
+  { key: 'users',   header: t('roles.table.colUsers'),   width: '7rem' },
+  { key: 'created', header: t('roles.table.colCreated') },
+  { key: 'actions', header: t('roles.table.colActions'), width: '13rem', toggleable: false },
+]);
 
 // --- Dialog: Add Role ---
 const showAddDialog = ref(false);
@@ -77,14 +77,9 @@ const selectedCount = computed(
 
 // --- Helpers ---
 const groupLabel = (name) => {
-  const map = {
-    menu: "Menu",
-    order: "Orders",
-    product: "Products",
-    staff: "Staff",
-    table: "Tables",
-  };
-  return map[name] ?? name.charAt(0).toUpperCase() + name.slice(1);
+  const key = `roles.permissionGroups.${name}`
+  const translated = t(key)
+  return translated !== key ? translated : name.charAt(0).toUpperCase() + name.slice(1)
 };
 
 const groupIcon = (name) => {
@@ -134,7 +129,7 @@ const formatDate = (dateStr) =>
 const extractError = (err) =>
   err?.response?.data?.errors?.join("; ") ||
   err?.response?.data?.message ||
-  "Something went wrong.";
+  t('roles.errors.generic');
 
 // --- Data Loading ---
 const loadRoles = async (page = 1) => {
@@ -199,7 +194,7 @@ const openAddDialog = () => {
 
 const submitAddRole = async () => {
   if (!addForm.value.name.trim()) {
-    addError.value = "Role name is required.";
+    addError.value = t('roles.errors.roleNameRequired');
     return;
   }
   addLoading.value = true;
@@ -228,7 +223,7 @@ const openEditDialog = (role) => {
 
 const submitEditRole = async () => {
   if (!editForm.value.name.trim()) {
-    editError.value = "Role name is required.";
+    editError.value = t('roles.errors.roleNameRequired');
     return;
   }
   editLoading.value = true;
@@ -315,15 +310,15 @@ const savePermissions = async () => {
     if (affectsCurrentUser) {
       toast.add({
         severity: "warn",
-        summary: "Permissions updated",
-        detail: `Your role "${roleName}" was modified. Please log in again for changes to take effect.`,
+        summary: t('roles.toast.permissionsUpdated'),
+        detail: t('roles.toast.permissionsUpdatedDetailAffectsSelf', { name: roleName }),
         life: 8000,
       });
     } else {
       toast.add({
         severity: "success",
-        summary: "Permissions updated",
-        detail: `Permissions for "${roleName}" saved successfully.`,
+        summary: t('roles.toast.permissionsUpdated'),
+        detail: t('roles.toast.permissionsUpdatedDetail', { name: roleName }),
         life: 4000,
       });
     }
@@ -343,16 +338,16 @@ const savePermissions = async () => {
         <p
           class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
         >
-          Access control
+          {{ t('roles.breadcrumb') }}
         </p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Role management</h1>
+        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('roles.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm app-text-muted">
-          Define roles and control what users can access.
+          {{ t('roles.subtitle') }}
         </p>
       </div>
       <prime-button severity="success" size="small" @click="openAddDialog">
         <iconify icon="ph:shield-plus-bold" />
-        <span>Add role</span>
+        <span>{{ t('roles.addRole') }}</span>
       </prime-button>
     </div>
 
@@ -363,7 +358,7 @@ const savePermissions = async () => {
           <p
             class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] app-text-subtle"
           >
-            Total roles
+            {{ t('roles.stats.totalRoles') }}
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">{{ stats.total }}</p>
         </template>
@@ -394,7 +389,7 @@ const savePermissions = async () => {
       <template #toolbar-left>
         <prime-input-text
           v-model="search"
-          placeholder="Search roles…"
+          :placeholder="t('roles.table.searchPlaceholder')"
           class="app-input tw:w-64"
         />
       </template>
@@ -451,7 +446,7 @@ const savePermissions = async () => {
             severity="secondary"
             outlined
             size="small"
-            v-tooltip.top="'Permissions'"
+            v-tooltip.top="t('roles.tooltips.permissions')"
             @click="openPermissionsDialog(data)"
             :class="btnIcon"
           >
@@ -461,7 +456,7 @@ const savePermissions = async () => {
             severity="secondary"
             outlined
             size="small"
-            v-tooltip.top="'Edit'"
+            v-tooltip.top="t('roles.tooltips.edit')"
             @click="openEditDialog(data)"
             :class="btnIcon"
           >
@@ -471,7 +466,7 @@ const savePermissions = async () => {
             severity="danger"
             outlined
             size="small"
-            v-tooltip.top="'Delete'"
+            v-tooltip.top="t('roles.tooltips.delete')"
             @click="confirmDeleteRole = data"
             :class="btnIcon"
           >
@@ -494,13 +489,13 @@ const savePermissions = async () => {
         </div>
       </template>
       <div v-if="drawerRole" class="tw:flex tw:flex-col tw:gap-2 tw:pb-4">
-        <prime-button label="Permissions" severity="secondary" outlined fluid @click="openPermissionsDialog(drawerRole); drawerVisible = false">
+        <prime-button :label="t('roles.tooltips.permissions')" severity="secondary" outlined fluid @click="openPermissionsDialog(drawerRole); drawerVisible = false">
           <template #icon><iconify icon="ph:key-bold" /></template>
         </prime-button>
-        <prime-button label="Edit" severity="secondary" outlined fluid @click="openEditDialog(drawerRole); drawerVisible = false">
+        <prime-button :label="t('roles.tooltips.edit')" severity="secondary" outlined fluid @click="openEditDialog(drawerRole); drawerVisible = false">
           <template #icon><iconify icon="ph:pencil-bold" /></template>
         </prime-button>
-        <prime-button label="Delete" severity="danger" outlined fluid @click="confirmDeleteRole = drawerRole; drawerVisible = false">
+        <prime-button :label="t('roles.tooltips.delete')" severity="danger" outlined fluid @click="confirmDeleteRole = drawerRole; drawerVisible = false">
           <template #icon><iconify icon="ph:trash-bold" /></template>
         </prime-button>
       </div>
@@ -509,7 +504,7 @@ const savePermissions = async () => {
     <!-- ===== Add Role Dialog ===== -->
     <prime-dialog
       v-model:visible="showAddDialog"
-      header="Add role"
+      :header="t('roles.addDialog.header')"
       :modal="true"
       style="width: 26rem"
       :breakpoints="{ '640px': '95vw' }"
@@ -525,20 +520,20 @@ const savePermissions = async () => {
 
         <div class="tw:space-y-1">
           <label class="tw:text-sm tw:font-medium"
-            >Role name <span class="tw:text-red-400">*</span></label
+            >{{ t('roles.addDialog.roleName') }} <span class="tw:text-red-400">*</span></label
           >
           <prime-input-text
             v-model="addForm.name"
             class="app-input tw:w-full"
-            placeholder="e.g. Manager"
+            :placeholder="t('roles.addDialog.roleNamePlaceholder')"
           />
         </div>
         <div class="tw:space-y-1">
-          <label class="tw:text-sm tw:font-medium">Description</label>
+          <label class="tw:text-sm tw:font-medium">{{ t('roles.addDialog.description') }}</label>
           <prime-textarea
             v-model="addForm.description"
             class="app-input tw:w-full"
-            placeholder="Describe what this role can do…"
+            :placeholder="t('roles.addDialog.descriptionPlaceholder')"
             :rows="3"
             auto-resize
           />
@@ -553,7 +548,7 @@ const savePermissions = async () => {
           @click="showAddDialog = false"
         >
           <iconify icon="ph:x-bold" />
-          <span>Cancel</span>
+          <span>{{ t('common.cancel') }}</span>
         </prime-button>
         <prime-button
           severity="success"
@@ -562,7 +557,7 @@ const savePermissions = async () => {
           @click="submitAddRole"
         >
           <iconify icon="ph:shield-plus-bold" />
-          <span>Create</span>
+          <span>{{ t('roles.addDialog.create') }}</span>
         </prime-button>
       </template>
     </prime-dialog>
@@ -570,7 +565,7 @@ const savePermissions = async () => {
     <!-- ===== Edit Role Dialog ===== -->
     <prime-dialog
       v-model:visible="showEditDialog"
-      header="Edit role"
+      :header="t('roles.editDialog.header')"
       :modal="true"
       style="width: 26rem"
       :breakpoints="{ '640px': '95vw' }"
@@ -586,7 +581,7 @@ const savePermissions = async () => {
 
         <div class="tw:space-y-1">
           <label class="tw:text-sm tw:font-medium"
-            >Role name <span class="tw:text-red-400">*</span></label
+            >{{ t('roles.editDialog.roleName') }} <span class="tw:text-red-400">*</span></label
           >
           <prime-input-text
             v-model="editForm.name"
@@ -594,11 +589,11 @@ const savePermissions = async () => {
           />
         </div>
         <div class="tw:space-y-1">
-          <label class="tw:text-sm tw:font-medium">Description</label>
+          <label class="tw:text-sm tw:font-medium">{{ t('roles.editDialog.description') }}</label>
           <prime-textarea
             v-model="editForm.description"
             class="app-input tw:w-full"
-            placeholder="Describe what this role can do…"
+            :placeholder="t('roles.editDialog.descriptionPlaceholder')"
             :rows="3"
             auto-resize
           />
@@ -613,7 +608,7 @@ const savePermissions = async () => {
           @click="showEditDialog = false"
         >
           <iconify icon="ph:x-bold" />
-          <span>Cancel</span>
+          <span>{{ t('common.cancel') }}</span>
         </prime-button>
         <prime-button
           severity="success"
@@ -622,7 +617,7 @@ const savePermissions = async () => {
           @click="submitEditRole"
         >
           <iconify icon="ph:floppy-disk-bold" />
-          <span>Save</span>
+          <span>{{ t('roles.editDialog.save') }}</span>
         </prime-button>
       </template>
     </prime-dialog>
@@ -630,7 +625,7 @@ const savePermissions = async () => {
     <!-- ===== Delete Confirm Dialog ===== -->
     <prime-dialog
       :visible="!!confirmDeleteRole"
-      header="Delete role"
+      :header="t('roles.deleteDialog.header')"
       :modal="true"
       style="width: 24rem"
       :breakpoints="{ '640px': '95vw' }"
@@ -642,10 +637,7 @@ const savePermissions = async () => {
     >
       <div class="tw:pt-2">
         <p class="tw:text-sm app-text-muted">
-          Delete role
-          <strong class="tw:font-semibold">{{ confirmDeleteRole?.name }}</strong
-          >? This action cannot be undone. Users assigned this role will lose
-          its permissions.
+          {{ t('roles.deleteDialog.confirmText', { name: confirmDeleteRole?.name }) }}
         </p>
       </div>
 
@@ -657,7 +649,7 @@ const savePermissions = async () => {
           @click="confirmDeleteRole = null"
         >
           <iconify icon="ph:x-bold" />
-          <span>Cancel</span>
+          <span>{{ t('common.cancel') }}</span>
         </prime-button>
         <prime-button
           severity="danger"
@@ -666,7 +658,7 @@ const savePermissions = async () => {
           @click="confirmAndDelete"
         >
           <iconify icon="ph:trash-bold" />
-          <span>Delete</span>
+          <span>{{ t('roles.deleteDialog.delete') }}</span>
         </prime-button>
       </template>
     </prime-dialog>
@@ -674,7 +666,7 @@ const savePermissions = async () => {
     <!-- ===== Permissions Dialog ===== -->
     <prime-dialog
       v-model:visible="showPermissionsDialog"
-      :header="`Permissions — ${permissionsRole?.name ?? ''}`"
+      :header="t('roles.permissionsDialog.header', { name: permissionsRole?.name ?? '' })"
       :modal="true"
       style="width: 60rem"
       :breakpoints="{ '1280px': '90vw', '960px': '90vw', '640px': '95vw' }"
@@ -767,10 +759,7 @@ const savePermissions = async () => {
           <div
             class="tw:flex tw:items-center tw:justify-between tw:text-sm app-text-muted"
           >
-            <span>
-              <strong class="tw:text-emerald-400">{{ selectedCount }}</strong>
-              of {{ permissions.length }} permissions selected
-            </span>
+            <span>{{ t('roles.permissionsDialog.selectedSummary', { selected: selectedCount, total: permissions.length }) }}</span>
             <prime-button
               v-if="selectedCount > 0"
               severity="secondary"
@@ -782,7 +771,7 @@ const savePermissions = async () => {
                 })
               "
             >
-              Clear all
+              {{ t('roles.permissionsDialog.clearAll') }}
             </prime-button>
           </div>
         </template>
@@ -796,7 +785,7 @@ const savePermissions = async () => {
           @click="showPermissionsDialog = false"
         >
           <iconify icon="ph:x-bold" />
-          <span>Cancel</span>
+          <span>{{ t('common.cancel') }}</span>
         </prime-button>
         <prime-button
           severity="success"
@@ -806,7 +795,7 @@ const savePermissions = async () => {
           @click="savePermissions"
         >
           <iconify icon="ph:floppy-disk-bold" />
-          <span>Save permissions</span>
+          <span>{{ t('roles.permissionsDialog.save') }}</span>
         </prime-button>
       </template>
     </prime-dialog>

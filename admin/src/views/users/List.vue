@@ -61,10 +61,10 @@ const roleFilterOptions = [
   { label: 'Staff', value: 'Staff' },
 ]
 
-const statusFilterOptions = [
-  { label: 'Active',   value: true  },
-  { label: 'Inactive', value: false },
-]
+const statusFilterOptions = computed(() => [
+  { label: t('users.filter.statusActive'),   value: true  },
+  { label: t('users.filter.statusInactive'), value: false },
+])
 
 const roleSelectOptions = [
   { label: 'Admin', value: 'Admin' },
@@ -93,7 +93,7 @@ const initials = (fullName) =>
 const extractError = (err) =>
   err?.response?.data?.errors?.join('; ') ||
   err?.response?.data?.message ||
-  'Something went wrong.'
+  t('users.errors.generic')
 
 // --- Data Loading ---
 const loadUsers = async (page = 1) => {
@@ -244,22 +244,22 @@ const confirmAndDeactivate = async () => {
 // ── Widget visibility ──────────────────────────────────────────────
 const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('users', [
-    { id: 'total',  label: 'Total users', preview: '24', description: 'Tổng số tài khoản đã được tạo trong hệ thống.' },
-    { id: 'active', label: 'Active',      preview: '20', description: 'Tài khoản đang hoạt động, có thể đăng nhập.', labelClass: 'tw:text-emerald-400' },
-    { id: 'admins', label: 'Admins',      preview: '3',  description: 'Tài khoản có quyền quản trị toàn hệ thống.', labelClass: 'tw:text-red-400' },
-    { id: 'staff',  label: 'Staff',       preview: '17', description: 'Nhân viên phục vụ, có quyền xử lý đơn hàng.', labelClass: 'tw:text-blue-400' },
+    { id: 'total',  label: t('users.widgets.totalUsers.label'), preview: '24', description: t('users.widgets.totalUsers.description') },
+    { id: 'active', label: t('users.widgets.active.label'),     preview: '20', description: t('users.widgets.active.description'),     labelClass: 'tw:text-emerald-400' },
+    { id: 'admins', label: t('users.widgets.admins.label'),     preview: '3',  description: t('users.widgets.admins.description'),     labelClass: 'tw:text-red-400' },
+    { id: 'staff',  label: t('users.widgets.staff.label'),      preview: '17', description: t('users.widgets.staff.description'),      labelClass: 'tw:text-blue-400' },
   ], { defaultCols: 4 })
 const W_COLS_CLASS = { 1: 'tw:grid-cols-1', 2: 'tw:grid-cols-2', 3: 'tw:grid-cols-3', 4: 'tw:grid-cols-4' }
 const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
 
-const columns = [
-  { key: 'user',        header: 'User',    width: '14rem' },
-  { field: 'email',     header: 'Email' },
-  { field: 'roles',     header: 'Role',    width: '8rem' },
-  { field: 'isActive',  header: 'Status' },
-  { field: 'createdAt', header: 'Created' },
-  { key: 'actions',     header: 'Actions', width: '8rem', toggleable: false },
-]
+const columns = computed(() => [
+  { key: 'user',        header: t('users.table.colUser'),    width: '14rem' },
+  { field: 'email',     header: t('users.table.colEmail') },
+  { field: 'roles',     header: t('users.table.colRole'),    width: '8rem' },
+  { field: 'isActive',  header: t('users.table.colStatus') },
+  { field: 'createdAt', header: t('users.table.colCreated') },
+  { key: 'actions',     header: t('users.table.colActions'), width: '8rem', toggleable: false },
+])
 
 // ── Mobile drawer ──────────────────────────────────────────────
 const drawerUser = ref(null);
@@ -273,10 +273,10 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
     <!-- ── Page Header ───────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">Users</p>
-        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">User management</h1>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('users.breadcrumb') }}</p>
+        <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('users.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm app-text-muted">
-          Maintain access, roles, and account status.
+          {{ t('users.subtitle') }}
         </p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
@@ -294,17 +294,17 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           @click="openAddDialog"
         >
           <iconify icon="ph:user-plus-bold" />
-          <span>Add user</span>
+          <span>{{ t('users.addUser') }}</span>
         </prime-button>
       </div>
     </div>
 
     <!-- ── Summary Stats ─────────────────────────────────────────── -->
     <div :class="['tw:grid tw:gap-3', wColsClass]">
-      <widget-stat v-if="wVisible('total')"  label="Total users" :value="stats.total" />
-      <widget-stat v-if="wVisible('active')" label="Active"      :value="stats.active" label-class="tw:text-emerald-400" />
-      <widget-stat v-if="wVisible('admins')" label="Admins"      :value="stats.admins" label-class="tw:text-red-400" />
-      <widget-stat v-if="wVisible('staff')"  label="Staff"       :value="stats.staff"  label-class="tw:text-blue-400" />
+      <widget-stat v-if="wVisible('total')"  :label="t('users.widgets.totalUsers.label')" :value="stats.total" />
+      <widget-stat v-if="wVisible('active')" :label="t('users.widgets.active.label')"     :value="stats.active" label-class="tw:text-emerald-400" />
+      <widget-stat v-if="wVisible('admins')" :label="t('users.widgets.admins.label')"     :value="stats.admins" label-class="tw:text-red-400" />
+      <widget-stat v-if="wVisible('staff')"  :label="t('users.widgets.staff.label')"      :value="stats.staff"  label-class="tw:text-blue-400" />
     </div>
 
     <!-- ── Error Banner ──────────────────────────────────────────── -->
@@ -340,7 +340,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
               </div>
             </div>
             <prime-tag
-              :value="data.isActive ? 'Active' : 'Inactive'"
+              :value="data.isActive ? t('users.status.active') : t('users.status.inactive')"
               :severity="data.isActive ? 'success' : 'danger'"
               class="tw:text-[11px]! tw:px-1.5! tw:py-0.5! tw:flex-shrink-0"
             />
@@ -359,7 +359,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           <!-- Search -->
           <prime-input-text
             v-model="search"
-            placeholder="Search users…"
+            :placeholder="t('users.table.searchPlaceholder')"
             class="app-input tw:w-64"
           />
 
@@ -367,7 +367,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           <prime-button
             :severity="hasActiveFilters ? 'success' : 'secondary'"
             :outlined="!hasActiveFilters"
-            v-tooltip.top="'Filters'"
+            v-tooltip.top="t('users.filter.tooltip')"
             @click="filterPanel.toggle($event)"
             :class="btnIcon"
           >
@@ -385,29 +385,29 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           <!-- Filter popover -->
           <prime-popover ref="filterPanel">
             <div class="tw:flex tw:flex-col tw:gap-4">
-              <p class="tw:text-sm tw:font-semibold">Filter users</p>
+              <p class="tw:text-sm tw:font-semibold">{{ t('users.filter.title') }}</p>
 
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Role</label>
+                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('users.filter.roleLabel') }}</label>
                 <prime-select
                   v-model="roleFilter"
                   :options="roleFilterOptions"
                   option-label="label"
                   option-value="value"
-                  placeholder="All roles"
+                  :placeholder="t('users.filter.rolePlaceholder')"
                   show-clear
                   class="app-input tw:w-full"
                 />
               </div>
 
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Status</label>
+                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('users.filter.statusLabel') }}</label>
                 <prime-select
                   v-model="statusFilter"
                   :options="statusFilterOptions"
                   option-label="label"
                   option-value="value"
-                  placeholder="All statuses"
+                  :placeholder="t('users.filter.statusPlaceholder')"
                   show-clear
                   class="app-input tw:w-full"
                 />
@@ -421,7 +421,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
                 @click="clearFilters"
               >
                 <iconify icon="ph:x-bold" />
-                <span>Clear filters</span>
+                <span>{{ t('users.filter.clearFilters') }}</span>
               </prime-button>
             </div>
           </prime-popover>
@@ -460,7 +460,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
 
       <template #col-isActive="{ data }">
         <prime-tag
-          :value="data.isActive ? 'Active' : 'Inactive'"
+          :value="data.isActive ? t('users.status.active') : t('users.status.inactive')"
           :severity="data.isActive ? 'success' : 'danger'"
         />
       </template>
@@ -476,7 +476,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
             :severity="data.isActive ? 'danger' : 'success'"
             outlined
             size="small"
-            v-tooltip.top="data.isActive ? 'Deactivate' : 'Activate'"
+            v-tooltip.top="data.isActive ? t('users.tooltips.deactivate') : t('users.tooltips.activate')"
             @click="handleToggleActive(data)"
             :class="btnIcon"
           >
@@ -486,7 +486,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
             severity="secondary"
             outlined
             size="small"
-            v-tooltip.top="'View / Edit'"
+            v-tooltip.top="t('users.tooltips.viewEdit')"
             @click="router.push({ name: 'userDetail', params: { id: data.id } })"
             :class="btnIcon"
           >
@@ -508,7 +508,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           <span class="tw:font-medium">{{ drawerUser?.username }}</span>
           <prime-tag
             v-if="drawerUser"
-            :value="drawerUser.isActive ? 'Active' : 'Inactive'"
+            :value="drawerUser.isActive ? t('users.status.active') : t('users.status.inactive')"
             :severity="drawerUser.isActive ? 'success' : 'danger'"
             class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
           />
@@ -517,7 +517,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
       <div v-if="drawerUser" class="tw:flex tw:flex-col tw:gap-2 tw:pb-4">
         <prime-button
           v-if="can('user.deactivate')"
-          :label="drawerUser.isActive ? 'Deactivate' : 'Activate'"
+          :label="drawerUser.isActive ? t('users.tooltips.deactivate') : t('users.tooltips.activate')"
           :severity="drawerUser.isActive ? 'danger' : 'success'"
           outlined fluid
           @click="handleToggleActive(drawerUser); drawerVisible = false"
@@ -527,7 +527,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           </template>
         </prime-button>
         <prime-button
-          label="View / Edit"
+          :label="t('users.tooltips.viewEdit')"
           severity="secondary"
           outlined fluid
           @click="router.push({ name: 'userDetail', params: { id: drawerUser.id } }); drawerVisible = false"
@@ -540,7 +540,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
     <!-- ===== Add User Dialog ===== -->
     <prime-dialog
       v-model:visible="showAddDialog"
-      header="Add user"
+      :header="t('users.addDialog.header')"
       :modal="true"
       style="width: 28rem"
     >
@@ -553,23 +553,23 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
         >{{ addError }}</prime-alert>
 
         <div class="tw:space-y-1">
-          <label class="tw:text-sm tw:font-medium">Username</label>
+          <label class="tw:text-sm tw:font-medium">{{ t('users.addDialog.username') }}</label>
           <prime-input-text
             v-model="addForm.username"
             class="app-input tw:w-full"
-            placeholder="e.g. barista01"
+            :placeholder="t('users.addDialog.usernamePlaceholder')"
           />
         </div>
         <div class="tw:space-y-1">
-          <label class="tw:text-sm tw:font-medium">Full name</label>
+          <label class="tw:text-sm tw:font-medium">{{ t('users.addDialog.fullName') }}</label>
           <prime-input-text
             v-model="addForm.fullName"
             class="app-input tw:w-full"
-            placeholder="e.g. Nguyen Van A"
+            :placeholder="t('users.addDialog.fullNamePlaceholder')"
           />
         </div>
         <div class="tw:space-y-1">
-          <label class="tw:text-sm tw:font-medium">Role</label>
+          <label class="tw:text-sm tw:font-medium">{{ t('users.addDialog.role') }}</label>
           <prime-select
             v-model="addForm.role"
             :options="roleSelectOptions"
@@ -588,7 +588,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           @click="showAddDialog = false"
         >
           <iconify icon="ph:x-bold" />
-          <span>Cancel</span>
+          <span>{{ t('common.cancel') }}</span>
         </prime-button>
         <prime-button
           severity="success"
@@ -597,7 +597,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           @click="submitAddUser"
         >
           <iconify icon="ph:user-plus-bold" />
-          <span>Create</span>
+          <span>{{ t('users.addDialog.create') }}</span>
         </prime-button>
       </template>
     </prime-dialog>
@@ -605,21 +605,21 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
     <!-- ===== Temp Password Dialog ===== -->
     <prime-dialog
       v-model:visible="showTempPasswordDialog"
-      header="Account created"
+      :header="t('users.tempPasswordDialog.header')"
       :modal="true"
       style="width: 26rem"
     >
       <div class="tw:space-y-4 tw:pt-2">
         <p class="tw:text-sm app-text-muted">
-          Share these credentials securely. The password cannot be retrieved again.
+          {{ t('users.tempPasswordDialog.notice') }}
         </p>
         <div class="tw:rounded-xl tw:border tw:p-4 tw:space-y-3 app-card">
           <div class="tw:space-y-0.5">
-            <p class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle">Username</p>
+            <p class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle">{{ t('users.tempPasswordDialog.username') }}</p>
             <p class="tw:font-mono tw:font-semibold">{{ tempPasswordData.username }}</p>
           </div>
           <div class="tw:space-y-0.5">
-            <p class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle">Temporary password</p>
+            <p class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle">{{ t('users.tempPasswordDialog.tempPassword') }}</p>
             <div class="tw:flex tw:items-center tw:gap-2">
               <p class="tw:font-mono tw:font-bold tw:text-xl tw:tracking-widest tw:text-emerald-300">
                 {{ tempPasswordData.temporaryPassword }}
@@ -628,7 +628,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
                 severity="secondary"
                 outlined
                 size="small"
-                v-tooltip.top="'Copy'"
+                v-tooltip.top="t('users.tooltips.copy')"
                 @click="copyTempPassword"
                 :class="btnIcon"
               >
@@ -646,7 +646,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           @click="showTempPasswordDialog = false"
         >
           <iconify icon="ph:check-bold" />
-          <span>Done</span>
+          <span>{{ t('users.tempPasswordDialog.done') }}</span>
         </prime-button>
       </template>
     </prime-dialog>
@@ -654,15 +654,14 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
     <!-- ===== Deactivate Confirm Dialog ===== -->
     <prime-dialog
       :visible="!!confirmDeactivateUser"
-      header="Deactivate account"
+      :header="t('users.deactivateDialog.header')"
       :modal="true"
       style="width: 24rem"
       @update:visible="(v) => { if (!v) confirmDeactivateUser = null }"
     >
       <div class="tw:pt-2">
         <p class="tw:text-sm app-text-muted">
-          Deactivate <strong class="tw:font-semibold">{{ confirmDeactivateUser?.username }}</strong>?
-          They will be immediately logged out and cannot log in until reactivated.
+          {{ t('users.deactivateDialog.confirmText', { username: confirmDeactivateUser?.username }) }}
         </p>
       </div>
 
@@ -674,7 +673,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           @click="confirmDeactivateUser = null"
         >
           <iconify icon="ph:x-bold" />
-          <span>Cancel</span>
+          <span>{{ t('common.cancel') }}</span>
         </prime-button>
         <prime-button
           severity="danger"
@@ -683,7 +682,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           @click="confirmAndDeactivate"
         >
           <iconify icon="ph:prohibit-bold" />
-          <span>Deactivate</span>
+          <span>{{ t('users.deactivateDialog.deactivate') }}</span>
         </prime-button>
       </template>
     </prime-dialog>

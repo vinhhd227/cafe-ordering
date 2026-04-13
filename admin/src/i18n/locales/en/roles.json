@@ -1,0 +1,65 @@
+{
+  "roles": {
+    "breadcrumb": "Access control",
+    "title": "Role management",
+    "subtitle": "Define roles and control what users can access.",
+    "addRole": "Add role",
+    "stats": {
+      "totalRoles": "Total roles"
+    },
+    "table": {
+      "colRole": "Role",
+      "colUsers": "Users",
+      "colCreated": "Created",
+      "colActions": "Actions",
+      "searchPlaceholder": "Search roles..."
+    },
+    "tooltips": {
+      "permissions": "Permissions",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "addDialog": {
+      "header": "Add role",
+      "roleName": "Role name",
+      "description": "Description",
+      "roleNamePlaceholder": "e.g. Manager",
+      "descriptionPlaceholder": "Describe what this role can do...",
+      "create": "Create"
+    },
+    "editDialog": {
+      "header": "Edit role",
+      "roleName": "Role name",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe what this role can do...",
+      "save": "Save"
+    },
+    "deleteDialog": {
+      "header": "Delete role",
+      "confirmText": "Delete role {name}? This action cannot be undone. Users assigned this role will lose its permissions.",
+      "delete": "Delete"
+    },
+    "permissionsDialog": {
+      "header": "Permissions — {name}",
+      "selectedSummary": "{selected} of {total} permissions selected",
+      "clearAll": "Clear all",
+      "save": "Save permissions"
+    },
+    "permissionGroups": {
+      "menu": "Menu",
+      "order": "Orders",
+      "product": "Products",
+      "staff": "Staff",
+      "table": "Tables"
+    },
+    "toast": {
+      "permissionsUpdated": "Permissions updated",
+      "permissionsUpdatedDetailAffectsSelf": "Your role \"{name}\" was modified. Please log in again for changes to take effect.",
+      "permissionsUpdatedDetail": "Permissions for \"{name}\" saved successfully."
+    },
+    "errors": {
+      "roleNameRequired": "Role name is required.",
+      "generic": "Something went wrong."
+    }
+  }
+}

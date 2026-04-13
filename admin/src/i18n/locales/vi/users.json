@@ -1,0 +1,68 @@
+{
+  "users": {
+    "breadcrumb": "Người dùng",
+    "title": "Quản lý người dùng",
+    "subtitle": "Quản lý quyền truy cập, vai trò và trạng thái tài khoản.",
+    "addUser": "Thêm người dùng",
+    "widgets": {
+      "totalUsers": { "label": "Tổng người dùng", "description": "Tổng số tài khoản đã được tạo trong hệ thống." },
+      "active":     { "label": "Đang hoạt động",  "description": "Tài khoản đang hoạt động, có thể đăng nhập." },
+      "admins":     { "label": "Quản trị",         "description": "Tài khoản có quyền quản trị toàn hệ thống." },
+      "staff":      { "label": "Nhân viên",        "description": "Nhân viên phục vụ, có quyền xử lý đơn hàng." }
+    },
+    "table": {
+      "colUser":    "Người dùng",
+      "colEmail":   "Email",
+      "colRole":    "Vai trò",
+      "colStatus":  "Trạng thái",
+      "colCreated": "Ngày tạo",
+      "colActions": "Thao tác",
+      "searchPlaceholder": "Tìm người dùng..."
+    },
+    "filter": {
+      "title":         "Lọc người dùng",
+      "tooltip":       "Lọc",
+      "roleLabel":     "Vai trò",
+      "rolePlaceholder": "Tất cả vai trò",
+      "statusLabel":   "Trạng thái",
+      "statusPlaceholder": "Tất cả trạng thái",
+      "clearFilters":  "Xóa bộ lọc",
+      "statusActive":  "Hoạt động",
+      "statusInactive": "Không hoạt động"
+    },
+    "status": {
+      "active":   "Hoạt động",
+      "inactive": "Không hoạt động"
+    },
+    "tooltips": {
+      "deactivate": "Vô hiệu hóa",
+      "activate":   "Kích hoạt",
+      "viewEdit":   "Xem / Sửa",
+      "copy":       "Sao chép"
+    },
+    "addDialog": {
+      "header":            "Thêm người dùng",
+      "username":          "Tên đăng nhập",
+      "usernamePlaceholder": "VD: barista01",
+      "fullName":          "Họ và tên",
+      "fullNamePlaceholder": "VD: Nguyễn Văn A",
+      "role":              "Vai trò",
+      "create":            "Tạo mới"
+    },
+    "tempPasswordDialog": {
+      "header":       "Tài khoản đã tạo",
+      "notice":       "Chia sẻ thông tin đăng nhập này một cách bảo mật. Mật khẩu sẽ không thể xem lại.",
+      "username":     "Tên đăng nhập",
+      "tempPassword": "Mật khẩu tạm thời",
+      "done":         "Xong"
+    },
+    "deactivateDialog": {
+      "header":      "Vô hiệu hóa tài khoản",
+      "confirmText": "Vô hiệu hóa tài khoản {username}? Người dùng sẽ bị đăng xuất ngay lập tức và không thể đăng nhập cho đến khi được kích hoạt lại.",
+      "deactivate":  "Vô hiệu hóa"
+    },
+    "errors": {
+      "generic": "Đã có lỗi xảy ra."
+    }
+  }
+}

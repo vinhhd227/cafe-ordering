@@ -1,0 +1,68 @@
+{
+  "users": {
+    "breadcrumb": "Users",
+    "title": "User management",
+    "subtitle": "Maintain access, roles, and account status.",
+    "addUser": "Add user",
+    "widgets": {
+      "totalUsers": { "label": "Total users", "description": "Total accounts created in the system." },
+      "active":     { "label": "Active",       "description": "Active accounts that can log in." },
+      "admins":     { "label": "Admins",       "description": "Accounts with full admin privileges." },
+      "staff":      { "label": "Staff",        "description": "Staff members with order management access." }
+    },
+    "table": {
+      "colUser":    "User",
+      "colEmail":   "Email",
+      "colRole":    "Role",
+      "colStatus":  "Status",
+      "colCreated": "Created",
+      "colActions": "Actions",
+      "searchPlaceholder": "Search users..."
+    },
+    "filter": {
+      "title":          "Filter users",
+      "tooltip":        "Filters",
+      "roleLabel":      "Role",
+      "rolePlaceholder": "All roles",
+      "statusLabel":    "Status",
+      "statusPlaceholder": "All statuses",
+      "clearFilters":   "Clear filters",
+      "statusActive":   "Active",
+      "statusInactive": "Inactive"
+    },
+    "status": {
+      "active":   "Active",
+      "inactive": "Inactive"
+    },
+    "tooltips": {
+      "deactivate": "Deactivate",
+      "activate":   "Activate",
+      "viewEdit":   "View / Edit",
+      "copy":       "Copy"
+    },
+    "addDialog": {
+      "header":            "Add user",
+      "username":          "Username",
+      "usernamePlaceholder": "e.g. barista01",
+      "fullName":          "Full name",
+      "fullNamePlaceholder": "e.g. Nguyen Van A",
+      "role":              "Role",
+      "create":            "Create"
+    },
+    "tempPasswordDialog": {
+      "header":       "Account created",
+      "notice":       "Share these credentials securely. The password cannot be retrieved again.",
+      "username":     "Username",
+      "tempPassword": "Temporary password",
+      "done":         "Done"
+    },
+    "deactivateDialog": {
+      "header":      "Deactivate account",
+      "confirmText": "Deactivate {username}? They will be immediately logged out and cannot log in until reactivated.",
+      "deactivate":  "Deactivate"
+    },
+    "errors": {
+      "generic": "Something went wrong."
+    }
+  }
+}

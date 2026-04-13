@@ -1,0 +1,65 @@
+{
+  "roles": {
+    "breadcrumb": "Phân quyền",
+    "title": "Quản lý vai trò",
+    "subtitle": "Định nghĩa vai trò và kiểm soát quyền truy cập của người dùng.",
+    "addRole": "Thêm vai trò",
+    "stats": {
+      "totalRoles": "Tổng vai trò"
+    },
+    "table": {
+      "colRole": "Vai trò",
+      "colUsers": "Người dùng",
+      "colCreated": "Ngày tạo",
+      "colActions": "Thao tác",
+      "searchPlaceholder": "Tìm vai trò..."
+    },
+    "tooltips": {
+      "permissions": "Quyền hạn",
+      "edit": "Sửa",
+      "delete": "Xóa"
+    },
+    "addDialog": {
+      "header": "Thêm vai trò",
+      "roleName": "Tên vai trò",
+      "description": "Mô tả",
+      "roleNamePlaceholder": "VD: Quản lý",
+      "descriptionPlaceholder": "Mô tả vai trò này có thể làm gì...",
+      "create": "Tạo mới"
+    },
+    "editDialog": {
+      "header": "Sửa vai trò",
+      "roleName": "Tên vai trò",
+      "description": "Mô tả",
+      "descriptionPlaceholder": "Mô tả vai trò này có thể làm gì...",
+      "save": "Lưu"
+    },
+    "deleteDialog": {
+      "header": "Xóa vai trò",
+      "confirmText": "Xóa vai trò {name}? Hành động này không thể hoàn tác. Người dùng được gán vai trò này sẽ mất quyền tương ứng.",
+      "delete": "Xóa"
+    },
+    "permissionsDialog": {
+      "header": "Quyền hạn — {name}",
+      "selectedSummary": "{selected} / {total} quyền được chọn",
+      "clearAll": "Bỏ chọn tất cả",
+      "save": "Lưu quyền hạn"
+    },
+    "permissionGroups": {
+      "menu": "Menu",
+      "order": "Đơn hàng",
+      "product": "Sản phẩm",
+      "staff": "Nhân viên",
+      "table": "Bàn"
+    },
+    "toast": {
+      "permissionsUpdated": "Đã cập nhật quyền hạn",
+      "permissionsUpdatedDetailAffectsSelf": "Vai trò \"{name}\" của bạn vừa được thay đổi. Vui lòng đăng nhập lại để áp dụng.",
+      "permissionsUpdatedDetail": "Quyền hạn cho \"{name}\" đã được lưu."
+    },
+    "errors": {
+      "roleNameRequired": "Tên vai trò là bắt buộc.",
+      "generic": "Đã có lỗi xảy ra."
+    }
+  }
+}
