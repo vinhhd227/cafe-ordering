@@ -63,6 +63,12 @@ export const navGroups = [
         requiredClaim: "product.read",
       },
       {
+        labelKey: "nav.recipes",
+        icon: "ph:notebook-bold",
+        to: { name: "recipes" },
+        requiredClaim: "recipe.read",
+      },
+      {
         labelKey: "nav.categories",
         icon: "ph:tag-bold",
         to: { name: "categories" },
@@ -89,6 +95,12 @@ export const navGroups = [
         labelKey: "nav.wifiQr",
         icon: "ph:wifi-high-bold",
         to: { name: "wifiQr" },
+        requiredClaim: "utility.read",
+      },
+      {
+        labelKey: "nav.paymentQr",
+        icon: "ph:qr-code-bold",
+        to: { name: "paymentQr" },
         requiredClaim: "utility.read",
       },
     ],

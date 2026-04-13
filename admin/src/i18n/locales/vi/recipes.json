@@ -1,0 +1,91 @@
+{
+  "recipes": {
+    "breadcrumb": "Công thức",
+    "title": "Công thức pha chế",
+    "subtitle": "Quản lý công thức ủ nguyên liệu và hướng dẫn pha từng đồ uống.",
+    "addRecipe": "Thêm công thức",
+    "type": {
+      "BaseIngredient": "Nguyên liệu",
+      "Drink": "Đồ uống"
+    },
+    "category": {
+      "BaseIngredient": "Nguyên liệu cơ bản",
+      "FruitTea": "Trà hoa quả",
+      "Coffee": "Cà phê",
+      "Smoothie": "Đá xay / Sinh tố",
+      "MilkTea": "Trà sữa",
+      "Other": "Khác"
+    },
+    "columns": {
+      "name": "Tên công thức",
+      "type": "Loại",
+      "category": "Danh mục",
+      "yield": "Định lượng",
+      "active": "Trạng thái",
+      "actions": "Thao tác"
+    },
+    "filter": {
+      "title": "Lọc công thức",
+      "type": "Loại",
+      "allTypes": "Tất cả loại",
+      "category": "Danh mục",
+      "allCategories": "Tất cả danh mục",
+      "clearFilters": "Xoá bộ lọc",
+      "filtersTooltip": "Bộ lọc"
+    },
+    "form": {
+      "name": "Tên công thức",
+      "namePlaceholder": "VD: Nước đường, Trà chanh hoàng kim...",
+      "type": "Loại",
+      "category": "Danh mục",
+      "yield": "Định lượng / sản lượng",
+      "yieldPlaceholder": "VD: 1200ml ≈ 40 cốc",
+      "yieldHint": "Lượng nguyên liệu thu được hoặc số cốc pha được",
+      "content": "Công thức / hướng dẫn",
+      "contentPlaceholder": "Nhập đầy đủ công thức, nguyên liệu và các bước thực hiện...",
+      "notes": "Ghi chú bảo quản",
+      "notesPlaceholder": "VD: Bảo quản tủ mát, sử dụng trong 3 ngày..."
+    },
+    "detail": {
+      "backToList": "Quay lại danh sách",
+      "newRecipe": "Công thức mới",
+      "saveChanges": "Lưu thay đổi",
+      "saving": "Đang lưu...",
+      "deleteConfirm": "Xoá công thức này? Hành động không thể hoàn tác.",
+      "unsavedChanges": "Có thay đổi chưa lưu",
+      "editBtn": "Chỉnh sửa",
+      "chat": {
+        "title": "Hỏi AI về công thức",
+        "placeholder": "Hỏi về nguyên liệu, định lượng, cách bảo quản...",
+        "send": "Gửi",
+        "comingSoon": "Tính năng AI đang được phát triển",
+        "comingSoonDesc": "Sẽ sớm có thể hỏi AI về công thức pha chế của quán."
+      }
+    },
+    "edit": {
+      "title": "Chỉnh sửa công thức",
+      "backToDetail": "Quay lại công thức"
+    },
+    "activeStatus": {
+      "active": "Đang dùng",
+      "inactive": "Tạm dừng"
+    },
+    "actions": {
+      "edit": "Sửa",
+      "delete": "Xoá",
+      "editTooltip": "Chỉnh sửa công thức",
+      "deleteTooltip": "Xoá công thức"
+    },
+    "error": {
+      "loadFailed": "Không thể tải danh sách công thức.",
+      "saveFailed": "Không thể lưu công thức.",
+      "deleteFailed": "Không thể xoá công thức.",
+      "loadDetailFailed": "Không thể tải công thức.",
+      "chatFailed": "Không thể gửi tin nhắn. Vui lòng thử lại."
+    },
+    "validation": {
+      "nameRequired": "Vui lòng nhập tên công thức.",
+      "contentRequired": "Vui lòng nhập nội dung công thức."
+    }
+  }
+}

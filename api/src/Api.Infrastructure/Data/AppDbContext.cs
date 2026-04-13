@@ -1,4 +1,5 @@
 using Api.Core.Aggregates.CategoryAggregate;
+using Api.Core.Aggregates.RecipeAggregate;
 using Api.Core.Aggregates.CustomerAggregate;
 using Api.Core.Aggregates.ExpenseAggregate;
 using Api.Core.Aggregates.GuestSessionAggregate;
@@ -40,6 +41,7 @@ public class AppDbContext : DbContext
   public DbSet<Expense> Expenses => Set<Expense>();
   public DbSet<Promotion> Promotions => Set<Promotion>();
   public DbSet<WifiProfile> WifiProfiles => Set<WifiProfile>();
+  public DbSet<Recipe> Recipes => Set<Recipe>();
   public DbSet<SavedMenu> SavedMenus => Set<SavedMenu>();
   public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
   public DbSet<Notification> Notifications => Set<Notification>();

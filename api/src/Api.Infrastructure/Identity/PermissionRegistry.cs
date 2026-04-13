@@ -78,6 +78,12 @@ public static class PermissionRegistry
       ["zone.update"]        = "Edit zone information",
       ["zone.delete"]        = "Delete zones",
 
+      // Recipes
+      ["recipe.read"]        = "View recipes and formulas",
+      ["recipe.create"]      = "Create new recipes",
+      ["recipe.update"]      = "Edit recipe information",
+      ["recipe.delete"]      = "Delete recipes",
+
       // Utilities
       ["utility.read"]       = "Access utility tools (menu design, WiFi QR)",
       ["utility.create"]     = "Save WiFi profiles and other utility data",

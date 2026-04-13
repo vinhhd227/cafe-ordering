@@ -124,6 +124,34 @@ const routes = [
         ],
       },
       {
+        path: "recipes",
+        meta: { requiresAuth: true, requiredClaim: "recipe.read", section: "nav.groups.operations" },
+        children: [
+          {
+            path: "",
+            name: "recipes",
+            component: () => import("@/views/recipes/List.vue"),
+          },
+          {
+            path: ":id",
+            name: "recipeDetail",
+            component: () => import("@/views/recipes/Detail.vue"),
+          },
+          {
+            path: ":id/edit",
+            name: "recipeEdit",
+            component: () => import("@/views/recipes/Edit.vue"),
+            meta: { requiresAuth: true, requiredClaim: "recipe.update" },
+          },
+          {
+            path: "new",
+            name: "recipeNew",
+            component: () => import("@/views/recipes/Edit.vue"),
+            meta: { requiresAuth: true, requiredClaim: "recipe.create" },
+          },
+        ],
+      },
+      {
         path: "menu",
         name: "menu",
         component: () => import("@/views/Menu.vue"),
@@ -224,6 +252,12 @@ const routes = [
         name: "wifiQr",
         component: () => import("@/views/utilities/WifiQr.vue"),
         meta: { requiresAuth: true, requiredClaim: "utility.read", section: "nav.groups.utilities", pageTitle: "utilities.wifiQr.title" },
+      },
+      {
+        path: "utilities/payment-qr",
+        name: "paymentQr",
+        component: () => import("@/views/utilities/PaymentQr.vue"),
+        meta: { requiresAuth: true, requiredClaim: "utility.read", section: "nav.groups.utilities", pageTitle: "utilities.paymentQr.title" },
       },
       {
         path: "settings/notification-configs",

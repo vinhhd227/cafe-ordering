@@ -1,0 +1,91 @@
+{
+  "recipes": {
+    "breadcrumb": "Recipes",
+    "title": "Recipes & Formulas",
+    "subtitle": "Manage ingredient preparation formulas and drink recipes.",
+    "addRecipe": "Add recipe",
+    "type": {
+      "BaseIngredient": "Base ingredient",
+      "Drink": "Drink"
+    },
+    "category": {
+      "BaseIngredient": "Base ingredient",
+      "FruitTea": "Fruit tea",
+      "Coffee": "Coffee",
+      "Smoothie": "Smoothie / Blended",
+      "MilkTea": "Milk tea",
+      "Other": "Other"
+    },
+    "columns": {
+      "name": "Recipe name",
+      "type": "Type",
+      "category": "Category",
+      "yield": "Yield",
+      "active": "Status",
+      "actions": "Actions"
+    },
+    "filter": {
+      "title": "Filter recipes",
+      "type": "Type",
+      "allTypes": "All types",
+      "category": "Category",
+      "allCategories": "All categories",
+      "clearFilters": "Clear filters",
+      "filtersTooltip": "Filters"
+    },
+    "form": {
+      "name": "Recipe name",
+      "namePlaceholder": "E.g. Simple syrup, Passion fruit tea...",
+      "type": "Type",
+      "category": "Category",
+      "yield": "Yield / quantity",
+      "yieldPlaceholder": "E.g. 1200ml ≈ 40 cups",
+      "yieldHint": "Amount produced or number of cups per batch",
+      "content": "Recipe / instructions",
+      "contentPlaceholder": "Enter full recipe, ingredients and preparation steps...",
+      "notes": "Storage notes",
+      "notesPlaceholder": "E.g. Refrigerate, use within 3 days..."
+    },
+    "detail": {
+      "backToList": "Back to list",
+      "newRecipe": "New recipe",
+      "saveChanges": "Save changes",
+      "saving": "Saving...",
+      "deleteConfirm": "Delete this recipe? This action cannot be undone.",
+      "unsavedChanges": "Unsaved changes",
+      "editBtn": "Edit",
+      "chat": {
+        "title": "Ask AI about recipes",
+        "placeholder": "Ask about ingredients, quantities, storage...",
+        "send": "Send",
+        "comingSoon": "AI feature coming soon",
+        "comingSoonDesc": "You'll soon be able to ask AI about your cafe's recipes."
+      }
+    },
+    "edit": {
+      "title": "Edit recipe",
+      "backToDetail": "Back to recipe"
+    },
+    "activeStatus": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "editTooltip": "Edit recipe",
+      "deleteTooltip": "Delete recipe"
+    },
+    "error": {
+      "loadFailed": "Failed to load recipes.",
+      "saveFailed": "Failed to save recipe.",
+      "deleteFailed": "Failed to delete recipe.",
+      "loadDetailFailed": "Failed to load recipe.",
+      "chatFailed": "Failed to send message. Please try again."
+    },
+    "validation": {
+      "nameRequired": "Recipe name is required.",
+      "contentRequired": "Recipe content is required."
+    }
+  }
+}

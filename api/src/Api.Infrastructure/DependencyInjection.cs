@@ -96,6 +96,10 @@ public static class DependencyInjection
     services.AddScoped<INotificationService, NotificationService>();
     services.AddHostedService<NotificationCleanupService>();
 
+    // === Gemini AI ===
+    services.Configure<GeminiOptions>(configuration.GetSection("Gemini"));
+    services.AddHttpClient<IGeminiService, GeminiService>();
+
     logger.LogInformation("{Project} services registered", "Infrastructure");
 
     return services;

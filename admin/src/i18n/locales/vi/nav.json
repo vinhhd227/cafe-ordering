@@ -11,6 +11,7 @@
     "products": "Sản phẩm",
     "categories": "Danh mục",
     "promotions": "Khuyến mãi",
+    "recipes": "Công thức",
     "reports": "Báo cáo",
     "reportsSummary": "Tổng hợp",
     "reportsDaily": "Theo ngày",
@@ -20,6 +21,7 @@
     "roles": "Vai trò",
     "menuDesign": "Thiết kế menu",
     "wifiQr": "Tạo QR wifi",
+    "paymentQr": "QR thanh toán",
     "notificationConfigs": "Cài đặt thông báo",
     "groups": {
       "overview": "Tổng quan",

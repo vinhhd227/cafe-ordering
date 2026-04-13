@@ -11,6 +11,7 @@
     "products": "Products",
     "categories": "Categories",
     "promotions": "Promotions",
+    "recipes": "Recipes",
     "reports": "Reports",
     "reportsSummary": "Summary",
     "reportsDaily": "Daily",
@@ -20,6 +21,7 @@
     "roles": "Roles",
     "menuDesign": "Menu Design",
     "wifiQr": "WiFi QR Code",
+    "paymentQr": "Payment QR",
     "notificationConfigs": "Notification Settings",
     "groups": {
       "overview": "Overview",
