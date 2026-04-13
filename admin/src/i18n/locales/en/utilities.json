@@ -49,6 +49,29 @@
       "preview": "Preview",
       "downloadPng": "Download PNG",
       "emptySsid": "Please enter a WiFi network name"
+    },
+    "paymentQr": {
+      "title": "Payment QR",
+      "subtitle": "Generate a VietQR-style payment QR code to print and display at the counter",
+      "content": "QR content",
+      "contentPlaceholder": "Paste a VietQR string or enter any content...",
+      "contentHint": "You can get the QR string from your banking app or VietQR.io",
+      "qrColor": "QR color",
+      "resetColor": "Reset",
+      "centerLogo": "Center logo (optional)",
+      "uploadLogo": "Upload logo",
+      "removeLogo": "Remove logo",
+      "textLines": "Display info",
+      "line1": "Line 1 — Account holder name",
+      "line1Placeholder": "E.g. NGUYEN VAN A",
+      "line2": "Line 2 — Account number",
+      "line2Placeholder": "E.g. 1234 5678 9012",
+      "line3": "Line 3 — Bank name",
+      "line3Placeholder": "E.g. Vietcombank",
+      "downloadPng": "Download PNG",
+      "preview": "Preview",
+      "emptyContent": "Enter QR content to preview",
+      "emptyPreview": "Enter QR content to get started"
     }
   }
 }

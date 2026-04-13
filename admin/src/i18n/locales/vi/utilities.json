@@ -49,6 +49,29 @@
       "preview": "Xem trước",
       "downloadPng": "Tải về PNG",
       "emptySsid": "Vui lòng nhập tên mạng wifi"
+    },
+    "paymentQr": {
+      "title": "QR thanh toán",
+      "subtitle": "Tạo mã QR thanh toán kiểu VietQR để in và dán tại quầy",
+      "content": "Nội dung QR",
+      "contentPlaceholder": "Dán chuỗi VietQR hoặc nhập nội dung bất kỳ...",
+      "contentHint": "Bạn có thể lấy chuỗi QR từ app ngân hàng hoặc VietQR.io",
+      "qrColor": "Màu QR",
+      "resetColor": "Đặt lại",
+      "centerLogo": "Logo ở giữa (tùy chọn)",
+      "uploadLogo": "Tải lên logo",
+      "removeLogo": "Xóa logo",
+      "textLines": "Thông tin hiển thị",
+      "line1": "Dòng 1 — Tên tài khoản",
+      "line1Placeholder": "VD: NGUYEN VAN A",
+      "line2": "Dòng 2 — Số tài khoản",
+      "line2Placeholder": "VD: 1234 5678 9012",
+      "line3": "Dòng 3 — Tên ngân hàng",
+      "line3Placeholder": "VD: Vietcombank",
+      "downloadPng": "Tải PNG",
+      "preview": "Xem trước",
+      "emptyContent": "Nhập nội dung QR để xem trước",
+      "emptyPreview": "Nhập nội dung QR để bắt đầu"
     }
   }
 }
