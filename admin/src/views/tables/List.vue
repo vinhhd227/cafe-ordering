@@ -267,7 +267,9 @@ const rrect = (ctx, x, y, w, h, r) => {
   ctx.closePath();
 };
 
-const generateCardCanvas = async () => {
+const generateCardCanvas = async (rowOverride = null, urlOverride = null) => {
+  const row = rowOverride ?? qrRow.value;
+  const url = urlOverride ?? qrUrl.value;
   const W = 360, H = 480, S = 2;
   const canvas = document.createElement("canvas");
   canvas.width = W * S;
@@ -311,14 +313,14 @@ const generateCardCanvas = async () => {
   ctx.fillText("Quét mã để đặt món", 96, 57);
 
   // Zone name — vertically centered in header (badge center at y=44)
-  if (qrRow.value.zoneName) {
+  if (row.zoneName) {
     ctx.fillStyle = "rgba(255,255,255,0.25)";
     rrect(ctx, W - 104, 30, 94, 28, 8);
     ctx.fill();
     ctx.fillStyle = "#fff";
     ctx.font = "12px system-ui, sans-serif";
     ctx.textAlign = "right";
-    ctx.fillText(qrRow.value.zoneName, W - 14, 49);
+    ctx.fillText(row.zoneName, W - 14, 49);
     ctx.textAlign = "left";
   }
 
@@ -335,7 +337,7 @@ const generateCardCanvas = async () => {
   ctx.shadowBlur = 0;
 
   // Generate QR — draw modules manually for custom style
-  const qrData = QRCode.create(qrUrl.value, { errorCorrectionLevel: errorLevel.value });
+  const qrData = QRCode.create(url, { errorCorrectionLevel: errorLevel.value });
   const mods = qrData.modules;
   const sz = mods.size;
   const cell = QR / sz;
@@ -424,7 +426,7 @@ const generateCardCanvas = async () => {
 
   ctx.fillStyle = "#1e293b";
   ctx.font = `bold 28px system-ui, sans-serif`;
-  ctx.fillText(qrRow.value.code, W / 2, infoY + 34);
+  ctx.fillText(row.code, W / 2, infoY + 34);
   ctx.textAlign = "left";
 
   return canvas;
@@ -494,6 +496,61 @@ const handleRegenerateQrToken = async () => {
     regenerateLoading.value = false;
   }
 };
+
+// ── Bulk QR export ─────────────────────────────────────────────────
+const exportAllQrLoading = ref(false)
+const exportAllQrProgress = ref(0)
+const exportAllQrTotal = ref(0)
+const toast = useToast()
+
+const exportAllQrPdf = async () => {
+  const tablesToExport = filtered.value
+  if (!tablesToExport.length) return
+
+  exportAllQrLoading.value = true
+  exportAllQrProgress.value = 0
+  exportAllQrTotal.value = tablesToExport.length
+
+  try {
+    const { jsPDF } = await import('jspdf')
+    // A4 portrait: 210×297mm, 2 cols × 3 rows = 6 cards per page
+    // Margins: 8mm, gaps: 4mm
+    // Height per card: (297 - 16 - 8) / 3 = 91mm → width = 91 * 3/4 ≈ 68mm
+    const pdf = new jsPDF({ format: 'a4', unit: 'mm' })
+    const MARGIN = 8, COL_GAP = 4, ROW_GAP = 4
+    const COLS = 2, ROWS = 3
+    const cardH = (297 - MARGIN * 2 - ROW_GAP * (ROWS - 1)) / ROWS  // ≈ 91.7mm
+    const cardW = cardH * (3 / 4)                                      // ≈ 68.7mm
+    const totalW = COLS * cardW + (COLS - 1) * COL_GAP
+    const startX = (210 - totalW) / 2  // center horizontally
+
+    for (let i = 0; i < tablesToExport.length; i++) {
+      const row = tablesToExport[i]
+      const url = `${import.meta.env.VITE_ORDERING_BASE_URL ?? ''}/order/${row.id}?token=${row.qrToken}`
+      const canvas = await generateCardCanvas(row, url)
+
+      const pageIdx = Math.floor(i / (COLS * ROWS))
+      const slotIdx = i % (COLS * ROWS)
+      const col = slotIdx % COLS
+      const rowIdx = Math.floor(slotIdx / COLS)
+
+      if (i > 0 && slotIdx === 0) pdf.addPage()
+
+      const x = startX + col * (cardW + COL_GAP)
+      const y = MARGIN + rowIdx * (cardH + ROW_GAP)
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, cardW, cardH)
+      exportAllQrProgress.value = i + 1
+    }
+
+    pdf.save('qr-tables.pdf')
+  } catch (err) {
+    toast.add({ severity: 'error', summary: t('tables.error.exportFailed'), life: 4000 })
+  } finally {
+    exportAllQrLoading.value = false
+    exportAllQrProgress.value = 0
+    exportAllQrTotal.value = 0
+  }
+}
 
 // ── Tag helpers ────────────────────────────────────────────────────
 const statusTag = (status) => {
@@ -849,6 +906,22 @@ const columns = computed(() => [
           @toggle="wToggle"
           @update:cols-per-row="wSetCols"
         />
+        <prime-button
+          severity="secondary"
+          outlined
+          size="small"
+          v-tooltip.top="t('tables.qr.exportAllTooltip')"
+          :loading="exportAllQrLoading"
+          :class="btnIcon"
+          @click="exportAllQrPdf"
+        >
+          <span v-if="!exportAllQrLoading" class="tw:relative tw:inline-flex">
+            <iconify icon="ph:qr-code-bold" />
+          </span>
+          <span v-if="exportAllQrLoading" class="tw:text-[10px] tw:tabular-nums tw:leading-none">
+            {{ exportAllQrProgress }}/{{ exportAllQrTotal }}
+          </span>
+        </prime-button>
         <prime-button
           v-if="can('table.create')"
           severity="success"

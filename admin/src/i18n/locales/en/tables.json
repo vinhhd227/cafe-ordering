@@ -73,6 +73,9 @@
       "regenerateTooltip": "Generate new token — old QR will stop working",
       "regenerate": "Regenerate",
       "downloadPng": "Download PNG",
+      "exportAllTooltip": "Export all table QR codes as PDF",
+      "exportAllPdf": "Export all (PDF)",
+      "exportAllProgress": "Generating QR {current}/{total}...",
       "customizer": {
         "headerColor": "Header color",
         "reset": "reset",
@@ -107,7 +110,8 @@
       "deleteFailed": "Failed to delete table {code}.",
       "createFailed": "Failed to create table. Code may already exist.",
       "editFailed": "Failed to update table. Code may already exist.",
-      "regenerateQrFailed": "Failed to regenerate QR token."
+      "regenerateQrFailed": "Failed to regenerate QR token.",
+      "exportFailed": "Failed to export PDF."
     }
   }
 }

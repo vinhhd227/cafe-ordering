@@ -73,6 +73,9 @@
       "regenerateTooltip": "Tạo token mới — QR cũ sẽ không còn hoạt động",
       "regenerate": "Tạo lại",
       "downloadPng": "Tải PNG",
+      "exportAllTooltip": "Xuất QR tất cả bàn thành PDF",
+      "exportAllPdf": "Xuất tất cả (PDF)",
+      "exportAllProgress": "Đang tạo QR {current}/{total}...",
       "customizer": {
         "headerColor": "Màu tiêu đề",
         "reset": "đặt lại",
@@ -107,7 +110,8 @@
       "deleteFailed": "Không thể xóa bàn {code}.",
       "createFailed": "Không thể tạo bàn. Mã có thể đã tồn tại.",
       "editFailed": "Không thể cập nhật bàn. Mã có thể đã tồn tại.",
-      "regenerateQrFailed": "Không thể tạo lại mã QR."
+      "regenerateQrFailed": "Không thể tạo lại mã QR.",
+      "exportFailed": "Xuất PDF thất bại."
     }
   }
 }
