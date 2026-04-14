@@ -71,6 +71,16 @@ public class Table : SoftDeletableEntity<int>, IAggregateRoot
     Status = TableStatus.Available;
   }
 
+  /// <summary>
+  ///   Sync ActiveSessionId khi session đã tồn tại nhưng table chưa được cập nhật
+  ///   (ví dụ: manual order tạo session mà không fire domain event lên table).
+  /// </summary>
+  public void SyncActiveSession(Guid sessionId)
+  {
+    Status = TableStatus.Occupied;
+    ActiveSessionId = sessionId;
+  }
+
   public void RegenerateQrToken()
   {
     QrToken = Guid.NewGuid();

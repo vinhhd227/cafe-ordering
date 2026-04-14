@@ -1,5 +1,7 @@
 using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
+using Api.Core.Aggregates.OrderAggregate;
+using Api.Core.Aggregates.OrderAggregate.Specifications;
 using Api.Core.Aggregates.TableAggregate;
 using Api.Core.Aggregates.TableAggregate.Specifications;
 using Api.UseCases.Sessions.DTOs;
@@ -10,6 +12,7 @@ namespace Api.UseCases.Sessions.GetOrCreate;
 public class GetOrCreateSessionHandler(
   IRepositoryBase<Table> tableRepository,
   IRepositoryBase<GuestSession> sessionRepository,
+  IReadRepositoryBase<Order> orderRepository,
   IConfiguration configuration)
   : ICommandHandler<GetOrCreateSessionCommand, Result<SessionContextDto>>
 {
@@ -33,16 +36,35 @@ public class GetOrCreateSessionHandler(
       return Result.Forbidden();
     }
 
-    // Return existing active session if one exists
+    // Tìm session active hiện tại của bàn
     var activeSessionSpec = new ActiveSessionByTableIdSpec(request.TableId);
     var existingSession = await sessionRepository.FirstOrDefaultAsync(activeSessionSpec, ct);
 
     if (existingSession is not null)
     {
-      return Result.Success(new SessionContextDto(
-        existingSession.Id,
-        existingSession.TableId,
-        existingSession.Status));
+      // Kiểm tra session còn order PENDING/PROCESSING không
+      var hasActiveOrders = await orderRepository.AnyAsync(
+        new ActiveOrdersBySessionIdSpec(existingSession.Id), ct);
+
+      if (hasActiveOrders)
+      {
+        // Session còn đang phục vụ → reuse, sync table nếu cần
+        if (table.ActiveSessionId != existingSession.Id)
+        {
+          table.SyncActiveSession(existingSession.Id);
+          await tableRepository.UpdateAsync(table, ct);
+        }
+
+        return Result.Success(new SessionContextDto(
+          existingSession.Id,
+          existingSession.TableId,
+          existingSession.Status));
+      }
+
+      // Session không còn order active → đóng lại, tạo session mới cho khách tiếp theo
+      existingSession.Close();
+      await sessionRepository.UpdateAsync(existingSession, ct);
+      table.MarkAvailable();
     }
 
     // If the table is still marked Occupied but no active session exists, the state is
