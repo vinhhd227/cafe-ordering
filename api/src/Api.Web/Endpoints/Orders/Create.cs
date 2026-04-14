@@ -10,6 +10,7 @@ public sealed class CreateOrderRequest
   public Guid SessionId { get; set; }
   public List<CreateOrderItemRequest> Items { get; set; } = [];
   public int? GuestCount { get; set; }
+  public string? PromoCode { get; set; }
 }
 
 public sealed class CreateOrderItemRequest
@@ -56,7 +57,8 @@ public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrde
       .ToList();
 
     var bypassCooldown = User.HasClaim("permission", "admin.access");
-    var result = await mediator.Send(new PlaceOrderCommand(req.SessionId, items, req.GuestCount, bypassCooldown), ct);
+    var result = await mediator.Send(
+      new PlaceOrderCommand(req.SessionId, items, req.GuestCount, bypassCooldown, req.PromoCode), ct);
     await this.SendResultAsync(result, ct);
   }
 }

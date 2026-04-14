@@ -6,4 +6,5 @@ public record PlaceOrderCommand(
   Guid SessionId,
   List<PlaceOrderItemDto> Items,
   int? GuestCount = null,
-  bool BypassCooldown = false) : ICommand<Result<PlaceOrderResponseDto>>;
+  bool BypassCooldown = false,
+  string? PromoCode = null) : ICommand<Result<PlaceOrderResponseDto>>;

@@ -2,7 +2,12 @@ using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
+using Api.Core.Aggregates.ProductAggregate;
+using Api.Core.Aggregates.ProductAggregate.Specifications;
+using Api.Core.Aggregates.PromotionAggregate;
+using Api.Core.Aggregates.PromotionAggregate.Specifications;
 using Api.UseCases.Orders.DTOs;
+using Api.UseCases.Promotions.Apply;
 using Microsoft.Extensions.Configuration;
 
 namespace Api.UseCases.Orders.Create;
@@ -13,6 +18,8 @@ namespace Api.UseCases.Orders.Create;
 public class PlaceOrderHandler(
   IRepositoryBase<Order> orderRepository,
   IReadRepositoryBase<GuestSession> sessionRepository,
+  IRepositoryBase<Promotion> promotionRepository,
+  IReadRepositoryBase<Product> productRepository,
   IConfiguration configuration)
   : ICommandHandler<PlaceOrderCommand, Result<PlaceOrderResponseDto>>
 {
@@ -79,7 +86,55 @@ public class PlaceOrderHandler(
     order.NotifyCreated();
     await orderRepository.UpdateAsync(order, ct); // Lưu items + dispatch event
 
+    // 7. Áp dụng promo nếu có (best-effort — không fail order nếu promo lỗi)
+    if (!string.IsNullOrWhiteSpace(request.PromoCode))
+      await TryApplyPromoAsync(order, request.PromoCode, ct);
+
     return Result.Success(new PlaceOrderResponseDto(order.Id, order.OrderNumber, order.TotalAmount));
+  }
+
+  private async Task TryApplyPromoAsync(Order order, string code, CancellationToken ct)
+  {
+    try
+    {
+      var promo = await promotionRepository.FirstOrDefaultAsync(new PromotionByCodeSpec(code), ct);
+      if (promo is null || !promo.IsValidAt(DateTime.UtcNow) || !promo.HasUsageLeft()) return;
+      if (!promo.IsApplicableTo(order.TotalAmount)) return;
+
+      Dictionary<int, int>? productCategoryMap = null;
+      var needsCategoryMap = (promo.Scope == PromotionScope.Category && promo.ApplicableCategoryIds.Any())
+                          || (promo.GetFromCategoryIds is { Count: > 0 });
+      if (needsCategoryMap)
+      {
+        var productIds = order.Items.Select(i => i.ProductId).ToList();
+        var products   = await productRepository.ListAsync(new ProductsByIdsSpec(productIds), ct);
+        productCategoryMap = products.ToDictionary(p => p.Id, p => p.CategoryId);
+      }
+
+      IReadOnlyList<Product>? externalFreeProducts = null;
+      if (promo.DiscountType == DiscountType.BuyXGetY && promo.GetFromProductIds is { Count: > 0 })
+        externalFreeProducts = await productRepository.ListAsync(new ProductsByIdsSpec(promo.GetFromProductIds), ct);
+
+      var discountResult = PromotionCalculator.Calculate(promo, order.Items, productCategoryMap, externalFreeProducts);
+      if (discountResult.TotalDiscount <= 0) return;
+
+      if (discountResult.FreeGifts is { Count: > 0 })
+      {
+        order.RemoveFreeGiftItems();
+        foreach (var gift in discountResult.FreeGifts)
+          order.AddItem(gift.ProductId, gift.ProductName, gift.UnitPrice, gift.Quantity, isFreeGift: true);
+      }
+
+      order.ApplyPromotion(promo.Id, promo.Code, discountResult.TotalDiscount);
+      promo.IncrementUsage(order.Id);
+
+      await orderRepository.UpdateAsync(order, ct);
+      await promotionRepository.UpdateAsync(promo, ct);
+    }
+    catch
+    {
+      // Promo lỗi không được fail order — bỏ qua
+    }
   }
 
   // Normalize legacy/alternative representations to canonical SmartEnum names.
