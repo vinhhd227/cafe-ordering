@@ -1,4 +1,5 @@
 using Api.Core.Aggregates.GuestSessionAggregate;
+using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.ProductAggregate;
 using Api.Core.Aggregates.ProductAggregate.Specifications;
@@ -36,13 +37,25 @@ public class CreateManualOrderHandler(
     if (!PaymentMethod.TryFromName(request.PaymentMethod, true, out var paymentMethod))
       return Result.Invalid(new ValidationError("PaymentMethod", $"Invalid payment method: {request.PaymentMethod}"));
 
-    // 4. Tạo GuestSession thủ công — không fire domain events, không ảnh hưởng Table.ActiveSessionId
-    var session = GuestSession.CreateManual(request.TableId);
-    await sessionRepository.AddAsync(session, ct);
+    // 4. Reuse active session nếu bàn đang có, tránh tạo nhiều active session song song
+    var existingSession = await sessionRepository.FirstOrDefaultAsync(
+      new ActiveSessionByTableIdSpec(request.TableId), ct);
+
+    Guid sessionId;
+    if (existingSession is not null)
+    {
+      sessionId = existingSession.Id;
+    }
+    else
+    {
+      var session = GuestSession.CreateManual(request.TableId);
+      await sessionRepository.AddAsync(session, ct);
+      sessionId = session.Id;
+    }
 
     // 5. Tạo order — chưa có items, save để EF sinh Id
     var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}";
-    var order = Order.Create(session.Id, orderNumber, guestCount: request.GuestCount, orderedAt: request.OrderedAt);
+    var order = Order.Create(sessionId, orderNumber, guestCount: request.GuestCount, orderedAt: request.OrderedAt);
     await orderRepository.AddAsync(order, ct);
 
     // 6. Load products để validate và lấy giá từ DB
