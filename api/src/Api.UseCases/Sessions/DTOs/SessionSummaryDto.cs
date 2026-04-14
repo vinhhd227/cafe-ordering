@@ -15,7 +15,9 @@ public record OrderLineDto(
   string OrderNumber,
   decimal TotalAmount,
   string Status,
-  IReadOnlyList<OrderItemLineDto> Items
+  string PaymentStatus,
+  IReadOnlyList<OrderItemLineDto> Items,
+  DateTime OrderDate
 );
 
 public record SessionSummaryDto(

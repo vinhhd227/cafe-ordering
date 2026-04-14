@@ -20,7 +20,8 @@ public class GetSessionSummaryHandler(
     if (session is null)
       return Result.NotFound($"Session {request.SessionId} not found.");
 
-    var ordersSpec = new OrdersBySessionIdSpec(request.SessionId);
+    var cutoff = DateTime.UtcNow.AddHours(-24);
+    var ordersSpec = new OrdersBySessionIdSpec(request.SessionId, cutoff);
     var orders = await orderRepository.ListAsync(ordersSpec, ct);
 
     var orderLines = orders
@@ -29,6 +30,7 @@ public class GetSessionSummaryHandler(
         o.OrderNumber,
         o.TotalAmount,
         o.Status.Name,
+        o.PaymentStatus.Name,
         o.Items
           .Select(i => new OrderItemLineDto(
             i.ProductId,
@@ -36,10 +38,13 @@ public class GetSessionSummaryHandler(
             i.UnitPrice,
             i.Quantity,
             i.TotalPrice))
-          .ToList()))
+          .ToList(),
+        o.OrderDate))
       .ToList();
 
-    var grandTotal = orderLines.Sum(o => o.TotalAmount);
+    var grandTotal = orderLines
+      .Where(o => !string.Equals(o.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+      .Sum(o => o.TotalAmount);
 
     return Result.Success(new SessionSummaryDto(
       session.Id,
