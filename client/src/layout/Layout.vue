@@ -246,7 +246,7 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
         </div>
       </header>
 
-      <main class="tw:flex-1 tw:px-8 tw:py-8 tw:z-10">
+      <main class="tw:flex-1 tw:px-4 tw:py-4 tw:sm:px-8 tw:sm:py-8 tw:z-10">
         <div class="tw:max-w-10xl tw:px-5 tw:mx-auto tw:w-full">
           <router-view />
         </div>

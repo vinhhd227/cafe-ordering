@@ -12,10 +12,12 @@ import {
   updateOrderItem,
   validatePromotion,
   getPublicPromotions,
+  cancelOrderByGuest,
 } from "../services/order.service.js";
 import { useCartStore } from "../stores/cart.js";
 import { getPublicTables } from "../services/table.service.js";
 
+const isDev = import.meta.env.DEV;
 const cartStore = useCartStore();
 const { t } = useI18n();
 const toast = useToast();
@@ -71,7 +73,100 @@ const orderError = ref("");
 const showSummary = ref(false);
 const summary = ref(null);
 const isSummaryLoading = ref(false);
+
+const summaryPaidTotal = computed(() => {
+  if (!summary.value?.orders) return 0;
+  return summary.value.orders
+    .filter(o => (o.paymentStatus ?? o.PaymentStatus) === 'PAID')
+    .reduce((sum, o) => sum + (o.totalAmount ?? o.TotalAmount ?? 0), 0);
+});
+
+const summaryUnpaidTotal = computed(() => {
+  const grand = summary.value?.grandTotal ?? summary.value?.GrandTotal ?? 0;
+  return grand - summaryPaidTotal.value;
+});
 const itemUpdating = ref(null);
+
+/* ─── Cancel order ──────────────────────────────────────── */
+const CANCEL_WINDOW_MS = 2 * 60 * 1000;
+
+const canCancelOrder = (order) => {
+  if ((order.status ?? order.Status) !== 'Pending') return false;
+  const orderDate = order.orderDate ?? order.OrderDate;
+  if (!orderDate) return false;
+  return Date.now() - new Date(orderDate).getTime() < CANCEL_WINDOW_MS;
+};
+
+const handleCancelOrder = async (order) => {
+  if (!session.value) return;
+  if (!confirm(t('order.cancelConfirm'))) return;
+  const orderId   = order.orderId ?? order.OrderId;
+  const sessionId = session.value.sessionId ?? session.value.id;
+  try {
+    await cancelOrderByGuest(orderId, sessionId);
+    summary.value = await getSessionSummary(sessionId);
+    toast.add({ severity: 'info', summary: t('order.cancelledTitle'), detail: t('order.cancelled'), life: 3000 });
+  } catch (e) {
+    orderError.value = e?.detail ?? e?.message ?? t('order.cancelFailed');
+  }
+};
+
+/* ─── Order action menu ─────────────────────────────────── */
+const orderMenuRef = ref(null);
+const activeMenuOrder = ref(null);
+
+const openOrderMenu = (event, order) => {
+  activeMenuOrder.value = order;
+  orderMenuRef.value.toggle(event);
+};
+
+/* ─── Edit order mode ───────────────────────────────────── */
+const editModeOrder = ref(null); // OrderLineDto đang edit, null = normal mode
+
+const enterEditMode = (order) => {
+  showSummary.value = false;
+  cartStore.clear();
+  for (const item of (order.items ?? order.Items ?? [])) {
+    cartStore.addItem(
+      { id: item.productId ?? item.ProductId, name: item.productName ?? item.ProductName, price: item.unitPrice ?? item.UnitPrice },
+      {},
+      item.quantity ?? item.Quantity,
+    );
+  }
+  editModeOrder.value = order;
+};
+
+const cancelEditMode = () => {
+  cartStore.clear();
+  editModeOrder.value = null;
+};
+
+const saveOrderEdits = async () => {
+  if (!editModeOrder.value || !session.value) return;
+  isOrdering.value = true;
+  orderError.value = '';
+  const orderId   = editModeOrder.value.orderId ?? editModeOrder.value.OrderId;
+  const sessionId = session.value.sessionId ?? session.value.id;
+  const originalItems = editModeOrder.value.items ?? editModeOrder.value.Items ?? [];
+
+  try {
+    for (const orig of originalItems) {
+      const productId = orig.productId ?? orig.ProductId;
+      if (!cartStore.items.find(i => i.id === productId))
+        await updateOrderItem(orderId, productId, 0, sessionId);
+    }
+    for (const cartItem of cartStore.items)
+      await updateOrderItem(orderId, cartItem.id, cartItem.quantity, sessionId);
+
+    cartStore.clear();
+    editModeOrder.value = null;
+    toast.add({ severity: 'success', summary: t('order.editOrderTitle'), detail: t('order.editSaved'), life: 3000 });
+  } catch (e) {
+    orderError.value = e?.detail ?? e?.message ?? t('order.updateFailed');
+  } finally {
+    isOrdering.value = false;
+  }
+};
 
 /* ─── Promo code ────────────────────────────────────────────────── */
 const promoCode    = ref("");
@@ -171,6 +266,18 @@ const optionsLabel = (options) => {
 };
 
 const noteLabel = (options) => options?.note?.trim() || null;
+
+const formatOrderTime = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const diffMs = Date.now() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return t('order.justNow');
+  if (diffMin < 60) return t('order.minutesAgo', { n: diffMin });
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+};
 
 /* ─── Session ──────────────────────────────────────────── */
 const fetchSession = async () => {
@@ -379,6 +486,21 @@ onMounted(async () => {
         <span>{{ t('order.viewBill') }}</span>
       </prime-button>
     </div>
+    <!-- Edit mode banner -->
+    <div
+      v-if="editModeOrder"
+      class="tw:mb-4 tw:flex tw:items-center tw:justify-between tw:gap-4 tw:rounded-2xl tw:border tw:border-amber-500/30 tw:bg-amber-500/10 tw:px-6 tw:py-3 tw:text-sm tw:text-amber-400"
+    >
+      <div class="tw:flex tw:items-center tw:gap-2">
+        <iconify icon="ph:pencil-simple-bold" />
+        <span>{{ t('order.editingBanner', { number: editModeOrder.orderNumber ?? editModeOrder.OrderNumber }) }}</span>
+      </div>
+      <prime-button severity="warning" text size="small" @click="cancelEditMode">
+        <iconify icon="ph:x-bold" />
+        <span>{{ t('common.cancel') }}</span>
+      </prime-button>
+    </div>
+
     <div
       v-if="sessionError"
       class="tw:mb-4 tw:rounded-2xl tw:border tw:border-rose-500/30 tw:bg-rose-500/10 tw:px-6 tw:py-3 tw:text-sm tw:text-rose-400 tw:flex tw:items-center tw:justify-between tw:gap-4"
@@ -674,9 +796,11 @@ onMounted(async () => {
               </div>
             </div>
 
-            <prime-button class="tw:w-full" :disabled="cartStore.count === 0 || !session" :loading="isOrdering" @click="submitOrder">
-              <iconify icon="prime:check" />
-              <span>{{ t('order.placeOrder') }}</span>
+            <prime-button class="tw:w-full" :disabled="cartStore.count === 0 || !session" :loading="isOrdering"
+              :severity="editModeOrder ? 'warning' : 'success'"
+              @click="editModeOrder ? saveOrderEdits() : submitOrder()">
+              <iconify :icon="editModeOrder ? 'ph:floppy-disk-bold' : 'prime:check'" />
+              <span>{{ editModeOrder ? t('order.saveEdits') : t('order.placeOrder') }}</span>
             </prime-button>
             <div v-if="!session && cartStore.count > 0" class="tw:text-center tw:text-xs tw:text-rose-400 tw:space-y-1">
               <p>{{ t('order.tableNotConnected') }}</p>
@@ -836,9 +960,11 @@ onMounted(async () => {
 
     <template #footer>
       <prime-button :label="t('order.keepBrowsing')" severity="secondary" text @click="showMobileCart = false" />
-      <prime-button :disabled="cartStore.count === 0 || !session" :loading="isOrdering" @click="submitOrder">
-        <iconify icon="prime:check" />
-        <span>{{ t('order.placeOrder') }}</span>
+      <prime-button :disabled="cartStore.count === 0 || !session" :loading="isOrdering"
+        :severity="editModeOrder ? 'warning' : 'success'"
+        @click="editModeOrder ? saveOrderEdits() : submitOrder()">
+        <iconify :icon="editModeOrder ? 'ph:floppy-disk-bold' : 'prime:check'" />
+        <span>{{ editModeOrder ? t('order.saveEdits') : t('order.placeOrder') }}</span>
       </prime-button>
     </template>
   </prime-dialog>
@@ -1030,78 +1156,132 @@ onMounted(async () => {
   </prime-dialog>
 
   <!-- ── Bill / Summary Dialog ─────────────────────────────────── -->
-  <prime-dialog v-model:visible="showSummary" :header="t('order.tableBill')" modal :style="{ width: '36rem' }">
+  <prime-drawer
+    v-model:visible="showSummary"
+    position="bottom"
+    :style="{ height: 'auto', maxHeight: '90dvh' }"
+    :pt="{ root: { class: 'tw:rounded-t-2xl' }, content: { class: 'tw:overflow-y-auto' } }"
+  >
+    <template #header>
+      <span class="tw:font-semibold tw:text-base">{{ t('order.tableBill') }}</span>
+    </template>
     <div v-if="summary">
       <div
         v-for="order in summary.orders ?? summary.Orders ?? []"
         :key="order.orderId ?? order.OrderId"
-        class="tw:mb-4 tw:rounded-xl tw:border tw:border-white/10 tw:p-4"
+        class="tw:mb-4 tw:rounded-xl tw:border tw:p-4"
+        :class="(order.status ?? order.Status) === 'Cancelled'
+          ? 'tw:border-black/5 tw:dark:tw:border-white/5 tw:opacity-50'
+          : 'tw:border-black/10 tw:dark:border-white/10'"
       >
-        <div class="tw:flex tw:items-center tw:justify-between">
-          <div class="tw:flex tw:items-center tw:gap-2">
-            <span class="tw:text-sm tw:font-semibold">{{ order.orderNumber ?? order.OrderNumber }}</span>
-            <span
-              v-if="(order.status ?? order.Status) === 'Pending'"
-              class="tw:rounded-full tw:bg-amber-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-amber-400"
-              >{{ t('order.pending') }}</span
-            >
+        <div class="tw:flex tw:items-start tw:justify-between">
+          <div class="tw:flex tw:flex-col tw:gap-0.5">
+            <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-x-2 tw:gap-y-1">
+              <span class="tw:text-sm tw:font-semibold tw:shrink-0">{{ order.orderNumber ?? order.OrderNumber }}</span>
+              <span
+                v-if="(order.status ?? order.Status) === 'Pending'"
+                class="tw:rounded-full tw:bg-amber-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-amber-400"
+                >{{ t('order.pending') }}</span
+              >
+              <span
+                v-if="(order.status ?? order.Status) === 'Processing'"
+                class="tw:rounded-full tw:bg-blue-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-blue-400"
+                >{{ t('order.processing') }}</span
+              >
+              <span
+                v-if="(order.status ?? order.Status) === 'Completed'"
+                class="tw:rounded-full tw:bg-emerald-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-emerald-500"
+                >{{ t('order.completed') }}</span
+              >
+              <span
+                v-if="(order.status ?? order.Status) === 'Cancelled'"
+                class="tw:rounded-full tw:bg-red-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-red-400"
+                >{{ t('order.cancelledBadge') }}</span
+              >
+              <span
+                v-if="(order.paymentStatus ?? order.PaymentStatus) === 'PAID'"
+                class="tw:rounded-full tw:bg-green-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-green-600 tw:dark:text-green-400"
+                >{{ t('order.paid') }}</span
+              >
+            </div>
+            <span class="tw:text-xs app-text-subtle">
+              {{ formatOrderTime(order.orderDate ?? order.OrderDate) }}
+            </span>
           </div>
-          <span class="tw:text-sm tw:font-semibold tw:text-emerald-600 tw:dark:text-emerald-400">
-            {{ formatPrice(order.totalAmount ?? order.TotalAmount) }}
-          </span>
+          <prime-button
+            v-if="(order.status ?? order.Status) === 'Pending'"
+            :class="btnIcon"
+            severity="secondary"
+            text
+            @click="openOrderMenu($event, order)"
+          >
+            <iconify icon="ph:dots-three-bold" />
+          </prime-button>
         </div>
         <ul class="tw:mt-2 tw:space-y-1.5">
           <li
             v-for="item in order.items ?? order.Items ?? []"
             :key="(item.productId ?? item.ProductId) + String(item.productName ?? item.ProductName)"
             class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:text-sm app-text-muted"
-            :class="{
-              'tw:opacity-50 tw:pointer-events-none':
-                itemUpdating === `${order.orderId ?? order.OrderId}-${item.productId ?? item.ProductId}`,
-            }"
           >
             <span class="tw:flex-1">{{ item.productName ?? item.ProductName }}</span>
-            <!-- Edit controls — Pending orders only -->
-            <div v-if="(order.status ?? order.Status) === 'Pending'" class="tw:flex tw:items-center tw:gap-1">
-              <button
-                class="tw:flex tw:h-6 tw:w-6 tw:items-center tw:justify-center tw:rounded tw:border tw:border-white/15 app-text-subtle tw:transition hover:tw:border-emerald-400/50 hover:tw:text-emerald-600 hover:tw:dark:text-emerald-400"
-                @click="decrementClientItem(order.orderId ?? order.OrderId, item.productId ?? item.ProductId, item.quantity ?? item.Quantity)"
-              >
-                <iconify icon="heroicons-outline:minus" class="tw:h-3 tw:w-3" />
-              </button>
-              <span class="tw:min-w-5 tw:text-center tw:font-semibold">{{ item.quantity ?? item.Quantity }}</span>
-              <button
-                class="tw:flex tw:h-6 tw:w-6 tw:items-center tw:justify-center tw:rounded tw:border tw:border-white/15 app-text-subtle tw:transition hover:tw:border-emerald-400/50 hover:tw:text-emerald-600 hover:tw:dark:text-emerald-400"
-                @click="setClientItemQty(order.orderId ?? order.OrderId, item.productId ?? item.ProductId, (item.quantity ?? item.Quantity) + 1)"
-              >
-                <iconify icon="heroicons-outline:plus" class="tw:h-3 tw:w-3" />
-              </button>
-              <button
-                class="tw:ml-1 tw:flex tw:h-6 tw:w-6 tw:items-center tw:justify-center tw:rounded tw:border tw:border-rose-500/30 tw:text-rose-400 tw:transition hover:tw:border-rose-500 hover:tw:text-rose-500"
-                @click="removeClientItem(order.orderId ?? order.OrderId, item.productId ?? item.ProductId)"
-              >
-                <iconify icon="heroicons-outline:trash" class="tw:h-3 tw:w-3" />
-              </button>
-            </div>
-            <span v-else class="tw:font-medium">× {{ item.quantity ?? item.Quantity }}</span>
+            <span class="tw:font-medium">× {{ item.quantity ?? item.Quantity }}</span>
             <span class="tw:shrink-0">{{ formatPrice((item.unitPrice ?? item.UnitPrice) * (item.quantity ?? item.Quantity)) }}</span>
           </li>
         </ul>
+        <prime-divider class="tw:my-2!" />
+        <div class="tw:flex tw:justify-end">
+          <span class="tw:text-sm tw:font-semibold tw:text-emerald-600 tw:dark:text-emerald-400">
+            {{ formatPrice(order.totalAmount ?? order.TotalAmount) }}
+          </span>
+        </div>
       </div>
 
-      <div class="tw:rounded-xl tw:bg-white/5 tw:p-4">
+      <!-- Desktop popover -->
+      <prime-popover ref="orderMenuRef" append-to="body">
+        <div class="tw:flex tw:flex-col tw:gap-1 tw:min-w-36">
+          <prime-button
+            severity="secondary" text size="small" class="tw:w-full tw:justify-start!"
+            @click="enterEditMode(activeMenuOrder); orderMenuRef.hide()"
+          >
+            <iconify icon="ph:pencil-simple-bold" />
+            <span>{{ t('order.editOrder') }}</span>
+          </prime-button>
+          <prime-button
+            v-if="activeMenuOrder && canCancelOrder(activeMenuOrder)"
+            severity="danger" text size="small" class="tw:w-full tw:justify-start!"
+            @click="handleCancelOrder(activeMenuOrder); orderMenuRef.hide()"
+          >
+            <iconify icon="ph:x-bold" />
+            <span>{{ t('order.cancelOrder') }}</span>
+          </prime-button>
+        </div>
+      </prime-popover>
+
+      <div class="tw:rounded-xl tw:bg-white/5 tw:p-4 tw:space-y-2">
         <div class="tw:flex tw:items-center tw:justify-between tw:text-lg tw:font-semibold">
           <span>{{ t('order.grandTotal') }}</span>
           <span class="tw:text-emerald-600 tw:dark:text-emerald-400">{{ formatPrice(summary.grandTotal ?? summary.GrandTotal ?? 0) }}</span>
         </div>
+        <template v-if="summaryPaidTotal > 0">
+          <prime-divider class="tw:my-1!" />
+          <div class="tw:flex tw:items-center tw:justify-between tw:text-sm">
+            <span class="app-text-muted">{{ t('order.paid') }}</span>
+            <span class="tw:text-green-600 tw:dark:text-green-400 tw:font-medium">{{ formatPrice(summaryPaidTotal) }}</span>
+          </div>
+          <div v-if="summaryUnpaidTotal > 0" class="tw:flex tw:items-center tw:justify-between tw:text-sm">
+            <span class="app-text-muted">{{ t('order.remaining') }}</span>
+            <span class="tw:text-amber-600 tw:dark:text-amber-400 tw:font-medium">{{ formatPrice(summaryUnpaidTotal) }}</span>
+          </div>
+          <div v-else class="tw:flex tw:items-center tw:justify-between tw:text-sm">
+            <span class="app-text-muted">{{ t('order.fullyPaid') }}</span>
+            <iconify icon="ph:check-circle-bold" class="tw:text-green-500 tw:text-base" />
+          </div>
+        </template>
       </div>
     </div>
     <div v-else class="tw:py-8 tw:text-center app-text-muted">{{ t('order.noOrders') }}</div>
-
-    <template #footer>
-      <prime-button :label="t('common.close')" severity="secondary" @click="showSummary = false" />
-    </template>
-  </prime-dialog>
+  </prime-drawer>
 
   <!-- Find Promotions Dialog -->
   <prime-dialog

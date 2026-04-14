@@ -29,6 +29,9 @@ export const validatePromotion = (code, orderAmount) =>
 
 export const getPublicPromotions = () => api.get('/promotions/public')
 
+export const cancelOrderByGuest = (orderId, sessionId) =>
+  api.put(`/orders/${orderId}/cancel`, { sessionId })
+
 /**
  * Apply a promotion to an existing Pending order.
  * @param {number} orderId

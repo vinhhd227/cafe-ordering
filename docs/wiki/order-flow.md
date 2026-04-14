@@ -38,17 +38,19 @@ Xem thêm: [[domain-model]], [[session-flow]], [[promotions]]
 ## Luồng 1: Khách đặt qua QR (Client App)
 
 ```
-1. Khách quét QR → mở /client → chọn bàn
-2. Frontend gọi POST /api/sessions (GetOrCreateSession)
+1. Khách quét QR → mở /client → URL chứa tableId + token
+2. Frontend gọi GET /api/tables/{tableId}/session?token={qrToken}
    → Backend tìm GuestSession Active của bàn hoặc tạo mới
+   → Nếu tạo mới: Table.OpenSession() → Status = Occupied, ActiveSessionId = sessionId
 3. Khách chọn món → giỏ hàng (Pinia cart store)
-4. Khách xác nhận → POST /api/orders
+4. Khách xác nhận → POST /api/orders { sessionId, items, promoCode? }
    → PlaceOrderHandler: tạo Order + Items, lưu DB
+   → Nếu có promoCode: TryApplyPromoAsync() (best-effort, không fail order)
    → order.NotifyCreated() → OrderCreatedEvent → SSE broadcast đến admin
 5. Admin nhận notification, xem đơn trên màn hình
 ```
 
-**Endpoint khách:** `POST /api/orders` (không cần auth, dùng sessionId từ QR token)
+**Endpoint khách:** `POST /api/orders` (không cần auth, dùng sessionId từ bước 2)
 
 ---
 
@@ -56,12 +58,16 @@ Xem thêm: [[domain-model]], [[session-flow]], [[promotions]]
 
 ```
 1. Admin vào trang Create Order (/admin/orders/create)
-2. Chọn bàn → backend GetOrCreateSession → lấy sessionId
+2. Chọn bàn → GET /api/tables/{tableId}/session (không có token) → lấy sessionId
 3. Admin chọn món, số khách, ngày giờ
-4. POST /api/admin/orders
-5. Ngay sau đó: autoApplyPromotions(orderId) → POST /api/admin/orders/{id}/promotions/auto
+4. POST /api/admin/orders { sessionId, items, ... }
+   → CreateManualOrderHandler: reuse active session nếu có, hoặc tạo GuestSession.CreateManual()
+   → Không fire domain event lên table, không ảnh hưởng Table.ActiveSessionId
+5. Nếu có promo code: POST /api/admin/orders/{id}/promotions { code }
 6. Redirect sang trang Detail
 ```
+
+**Lưu ý:** `CreateManualOrderHandler` không cập nhật `Table.ActiveSessionId`. Table sẽ được sync khi client gọi `GetOrCreateSession` lần tiếp theo.
 
 **Endpoint admin:** `POST /api/admin/orders` (cần claim `order.create`)
 
@@ -153,9 +159,10 @@ Gọi `order.UpdateManually(orderedAt, guestCount)` → xóa hết items + promo
 ## Tính toán giá
 
 ```
-TotalAmount  = sum(item.UnitPrice × item.Quantity - item.DiscountAmount)
-TotalDiscount = sum(promotion.DiscountAmount)
-FinalAmount  = max(0, TotalAmount - TotalDiscount)
+item.TotalPrice  = (item.UnitPrice - item.Discount) × item.Quantity
+TotalAmount      = sum(item.TotalPrice)
+TotalDiscount    = sum(promotion.DiscountAmount)
+FinalAmount      = max(0, TotalAmount - TotalDiscount)
 ```
 
 Xem chi tiết cách tính discount: [[promotions]]
@@ -181,5 +188,4 @@ Xem chi tiết cách tính discount: [[promotions]]
 | `PATCH` | `/api/admin/orders/{id}/order-date` | Cập nhật ngày đặt hàng |
 | `GET` | `/api/admin/orders/stream` | SSE stream đơn hàng realtime |
 | `POST` | `/api/admin/orders/{id}/promotions` | Áp khuyến mãi thủ công |
-| `POST` | `/api/admin/orders/{id}/promotions/auto` | Auto-apply khuyến mãi |
 | `DELETE` | `/api/admin/orders/{id}/promotions/{promoId}` | Xóa khuyến mãi |

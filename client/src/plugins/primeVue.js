@@ -49,6 +49,8 @@ import ToastService from 'primevue/toastservice'
 import Checkbox from 'primevue/checkbox';
 import CheckboxGroup from 'primevue/checkboxgroup';
 import Dialog from 'primevue/dialog';
+import Drawer from 'primevue/drawer';
+import Popover from 'primevue/popover';
 
 // Theme
 const emeraldPreset = definePreset(Aura, {
@@ -127,5 +129,7 @@ export default {
         app.component('prime-checkbox', Checkbox)
         app.component('prime-checkbox-group', CheckboxGroup)
         app.component('prime-dialog', Dialog)
+        app.component('prime-drawer', Drawer)
+        app.component('prime-popover', Popover)
     },
 }
