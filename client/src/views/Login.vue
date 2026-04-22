@@ -95,14 +95,14 @@ onBeforeUnmount(() => {
                 :key="l.code"
                 type="button"
                 class="tw:rounded-md tw:px-2 tw:py-1 tw:text-xs tw:font-semibold tw:transition-all"
-                :class="locale === l.code ? 'tw:bg-emerald-500/15 tw:text-emerald-400' : 'app-text-subtle hover:tw:bg-white/5'"
+                :class="locale === l.code ? 'tw:bg-emerald-500/15 tw:text-emerald-400' : 'app-text-subtle tw:hover:bg-white/5'"
                 @click="setLocale(l.code)"
               >
                 {{ l.label }}
               </button>
               <button
                 type="button"
-                class="tw:rounded-md tw:p-1 tw:text-xs tw:transition-all app-text-subtle hover:tw:bg-white/5"
+                class="tw:rounded-md tw:p-1 tw:text-xs tw:transition-all app-text-subtle tw:hover:bg-white/5"
                 @click="themeStore.toggleTheme()"
               >
                 <iconify :icon="themeStore.isDark ? 'ph:sun-bold' : 'ph:moon-bold'" class="tw:text-sm" />
@@ -110,7 +110,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
           <h2 class="tw:text-3xl tw:font-semibold">{{ t('login.title') }}</h2>
-          <p class="tw:text-sm app-text-muted">{{ t('login.subtitle') }}</p>
+          <p class="tw:text-sm tw:text-muted">{{ t('login.subtitle') }}</p>
         </div>
 
         <!-- Form -->
@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
               class="app-panel"
               size="small"
             />
-            <label for="rememberMe" class="tw:text-sm app-text-muted">{{ t('login.rememberMe') }}</label>
+            <label for="rememberMe" class="tw:text-sm tw:text-muted">{{ t('login.rememberMe') }}</label>
           </div>
 
           <prime-message v-if="submitError" severity="error" size="small" variant="simple" :closable="false" class="tw:mt-4">
@@ -175,7 +175,7 @@ onBeforeUnmount(() => {
 
           <div class="tw:mt-5 tw:flex tw:items-center tw:justify-between tw:text-sm">
             <span class="app-text-subtle">{{ t('login.newUser') }}</span>
-            <router-link class="tw:text-emerald-400 hover:tw:text-emerald-300" :to="{ name: 'register' }">
+            <router-link class="tw:text-emerald-400 tw:hover:text-emerald-300" :to="{ name: 'register' }">
               {{ t('login.register') }}
             </router-link>
           </div>

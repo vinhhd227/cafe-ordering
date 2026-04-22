@@ -432,7 +432,7 @@ onUnmounted(() => {
     :style="{ width: '22rem' }"
   >
     <div class="tw:space-y-4">
-      <p class="tw:text-sm app-text-muted">
+      <p class="tw:text-sm tw:text-muted">
         {{ t("orders.pay.order") }}
         <span class="tw:font-mono tw:font-semibold tw:text-white">{{
           payOrder?.orderNumber
@@ -441,7 +441,7 @@ onUnmounted(() => {
       <!-- Amount received -->
       <div class="tw:space-y-1.5">
         <label
-          class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted"
           >{{ t("orders.pay.amountReceived") }}</label
         >
         <prime-input-number
@@ -458,7 +458,7 @@ onUnmounted(() => {
           v-if="payChange !== null && payChange < 0"
           class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5"
         >
-          <span class="app-text-muted">{{ t("orders.pay.short") }}</span>
+          <span class="tw:text-muted">{{ t("orders.pay.short") }}</span>
           <span class="tw:text-red-400 tw:font-semibold">{{
             formatVnd(Math.abs(payChange))
           }}</span>
@@ -469,13 +469,13 @@ onUnmounted(() => {
           <div
             class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5"
           >
-            <span class="app-text-muted">{{ t("orders.pay.change") }}</span>
+            <span class="tw:text-muted">{{ t("orders.pay.change") }}</span>
             <span class="tw:font-semibold">{{ formatVnd(payChange) }}</span>
           </div>
           <div class="tw:space-y-1">
             <label
               for="tip"
-              class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+              class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted"
               >{{ t("orders.pay.tip") }}</label
             >
             <div class="tw:flex tw:gap-2">
@@ -500,13 +500,13 @@ onUnmounted(() => {
             </div>
           </div>
           <div class="tw:flex tw:items-center tw:justify-between tw:text-sm">
-            <span class="app-text-muted">{{
+            <span class="tw:text-muted">{{
               t("orders.pay.returnToCustomer")
             }}</span>
             <span
               :class="
                 payReturn === 0
-                  ? 'app-text-muted'
+                  ? 'tw:text-muted'
                   : 'tw:text-emerald-400 tw:font-semibold'
               "
             >
@@ -518,7 +518,7 @@ onUnmounted(() => {
 
       <div class="tw:space-y-2">
         <label
-          class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted"
           >{{ t("orders.pay.paymentMethod") }}</label
         >
         <prime-select-button
@@ -563,7 +563,7 @@ onUnmounted(() => {
         />
         <div class="tw:flex-1 tw:min-w-0">
           <p class="tw:text-sm tw:font-semibold">{{ message.summary }}</p>
-          <p class="tw:text-xs app-text-muted">{{ message.detail }}</p>
+          <p class="tw:text-xs tw:text-muted">{{ message.detail }}</p>
         </div>
         <prime-button
           :label="t('orders.kanban.undo')"
@@ -581,7 +581,7 @@ onUnmounted(() => {
     <!-- Header -->
     <page-header>
       <template #subtitle>
-        <p class="tw:text-sm app-text-muted tw:flex tw:items-center tw:gap-1.5">
+        <p class="tw:text-sm tw:text-muted tw:flex tw:items-center tw:gap-1.5">
           <span
             class="tw:inline-block tw:h-2 tw:w-2 tw:rounded-full tw:shrink-0 tw:transition-colors"
             :class="
@@ -635,7 +635,7 @@ onUnmounted(() => {
     <div class="tw:flex tw:md:hidden tw:items-center tw:gap-3 tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:px-4 tw:py-3">
       <div class="tw:shrink-0">
         <span class="tw:text-xl tw:font-bold">{{ summary.total }}</span>
-        <span class="app-text-muted tw:text-xs tw:ml-1.5">{{ t('orders.breadcrumb').toLowerCase() }}</span>
+        <span class="tw:text-muted tw:text-xs tw:ml-1.5">{{ t('orders.breadcrumb').toLowerCase() }}</span>
       </div>
       <div class="tw:h-4 tw:w-px tw:bg-white/10 tw:shrink-0" />
       <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
@@ -684,7 +684,7 @@ onUnmounted(() => {
         @click="activeTab = col.key"
         :class="[
           'tw:flex tw:items-center tw:gap-1.5 tw:rounded-full tw:px-3 tw:py-1.5 tw:text-xs tw:font-semibold tw:whitespace-nowrap tw:shrink-0 tw:border tw:transition-colors tw:cursor-pointer tw:bg-transparent',
-          activeTab === col.key ? col.bg + ' ' + col.color : 'tw:border-white/15 app-text-muted'
+          activeTab === col.key ? col.bg + ' ' + col.color : 'tw:border-white/15 tw:text-muted'
         ]"
       >
         <span
@@ -765,7 +765,7 @@ onUnmounted(() => {
           >
             <template #content>
               <div
-                class="tw:flex tw:flex-col tw:items-center tw:justify-center app-text-muted tw:text-sm tw:text-center tw:opacity-50"
+                class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:text-muted tw:text-sm tw:text-center tw:opacity-50"
               >
                 <iconify icon="ph:tray-bold" class="tw:text-2xl tw:mb-2" />
                 <span>{{ t("orders.kanban.noOrders") }}</span>
@@ -807,7 +807,7 @@ onUnmounted(() => {
                   >
                     {{ order.orderNumber }}
                   </p>
-                  <p class="tw:text-xs app-text-muted tw:mt-0.5">
+                  <p class="tw:text-xs tw:text-muted tw:mt-0.5">
                     {{ timeAgo(order.orderDate) }}
                   </p>
                 </div>
@@ -836,7 +836,7 @@ onUnmounted(() => {
                 <li
                   v-for="item in order.items"
                   :key="item.productId"
-                  class="tw:flex tw:items-center tw:justify-between tw:text-xs app-text-muted"
+                  class="tw:flex tw:items-center tw:justify-between tw:text-xs tw:text-muted"
                 >
                   <span class="tw:truncate tw:max-w-30">{{
                     item.productName

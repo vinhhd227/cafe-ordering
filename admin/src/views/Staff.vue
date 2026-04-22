@@ -5,14 +5,14 @@
         Staff
       </p>
       <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Staff directory</h1>
-      <p class="tw:mt-2 tw:text-sm app-text-muted">
+      <p class="tw:mt-2 tw:text-sm tw:text-muted">
         Monitor roles, shifts, and performance.
       </p>
     </div>
 
     <prime-card class="app-card tw:rounded-2xl tw:border">
       <template #content>
-        <p class="app-text-muted">Staff page is ready for data wiring.</p>
+        <p class="tw:text-muted">Staff page is ready for data wiring.</p>
       </template>
     </prime-card>
   </section>

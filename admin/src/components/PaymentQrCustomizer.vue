@@ -61,7 +61,7 @@ const removeLogo = () => {
 
       <!-- Color -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('utilities.paymentQr.qrColor') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('utilities.paymentQr.qrColor') }}</span>
         <div class="tw:relative">
           <div
             class="tw:w-6 tw:h-6 tw:rounded tw:cursor-pointer tw:border tw:border-slate-200 tw:dark:border-white/15"
@@ -84,7 +84,7 @@ const removeLogo = () => {
           spellcheck="false"
         />
         <button
-          class="tw:text-xs app-text-muted tw:underline tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0"
+          class="tw:text-xs tw:text-muted tw:underline tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0"
           @click="color = '#1a5e38'"
         >{{ t('utilities.paymentQr.resetColor') }}</button>
       </div>
@@ -93,52 +93,52 @@ const removeLogo = () => {
 
       <!-- Pattern -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.pattern') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.pattern') }}</span>
         <div class="tw:flex tw:gap-1">
           <button
             v-for="opt in qrStyleOptions" :key="opt.value"
             @click="style = opt.value"
             :class="['tw:text-sm tw:w-8 tw:h-7 tw:rounded tw:border tw:cursor-pointer tw:transition-colors',
-              style === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'app-text-muted tw:border-surface-400 tw:bg-transparent']"
+              style === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'tw:text-muted tw:border-surface-400 tw:bg-transparent']"
           >{{ opt.label }}</button>
         </div>
       </div>
 
       <!-- Marker border -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.markerBorder') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.markerBorder') }}</span>
         <div class="tw:flex tw:gap-1">
           <button
             v-for="opt in markerBorderOptions" :key="opt.value"
             @click="markerBorder = opt.value"
             :class="['tw:text-sm tw:w-8 tw:h-7 tw:rounded tw:border tw:cursor-pointer tw:transition-colors',
-              markerBorder === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'app-text-muted tw:border-surface-400 tw:bg-transparent']"
+              markerBorder === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'tw:text-muted tw:border-surface-400 tw:bg-transparent']"
           >{{ opt.label }}</button>
         </div>
       </div>
 
       <!-- Marker center -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.markerCenter') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.markerCenter') }}</span>
         <div class="tw:flex tw:gap-1">
           <button
             v-for="opt in markerCenterOptions" :key="opt.value"
             @click="markerCenter = opt.value"
             :class="['tw:text-sm tw:w-8 tw:h-7 tw:rounded tw:border tw:cursor-pointer tw:transition-colors',
-              markerCenter === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'app-text-muted tw:border-surface-400 tw:bg-transparent']"
+              markerCenter === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'tw:text-muted tw:border-surface-400 tw:bg-transparent']"
           >{{ opt.label }}</button>
         </div>
       </div>
 
       <!-- Precision -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.precision') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.precision') }}</span>
         <div class="tw:flex tw:gap-1">
           <button
             v-for="lvl in errorLevelOptions" :key="lvl"
             @click="errorLevel = lvl"
             :class="['tw:text-xs tw:font-mono tw:w-8 tw:h-7 tw:rounded tw:border tw:cursor-pointer tw:transition-colors',
-              errorLevel === lvl ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'app-text-muted tw:border-surface-400 tw:bg-transparent']"
+              errorLevel === lvl ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'tw:text-muted tw:border-surface-400 tw:bg-transparent']"
           >{{ lvl }}</button>
         </div>
       </div>
@@ -147,7 +147,7 @@ const removeLogo = () => {
 
       <!-- Logo -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('utilities.paymentQr.centerLogo') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('utilities.paymentQr.centerLogo') }}</span>
         <div v-if="!logo" class="tw:flex tw:items-center tw:gap-2">
           <prime-button severity="secondary" outlined size="small" @click="logoInputRef.click()">
             <iconify icon="ph:upload-simple-bold" />

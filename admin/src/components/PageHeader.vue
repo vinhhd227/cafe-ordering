@@ -47,7 +47,7 @@ const resolvedTitle = computed(() => {
         <slot name="subtitle" />
       </div>
       <!-- subtitle prop: rendered inside a standard <p> -->
-      <p v-else-if="subtitle" class="tw:mt-1 tw:text-sm app-text-muted">{{ subtitle }}</p>
+      <p v-else-if="subtitle" class="tw:mt-1 tw:text-sm tw:text-muted">{{ subtitle }}</p>
     </div>
 
     <!-- Right: action buttons etc. (default slot) -->

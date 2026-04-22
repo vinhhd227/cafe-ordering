@@ -15,13 +15,13 @@
       <div class="tw:flex tw:items-center tw:gap-3">
         <button
           type="button"
-          class="tw:rounded-xl tw:border tw:border-white/10 tw:px-4 tw:py-2 tw:text-sm tw:text-slate-200 tw:transition hover:tw:bg-white/5"
+          class="tw:rounded-xl tw:border tw:border-white/10 tw:px-4 tw:py-2 tw:text-sm tw:text-slate-200 tw:transition tw:hover:bg-white/5"
         >
           Download report
         </button>
         <button
           type="button"
-          class="tw:rounded-xl tw:bg-emerald-500 tw:px-4 tw:py-2 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-emerald-500/30 tw:transition hover:tw:bg-emerald-400"
+          class="tw:rounded-xl tw:bg-emerald-500 tw:px-4 tw:py-2 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-emerald-500/30 tw:transition tw:hover:bg-emerald-400"
         >
           New order
         </button>

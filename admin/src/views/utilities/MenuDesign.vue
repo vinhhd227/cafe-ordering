@@ -333,7 +333,7 @@ const confirmDeleteMenu = (menu) => {
     <div>
       <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('nav.groups.utilities') }}</p>
       <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('utilities.menuDesign.title') }}</h1>
-      <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('utilities.menuDesign.subtitle') }}</p>
+      <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('utilities.menuDesign.subtitle') }}</p>
     </div>
 
     <prime-alert v-if="errorMessage" severity="error" variant="accent" closable @close="errorMessage = ''">
@@ -349,7 +349,7 @@ const confirmDeleteMenu = (menu) => {
 
           <!-- Template selector -->
           <div class="tw:space-y-1.5">
-            <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Template</p>
+            <p class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">Template</p>
             <div class="tw:grid tw:grid-cols-2 tw:gap-2">
               <prime-button
                 v-for="tpl in templateOptions"
@@ -395,31 +395,31 @@ const confirmDeleteMenu = (menu) => {
           </div>
 
           <div class="tw:space-y-1.5">
-            <label for="cafe-name" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.menuDesign.cafeName') }}</label>
+            <label for="cafe-name" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.menuDesign.cafeName') }}</label>
             <prime-input-text id="cafe-name" v-model="cafeName" :placeholder="t('utilities.menuDesign.cafeNamePlaceholder')" class="app-input tw:w-full" />
           </div>
 
           <div class="tw:space-y-1.5">
-            <label for="slogan" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.menuDesign.slogan') }}</label>
+            <label for="slogan" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.menuDesign.slogan') }}</label>
             <prime-input-text id="slogan" v-model="slogan" :placeholder="t('utilities.menuDesign.sloganPlaceholder')" class="app-input tw:w-full" />
           </div>
 
           <div class="tw:grid tw:grid-cols-2 tw:gap-4">
             <div class="tw:space-y-1.5">
-              <label for="primary-color" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.menuDesign.primaryColor') }}</label>
+              <label for="primary-color" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.menuDesign.primaryColor') }}</label>
               <div class="tw:flex tw:items-center tw:gap-2">
                 <input id="primary-color" type="color" v-model="primaryColor" class="tw:w-10 tw:h-10 tw:rounded-lg tw:border tw:border-slate-300 tw:dark:border-white/20 tw:cursor-pointer tw:bg-transparent" />
-                <span class="tw:text-sm tw:font-mono app-text-muted">{{ primaryColor }}</span>
+                <span class="tw:text-sm tw:font-mono tw:text-muted">{{ primaryColor }}</span>
               </div>
             </div>
             <div class="tw:space-y-1.5">
-              <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.menuDesign.layout') }}</p>
+              <p class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.menuDesign.layout') }}</p>
               <prime-select v-model="layout" :options="layoutOptions" option-label="label" option-value="value" class="app-input tw:w-full" />
             </div>
           </div>
 
           <div class="tw:space-y-1.5">
-            <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Font chữ</p>
+            <p class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">Font chữ</p>
             <div class="tw:flex tw:gap-2">
               <prime-select v-model="menuFont" :options="fontOptions" option-label="label" option-value="value" class="app-input tw:flex-1">
                 <template #option="{ option }">
@@ -465,12 +465,12 @@ const confirmDeleteMenu = (menu) => {
             </div>
           </div>
 
-          <p class="tw:text-xs app-text-muted">
+          <p class="tw:text-xs tw:text-muted">
             {{ t('utilities.menuDesign.selectedCount', { n: selectedCount }) }}
           </p>
 
           <div v-if="loading" class="tw:flex tw:justify-center tw:py-8">
-            <iconify icon="ph:spinner-bold" class="tw:text-2xl tw:animate-spin app-text-muted" />
+            <iconify icon="ph:spinner-bold" class="tw:text-2xl tw:animate-spin tw:text-muted" />
           </div>
 
           <div v-else class="tw:space-y-3 tw:max-h-[400px] tw:overflow-y-auto tw:pr-1">
@@ -505,7 +505,7 @@ const confirmDeleteMenu = (menu) => {
                     :style="{ color: isCategorySelected(cat) || isCategoryPartial(cat) ? primaryColor : undefined }"
                   />
                   <span class="tw:text-sm tw:font-semibold">{{ cat.name }}</span>
-                  <span class="tw:text-xs app-text-muted tw:ml-auto">{{ cat.products?.length }} sp</span>
+                  <span class="tw:text-xs tw:text-muted tw:ml-auto">{{ cat.products?.length }} sp</span>
                 </div>
               </div>
               <!-- Product rows -->
@@ -522,7 +522,7 @@ const confirmDeleteMenu = (menu) => {
                     :style="{ color: selectedIds.has(product.id) ? primaryColor : undefined }"
                   />
                   <span class="tw:text-sm tw:flex-1">{{ product.name }}</span>
-                  <span class="tw:text-xs app-text-muted">{{ formatPrice(product.price) }}</span>
+                  <span class="tw:text-xs tw:text-muted">{{ formatPrice(product.price) }}</span>
                 </div>
               </div>
             </div>
@@ -568,7 +568,7 @@ const confirmDeleteMenu = (menu) => {
             >
               <div class="tw:flex-1 tw:min-w-0">
                 <p class="tw:text-sm tw:font-medium tw:truncate">{{ menu.name }}</p>
-                <p class="tw:text-xs app-text-muted tw:truncate">{{ menu.cafeName }} · {{ menu.layout }} · {{ menu.menuTemplate }}</p>
+                <p class="tw:text-xs tw:text-muted tw:truncate">{{ menu.cafeName }} · {{ menu.layout }} · {{ menu.menuTemplate }}</p>
               </div>
               <prime-button :class="btnIcon" severity="secondary" outlined v-tooltip.top="t('utilities.menuDesign.loadMenu')" @click="applyMenu(menu)">
                 <iconify icon="ph:arrow-counter-clockwise-bold" />
@@ -583,7 +583,7 @@ const confirmDeleteMenu = (menu) => {
 
       <!-- Right: A4 Preview -->
       <div class="tw:flex tw:flex-col tw:items-center tw:gap-4">
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] app-text-muted tw:self-start">{{ t('utilities.menuDesign.preview') }}</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-muted tw:self-start">{{ t('utilities.menuDesign.preview') }}</p>
 
         <!-- A4 wrapper: scale to fit, preserve ratio -->
         <div class="tw:w-full tw:overflow-auto">
@@ -747,7 +747,7 @@ const confirmDeleteMenu = (menu) => {
     >
       <div class="tw:space-y-4 tw:py-2">
         <div class="tw:space-y-1.5">
-          <label for="save-menu-name" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.menuDesign.menuName') }}</label>
+          <label for="save-menu-name" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.menuDesign.menuName') }}</label>
           <prime-input-text
             id="save-menu-name"
             v-model="saveMenuName"

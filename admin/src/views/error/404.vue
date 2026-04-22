@@ -9,19 +9,19 @@
         Cafe Ordering
       </p>
       <h1 class="tw:mt-4 tw:text-4xl tw:font-semibold">404</h1>
-      <p class="tw:mt-2 tw:text-lg app-text-muted">Page not found</p>
-      <p class="tw:mt-4 tw:text-sm app-text-muted">
+      <p class="tw:mt-2 tw:text-lg tw:text-muted">Page not found</p>
+      <p class="tw:mt-4 tw:text-sm tw:text-muted">
         The page you are looking for does not exist or has been moved.
       </p>
       <div class="tw:mt-8 tw:flex tw:flex-wrap tw:justify-center tw:gap-3">
         <router-link
-          class="tw:rounded-xl tw:bg-emerald-500 tw:px-4 tw:py-2 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-emerald-500/30 tw:transition hover:tw:bg-emerald-400"
+          class="tw:rounded-xl tw:bg-emerald-500 tw:px-4 tw:py-2 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-emerald-500/30 tw:transition tw:hover:bg-emerald-400"
           to="/"
         >
           Back to home
         </router-link>
         <router-link
-          class="tw:rounded-xl tw:border app-border tw:px-4 tw:py-2 tw:text-sm app-text-muted tw:transition hover:tw:bg-white/5"
+          class="tw:rounded-xl tw:border app-border tw:px-4 tw:py-2 tw:text-sm tw:text-muted tw:transition tw:hover:bg-white/5"
           to="/"
         >
           Go to dashboard

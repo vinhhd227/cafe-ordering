@@ -37,7 +37,7 @@ const profitMargin = computed(() => {
       <span class="tw:text-sm tw:font-bold">{{ loading ? '…' : formatVnd(expenseBreakdown.total) }}</span>
     </div>
     <div class="tw:flex tw:flex-col tw:gap-0.5 tw:text-right">
-      <span class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">{{ t('expenses.summary.profit') }}</span>
+      <span class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-muted">{{ t('expenses.summary.profit') }}</span>
       <span
         class="tw:text-sm tw:font-bold"
         :class="profit >= 0 ? 'tw:text-emerald-500 tw:dark:text-emerald-400' : 'tw:text-red-500 tw:dark:text-red-400'"
@@ -57,7 +57,7 @@ const profitMargin = computed(() => {
         <iconify icon="ph:trend-up-bold" class="tw:text-emerald-400 tw:opacity-60" />
       </template>
       <template #sub>
-        <div class="tw:mt-2 tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:text-xs app-text-muted">
+        <div class="tw:mt-2 tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:text-xs tw:text-muted">
           <span>{{ t('expenses.summary.cash') }} <span class="tw:font-medium">{{ formatVnd(revenue.cash) }}</span></span>
           <span>{{ t('expenses.summary.bank') }} <span class="tw:font-medium">{{ formatVnd(revenue.bank) }}</span></span>
         </div>
@@ -74,7 +74,7 @@ const profitMargin = computed(() => {
         <iconify icon="ph:trend-down-bold" class="tw:text-red-400 tw:opacity-60" />
       </template>
       <template #sub>
-        <div class="tw:mt-2 tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:text-xs app-text-muted">
+        <div class="tw:mt-2 tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:text-xs tw:text-muted">
           <span>{{ t('expenses.summary.cash') }} <span class="tw:font-medium">{{ formatVnd(expenseBreakdown.cash) }}</span></span>
           <span>{{ t('expenses.summary.bank') }} <span class="tw:font-medium">{{ formatVnd(expenseBreakdown.bank) }}</span></span>
         </div>
@@ -94,7 +94,7 @@ const profitMargin = computed(() => {
         />
       </template>
       <template #sub>
-        <div class="tw:mt-2 tw:text-xs app-text-muted">
+        <div class="tw:mt-2 tw:text-xs tw:text-muted">
           <span v-if="profitMargin !== null">
             {{ t('expenses.summary.margin') }}
             <span :class="profit >= 0 ? 'tw:text-emerald-400 tw:font-semibold' : 'tw:text-red-400 tw:font-semibold'">{{ profitMargin }}%</span>

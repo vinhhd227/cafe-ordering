@@ -68,7 +68,7 @@ onMounted(fetchTables)
   <div>
     <div class="tw:mb-6">
       <h1 class="tw:text-2xl tw:font-semibold">{{ t('table.selectTitle') }}</h1>
-      <p class="tw:mt-1 app-text-muted">{{ t('table.selectSubtitle') }}</p>
+      <p class="tw:mt-1 tw:text-muted">{{ t('table.selectSubtitle') }}</p>
     </div>
 
     <!-- Loading -->
@@ -91,7 +91,7 @@ onMounted(fetchTables)
     <!-- Empty -->
     <div
       v-else-if="tables.length === 0"
-      class="tw:rounded-2xl tw:border tw:border-white/10 tw:bg-white/5 tw:p-12 tw:text-center app-text-muted"
+      class="tw:rounded-2xl tw:border tw:border-white/10 tw:bg-white/5 tw:p-12 tw:text-center tw:text-muted"
     >
       <iconify icon="ph:chair-bold" class="tw:mb-3 tw:text-4xl app-text-subtle" />
       <p>{{ t('table.empty') }}</p>
@@ -120,9 +120,9 @@ onMounted(fetchTables)
             class="app-panel tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-2 tw:rounded-2xl tw:border tw:p-6 tw:text-center tw:transition-all tw:duration-150"
             :class="
               table.status === 'Available'
-                ? 'tw:border-emerald-500/30 hover:tw:border-emerald-400 hover:tw:bg-emerald-500/10 tw:cursor-pointer'
+                ? 'tw:border-emerald-500/30 tw:hover:border-emerald-400 tw:hover:bg-emerald-500/10 tw:cursor-pointer'
                 : table.status === 'Occupied'
-                ? 'tw:border-amber-500/20 hover:tw:border-amber-400 hover:tw:bg-amber-500/10 tw:cursor-pointer'
+                ? 'tw:border-amber-500/20 tw:hover:border-amber-400 tw:hover:bg-amber-500/10 tw:cursor-pointer'
                 : 'tw:border-white/10 tw:opacity-40 tw:cursor-not-allowed'
             "
             :disabled="table.status === 'Inactive'"

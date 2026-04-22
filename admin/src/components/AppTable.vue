@@ -186,7 +186,7 @@ watch(
           v-if="$slots['mobile-card']"
           class="tw:sm:hidden tw:py-2"
         >
-          <div v-if="value.length === 0" class="tw:py-14 tw:flex tw:flex-col tw:items-center tw:gap-3 app-text-muted">
+          <div v-if="value.length === 0" class="tw:py-14 tw:flex tw:flex-col tw:items-center tw:gap-3 tw:text-muted">
             <iconify icon="ph:tray-bold" class="tw:text-5xl" />
             <span class="tw:text-sm">{{ emptyMessage ?? t('common.table.emptyMessage') }}</span>
           </div>
@@ -209,7 +209,7 @@ watch(
         responsiveLayout="scroll"
       >
         <template #empty>
-          <div class="tw:py-14 tw:flex tw:flex-col tw:items-center tw:gap-3 app-text-muted">
+          <div class="tw:py-14 tw:flex tw:flex-col tw:items-center tw:gap-3 tw:text-muted">
             <iconify icon="ph:tray-bold" class="tw:text-5xl" />
             <span class="tw:text-sm">{{ emptyMessage ?? t('common.table.emptyMessage') }}</span>
           </div>
@@ -244,7 +244,7 @@ watch(
       >
         <!-- Left: showing info -->
         <span
-          class="tw:text-sm app-text-muted tw:w-full tw:sm:w-auto tw:sm:min-w-[14rem]"
+          class="tw:text-sm tw:text-muted tw:w-full tw:sm:w-auto tw:sm:min-w-[14rem]"
         >
           {{ t('common.table.showing', { from: showingFrom, to: showingTo, total: totalRecords }) }}
         </span>
@@ -278,7 +278,7 @@ watch(
           <template v-for="(token, idx) in pageTokens" :key="idx">
             <span
               v-if="token === '...'"
-              class="tw:px-1 tw:text-sm app-text-muted tw:select-none tw:leading-none"
+              class="tw:px-1 tw:text-sm tw:text-muted tw:select-none tw:leading-none"
               >…</span
             >
             <prime-button
@@ -321,7 +321,7 @@ watch(
         <div
           class="tw:flex tw:items-center tw:gap-2 tw:w-full tw:sm:w-auto tw:sm:min-w-[14rem] tw:justify-between tw:sm:justify-end"
         >
-          <span class="tw:text-sm app-text-muted tw:whitespace-nowrap tw:hidden tw:sm:inline">{{ t('common.table.itemsPerPage') }}</span>
+          <span class="tw:text-sm tw:text-muted tw:whitespace-nowrap tw:hidden tw:sm:inline">{{ t('common.table.itemsPerPage') }}</span>
           <div class="tw:flex tw:items-center tw:gap-2">
             <prime-select
               :model-value="rows"

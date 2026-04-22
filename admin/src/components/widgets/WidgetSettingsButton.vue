@@ -43,7 +43,7 @@ const visible = ref(false)
     >
       <!-- ── Columns per row ──────────────────────────────────────── -->
       <div class="tw:flex tw:items-center tw:justify-between tw:mb-5">
-        <span class="tw:text-sm app-text-muted">Columns per row</span>
+        <span class="tw:text-sm tw:text-muted">Columns per row</span>
         <div class="tw:flex tw:gap-1">
           <prime-button
             v-for="n in [1, 2, 3, 4]"
@@ -85,7 +85,7 @@ const visible = ref(false)
           </div>
 
           <!-- Description (outside the card) -->
-          <p class="tw:text-[11px] tw:leading-snug app-text-muted tw:px-1">
+          <p class="tw:text-[11px] tw:leading-snug tw:text-muted tw:px-1">
             {{ w.description }}
           </p>
         </div>

@@ -158,7 +158,7 @@ const submitForm = async () => {
     <div class="tw:space-y-4">
       <!-- Purchase date -->
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('expenses.dialog.purchaseDate') }}
         </label>
         <prime-date-picker
@@ -171,7 +171,7 @@ const submitForm = async () => {
 
       <!-- Item name -->
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('expenses.dialog.itemName') }} <span class="tw:text-red-400">*</span>
         </label>
         <prime-auto-complete
@@ -187,7 +187,7 @@ const submitForm = async () => {
       <!-- Category + Payment method -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('expenses.dialog.category') }}
           </label>
           <prime-select
@@ -213,7 +213,7 @@ const submitForm = async () => {
         </div>
 
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('expenses.dialog.payment') }}
           </label>
           <prime-select
@@ -242,7 +242,7 @@ const submitForm = async () => {
       <!-- Qty + Unit -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('expenses.dialog.quantity') }} <span class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
@@ -256,7 +256,7 @@ const submitForm = async () => {
           />
         </div>
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('expenses.dialog.unit') }}
           </label>
           <prime-auto-complete
@@ -273,7 +273,7 @@ const submitForm = async () => {
       <!-- Unit price + Total (computed) -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('expenses.dialog.unitPrice') }} <span class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
@@ -287,7 +287,7 @@ const submitForm = async () => {
           />
         </div>
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('expenses.dialog.totalAuto') }}
           </label>
           <div class="tw:flex tw:items-center tw:h-10 tw:px-3 tw:rounded-lg tw:border tw:border-white/10 tw:bg-white/5 tw:text-sm tw:font-semibold">
@@ -298,7 +298,7 @@ const submitForm = async () => {
 
       <!-- Notes -->
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('expenses.dialog.notes') }}
         </label>
         <prime-textarea

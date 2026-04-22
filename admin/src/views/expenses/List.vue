@@ -275,7 +275,7 @@ const onPage = (e) => {
       <div>
         <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('expenses.groupLabel') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('expenses.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('expenses.subtitle') }}</p>
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('expenses.subtitle') }}</p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
         <prime-button severity="secondary" outlined size="small" :loading="loading || summaryLoading" @click="loadAll">
@@ -343,7 +343,7 @@ const onPage = (e) => {
 
               <!-- Date range -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
                   {{ t('expenses.filter.dateRange') }}
                 </label>
                 <prime-date-picker
@@ -358,7 +358,7 @@ const onPage = (e) => {
 
               <!-- Payment method -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
                   {{ t('expenses.filter.payment') }}
                 </label>
                 <prime-select
@@ -381,7 +381,7 @@ const onPage = (e) => {
 
               <!-- Category -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
                   {{ t('expenses.filter.category') }}
                 </label>
                 <prime-select
@@ -412,7 +412,7 @@ const onPage = (e) => {
       </template>
 
       <template #col-purchaseDate="{ data }">
-        <span class="tw:text-sm app-text-muted">{{ formatDate(data.purchaseDate) }}</span>
+        <span class="tw:text-sm tw:text-muted">{{ formatDate(data.purchaseDate) }}</span>
       </template>
 
       <template #col-name="{ data }">
@@ -422,7 +422,7 @@ const onPage = (e) => {
       <template #col-category="{ data }">
         <div class="tw:flex tw:items-center tw:gap-1.5">
           <prime-tag :severity="categoryMeta(data.category).severity">
-            <iconify :icon="categoryMeta(data.category).icon" class="tw:text-sm app-text-muted" />
+            <iconify :icon="categoryMeta(data.category).icon" class="tw:text-sm tw:text-muted" />
             <span>{{ categoryMeta(data.category).label }}</span>
           </prime-tag>
         </div>
@@ -431,7 +431,7 @@ const onPage = (e) => {
       <template #col-paymentMethod="{ data }">
         <div class="tw:flex tw:items-center tw:gap-1.5">
           <prime-tag :severity="EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.severity ?? 'secondary'">
-            <iconify :icon="EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.icon ?? 'ph:money-bold'" class="tw:text-sm app-text-muted" />
+            <iconify :icon="EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.icon ?? 'ph:money-bold'" class="tw:text-sm tw:text-muted" />
             <span>{{ EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.label ?? data.paymentMethod }}</span>
           </prime-tag>
         </div>
@@ -440,12 +440,12 @@ const onPage = (e) => {
       <template #col-qty="{ data }">
         <span class="tw:text-sm">
           {{ data.quantity }}
-          <span v-if="data.unit" class="app-text-muted tw:ml-0.5">{{ data.unit }}</span>
+          <span v-if="data.unit" class="tw:text-muted tw:ml-0.5">{{ data.unit }}</span>
         </span>
       </template>
 
       <template #col-unitPrice="{ data }">
-        <span class="tw:text-sm app-text-muted">{{ formatVnd(data.unitPrice) }}</span>
+        <span class="tw:text-sm tw:text-muted">{{ formatVnd(data.unitPrice) }}</span>
       </template>
 
       <template #col-totalAmount="{ data }">
@@ -453,7 +453,7 @@ const onPage = (e) => {
       </template>
 
       <template #col-notes="{ data }">
-        <span v-if="data.notes" class="tw:text-sm app-text-muted tw:line-clamp-1">{{ data.notes }}</span>
+        <span v-if="data.notes" class="tw:text-sm tw:text-muted tw:line-clamp-1">{{ data.notes }}</span>
         <span v-else class="app-text-subtle">—</span>
       </template>
 
@@ -487,7 +487,7 @@ const onPage = (e) => {
       <template #mobile-card="{ data }">
         <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/15 tw:p-3 tw:flex tw:flex-col tw:gap-2">
           <div class="tw:flex tw:items-center tw:justify-between tw:gap-1">
-            <span class="tw:text-xs app-text-muted">{{ formatDate(data.purchaseDate) }}</span>
+            <span class="tw:text-xs tw:text-muted">{{ formatDate(data.purchaseDate) }}</span>
             <span class="tw:font-semibold tw:text-sm">{{ formatVnd(data.totalAmount) }}</span>
           </div>
           <span class="tw:font-medium tw:text-sm tw:leading-snug">{{ data.name }}</span>
@@ -501,7 +501,7 @@ const onPage = (e) => {
               <span>{{ EXPENSE_PAYMENT_METHOD_MAP[data.paymentMethod]?.label ?? data.paymentMethod }}</span>
             </prime-tag>
           </div>
-          <p class="tw:text-xs app-text-muted">
+          <p class="tw:text-xs tw:text-muted">
             {{ data.quantity }}<span v-if="data.unit"> {{ data.unit }}</span> × {{ formatVnd(data.unitPrice) }}
           </p>
           <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
@@ -524,7 +524,7 @@ const onPage = (e) => {
       <template #header>
         <div class="tw:flex tw:flex-col tw:gap-0.5">
           <span class="tw:font-medium">{{ drawerExpense?.name }}</span>
-          <span v-if="drawerExpense" class="tw:text-xs app-text-muted">
+          <span v-if="drawerExpense" class="tw:text-xs tw:text-muted">
             {{ formatDate(drawerExpense.purchaseDate) }} · {{ formatVnd(drawerExpense.totalAmount) }}
           </span>
         </div>

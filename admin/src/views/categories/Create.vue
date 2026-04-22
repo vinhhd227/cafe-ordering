@@ -54,7 +54,7 @@ const submit = async () => {
           {{ t('categories.breadcrumb') }}
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('categories.create.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           {{ t('categories.create.subtitle') }}
         </p>
       </div>
@@ -101,7 +101,7 @@ const submit = async () => {
           <div class="tw:space-y-1.5">
             <label for="description" class="tw:text-sm tw:font-medium">
               {{ t('categories.form.description') }}
-              <span class="app-text-muted tw:font-normal">{{ t('categories.form.optional') }}</span>
+              <span class="tw:text-muted tw:font-normal">{{ t('categories.form.optional') }}</span>
             </label>
             <prime-textarea
               id="description"

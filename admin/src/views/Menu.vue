@@ -121,7 +121,7 @@ const toggleProduct = async (product) => {
           Menu
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Menu builder</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           Activate or deactivate categories and products at a glance.
         </p>
       </div>
@@ -147,9 +147,9 @@ const toggleProduct = async (product) => {
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
             {{ stats.activeCategories }}
-            <span class="tw:text-base tw:font-normal app-text-muted">/ {{ stats.totalCategories }}</span>
+            <span class="tw:text-base tw:font-normal tw:text-muted">/ {{ stats.totalCategories }}</span>
           </p>
-          <p class="tw:mt-1 tw:text-xs app-text-muted">
+          <p class="tw:mt-1 tw:text-xs tw:text-muted">
             {{ t('menu.stats.categoriesActive', { active: stats.activeCategories, total: stats.totalCategories }) }}
           </p>
         </template>
@@ -163,7 +163,7 @@ const toggleProduct = async (product) => {
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
             {{ stats.activeProducts }}
-            <span class="tw:text-base tw:font-normal app-text-muted">/ {{ stats.totalProducts }}</span>
+            <span class="tw:text-base tw:font-normal tw:text-muted">/ {{ stats.totalProducts }}</span>
           </p>
           <div class="tw:mt-2 tw:h-1.5 tw:rounded-full tw:bg-white/10 tw:overflow-hidden">
             <div
@@ -171,7 +171,7 @@ const toggleProduct = async (product) => {
               :style="{ width: stats.totalProducts ? `${Math.round(stats.activeProducts / stats.totalProducts * 100)}%` : '0%' }"
             />
           </div>
-          <p class="tw:mt-1 tw:text-xs app-text-muted">
+          <p class="tw:mt-1 tw:text-xs tw:text-muted">
             {{ t('menu.stats.productsActive', { active: stats.activeProducts, total: stats.totalProducts }) }}
           </p>
         </template>
@@ -191,7 +191,7 @@ const toggleProduct = async (product) => {
           >
             {{ stats.noImageProducts }}
           </p>
-          <p class="tw:mt-1 tw:text-xs app-text-muted">
+          <p class="tw:mt-1 tw:text-xs tw:text-muted">
             {{ t('menu.stats.noImageHint') }}
           </p>
         </template>
@@ -286,13 +286,13 @@ const toggleProduct = async (product) => {
               <iconify
                 v-if="toggling.has(`cat-${cat.id}`)"
                 icon="ph:circle-notch-bold"
-                class="tw:animate-spin tw:shrink-0 app-text-muted"
+                class="tw:animate-spin tw:shrink-0 tw:text-muted"
               />
 
               <!-- Description (shown on wider screens) -->
               <span
                 v-if="cat.description"
-                class="tw:ml-auto tw:text-xs app-text-muted tw:truncate tw:hidden tw:md:block tw:max-w-xs"
+                class="tw:ml-auto tw:text-xs tw:text-muted tw:truncate tw:hidden tw:md:block tw:max-w-xs"
               >
                 {{ cat.description }}
               </span>
@@ -305,7 +305,7 @@ const toggleProduct = async (product) => {
               <!-- Empty state -->
               <div
                 v-if="cat.products.length === 0"
-                class="tw:flex tw:flex-col tw:items-center tw:py-8 app-text-muted"
+                class="tw:flex tw:flex-col tw:items-center tw:py-8 tw:text-muted"
               >
                 <iconify icon="ph:coffee-bold" class="tw:text-2xl tw:mb-2" />
 
@@ -339,7 +339,7 @@ const toggleProduct = async (product) => {
                     >
                       <iconify
                         icon="ph:coffee-bold"
-                        class="tw:text-lg app-text-muted"
+                        class="tw:text-lg tw:text-muted"
                       />
                     </div>
 
@@ -354,7 +354,7 @@ const toggleProduct = async (product) => {
                       <iconify
                         v-if="toggling.has(`prod-${product.id}`)"
                         icon="ph:circle-notch-bold"
-                        class="tw:animate-spin tw:absolute tw:-top-0.5 tw:-right-0.5 tw:text-xs app-text-muted"
+                        class="tw:animate-spin tw:absolute tw:-top-0.5 tw:-right-0.5 tw:text-xs tw:text-muted"
                       />
                     </div>
                   </div>
@@ -391,7 +391,7 @@ const toggleProduct = async (product) => {
     <prime-card v-else class="app-card tw:rounded-2xl tw:border">
       <template #content>
         <div
-          class="tw:flex tw:flex-col tw:items-center tw:py-12 app-text-muted"
+          class="tw:flex tw:flex-col tw:items-center tw:py-12 tw:text-muted"
         >
           <iconify icon="ph:list-bold" class="tw:text-3xl tw:mb-2" />
           <p class="tw:text-sm">No categories found.</p>

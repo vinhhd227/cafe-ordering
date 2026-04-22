@@ -76,7 +76,7 @@ const confirmPayment = async () => {
     class="tw:w-[22rem]"
   >
     <div class="tw:space-y-4">
-      <p class="tw:text-sm app-text-muted">
+      <p class="tw:text-sm tw:text-muted">
         {{ t('orders.pay.order') }}
         <span class="tw:font-mono tw:font-semibold tw:text-white">{{ order?.orderNumber }}</span>
       </p>
@@ -88,7 +88,7 @@ const confirmPayment = async () => {
 
       <!-- Amount received -->
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('orders.pay.amountReceived') }}
         </label>
         <prime-input-number
@@ -104,16 +104,16 @@ const confirmPayment = async () => {
           v-if="payChange !== null && payChange < 0"
           class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5"
         >
-          <span class="app-text-muted">{{ t('orders.pay.short') }}</span>
+          <span class="tw:text-muted">{{ t('orders.pay.short') }}</span>
           <span class="tw:text-red-400 tw:font-semibold">{{ formatVnd(Math.abs(payChange)) }}</span>
         </div>
         <template v-if="payChange !== null && payChange > 0">
           <div class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:pt-0.5">
-            <span class="app-text-muted">{{ t('orders.pay.change') }}</span>
+            <span class="tw:text-muted">{{ t('orders.pay.change') }}</span>
             <span class="tw:font-semibold">{{ formatVnd(payChange) }}</span>
           </div>
           <div class="tw:space-y-1">
-            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+            <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
               {{ t('orders.pay.tip') }}
             </label>
             <div class="tw:flex tw:gap-2">
@@ -137,8 +137,8 @@ const confirmPayment = async () => {
             </div>
           </div>
           <div class="tw:flex tw:items-center tw:justify-between tw:text-sm">
-            <span class="app-text-muted">{{ t('orders.pay.returnToCustomer') }}</span>
-            <span :class="payReturn === 0 ? 'app-text-muted' : 'tw:text-emerald-400 tw:font-semibold'">
+            <span class="tw:text-muted">{{ t('orders.pay.returnToCustomer') }}</span>
+            <span :class="payReturn === 0 ? 'tw:text-muted' : 'tw:text-emerald-400 tw:font-semibold'">
               {{ payReturn === 0 ? '—' : formatVnd(payReturn) }}
             </span>
           </div>
@@ -147,7 +147,7 @@ const confirmPayment = async () => {
 
       <!-- Payment method -->
       <div class="tw:space-y-2">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('orders.pay.paymentMethod') }}
         </label>
         <prime-select-button

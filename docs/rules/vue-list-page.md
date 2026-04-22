@@ -161,7 +161,7 @@ const totalRecords = computed(() => filteredItems.value.length)
       <div>
         <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('...breadcrumb') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('...title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('...subtitle') }}</p>
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('...subtitle') }}</p>
       </div>
       <prime-button v-if="can('feature.create')" severity="success" size="small" @click="router.push({ name: '...' })">
         <iconify icon="ph:plus-bold" />
@@ -265,7 +265,7 @@ const totalRecords = computed(() => filteredItems.value.length)
     <p class="tw:text-sm tw:font-semibold">{{ t('...filterTitle') }}</p>
 
     <div class="tw:space-y-1.5">
-      <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('...') }}</label>
+      <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t('...') }}</label>
       <prime-select v-model="statusFilter" :options="statusOptions" option-label="label" option-value="value"
         :placeholder="t('...all')" show-clear class="app-input tw:w-full" />
     </div>
@@ -397,7 +397,7 @@ Grid summary stats phải responsive: 1 cột trên mobile, 3 cột trên `sm+`:
 - **Nút mở drawer trong `mobile-card`**: dùng `fluid` + label `t('common.moreActions')`, không dùng `btnIcon`
 - **`v-if="can('...')`** bảo vệ CTA button và action buttons theo permission
 - **`app-input`** class cho tất cả input trong filter/toolbar
-- **`app-text-muted` / `app-text-subtle`** cho text phụ — không hardcode màu
+- **`tw:text-muted` / `app-text-subtle`** cho text phụ — không hardcode màu
 - **`tw:space-y-8`** trên `<section>` root để căn khoảng cách giữa các block
 - Error dùng `<prime-alert severity="error" variant="accent" closable>` — không dùng toast cho load error
 - Toast chỉ dùng cho action success/error (toggle, delete, ...)

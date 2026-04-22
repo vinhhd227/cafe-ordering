@@ -88,7 +88,7 @@ const ICON_COLOR = {
   info:      'tw:text-sky-400',
   warning:   'tw:text-amber-400',
   error:     'tw:text-red-400',
-  secondary: 'app-text-muted',
+  secondary: 'tw:text-muted',
 }
 
 const TITLE_COLOR = {
@@ -96,7 +96,7 @@ const TITLE_COLOR = {
   info:      'tw:text-sky-300',
   warning:   'tw:text-amber-300',
   error:     'tw:text-red-300',
-  secondary: 'app-text-muted',
+  secondary: 'tw:text-muted',
 }
 
 // Background classes per variant × severity
@@ -242,7 +242,7 @@ const dismiss = () => {
         <!-- Body text -->
         <div
           class="tw:leading-relaxed"
-          :class="[title ? 'tw:mt-0.5 tw:text-xs app-text-muted' : '']"
+          :class="[title ? 'tw:mt-0.5 tw:text-xs tw:text-muted' : '']"
         >
           <slot />
         </div>
@@ -261,7 +261,7 @@ const dismiss = () => {
       <button
         v-if="closable"
         type="button"
-        class="tw:ml-auto tw:shrink-0 tw:mt-0.5 tw:-mr-1 tw:flex tw:h-6 tw:w-6 tw:items-center tw:justify-center tw:rounded-md tw:opacity-60 tw:transition-opacity hover:tw:opacity-100 tw:cursor-pointer"
+        class="tw:ml-auto tw:shrink-0 tw:mt-0.5 tw:-mr-1 tw:flex tw:h-6 tw:w-6 tw:items-center tw:justify-center tw:rounded-md tw:opacity-60 tw:transition-opacity tw:hover:opacity-100 tw:cursor-pointer"
         :class="iconColor"
         @click="dismiss"
         aria-label="Dismiss"

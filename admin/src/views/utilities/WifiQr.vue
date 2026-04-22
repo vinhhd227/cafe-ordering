@@ -186,7 +186,7 @@ const downloadPng = async () => {
     <div>
       <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('nav.groups.utilities') }}</p>
       <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('utilities.wifiQr.title') }}</h1>
-      <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('utilities.wifiQr.subtitle') }}</p>
+      <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('utilities.wifiQr.subtitle') }}</p>
     </div>
 
     <div class="tw:grid tw:grid-cols-1 tw:lg:grid-cols-2 tw:gap-8 tw:items-start">
@@ -196,7 +196,7 @@ const downloadPng = async () => {
         <div :class="appCard" class="tw:rounded-2xl tw:p-6 tw:space-y-5">
           <!-- SSID -->
           <div class="tw:space-y-1.5">
-            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.wifiQr.ssid') }}</label>
+            <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.wifiQr.ssid') }}</label>
             <prime-input-text
               v-model="ssid"
               :placeholder="t('utilities.wifiQr.ssidPlaceholder')"
@@ -206,7 +206,7 @@ const downloadPng = async () => {
 
           <!-- Security type -->
           <div class="tw:space-y-1.5">
-            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.wifiQr.security') }}</label>
+            <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.wifiQr.security') }}</label>
             <prime-select
               v-model="security"
               :options="securityOptions"
@@ -218,7 +218,7 @@ const downloadPng = async () => {
 
           <!-- Password -->
           <div v-if="security !== 'nopass'" class="tw:space-y-1.5">
-            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.wifiQr.password') }}</label>
+            <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.wifiQr.password') }}</label>
             <prime-input-group>
               <prime-input-text
                 v-model="password"
@@ -235,24 +235,24 @@ const downloadPng = async () => {
           <!-- Colors -->
           <div class="tw:grid tw:grid-cols-2 tw:gap-4">
             <div class="tw:space-y-1.5">
-              <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.wifiQr.foregroundColor') }}</label>
+              <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.wifiQr.foregroundColor') }}</label>
               <div class="tw:flex tw:items-center tw:gap-2">
                 <input type="color" v-model="foregroundColor" class="tw:w-10 tw:h-10 tw:rounded-lg tw:border tw:border-slate-300 tw:dark:border-white/20 tw:cursor-pointer tw:bg-transparent" />
-                <span class="tw:text-sm tw:font-mono app-text-muted">{{ foregroundColor }}</span>
+                <span class="tw:text-sm tw:font-mono tw:text-muted">{{ foregroundColor }}</span>
               </div>
             </div>
             <div class="tw:space-y-1.5">
-              <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.wifiQr.backgroundColor') }}</label>
+              <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.wifiQr.backgroundColor') }}</label>
               <div class="tw:flex tw:items-center tw:gap-2">
                 <input type="color" v-model="backgroundColor" class="tw:w-10 tw:h-10 tw:rounded-lg tw:border tw:border-slate-300 tw:dark:border-white/20 tw:cursor-pointer tw:bg-transparent" />
-                <span class="tw:text-sm tw:font-mono app-text-muted">{{ backgroundColor }}</span>
+                <span class="tw:text-sm tw:font-mono tw:text-muted">{{ backgroundColor }}</span>
               </div>
             </div>
           </div>
 
           <!-- Custom text -->
           <div class="tw:space-y-1.5">
-            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.wifiQr.customText') }}</label>
+            <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.wifiQr.customText') }}</label>
             <prime-input-text
               v-model="customText"
               :placeholder="t('utilities.wifiQr.customTextPlaceholder')"
@@ -262,7 +262,7 @@ const downloadPng = async () => {
 
           <!-- Logo upload -->
           <div class="tw:space-y-1.5">
-            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">{{ t('utilities.wifiQr.logoUpload') }}</label>
+            <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">{{ t('utilities.wifiQr.logoUpload') }}</label>
             <div class="tw:flex tw:items-center tw:gap-3">
               <prime-button severity="secondary" outlined size="small" @click="logoInputRef.click()">
                 <iconify icon="ph:upload-simple-bold" />
@@ -271,7 +271,7 @@ const downloadPng = async () => {
               <prime-button v-if="logoDataUrl" :class="btnIcon" severity="danger" outlined @click="removeLogo" v-tooltip.top="'Xóa logo'">
                 <iconify icon="ph:x-bold" />
               </prime-button>
-              <span v-if="!logoDataUrl" class="tw:text-xs app-text-muted">{{ t('utilities.wifiQr.logoHint') }}</span>
+              <span v-if="!logoDataUrl" class="tw:text-xs tw:text-muted">{{ t('utilities.wifiQr.logoHint') }}</span>
             </div>
             <input ref="logoInputRef" type="file" accept="image/*" class="tw:hidden" @change="handleLogoUpload" />
           </div>
@@ -304,10 +304,10 @@ const downloadPng = async () => {
         <div :class="appCard" class="tw:rounded-2xl tw:p-5">
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <p class="tw:text-sm tw:font-semibold">Cấu hình đã lưu</p>
-            <iconify v-if="loadingProfiles" icon="ph:spinner-bold" class="tw:animate-spin app-text-muted" />
+            <iconify v-if="loadingProfiles" icon="ph:spinner-bold" class="tw:animate-spin tw:text-muted" />
           </div>
 
-          <div v-if="!loadingProfiles && profiles.length === 0" class="tw:text-sm app-text-muted tw:text-center tw:py-6">
+          <div v-if="!loadingProfiles && profiles.length === 0" class="tw:text-sm tw:text-muted tw:text-center tw:py-6">
             Chưa có cấu hình nào được lưu
           </div>
 
@@ -325,7 +325,7 @@ const downloadPng = async () => {
                 />
                 <div class="tw:min-w-0">
                   <p class="tw:text-sm tw:font-medium tw:truncate">{{ profile.name }}</p>
-                  <p class="tw:text-xs app-text-muted tw:truncate">{{ profile.ssid }} · {{ profile.securityType }}</p>
+                  <p class="tw:text-xs tw:text-muted tw:truncate">{{ profile.ssid }} · {{ profile.securityType }}</p>
                 </div>
               </div>
               <div class="tw:flex tw:gap-1.5 tw:flex-shrink-0">
@@ -355,7 +355,7 @@ const downloadPng = async () => {
 
       <!-- Right: Preview -->
       <div class="tw:flex tw:flex-col tw:items-center tw:gap-6">
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] app-text-muted tw:self-start">{{ t('utilities.wifiQr.preview') }}</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-muted tw:self-start">{{ t('utilities.wifiQr.preview') }}</p>
 
         <!-- QR card (this is what gets captured) -->
         <div
@@ -388,7 +388,7 @@ const downloadPng = async () => {
             <iconify icon="ph:wifi-high-bold" class="tw:text-base" :style="{ color: foregroundColor }" />
             <span class="tw:text-sm tw:font-semibold" :style="{ color: foregroundColor }">{{ ssid }}</span>
           </div>
-          <p v-else class="tw:text-sm app-text-muted tw:italic">Nhập tên wifi để xem QR</p>
+          <p v-else class="tw:text-sm tw:text-muted tw:italic">Nhập tên wifi để xem QR</p>
         </div>
       </div>
     </div>
@@ -402,7 +402,7 @@ const downloadPng = async () => {
     >
       <div class="tw:space-y-4 tw:py-2">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Tên cấu hình</label>
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">Tên cấu hình</label>
           <prime-input-text
             v-model="profileName"
             placeholder="VD: WiFi Tầng 1"
@@ -411,7 +411,7 @@ const downloadPng = async () => {
             @keyup.enter="saveProfile"
           />
         </div>
-        <div class="tw:text-xs app-text-muted">
+        <div class="tw:text-xs tw:text-muted">
           <span class="tw:font-medium">SSID:</span> {{ ssid }} ·
           <span class="tw:font-medium">Loại:</span> {{ security }}
         </div>

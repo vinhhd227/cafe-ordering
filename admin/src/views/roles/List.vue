@@ -341,7 +341,7 @@ const savePermissions = async () => {
           {{ t('roles.breadcrumb') }}
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('roles.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           {{ t('roles.subtitle') }}
         </p>
       </div>
@@ -404,7 +404,7 @@ const savePermissions = async () => {
               <span class="tw:font-semibold tw:text-sm">{{ data.name }}</span>
             </div>
           </div>
-          <p v-if="data.description" class="tw:text-xs app-text-muted tw:line-clamp-2">{{ data.description }}</p>
+          <p v-if="data.description" class="tw:text-xs tw:text-muted tw:line-clamp-2">{{ data.description }}</p>
           <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
             <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
               <iconify icon="ph:dots-three-bold" />
@@ -427,7 +427,7 @@ const savePermissions = async () => {
           </div>
           <div>
             <p class="tw:text-sm tw:font-medium">{{ data.name }}</p>
-            <p class="tw:text-xs app-text-muted">{{ data.description || "—" }}</p>
+            <p class="tw:text-xs tw:text-muted">{{ data.description || "—" }}</p>
           </div>
         </div>
       </template>
@@ -437,7 +437,7 @@ const savePermissions = async () => {
       </template>
 
       <template #col-created="{ data }">
-        <span class="tw:text-xs app-text-muted">{{ formatDate(data.createdAt) }}</span>
+        <span class="tw:text-xs tw:text-muted">{{ formatDate(data.createdAt) }}</span>
       </template>
 
       <template #col-actions="{ data }">
@@ -636,7 +636,7 @@ const savePermissions = async () => {
       "
     >
       <div class="tw:pt-2">
-        <p class="tw:text-sm app-text-muted">
+        <p class="tw:text-sm tw:text-muted">
           {{ t('roles.deleteDialog.confirmText', { name: confirmDeleteRole?.name }) }}
         </p>
       </div>
@@ -732,7 +732,7 @@ const savePermissions = async () => {
                   'tw:flex tw:items-start tw:gap-3 tw:rounded-lg tw:p-2.5 tw:cursor-pointer tw:transition-colors',
                   perm.assigned
                     ? 'tw:bg-emerald-500/10 tw:border tw:border-emerald-500/30'
-                    : 'tw:bg-transparent tw:border tw:border-transparent hover:tw:bg-white/5',
+                    : 'tw:bg-transparent tw:border tw:border-transparent tw:hover:bg-white/5',
                 ]"
                 @click="togglePermission(perm)"
               >
@@ -757,7 +757,7 @@ const savePermissions = async () => {
 
           <!-- Summary bar -->
           <div
-            class="tw:flex tw:items-center tw:justify-between tw:text-sm app-text-muted"
+            class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:text-muted"
           >
             <span>{{ t('roles.permissionsDialog.selectedSummary', { selected: selectedCount, total: permissions.length }) }}</span>
             <prime-button

@@ -860,7 +860,7 @@ onMounted(async () => {
         <!-- Empty state -->
         <prime-panel
           v-else-if="!loadingMenu && visibleCategories.length === 0"
-          class="app-panel tw:rounded-2xl tw:border tw:p-12 tw:text-center app-text-muted"
+          class="app-panel tw:rounded-2xl tw:border tw:p-12 tw:text-center tw:text-muted"
         >
           <iconify
             icon="ph:magnifying-glass-bold"
@@ -887,7 +887,7 @@ onMounted(async () => {
             <article
               v-for="product in category.filteredProducts"
               :key="product.id"
-              class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all hover:tw:-translate-y-0.5 hover:tw:border-emerald-500/50"
+              class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all tw:hover:-translate-y-0.5 tw:hover:border-emerald-500/50"
               style="
                 border-color: var(--app-border);
                 background: var(--app-bg-subtle);
@@ -1021,7 +1021,7 @@ onMounted(async () => {
           <!-- Empty state -->
           <div
             v-if="cart.length === 0"
-            class="tw:py-8 tw:text-center app-text-muted tw:text-sm tw:rounded-xl tw:border tw:border-dashed"
+            class="tw:py-8 tw:text-center tw:text-muted tw:text-sm tw:rounded-xl tw:border tw:border-dashed"
             style="border-color: var(--app-border)"
           >
             {{ t("orders.create.cartEmpty") }}<br />
@@ -1177,7 +1177,7 @@ onMounted(async () => {
               <div
                 class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:mb-1"
               >
-                <span class="app-text-muted">{{
+                <span class="tw:text-muted">{{
                   t("orders.create.subtotal")
                 }}</span>
                 <span class="tw:font-medium">{{ formatVnd(cartTotal) }}</span>
@@ -1185,10 +1185,10 @@ onMounted(async () => {
               <div
                 class="tw:flex tw:items-center tw:justify-between tw:text-xs tw:mb-2"
               >
-                <span class="app-text-muted">{{
+                <span class="tw:text-muted">{{
                   t("orders.create.serviceCharge")
                 }}</span>
-                <span class="app-text-muted">{{
+                <span class="tw:text-muted">{{
                   t("orders.create.free")
                 }}</span>
               </div>
@@ -1201,7 +1201,7 @@ onMounted(async () => {
                   v-if="promoInfo"
                   class="tw:flex tw:items-center tw:justify-between tw:text-xs tw:mb-1.5"
                 >
-                  <span class="tw:flex tw:items-center tw:gap-1 app-text-muted">
+                  <span class="tw:flex tw:items-center tw:gap-1 tw:text-muted">
                     <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
                     {{ promoInfo.code }}
                   </span>
@@ -1220,7 +1220,7 @@ onMounted(async () => {
                   >
                     -{{ formatVnd(promoInfo.estimatedDiscount) }}
                   </span>
-                  <span v-else class="app-text-muted tw:italic">{{
+                  <span v-else class="tw:text-muted tw:italic">{{
                     t("orders.create.willBeApplied")
                   }}</span>
                 </div>
@@ -1231,7 +1231,7 @@ onMounted(async () => {
                   <div class="tw:text-right">
                     <span
                       v-if="promoInfo?.estimatedDiscount && !freeItemSelection"
-                      class="app-text-muted tw:line-through tw:text-xs tw:font-normal tw:mr-1"
+                      class="tw:text-muted tw:line-through tw:text-xs tw:font-normal tw:mr-1"
                       >{{ formatVnd(cartTotal) }}</span
                     >
                     <span class="tw:text-emerald-400 tw:text-base">{{
@@ -1248,7 +1248,7 @@ onMounted(async () => {
             class="tw:flex tw:items-center tw:justify-between tw:mt-4 tw:mb-1"
           >
             <span
-              class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs app-text-muted"
+              class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs tw:text-muted"
             >
               <iconify icon="ph:ticket-bold" class="tw:text-emerald-400" />
               {{ t("orders.create.findPromotions") }}
@@ -1280,7 +1280,7 @@ onMounted(async () => {
                 <span class="tw:font-medium tw:text-sm tw:text-emerald-300">{{
                   promoInfo.code
                 }}</span>
-                <span class="tw:text-xs app-text-muted tw:truncate">{{
+                <span class="tw:text-xs tw:text-muted tw:truncate">{{
                   promoInfo.name
                 }}</span>
               </div>
@@ -1315,7 +1315,7 @@ onMounted(async () => {
                   :class="
                     freeItemSelection?._key === item._key
                       ? 'tw:border-emerald-500 tw:bg-emerald-500/10 tw:text-emerald-300'
-                      : 'hover:tw:border-emerald-500/40 app-text-muted'
+                      : 'tw:hover:border-emerald-500/40 tw:text-muted'
                   "
                   :style="
                     freeItemSelection?._key === item._key
@@ -1392,7 +1392,7 @@ onMounted(async () => {
 
           <p
             v-if="!sessionId && !sessionLoading"
-            class="tw:text-xs app-text-muted tw:text-center tw:mt-2"
+            class="tw:text-xs tw:text-muted tw:text-center tw:mt-2"
           >
             {{ t("orders.create.tableHint") }}
           </p>
@@ -1411,7 +1411,7 @@ onMounted(async () => {
     <div class="tw:space-y-2">
       <div
         v-if="publicPromosLoading"
-        class="tw:flex tw:items-center tw:justify-center tw:gap-2 tw:py-8 app-text-muted"
+        class="tw:flex tw:items-center tw:justify-center tw:gap-2 tw:py-8 tw:text-muted"
       >
         <iconify icon="prime:spinner" class="tw:animate-spin" />
         <span class="tw:text-sm">{{
@@ -1420,7 +1420,7 @@ onMounted(async () => {
       </div>
       <div
         v-else-if="publicPromos.length === 0"
-        class="tw:py-8 tw:text-center tw:text-sm app-text-muted"
+        class="tw:py-8 tw:text-center tw:text-sm tw:text-muted"
       >
         {{ t("orders.create.promoDialog.empty") }}
       </div>
@@ -1431,7 +1431,7 @@ onMounted(async () => {
         class="tw:rounded-xl tw:border tw:p-3 tw:transition-colors"
         :class="
           isPromoAvailable(promo)
-            ? 'tw:cursor-pointer hover:tw:border-emerald-500/50 hover:tw:bg-emerald-500/5'
+            ? 'tw:cursor-pointer tw:hover:border-emerald-500/50 tw:hover:bg-emerald-500/5'
             : 'tw:opacity-40 tw:cursor-not-allowed'
         "
         style="border-color: var(--app-border)"
@@ -1442,13 +1442,13 @@ onMounted(async () => {
             <p class="tw:text-sm tw:font-semibold tw:leading-snug">
               {{ promo.name }}
             </p>
-            <p class="tw:text-xs tw:font-mono app-text-muted tw:mt-0.5">
+            <p class="tw:text-xs tw:font-mono tw:text-muted tw:mt-0.5">
               {{ promo.code }}
             </p>
             <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5 tw:mt-1.5">
               <span
                 v-if="promo.minOrderAmount"
-                class="tw:text-xs app-text-muted"
+                class="tw:text-xs tw:text-muted"
               >
                 {{
                   t("orders.create.promoDialog.minAmount", {
@@ -1456,14 +1456,14 @@ onMounted(async () => {
                   })
                 }}
               </span>
-              <span v-if="promo.endDate" class="tw:text-xs app-text-muted">
+              <span v-if="promo.endDate" class="tw:text-xs tw:text-muted">
                 {{
                   t("orders.create.promoDialog.until", {
                     date: new Date(promo.endDate).toLocaleDateString("vi-VN"),
                   })
                 }}
               </span>
-              <span v-if="promo.maxUsage" class="tw:text-xs app-text-muted">
+              <span v-if="promo.maxUsage" class="tw:text-xs tw:text-muted">
                 {{
                   t("orders.create.promoDialog.usesLeft", {
                     n: promo.maxUsage - promo.currentUsage,
@@ -1528,13 +1528,13 @@ onMounted(async () => {
           </p>
           <p
             v-if="selectedProduct?.description"
-            class="tw:text-sm tw:leading-relaxed app-text-muted"
+            class="tw:text-sm tw:leading-relaxed tw:text-muted"
           >
             {{ selectedProduct.description }}
           </p>
           <div
             v-if="selectedProduct?.estimatedPrepMinutes"
-            class="tw:mt-auto tw:flex tw:items-center tw:gap-1 tw:pt-2 tw:text-xs app-text-muted"
+            class="tw:mt-auto tw:flex tw:items-center tw:gap-1 tw:pt-2 tw:text-xs tw:text-muted"
           >
             <iconify icon="ph:clock-bold" class="tw:h-4 tw:w-4" />
             <span>{{ t("orders.create.optionsDialog.prepTime", { min: selectedProduct.estimatedPrepMinutes }) }}</span>
@@ -1552,7 +1552,7 @@ onMounted(async () => {
             </p>
             <div class="tw:flex tw:items-center tw:gap-3">
               <button
-                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
+                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition tw:hover:border-emerald-400 tw:text-muted"
                 style="border-color: var(--app-border)"
                 @click="pendingQuantity = Math.max(1, pendingQuantity - 1)"
               >
@@ -1562,7 +1562,7 @@ onMounted(async () => {
                 pendingQuantity
               }}</span>
               <button
-                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
+                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition tw:hover:border-emerald-400 tw:text-muted"
                 style="border-color: var(--app-border)"
                 @click="pendingQuantity++"
               >

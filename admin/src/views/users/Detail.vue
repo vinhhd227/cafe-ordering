@@ -221,7 +221,7 @@ const doResetPassword = async () => {
             :severity="user.isActive ? 'success' : 'danger'"
           />
         </h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           <template v-if="user">
             {{ user.fullName }} · Joined {{ formatDate(user.createdAt) }}
           </template>
@@ -301,7 +301,7 @@ const doResetPassword = async () => {
               </div>
               <div class="tw:text-center">
                 <p class="tw:font-semibold tw:text-base">{{ user.username }}</p>
-                <p class="tw:text-sm app-text-muted">{{ user.fullName }}</p>
+                <p class="tw:text-sm tw:text-muted">{{ user.fullName }}</p>
               </div>
             </div>
 
@@ -311,7 +311,7 @@ const doResetPassword = async () => {
               <div
                 class="tw:flex tw:justify-between tw:items-center tw:text-sm tw:gap-2"
               >
-                <span class="app-text-muted tw:shrink-0">Role</span>
+                <span class="tw:text-muted tw:shrink-0">Role</span>
                 <div class="tw:flex tw:gap-1 tw:flex-wrap tw:justify-end">
                   <prime-tag
                     v-for="role in user.roles"
@@ -319,7 +319,7 @@ const doResetPassword = async () => {
                     :value="role"
                     :severity="roleSeverity(role)"
                   />
-                  <span v-if="!user.roles?.length" class="app-text-muted"
+                  <span v-if="!user.roles?.length" class="tw:text-muted"
                     >—</span
                   >
                 </div>
@@ -329,7 +329,7 @@ const doResetPassword = async () => {
               <div
                 class="tw:flex tw:justify-between tw:items-center tw:text-sm"
               >
-                <span class="app-text-muted">Status</span>
+                <span class="tw:text-muted">Status</span>
                 <prime-tag
                   :value="user.isActive ? 'Active' : 'Inactive'"
                   :severity="user.isActive ? 'success' : 'danger'"
@@ -338,7 +338,7 @@ const doResetPassword = async () => {
 
               <!-- Email -->
               <div class="tw:flex tw:justify-between tw:text-sm tw:gap-2">
-                <span class="app-text-muted tw:shrink-0">Email</span>
+                <span class="tw:text-muted tw:shrink-0">Email</span>
                 <span class="tw:font-medium tw:text-right tw:truncate">
                   {{ user.email || "—" }}
                 </span>
@@ -346,7 +346,7 @@ const doResetPassword = async () => {
 
               <!-- Created -->
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">Joined</span>
+                <span class="tw:text-muted">Joined</span>
                 <span class="tw:font-medium">{{
                   formatDate(user.createdAt)
                 }}</span>
@@ -433,7 +433,7 @@ const doResetPassword = async () => {
               <div class="tw:space-y-1.5">
                 <label class="tw:text-sm tw:font-medium">
                   Email
-                  <span class="app-text-muted tw:font-normal">(optional)</span>
+                  <span class="tw:text-muted tw:font-normal">(optional)</span>
                 </label>
                 <prime-input-text
                   v-model="profileForm.email"
@@ -469,7 +469,7 @@ const doResetPassword = async () => {
                   <span>Change role</span>
                 </prime-button>
               </div>
-              <p class="tw:text-xs app-text-muted tw:mt-2">
+              <p class="tw:text-xs tw:text-muted tw:mt-2">
                 Changing the role will take effect on the user's next login.
               </p>
             </div>
@@ -506,7 +506,7 @@ const doResetPassword = async () => {
     <prime-card v-else class="app-card tw:rounded-2xl tw:border">
       <template #content>
         <div
-          class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted"
+          class="tw:flex tw:flex-col tw:items-center tw:py-10 tw:text-muted"
         >
           <iconify icon="ph:user-x-bold" class="tw:text-3xl tw:mb-2" />
           <p class="tw:text-sm">User not found.</p>
@@ -522,7 +522,7 @@ const doResetPassword = async () => {
       style="width: 24rem"
     >
       <div class="tw:pt-2">
-        <p class="tw:text-sm app-text-muted">
+        <p class="tw:text-sm tw:text-muted">
           Deactivate
           <strong class="tw:font-semibold">{{ user?.username }}</strong
           >? They will be immediately logged out and cannot log in until

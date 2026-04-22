@@ -239,7 +239,7 @@ onMounted(async () => {
     <div class="tw:space-y-4">
       <!-- Temperature -->
       <div v-if="selectedProduct?.hasTemperatureOption" class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.temperature.label") }}</p>
+        <p class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.temperature.label") }}</p>
         <prime-select-button
           v-model="pendingOptions.temperature"
           :options="temperatureOptions"
@@ -251,7 +251,7 @@ onMounted(async () => {
       </div>
       <!-- Ice level -->
       <div v-if="selectedProduct?.hasIceLevelOption && pendingOptions.temperature !== DRINK_TEMPERATURE.HOT" class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.iceLevel.label") }}</p>
+        <p class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.iceLevel.label") }}</p>
         <prime-select-button
           v-model="pendingOptions.iceLevel"
           :options="iceLevelOptions"
@@ -262,7 +262,7 @@ onMounted(async () => {
       </div>
       <!-- Sugar level -->
       <div v-if="selectedProduct?.hasSugarLevelOption" class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.sugarLevel.label") }}</p>
+        <p class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.sugarLevel.label") }}</p>
         <prime-select-button
           v-model="pendingOptions.sugarLevel"
           :options="sugarLevelOptions"
@@ -273,7 +273,7 @@ onMounted(async () => {
       </div>
       <!-- Serving -->
       <div class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.serving.label") }}</p>
+        <p class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.serving.label") }}</p>
         <prime-select-button
           v-model="pendingOptions.isTakeaway"
           :options="servingOptions"
@@ -284,12 +284,12 @@ onMounted(async () => {
       </div>
       <!-- Note -->
       <div class="tw:space-y-1.5">
-        <label for="manual-note" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.note") }}</label>
+        <label for="manual-note" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.note") }}</label>
         <prime-input-text id="manual-note" v-model="pendingOptions.note" :placeholder="t('orders.manual.notePlaceholder')" class="app-input tw:w-full" />
       </div>
       <!-- Quantity -->
       <div class="tw:flex tw:items-center tw:justify-between">
-        <span class="tw:text-sm app-text-muted">{{ t("orders.manual.quantity") }}</span>
+        <span class="tw:text-sm tw:text-muted">{{ t("orders.manual.quantity") }}</span>
         <div class="tw:flex tw:items-center tw:gap-3">
           <prime-button :class="btnIcon" severity="secondary" outlined :disabled="pendingQuantity <= 1" @click="pendingQuantity--">
             <iconify icon="ph:minus-bold" />
@@ -347,12 +347,12 @@ onMounted(async () => {
         <!-- Categories -->
         <div v-else class="tw:space-y-4 tw:overflow-y-auto tw:max-h-[60dvh]">
           <div v-for="cat in visibleCategories" :key="cat.id">
-            <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest app-text-muted tw:mb-2">{{ cat.name }}</p>
+            <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest tw:text-muted tw:mb-2">{{ cat.name }}</p>
             <div class="tw:grid tw:grid-cols-2 tw:sm:grid-cols-3 tw:gap-2">
               <button
                 v-for="product in cat.filteredProducts"
                 :key="product.id"
-                class="tw:text-left tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:p-3 tw:transition-colors hover:tw:bg-white/10 hover:tw:border-emerald-500/40"
+                class="tw:text-left tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:p-3 tw:transition-colors tw:hover:bg-white/10 tw:hover:border-emerald-500/40"
                 @click="handleAddToCart(product)"
               >
                 <p class="tw:text-sm tw:font-medium tw:leading-tight">{{ product.name }}</p>
@@ -360,7 +360,7 @@ onMounted(async () => {
               </button>
             </div>
           </div>
-          <p v-if="!visibleCategories.length && !loadingMenu" class="tw:text-sm app-text-muted tw:text-center tw:py-6">
+          <p v-if="!visibleCategories.length && !loadingMenu" class="tw:text-sm tw:text-muted tw:text-center tw:py-6">
             {{ t("orders.manual.noProducts") }}
           </p>
         </div>
@@ -375,7 +375,7 @@ onMounted(async () => {
 
           <!-- Table -->
           <div class="tw:space-y-1.5">
-            <label for="manual-table" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.table") }}</label>
+            <label for="manual-table" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.table") }}</label>
             <prime-select
               id="manual-table"
               v-model="selectedTableId"
@@ -391,7 +391,7 @@ onMounted(async () => {
           <!-- Ordered at + Guest count -->
           <div class="tw:grid tw:grid-cols-2 tw:gap-3">
             <div class="tw:space-y-1.5">
-              <label for="manual-date" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.orderedAt") }}</label>
+              <label for="manual-date" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.orderedAt") }}</label>
               <prime-date-picker
                 id="manual-date"
                 v-model="orderedAt"
@@ -404,7 +404,7 @@ onMounted(async () => {
               />
             </div>
             <div class="tw:space-y-1.5">
-              <label for="manual-guests" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.guestCount") }}</label>
+              <label for="manual-guests" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.guestCount") }}</label>
               <prime-input-number
                 id="manual-guests"
                 v-model="guestCount"
@@ -419,7 +419,7 @@ onMounted(async () => {
 
           <!-- Status -->
           <div class="tw:space-y-1.5">
-            <label for="manual-status" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.orderStatus") }}</label>
+            <label for="manual-status" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.orderStatus") }}</label>
             <prime-select
               id="manual-status"
               v-model="orderStatus"
@@ -433,7 +433,7 @@ onMounted(async () => {
           <!-- Payment status + method -->
           <div class="tw:grid tw:grid-cols-2 tw:gap-3">
             <div class="tw:space-y-1.5">
-              <label for="manual-pay-status" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.paymentStatus") }}</label>
+              <label for="manual-pay-status" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.paymentStatus") }}</label>
               <prime-select
                 id="manual-pay-status"
                 v-model="paymentStatus"
@@ -444,7 +444,7 @@ onMounted(async () => {
               />
             </div>
             <div class="tw:space-y-1.5">
-              <label for="manual-pay-method" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.paymentMethod") }}</label>
+              <label for="manual-pay-method" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.paymentMethod") }}</label>
               <prime-select
                 id="manual-pay-method"
                 v-model="paymentMethod"
@@ -459,7 +459,7 @@ onMounted(async () => {
           <!-- Amount received + tip -->
           <div v-if="paymentStatus === PAYMENT_STATUS.PAID" class="tw:grid tw:grid-cols-2 tw:gap-3">
             <div class="tw:space-y-1.5">
-              <label for="manual-amount" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.amountReceived") }}</label>
+              <label for="manual-amount" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.amountReceived") }}</label>
               <prime-input-number
                 id="manual-amount"
                 v-model="amountReceived"
@@ -471,7 +471,7 @@ onMounted(async () => {
               />
             </div>
             <div class="tw:space-y-1.5">
-              <label for="manual-tip" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.tip") }}</label>
+              <label for="manual-tip" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.manual.tip") }}</label>
               <prime-input-number
                 id="manual-tip"
                 v-model="tipAmount"
@@ -489,11 +489,11 @@ onMounted(async () => {
         <div :class="[appCard, cardRing, 'tw:rounded-xl tw:p-4 tw:flex tw:flex-col tw:gap-3']">
           <div class="tw:flex tw:items-center tw:justify-between">
             <p class="tw:text-sm tw:font-semibold">{{ t("orders.manual.cart") }}</p>
-            <span class="tw:text-xs app-text-muted">{{ t("orders.manual.cartCount", { n: cart.length }) }}</span>
+            <span class="tw:text-xs tw:text-muted">{{ t("orders.manual.cartCount", { n: cart.length }) }}</span>
           </div>
 
           <!-- Empty state -->
-          <div v-if="!cart.length" class="tw:text-sm app-text-muted tw:text-center tw:py-4">
+          <div v-if="!cart.length" class="tw:text-sm tw:text-muted tw:text-center tw:py-4">
             {{ t("orders.manual.cartEmpty") }}
           </div>
 
@@ -506,7 +506,7 @@ onMounted(async () => {
             >
               <div class="tw:flex-1 tw:min-w-0">
                 <p class="tw:text-sm tw:font-medium tw:truncate">{{ item.productName }}</p>
-                <p v-if="optionsLabel(item)" class="tw:text-[11px] app-text-muted tw:mt-0.5">{{ optionsLabel(item) }}</p>
+                <p v-if="optionsLabel(item)" class="tw:text-[11px] tw:text-muted tw:mt-0.5">{{ optionsLabel(item) }}</p>
                 <p class="tw:text-xs tw:text-emerald-400 tw:mt-0.5">{{ formatVnd(item.unitPrice) }}</p>
               </div>
               <div class="tw:flex tw:items-center tw:gap-1.5 tw:shrink-0">
@@ -523,7 +523,7 @@ onMounted(async () => {
 
           <!-- Total -->
           <div v-if="cart.length" class="tw:border-t tw:border-white/10 tw:pt-3 tw:flex tw:justify-between tw:items-center">
-            <span class="tw:text-sm app-text-muted">{{ t("orders.manual.subtotal") }}</span>
+            <span class="tw:text-sm tw:text-muted">{{ t("orders.manual.subtotal") }}</span>
             <span class="tw:font-semibold">{{ formatVnd(cartTotal) }}</span>
           </div>
 

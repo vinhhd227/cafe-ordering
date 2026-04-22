@@ -466,7 +466,7 @@ onMounted(load)
         class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
         :class="activeTab === 'range'
           ? 'tw:bg-white tw:dark:bg-white/15 tw:text-surface-900 tw:dark:text-white tw:shadow-sm'
-          : 'app-text-muted'"
+          : 'tw:text-muted'"
         @click="activeTab = 'range'"
       >
         {{ t('report.tabs.dateRange') }}
@@ -475,7 +475,7 @@ onMounted(load)
         class="tw:px-3 tw:py-1.5 tw:text-xs tw:rounded-md tw:font-medium tw:transition-colors"
         :class="activeTab === 'monthly'
           ? 'tw:bg-white tw:dark:bg-white/15 tw:text-surface-900 tw:dark:text-white tw:shadow-sm'
-          : 'app-text-muted'"
+          : 'tw:text-muted'"
         @click="activeTab = 'monthly'"
       >
         {{ t('report.tabs.monthly') }}
@@ -534,7 +534,7 @@ onMounted(load)
     <!-- Content -->
     <div v-if="data" ref="reportContent" class="tw:space-y-8">
       <!-- Export header: date range label (visible in capture) -->
-      <p class="tw:text-sm app-text-muted">
+      <p class="tw:text-sm tw:text-muted">
         {{ fileStem.replace('_', ' → ') }}
       </p>
       <!-- Summary widgets -->
@@ -576,7 +576,7 @@ onMounted(load)
               <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
                 <div class="tw:flex tw:items-center tw:gap-1.5">
                   <iconify icon="ph:coins-bold" class="tw:text-rose-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.rev') }}</span>
+                  <span class="tw:text-xs tw:text-muted">{{ t('report.widgets.avgPerDay.rev') }}</span>
                 </div>
                 <span class="tw:text-xs tw:font-semibold">{{ fmt(avgRevPerDay) }}</span>
               </div>
@@ -584,7 +584,7 @@ onMounted(load)
               <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
                 <div class="tw:flex tw:items-center tw:gap-1.5">
                   <iconify icon="ph:coffee-bold" class="tw:text-cyan-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.drinks') }}</span>
+                  <span class="tw:text-xs tw:text-muted">{{ t('report.widgets.avgPerDay.drinks') }}</span>
                 </div>
                 <span class="tw:text-xs tw:font-semibold">
                   {{ avgDrinksPerDay % 1 === 0 ? avgDrinksPerDay : avgDrinksPerDay.toFixed(1) }}
@@ -594,7 +594,7 @@ onMounted(load)
               <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
                 <div class="tw:flex tw:items-center tw:gap-1.5">
                   <iconify icon="ph:receipt-bold" class="tw:text-green-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.orders') }}</span>
+                  <span class="tw:text-xs tw:text-muted">{{ t('report.widgets.avgPerDay.orders') }}</span>
                 </div>
                 <span class="tw:text-xs tw:font-semibold">
                   {{ avgOrdersPerDay % 1 === 0 ? avgOrdersPerDay : avgOrdersPerDay.toFixed(1) }}
@@ -604,7 +604,7 @@ onMounted(load)
               <div class="tw:flex tw:items-center tw:justify-between tw:py-1.5">
                 <div class="tw:flex tw:items-center tw:gap-1.5">
                   <iconify icon="ph:users-bold" class="tw:text-amber-400 tw:text-sm tw:opacity-80" />
-                  <span class="tw:text-xs app-text-muted">{{ t('report.widgets.avgPerDay.guests') }}</span>
+                  <span class="tw:text-xs tw:text-muted">{{ t('report.widgets.avgPerDay.guests') }}</span>
                 </div>
                 <span class="tw:text-xs tw:font-semibold">
                   {{ avgGuestsPerDay % 1 === 0 ? avgGuestsPerDay : avgGuestsPerDay.toFixed(1) }}

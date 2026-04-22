@@ -96,7 +96,7 @@ onMounted(loadCategory);
             :severity="category.isActive ? 'success' : 'danger'"
           />
         </h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           {{ t('categories.detail.id', { id: categoryId }) }}
           <template v-if="category">
             · {{ t('categories.detail.created') }} {{ formatDate(category.createdAt) }}
@@ -181,14 +181,14 @@ onMounted(loadCategory);
             <!-- Info rows -->
             <div class="tw:space-y-3">
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">{{ t('categories.list.col.status') }}</span>
+                <span class="tw:text-muted">{{ t('categories.list.col.status') }}</span>
                 <prime-tag
                   :value="category.isActive ? t('categories.status.active') : t('categories.status.inactive')"
                   :severity="category.isActive ? 'success' : 'danger'"
                 />
               </div>
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">{{ t('categories.detail.created') }}</span>
+                <span class="tw:text-muted">{{ t('categories.detail.created') }}</span>
                 <span class="tw:font-medium tw:text-right">{{
                   formatDate(category.createdAt)
                 }}</span>
@@ -197,7 +197,7 @@ onMounted(loadCategory);
                 v-if="category.updatedAt"
                 class="tw:flex tw:justify-between tw:text-sm"
               >
-                <span class="app-text-muted">{{ t('categories.detail.updated') }}</span>
+                <span class="tw:text-muted">{{ t('categories.detail.updated') }}</span>
                 <span class="tw:font-medium tw:text-right">{{
                   formatDate(category.updatedAt)
                 }}</span>
@@ -211,7 +211,7 @@ onMounted(loadCategory);
               >
                 {{ t('categories.detail.description') }}
               </p>
-              <p class="tw:text-sm app-text-muted tw:leading-relaxed">
+              <p class="tw:text-sm tw:text-muted tw:leading-relaxed">
                 {{ category.description }}
               </p>
             </div>
@@ -240,7 +240,7 @@ onMounted(loadCategory);
               <div class="tw:space-y-1.5">
                 <label for="description" class="tw:text-sm tw:font-medium">
                   {{ t('categories.form.description') }}
-                  <span class="app-text-muted tw:font-normal">{{ t('categories.form.optional') }}</span>
+                  <span class="tw:text-muted tw:font-normal">{{ t('categories.form.optional') }}</span>
                 </label>
                 <prime-textarea
                   id="description"
@@ -258,7 +258,7 @@ onMounted(loadCategory);
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
                   <p class="tw:text-sm tw:font-semibold">{{ t('categories.detail.activeOption.label') }}</p>
-                  <p class="tw:text-xs app-text-muted">
+                  <p class="tw:text-xs tw:text-muted">
                     {{ t('categories.detail.activeOption.hint') }}
                   </p>
                 </div>
@@ -298,7 +298,7 @@ onMounted(loadCategory);
     <prime-card v-else class="app-card tw:rounded-2xl tw:border">
       <template #content>
         <div
-          class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted"
+          class="tw:flex tw:flex-col tw:items-center tw:py-10 tw:text-muted"
         >
           <iconify icon="ph:warning-bold" class="tw:text-3xl tw:mb-2" />
           <p class="tw:text-sm">{{ t('categories.detail.notFound') }}</p>

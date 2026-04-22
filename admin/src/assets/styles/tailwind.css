@@ -2,6 +2,7 @@
 @import "./app.css";
 @import "tailwindcss" prefix(tw);
 @import "tailwindcss-primeui";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:where(.app-dark, .app-dark *));
 
@@ -16,6 +17,16 @@
 }
 @utility max-w-11xl {
   max-width: 120rem;  /* 1920px */
+}
+
+@utility text-muted {
+  color: var(--tw-color-slate-500);
+  @variant dark { color: var(--tw-color-slate-400); }
+}
+
+@utility text-subtle {
+  color: var(--tw-color-slate-400);
+  @variant dark { color: var(--tw-color-slate-500); }
 }
 
 html {

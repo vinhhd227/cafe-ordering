@@ -505,7 +505,7 @@ const handleDelete = (promo) => {
     <div class="tw:space-y-4">
       <!-- Name -->
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('promotions.form.name') }} <span class="tw:text-red-400">*</span>
         </label>
         <prime-input-text
@@ -518,7 +518,7 @@ const handleDelete = (promo) => {
       <!-- Code + Visibility -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.code') }}
             <span class="tw:normal-case tw:opacity-60">{{ t('promotions.form.codeHint') }}</span>
           </label>
@@ -529,7 +529,7 @@ const handleDelete = (promo) => {
           />
         </div>
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.visibility') }}
           </label>
           <prime-select
@@ -558,7 +558,7 @@ const handleDelete = (promo) => {
       <!-- Discount type + Scope -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.discountType') }}
           </label>
           <prime-select
@@ -583,7 +583,7 @@ const handleDelete = (promo) => {
           </prime-select>
         </div>
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.scope') }}
           </label>
           <prime-select
@@ -611,7 +611,7 @@ const handleDelete = (promo) => {
 
       <!-- Discount value (conditional) -->
       <div v-if="!isBuyXGetY" class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('promotions.form.discountValue') }} <span class="tw:text-red-400">*</span>
           <span class="tw:normal-case tw:opacity-60">
             {{ fDiscountType === 'PERCENTAGE' ? '(%)' : '(₫)' }}
@@ -632,7 +632,7 @@ const handleDelete = (promo) => {
 
       <!-- Max discount amount (only for PERCENTAGE) -->
       <div v-if="isPercentage" class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('promotions.form.maxDiscountAmount') }}
           <span class="tw:normal-case tw:opacity-60">{{ t('promotions.form.maxDiscountAmountHint') }}</span>
         </label>
@@ -650,7 +650,7 @@ const handleDelete = (promo) => {
       <!-- Buy qty + Get qty (only for BUY_X_GET_Y) -->
       <div v-if="isBuyXGetY" class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.buyQuantity') }} <span class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
@@ -662,7 +662,7 @@ const handleDelete = (promo) => {
           />
         </div>
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.getQuantity') }} <span class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
@@ -677,7 +677,7 @@ const handleDelete = (promo) => {
 
       <!-- Applicable products (only for PRODUCT scope) -->
       <div v-show="isProductScope" class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('promotions.form.applicableProducts') }}
         </label>
         <prime-tree-select
@@ -691,7 +691,7 @@ const handleDelete = (promo) => {
 
       <!-- Applicable categories (only for CATEGORY scope) -->
       <div v-if="isCategoryScope" class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('promotions.form.applicableCategories') }}
         </label>
         <prime-multi-select
@@ -709,7 +709,7 @@ const handleDelete = (promo) => {
       <!-- Gift source classification (only for BUY_X_GET_Y) -->
       <div v-if="isBuyXGetY" class="tw:space-y-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.freeItem') }}
           </label>
           <prime-select-button
@@ -731,7 +731,7 @@ const handleDelete = (promo) => {
         <!-- GetFrom selectors — only shown when SEPARATE -->
         <template v-if="fGiftSource === 'SEPARATE'">
           <div class="tw:space-y-1.5">
-            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+            <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
               {{ t('promotions.form.freeItemFromProducts') }}
             </label>
             <prime-tree-select
@@ -743,7 +743,7 @@ const handleDelete = (promo) => {
             />
           </div>
           <div class="tw:space-y-1.5">
-            <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+            <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
               {{ t('promotions.form.freeItemFromCategories') }}
             </label>
             <prime-multi-select
@@ -763,7 +763,7 @@ const handleDelete = (promo) => {
       <!-- Min order amount + Max usage -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.minOrderAmount') }}
           </label>
           <prime-input-number
@@ -777,7 +777,7 @@ const handleDelete = (promo) => {
           />
         </div>
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.maxUsage') }}
             <span class="tw:normal-case tw:opacity-60">{{ t('promotions.form.maxUsageHint') }}</span>
           </label>
@@ -794,7 +794,7 @@ const handleDelete = (promo) => {
       <!-- Start date + End date -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.startDate') }} <span class="tw:text-red-400">*</span>
           </label>
           <prime-date-picker
@@ -805,7 +805,7 @@ const handleDelete = (promo) => {
           />
         </div>
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('promotions.form.endDate') }}
             <span class="tw:normal-case tw:opacity-60">{{ t('promotions.form.endDateHint') }}</span>
           </label>
@@ -820,7 +820,7 @@ const handleDelete = (promo) => {
 
       <!-- Description -->
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('promotions.form.description') }}
         </label>
         <prime-textarea
@@ -834,7 +834,7 @@ const handleDelete = (promo) => {
 
       <!-- Active toggle (edit only) -->
       <div v-if="isEditMode" class="tw:flex tw:items-center tw:justify-between">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('promotions.form.activeLabel') }}
         </label>
         <prime-toggle-switch v-model="fIsActive" />
@@ -866,7 +866,7 @@ const handleDelete = (promo) => {
           {{ t('promotions.breadcrumb') }}
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('promotions.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('promotions.subtitle') }}</p>
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('promotions.subtitle') }}</p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
         <prime-button
@@ -936,7 +936,7 @@ const handleDelete = (promo) => {
 
               <!-- Status -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('promotions.filter.status') }}</label>
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t('promotions.filter.status') }}</label>
                 <prime-select
                   v-model="isActiveFilter"
                   :options="[{ label: t('promotions.tag.active'), value: true }, { label: t('promotions.tag.inactive'), value: false }]"
@@ -950,7 +950,7 @@ const handleDelete = (promo) => {
 
               <!-- Discount type -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('promotions.filter.discountType') }}</label>
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t('promotions.filter.discountType') }}</label>
                 <prime-select
                   v-model="discountTypeFilter"
                   :options="PROMOTION_DISCOUNT_TYPE_OPTIONS"
@@ -971,7 +971,7 @@ const handleDelete = (promo) => {
 
               <!-- Scope -->
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('promotions.filter.scope') }}</label>
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t('promotions.filter.scope') }}</label>
                 <prime-select
                   v-model="scopeFilter"
                   :options="PROMOTION_SCOPE_OPTIONS"
@@ -1015,8 +1015,8 @@ const handleDelete = (promo) => {
               class="tw:text-[11px]! tw:px-1.5! tw:py-0.5! tw:flex-shrink-0"
             />
           </div>
-          <p v-if="data.code" class="tw:text-xs tw:font-mono app-text-muted">{{ data.code }}</p>
-          <p class="tw:text-xs app-text-muted">{{ discountValueLabel(data) }}</p>
+          <p v-if="data.code" class="tw:text-xs tw:font-mono tw:text-muted">{{ data.code }}</p>
+          <p class="tw:text-xs tw:text-muted">{{ discountValueLabel(data) }}</p>
           <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
             <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
               <iconify icon="ph:dots-three-bold" />
@@ -1029,7 +1029,7 @@ const handleDelete = (promo) => {
       <template #col-name="{ data }">
         <div>
           <p class="tw:font-semibold tw:text-sm">{{ data.name }}</p>
-          <p class="tw:text-xs tw:font-mono app-text-muted">{{ data.code }}</p>
+          <p class="tw:text-xs tw:font-mono tw:text-muted">{{ data.code }}</p>
         </div>
       </template>
 
@@ -1037,7 +1037,7 @@ const handleDelete = (promo) => {
         <div class="tw:flex tw:items-center tw:gap-1.5">
           <iconify
             :icon="PROMOTION_DISCOUNT_TYPE_MAP[data.discountType]?.icon ?? 'ph:tag-bold'"
-            class="tw:text-sm app-text-muted"
+            class="tw:text-sm tw:text-muted"
           />
           <prime-tag
             :value="PROMOTION_DISCOUNT_TYPE_MAP[data.discountType]?.label ?? data.discountType"
@@ -1050,7 +1050,7 @@ const handleDelete = (promo) => {
         <div class="tw:flex tw:items-center tw:gap-1.5">
           <iconify
             :icon="PROMOTION_SCOPE_MAP[data.scope]?.icon ?? 'ph:tag-bold'"
-            class="tw:text-sm app-text-muted"
+            class="tw:text-sm tw:text-muted"
           />
           <prime-tag
             :value="PROMOTION_SCOPE_MAP[data.scope]?.label ?? data.scope"
@@ -1065,16 +1065,16 @@ const handleDelete = (promo) => {
 
       <template #col-validity="{ data }">
         <div class="tw:text-sm">
-          <span class="app-text-muted">{{ formatDate(data.startDate) }}</span>
-          <span class="app-text-muted tw:mx-1">–</span>
-          <span class="app-text-muted">{{ data.endDate ? formatDate(data.endDate) : '∞' }}</span>
+          <span class="tw:text-muted">{{ formatDate(data.startDate) }}</span>
+          <span class="tw:text-muted tw:mx-1">–</span>
+          <span class="tw:text-muted">{{ data.endDate ? formatDate(data.endDate) : '∞' }}</span>
         </div>
       </template>
 
       <template #col-usage="{ data }">
         <span class="tw:text-sm">
           {{ data.currentUsage }}
-          <span class="app-text-muted">/ {{ data.maxUsage ?? '∞' }}</span>
+          <span class="tw:text-muted">/ {{ data.maxUsage ?? '∞' }}</span>
         </span>
       </template>
 
@@ -1082,7 +1082,7 @@ const handleDelete = (promo) => {
         <div class="tw:flex tw:items-center tw:gap-1.5">
           <iconify
             :icon="CODE_VISIBILITY_MAP[data.codeVisibility]?.icon ?? 'ph:eye-bold'"
-            class="tw:text-sm app-text-muted"
+            class="tw:text-sm tw:text-muted"
           />
           <prime-tag
             :value="CODE_VISIBILITY_MAP[data.codeVisibility]?.label ?? data.codeVisibility"

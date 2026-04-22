@@ -334,7 +334,7 @@ const takeawayChartOptions = {
         <iconify icon="ph:caret-right-bold" />
       </prime-button>
 
-      <span class="tw:text-xs app-text-muted tw:ml-1">
+      <span class="tw:text-xs tw:text-muted tw:ml-1">
         {{ t('report.monthly.vs') }} {{ prevMonthLabel }}
       </span>
 
@@ -376,7 +376,7 @@ const takeawayChartOptions = {
     <!-- No data -->
     <div
       v-else-if="data && data.current.totalOrders === 0"
-      class="tw:text-sm app-text-muted tw:text-center tw:py-10"
+      class="tw:text-sm tw:text-muted tw:text-center tw:py-10"
     >
       {{ t('report.monthly.noData') }}
     </div>
@@ -406,7 +406,7 @@ const takeawayChartOptions = {
             <!-- Current value -->
             <p class="tw:text-base tw:font-bold tw:truncate">{{ m.format(m.current) }}</p>
             <!-- Previous value -->
-            <p class="tw:text-xs app-text-muted tw:truncate">{{ m.format(m.previous) }}</p>
+            <p class="tw:text-xs tw:text-muted tw:truncate">{{ m.format(m.previous) }}</p>
             <!-- Delta -->
             <div
               v-if="m.delta !== null"
@@ -416,7 +416,7 @@ const takeawayChartOptions = {
               <iconify :icon="m.delta >= 0 ? 'ph:trend-up-bold' : 'ph:trend-down-bold'" />
               <span>{{ m.delta >= 0 ? '+' : '' }}{{ m.delta.toFixed(1) }}%</span>
             </div>
-            <div v-else class="tw:text-xs app-text-muted">—</div>
+            <div v-else class="tw:text-xs tw:text-muted">—</div>
           </template>
         </prime-card>
       </div>
@@ -437,7 +437,7 @@ const takeawayChartOptions = {
               <iconify icon="ph:clock-bold" class="app-text-subtle" />
               <span class="tw:text-sm tw:font-medium">{{ t('report.monthly.charts.peakHours') }}</span>
             </div>
-            <p class="tw:text-xs app-text-muted">{{ t('report.monthly.charts.peakHoursSubtitle') }}</p>
+            <p class="tw:text-xs tw:text-muted">{{ t('report.monthly.charts.peakHoursSubtitle') }}</p>
           </template>
           <template #content>
             <prime-chart type="bar" :data="peakHoursChartData" :options="peakHoursChartOptions" class="tw:h-full" />
@@ -458,7 +458,7 @@ const takeawayChartOptions = {
               <iconify icon="ph:calendar-bold" class="app-text-subtle" />
               <span class="tw:text-sm tw:font-medium">{{ t('report.monthly.charts.weekday') }}</span>
             </div>
-            <p class="tw:text-xs app-text-muted">{{ t('report.monthly.charts.weekdaySubtitle') }}</p>
+            <p class="tw:text-xs tw:text-muted">{{ t('report.monthly.charts.weekdaySubtitle') }}</p>
           </template>
           <template #content>
             <prime-chart type="bar" :data="weekdayChartData" :options="weekdayChartOptions" class="tw:h-full" />
@@ -481,7 +481,7 @@ const takeawayChartOptions = {
             <iconify icon="ph:trophy-bold" class="tw:text-amber-400" />
             <span class="tw:text-sm tw:font-medium">{{ t('report.monthly.topProducts.title') }}</span>
           </div>
-          <p class="tw:text-xs app-text-muted">{{ t('report.monthly.topProducts.subtitle') }}</p>
+          <p class="tw:text-xs tw:text-muted">{{ t('report.monthly.topProducts.subtitle') }}</p>
         </template>
         <template #content>
           <prime-data-table
@@ -539,7 +539,7 @@ const takeawayChartOptions = {
                   <span>{{ Math.abs(row.rankChange) }}</span>
                 </div>
                 <!-- No change -->
-                <span v-else class="app-text-muted tw:text-xs">—</span>
+                <span v-else class="tw:text-muted tw:text-xs">—</span>
               </template>
             </prime-column>
           </prime-data-table>
@@ -563,7 +563,7 @@ const takeawayChartOptions = {
               <iconify icon="ph:arrow-down-bold" class="tw:text-rose-400" />
               <span class="tw:text-sm tw:font-medium">{{ t('report.monthly.worstSellers.title') }}</span>
             </div>
-            <p class="tw:text-xs app-text-muted">{{ t('report.monthly.worstSellers.subtitle') }}</p>
+            <p class="tw:text-xs tw:text-muted">{{ t('report.monthly.worstSellers.subtitle') }}</p>
           </template>
           <template #content>
             <div
@@ -572,11 +572,11 @@ const takeawayChartOptions = {
               class="tw:flex tw:items-center tw:justify-between tw:py-1.5 tw:border-b tw:border-white/5 last:tw:border-0"
             >
               <div class="tw:flex tw:items-center tw:gap-2">
-                <span class="tw:text-xs app-text-muted tw:w-5 tw:text-right">{{ idx + 1 }}.</span>
+                <span class="tw:text-xs tw:text-muted tw:w-5 tw:text-right">{{ idx + 1 }}.</span>
                 <span class="tw:text-sm">{{ item.name }}</span>
               </div>
               <div class="tw:flex tw:items-center tw:gap-3">
-                <span class="tw:text-xs app-text-muted">{{ item.qty }} {{ t('report.topProducts.unit') }}</span>
+                <span class="tw:text-xs tw:text-muted">{{ item.qty }} {{ t('report.topProducts.unit') }}</span>
                 <span class="tw:text-xs tw:font-medium tw:text-emerald-400">{{ fmt(item.revenue) }}</span>
               </div>
             </div>
@@ -595,7 +595,7 @@ const takeawayChartOptions = {
           <template #header>
             <iconify icon="ph:bag-bold" class="tw:text-blue-400" />
             <span class="tw:text-sm tw:font-medium">{{ t('report.monthly.takeaway.title') }}</span>
-            <span class="tw:ml-auto tw:text-xs app-text-muted">
+            <span class="tw:ml-auto tw:text-xs tw:text-muted">
               {{ data.takeawayRatio.toFixed(1) }}% {{ t('report.monthly.takeaway.takeaway') }}
             </span>
           </template>
@@ -607,7 +607,7 @@ const takeawayChartOptions = {
               :options="takeawayChartOptions"
               class="tw:h-full"
             />
-            <div v-else class="tw:flex tw:items-center tw:justify-center tw:h-full tw:text-xs app-text-muted">
+            <div v-else class="tw:flex tw:items-center tw:justify-center tw:h-full tw:text-xs tw:text-muted">
               {{ t('report.empty') }}
             </div>
           </template>

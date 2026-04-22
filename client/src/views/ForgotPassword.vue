@@ -40,14 +40,14 @@
 
         <prime-button
           type="button"
-          class="tw:mt-8 tw:w-full tw:rounded-xl tw:bg-emerald-500 tw:px-4 tw:py-3 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-emerald-500/30 tw:transition hover:tw:bg-emerald-400"
+          class="tw:mt-8 tw:w-full tw:rounded-xl tw:bg-emerald-500 tw:px-4 tw:py-3 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-emerald-500/30 tw:transition tw:hover:bg-emerald-400"
         >
           Send reset link
         </prime-button>
 
         <div class="tw:mt-6 tw:flex tw:items-center tw:justify-between tw:text-sm">
           <span class="tw:text-slate-400">Remembered your password?</span>
-          <router-link class="tw:text-emerald-300 hover:tw:text-emerald-200" to="/admin/login">
+          <router-link class="tw:text-emerald-300 tw:hover:text-emerald-200" to="/admin/login">
             Back to login
           </router-link>
         </div>

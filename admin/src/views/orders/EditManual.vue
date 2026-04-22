@@ -267,7 +267,7 @@ onMounted(async () => {
   <prime-dialog v-model:visible="showOptionsDialog" :header="selectedProduct?.name" :modal="true" class="tw:w-[360px]">
     <div class="tw:space-y-4">
       <div v-if="selectedProduct?.hasTemperatureOption" class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.temperature.label", "Nhiệt độ") }}</p>
+        <p class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.temperature.label", "Nhiệt độ") }}</p>
         <prime-select-button
           v-model="pendingOptions.temperature"
           :options="temperatureOptions"
@@ -278,7 +278,7 @@ onMounted(async () => {
         />
       </div>
       <div v-if="selectedProduct?.hasIceLevelOption && pendingOptions.temperature !== DRINK_TEMPERATURE.HOT" class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.iceLevel.label", "Đá") }}</p>
+        <p class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.iceLevel.label", "Đá") }}</p>
         <prime-select-button
           v-model="pendingOptions.iceLevel"
           :options="iceLevelOptions"
@@ -288,7 +288,7 @@ onMounted(async () => {
         />
       </div>
       <div v-if="selectedProduct?.hasSugarLevelOption" class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.sugarLevel.label", "Đường") }}</p>
+        <p class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.sugarLevel.label", "Đường") }}</p>
         <prime-select-button
           v-model="pendingOptions.sugarLevel"
           :options="sugarLevelOptions"
@@ -298,7 +298,7 @@ onMounted(async () => {
         />
       </div>
       <div class="tw:space-y-2">
-        <p class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.serving.label", "Phục vụ") }}</p>
+        <p class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.serving.label", "Phục vụ") }}</p>
         <prime-select-button
           v-model="pendingOptions.isTakeaway"
           :options="servingOptions"
@@ -308,11 +308,11 @@ onMounted(async () => {
         />
       </div>
       <div class="tw:space-y-1.5">
-        <label for="edit-manual-note" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t("orders.create.note", "Ghi chú") }}</label>
+        <label for="edit-manual-note" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t("orders.create.note", "Ghi chú") }}</label>
         <prime-input-text id="edit-manual-note" v-model="pendingOptions.note" :placeholder="t('orders.create.notePlaceholder', 'Yêu cầu đặc biệt...')" class="app-input tw:w-full" />
       </div>
       <div class="tw:flex tw:items-center tw:justify-between">
-        <span class="tw:text-sm app-text-muted">{{ t("orders.create.quantity", "Số lượng") }}</span>
+        <span class="tw:text-sm tw:text-muted">{{ t("orders.create.quantity", "Số lượng") }}</span>
         <div class="tw:flex tw:items-center tw:gap-3">
           <prime-button :class="btnIcon" severity="secondary" outlined :disabled="pendingQuantity <= 1" @click="pendingQuantity--">
             <iconify icon="ph:minus-bold" />
@@ -369,12 +369,12 @@ onMounted(async () => {
 
         <div class="tw:space-y-4 tw:overflow-y-auto tw:max-h-[60dvh]">
           <div v-for="cat in visibleCategories" :key="cat.id">
-            <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest app-text-muted tw:mb-2">{{ cat.name }}</p>
+            <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest tw:text-muted tw:mb-2">{{ cat.name }}</p>
             <div class="tw:grid tw:grid-cols-2 tw:sm:grid-cols-3 tw:gap-2">
               <button
                 v-for="product in cat.filteredProducts"
                 :key="product.id"
-                class="tw:text-left tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:p-3 tw:transition-colors hover:tw:bg-white/10 hover:tw:border-emerald-500/40"
+                class="tw:text-left tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:p-3 tw:transition-colors tw:hover:bg-white/10 tw:hover:border-emerald-500/40"
                 @click="handleAddToCart(product)"
               >
                 <p class="tw:text-sm tw:font-medium tw:leading-tight">{{ product.name }}</p>
@@ -382,7 +382,7 @@ onMounted(async () => {
               </button>
             </div>
           </div>
-          <p v-if="!visibleCategories.length" class="tw:text-sm app-text-muted tw:text-center tw:py-6">Không có sản phẩm</p>
+          <p v-if="!visibleCategories.length" class="tw:text-sm tw:text-muted tw:text-center tw:py-6">Không có sản phẩm</p>
         </div>
       </div>
 
@@ -402,7 +402,7 @@ onMounted(async () => {
           <!-- Ordered at + Guest count -->
           <div class="tw:grid tw:grid-cols-2 tw:gap-3">
             <div class="tw:space-y-1.5">
-              <label for="edit-manual-date" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Thời gian</label>
+              <label for="edit-manual-date" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">Thời gian</label>
               <prime-date-picker
                 id="edit-manual-date"
                 v-model="orderedAt"
@@ -414,7 +414,7 @@ onMounted(async () => {
               />
             </div>
             <div class="tw:space-y-1.5">
-              <label for="edit-manual-guests" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Số khách</label>
+              <label for="edit-manual-guests" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">Số khách</label>
               <prime-input-number
                 id="edit-manual-guests"
                 v-model="guestCount"
@@ -429,7 +429,7 @@ onMounted(async () => {
 
           <!-- Status -->
           <div class="tw:space-y-1.5">
-            <label for="edit-manual-status" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Trạng thái</label>
+            <label for="edit-manual-status" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">Trạng thái</label>
             <prime-select
               id="edit-manual-status"
               v-model="orderStatus"
@@ -443,7 +443,7 @@ onMounted(async () => {
           <!-- Payment status + method -->
           <div class="tw:grid tw:grid-cols-2 tw:gap-3">
             <div class="tw:space-y-1.5">
-              <label for="edit-manual-pay-status" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">TT thanh toán</label>
+              <label for="edit-manual-pay-status" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">TT thanh toán</label>
               <prime-select
                 id="edit-manual-pay-status"
                 v-model="paymentStatus"
@@ -454,7 +454,7 @@ onMounted(async () => {
               />
             </div>
             <div class="tw:space-y-1.5">
-              <label for="edit-manual-pay-method" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Phương thức</label>
+              <label for="edit-manual-pay-method" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">Phương thức</label>
               <prime-select
                 id="edit-manual-pay-method"
                 v-model="paymentMethod"
@@ -469,7 +469,7 @@ onMounted(async () => {
           <!-- Amount received + tip (only when PAID) -->
           <div v-if="paymentStatus === PAYMENT_STATUS.PAID" class="tw:grid tw:grid-cols-2 tw:gap-3">
             <div class="tw:space-y-1.5">
-              <label for="edit-manual-amount" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Số tiền nhận</label>
+              <label for="edit-manual-amount" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">Số tiền nhận</label>
               <prime-input-number
                 id="edit-manual-amount"
                 v-model="amountReceived"
@@ -481,7 +481,7 @@ onMounted(async () => {
               />
             </div>
             <div class="tw:space-y-1.5">
-              <label for="edit-manual-tip" class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">Tiền tip</label>
+              <label for="edit-manual-tip" class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">Tiền tip</label>
               <prime-input-number
                 id="edit-manual-tip"
                 v-model="tipAmount"
@@ -499,10 +499,10 @@ onMounted(async () => {
         <div :class="[appCard, cardRing, 'tw:rounded-xl tw:p-4 tw:flex tw:flex-col tw:gap-3']">
           <div class="tw:flex tw:items-center tw:justify-between">
             <p class="tw:text-sm tw:font-semibold">Giỏ hàng</p>
-            <span class="tw:text-xs app-text-muted">{{ cart.length }} sản phẩm</span>
+            <span class="tw:text-xs tw:text-muted">{{ cart.length }} sản phẩm</span>
           </div>
 
-          <div v-if="!cart.length" class="tw:text-sm app-text-muted tw:text-center tw:py-4">
+          <div v-if="!cart.length" class="tw:text-sm tw:text-muted tw:text-center tw:py-4">
             Chưa có sản phẩm nào
           </div>
 
@@ -514,7 +514,7 @@ onMounted(async () => {
             >
               <div class="tw:flex-1 tw:min-w-0">
                 <p class="tw:text-sm tw:font-medium tw:truncate">{{ item.productName }}</p>
-                <p v-if="optionsLabel(item)" class="tw:text-[11px] app-text-muted tw:mt-0.5">{{ optionsLabel(item) }}</p>
+                <p v-if="optionsLabel(item)" class="tw:text-[11px] tw:text-muted tw:mt-0.5">{{ optionsLabel(item) }}</p>
                 <p class="tw:text-xs tw:text-emerald-400 tw:mt-0.5">{{ formatVnd(item.unitPrice) }}</p>
               </div>
               <div class="tw:flex tw:items-center tw:gap-1.5 tw:shrink-0">
@@ -530,7 +530,7 @@ onMounted(async () => {
           </div>
 
           <div v-if="cart.length" class="tw:border-t tw:border-white/10 tw:pt-3 tw:flex tw:justify-between tw:items-center">
-            <span class="tw:text-sm app-text-muted">Tạm tính</span>
+            <span class="tw:text-sm tw:text-muted">Tạm tính</span>
             <span class="tw:font-semibold">{{ formatVnd(cartTotal) }}</span>
           </div>
 

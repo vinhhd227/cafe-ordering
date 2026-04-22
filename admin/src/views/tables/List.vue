@@ -666,7 +666,7 @@ const columns = computed(() => [
       <div class="tw:space-y-1.5">
         <label
           for="tableCode"
-          class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+          class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted"
         >
           {{ t('tables.form.tableCode') }}
         </label>
@@ -682,7 +682,7 @@ const columns = computed(() => [
         </p>
       </div>
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('tables.form.zone') }} <span class="app-text-subtle">{{ t('tables.form.optional') }}</span>
         </label>
         <prime-select
@@ -721,7 +721,7 @@ const columns = computed(() => [
   >
     <div class="tw:space-y-4">
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('tables.form.tableCode') }}
         </label>
         <prime-input-text
@@ -732,7 +732,7 @@ const columns = computed(() => [
         />
       </div>
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('tables.form.zone') }} <span class="app-text-subtle">{{ t('tables.form.optional') }}</span>
         </label>
         <prime-select
@@ -774,7 +774,7 @@ const columns = computed(() => [
         v-if="qrCardLoading"
         class="tw:w-[260px] tw:h-[360px] tw:rounded-xl tw:bg-slate-100 tw:dark:bg-slate-800 tw:flex tw:items-center tw:justify-center"
       >
-        <iconify icon="ph:circle-notch-bold" class="tw:animate-spin tw:text-2xl app-text-muted" />
+        <iconify icon="ph:circle-notch-bold" class="tw:animate-spin tw:text-2xl tw:text-muted" />
       </div>
       <img
         v-else-if="qrCardDataUrl"
@@ -784,7 +784,7 @@ const columns = computed(() => [
       />
       <p
         v-if="qrUrl"
-        class="tw:text-xs tw:font-mono app-text-muted tw:text-center tw:break-all tw:px-2"
+        class="tw:text-xs tw:font-mono tw:text-muted tw:text-center tw:break-all tw:px-2"
       >{{ qrUrl }}</p>
       <p v-if="regenerateError" class="tw:text-xs tw:text-red-400 tw:text-center">
         {{ regenerateError }}
@@ -825,7 +825,7 @@ const columns = computed(() => [
     <div class="tw:flex tw:flex-col tw:gap-3" style="min-width: 210px">
       <!-- Header color -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.headerColor') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.headerColor') }}</span>
         <input
           type="color"
           :value="cardColor"
@@ -833,51 +833,51 @@ const columns = computed(() => [
           class="tw:w-7 tw:h-7 tw:rounded tw:cursor-pointer tw:border-0 tw:bg-transparent tw:p-0.5"
         />
         <button
-          class="tw:text-xs app-text-muted tw:underline tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0"
+          class="tw:text-xs tw:text-muted tw:underline tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0"
           @click="cardColor = '#10b981'"
         >{{ t('tables.qr.customizer.reset') }}</button>
       </div>
       <!-- Pattern -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.pattern') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.pattern') }}</span>
         <div class="tw:flex tw:gap-1">
           <button v-for="opt in qrStyleOptions" :key="opt.value"
             @click="qrStyle = opt.value"
             :class="['tw:text-sm tw:w-8 tw:h-7 tw:rounded tw:border tw:cursor-pointer tw:transition-colors',
-              qrStyle === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'app-text-muted tw:border-surface-400 tw:bg-transparent']"
+              qrStyle === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'tw:text-muted tw:border-surface-400 tw:bg-transparent']"
           >{{ opt.label }}</button>
         </div>
       </div>
       <!-- Marker border -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.markerBorder') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.markerBorder') }}</span>
         <div class="tw:flex tw:gap-1">
           <button v-for="opt in markerBorderOptions" :key="opt.value"
             @click="markerBorder = opt.value"
             :class="['tw:text-sm tw:w-8 tw:h-7 tw:rounded tw:border tw:cursor-pointer tw:transition-colors',
-              markerBorder === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'app-text-muted tw:border-surface-400 tw:bg-transparent']"
+              markerBorder === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'tw:text-muted tw:border-surface-400 tw:bg-transparent']"
           >{{ opt.label }}</button>
         </div>
       </div>
       <!-- Marker center -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.markerCenter') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.markerCenter') }}</span>
         <div class="tw:flex tw:gap-1">
           <button v-for="opt in markerCenterOptions" :key="opt.value"
             @click="markerCenter = opt.value"
             :class="['tw:text-sm tw:w-8 tw:h-7 tw:rounded tw:border tw:cursor-pointer tw:transition-colors',
-              markerCenter === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'app-text-muted tw:border-surface-400 tw:bg-transparent']"
+              markerCenter === opt.value ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'tw:text-muted tw:border-surface-400 tw:bg-transparent']"
           >{{ opt.label }}</button>
         </div>
       </div>
       <!-- Precision -->
       <div class="tw:flex tw:items-center tw:gap-2">
-        <span class="tw:text-xs app-text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.precision') }}</span>
+        <span class="tw:text-xs tw:text-muted tw:w-28 tw:shrink-0">{{ t('tables.qr.customizer.precision') }}</span>
         <div class="tw:flex tw:gap-1">
           <button v-for="lvl in errorLevelOptions" :key="lvl"
             @click="errorLevel = lvl"
             :class="['tw:text-xs tw:font-mono tw:w-8 tw:h-7 tw:rounded tw:border tw:cursor-pointer tw:transition-colors',
-              errorLevel === lvl ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'app-text-muted tw:border-surface-400 tw:bg-transparent']"
+              errorLevel === lvl ? 'tw:bg-primary-500 tw:text-white tw:border-primary-500' : 'tw:text-muted tw:border-surface-400 tw:bg-transparent']"
           >{{ lvl }}</button>
         </div>
       </div>
@@ -894,7 +894,7 @@ const columns = computed(() => [
           {{ t('tables.groupLabel') }}
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('tables.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           {{ t('tables.subtitle') }}
         </p>
       </div>
@@ -1010,7 +1010,7 @@ const columns = computed(() => [
               <div class="tw:space-y-1.5">
                 <label
                   for="statusFilter"
-                  class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
+                  class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest"
                 >
                   {{ t('tables.filter.status') }}
                 </label>
@@ -1027,7 +1027,7 @@ const columns = computed(() => [
               </div>
 
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
                   {{ t('tables.filter.active') }}
                 </label>
                 <prime-select
@@ -1042,7 +1042,7 @@ const columns = computed(() => [
               </div>
 
               <div v-if="zoneOptions.length > 0" class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
                   {{ t('tables.filter.zone') }}
                 </label>
                 <prime-select
@@ -1090,7 +1090,7 @@ const columns = computed(() => [
           </div>
           <!-- Zone + Inactive badge -->
           <div class="tw:flex tw:items-center tw:gap-1.5 tw:flex-wrap">
-            <span class="tw:text-xs app-text-muted">{{ data.zoneName || '—' }}</span>
+            <span class="tw:text-xs tw:text-muted">{{ data.zoneName || '—' }}</span>
             <prime-tag v-if="!data.isActive" :value="t('tables.activeStatus.inactive')" severity="danger" class="tw:text-[10px]! tw:px-1! tw:py-0!" />
           </div>
           <!-- Actions -->
@@ -1127,7 +1127,7 @@ const columns = computed(() => [
       </template>
 
       <template #col-activeSessionId="{ data }">
-        <span v-if="data.activeSessionId" class="tw:text-xs app-text-muted tw:font-mono">
+        <span v-if="data.activeSessionId" class="tw:text-xs tw:text-muted tw:font-mono">
           {{ data.activeSessionId.slice(0, 8) }}…
         </span>
         <span v-else class="app-text-subtle">—</span>
@@ -1232,7 +1232,7 @@ const columns = computed(() => [
 
       <div class="tw:flex tw:flex-col tw:gap-4 tw:pb-6">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+          <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
             {{ t('tables.filter.status') }}
           </label>
           <prime-select
@@ -1247,7 +1247,7 @@ const columns = computed(() => [
         </div>
 
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+          <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
             {{ t('tables.filter.active') }}
           </label>
           <prime-select
@@ -1262,7 +1262,7 @@ const columns = computed(() => [
         </div>
 
         <div v-if="zoneOptions.length > 0" class="tw:space-y-1.5">
-          <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+          <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
             {{ t('tables.filter.zone') }}
           </label>
           <prime-select
@@ -1295,7 +1295,7 @@ const columns = computed(() => [
             class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
           />
           <prime-tag v-if="drawerTable && !drawerTable.isActive" :value="t('tables.activeStatus.inactive')" severity="danger" class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!" />
-          <span v-if="drawerTable?.zoneName" class="tw:text-xs app-text-muted">· {{ drawerTable.zoneName }}</span>
+          <span v-if="drawerTable?.zoneName" class="tw:text-xs tw:text-muted">· {{ drawerTable.zoneName }}</span>
         </div>
       </template>
 

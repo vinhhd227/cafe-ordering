@@ -32,7 +32,7 @@ const fmtCompact = (val) => {
       <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
         <div>
           <p class="tw:text-sm tw:font-semibold">{{ title }}</p>
-          <p v-if="subtitle" class="tw:text-xs app-text-muted">{{ subtitle }}</p>
+          <p v-if="subtitle" class="tw:text-xs tw:text-muted">{{ subtitle }}</p>
         </div>
         <iconify icon="ph:tag-bold" class="tw:text-amber-400 tw:opacity-60 tw:text-lg" />
       </div>
@@ -43,7 +43,7 @@ const fmtCompact = (val) => {
             <div class="tw:flex tw:items-center tw:gap-2 tw:min-w-0">
               <span class="tw:size-2 tw:rounded-full tw:shrink-0" :style="{ backgroundColor: cat.hex }" />
               <span class="tw:text-sm tw:truncate">{{ cat.name }}</span>
-              <span class="tw:text-[11px] app-text-muted tw:shrink-0">{{ cat.pct }}%</span>
+              <span class="tw:text-[11px] tw:text-muted tw:shrink-0">{{ cat.pct }}%</span>
             </div>
             <span v-if="cat.revenue != null" class="tw:text-xs tw:font-semibold tw:shrink-0">{{ fmtCompact(cat.revenue) }}</span>
           </div>

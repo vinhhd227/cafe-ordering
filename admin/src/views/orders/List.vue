@@ -313,7 +313,7 @@ const handleDeleteOrder = (order) => {
     <div class="tw:flex tw:sm:hidden tw:items-center tw:gap-3 tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:px-4 tw:py-3">
       <div class="tw:shrink-0">
         <span class="tw:text-xl tw:font-bold">{{ summary.total }}</span>
-        <span class="app-text-muted tw:text-xs tw:ml-1.5">{{ t('orders.breadcrumb').toLowerCase() }}</span>
+        <span class="tw:text-muted tw:text-xs tw:ml-1.5">{{ t('orders.breadcrumb').toLowerCase() }}</span>
       </div>
       <div class="tw:h-4 tw:w-px tw:bg-white/10 tw:shrink-0" />
       <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
@@ -485,11 +485,11 @@ const handleDeleteOrder = (order) => {
                 <span class="tw:font-mono tw:font-bold tw:text-sm">{{ data.orderNumber }}</span>
                 <prime-tag v-if="data.isManual" value="Thủ công" severity="secondary" class="tw:text-[10px]! tw:px-1.5! tw:py-0!" />
               </div>
-              <p class="tw:text-[11px] app-text-muted tw:mt-0.5">{{ formatDate(data.orderDate) }}</p>
+              <p class="tw:text-[11px] tw:text-muted tw:mt-0.5">{{ formatDate(data.orderDate) }}</p>
             </div>
             <div class="tw:text-right tw:shrink-0">
               <p class="tw:font-semibold tw:text-sm">
-                <span v-if="data.totalDiscount > 0" class="tw:text-xs app-text-muted tw:line-through tw:mr-1">
+                <span v-if="data.totalDiscount > 0" class="tw:text-xs tw:text-muted tw:line-through tw:mr-1">
                   {{ formatVnd(data.totalAmount) }}
                 </span>
                 {{ formatVnd(data.totalDiscount > 0 ? data.finalAmount : data.totalAmount) }}
@@ -504,14 +504,14 @@ const handleDeleteOrder = (order) => {
           <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-1.5">
             <prime-tag :value="statusTag(data.status).label" :severity="statusTag(data.status).severity" class="tw:text-[10px]! tw:px-1.5! tw:py-0.5!" />
             <prime-tag :value="paymentTag(data.paymentStatus, data.paymentMethod).label" :severity="paymentTag(data.paymentStatus, data.paymentMethod).severity" class="tw:text-[10px]! tw:px-1.5! tw:py-0.5!" />
-            <span v-if="data.guestCount" class="tw:flex tw:items-center tw:gap-0.5 tw:text-[10px] app-text-muted">
+            <span v-if="data.guestCount" class="tw:flex tw:items-center tw:gap-0.5 tw:text-[10px] tw:text-muted">
               <iconify icon="ph:users" />{{ data.guestCount }}
             </span>
           </div>
 
           <!-- Items summary -->
           <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
-            <span v-for="(item, idx) in (data.items ?? []).slice(0, 3)" :key="idx" class="tw:text-[11px] app-text-muted">
+            <span v-for="(item, idx) in (data.items ?? []).slice(0, 3)" :key="idx" class="tw:text-[11px] tw:text-muted">
               <span class="tw:text-emerald-400 tw:font-semibold">{{ item.quantity }}×</span>
               {{ item.productName }}
             </span>
@@ -580,7 +580,7 @@ const handleDeleteOrder = (order) => {
       </template>
 
       <template #col-orderDate="{ data }">
-        <span class="tw:text-sm app-text-muted">{{ formatDate(data.orderDate) }}</span>
+        <span class="tw:text-sm tw:text-muted">{{ formatDate(data.orderDate) }}</span>
       </template>
 
       <template #col-status="{ data }">
@@ -610,7 +610,7 @@ const handleDeleteOrder = (order) => {
             class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs"
           >
             <span class="tw:shrink-0 tw:font-semibold tw:text-emerald-400 tw:w-4 tw:text-right">{{ item.quantity }}×</span>
-            <span class="tw:truncate app-text-muted" style="max-width: 9rem">{{ item.productName }}</span>
+            <span class="tw:truncate tw:text-muted" style="max-width: 9rem">{{ item.productName }}</span>
           </div>
           <span v-if="(data.items?.length ?? 0) > 3" class="tw:text-[10px] app-text-subtle tw:italic">
             {{ t('orders.list.moreItems', { n: data.items.length - 3 }) }}
@@ -633,7 +633,7 @@ const handleDeleteOrder = (order) => {
       <template #col-totalAmount="{ data }">
         <div class="tw:space-y-0.5">
           <div class="tw:flex tw:items-baseline tw:gap-1.5 tw:flex-wrap">
-            <span v-if="data.totalDiscount > 0" class="tw:text-xs app-text-muted tw:line-through">
+            <span v-if="data.totalDiscount > 0" class="tw:text-xs tw:text-muted tw:line-through">
               {{ formatVnd(data.totalAmount) }}
             </span>
             <span class="tw:font-semibold tw:text-sm">

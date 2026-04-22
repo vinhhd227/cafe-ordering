@@ -301,11 +301,11 @@ const exportItems = computed(() => [
 
     <!-- ── Header ──────────────────────────────────────────────────── -->
     <div>
-      <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] app-text-muted">
+      <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-muted">
         {{ t('report.daily.breadcrumb') }}
       </p>
       <h1 class="tw:mt-1 tw:text-3xl tw:font-semibold">{{ t('report.daily.title') }}</h1>
-      <p class="tw:mt-1 tw:text-sm app-text-muted">{{ t('report.daily.subtitle') }}</p>
+      <p class="tw:mt-1 tw:text-sm tw:text-muted">{{ t('report.daily.subtitle') }}</p>
     </div>
 
     <!-- Toolbar: date + actions -->
@@ -374,7 +374,7 @@ const exportItems = computed(() => [
           <prime-skeleton height="1rem" width="50%" />
         </template>
         <template v-else>
-          <p class="tw:text-xs tw:font-medium app-text-muted tw:mb-2">
+          <p class="tw:text-xs tw:font-medium tw:text-muted tw:mb-2">
             {{ t('report.daily.metrics.revenue') }}
           </p>
           <p class="tw:text-2xl tw:font-bold tw:tabular-nums">
@@ -391,10 +391,10 @@ const exportItems = computed(() => [
                 {{ deltaPct(reportData?.revenue?.total, reportData?.revenue?.yesterday) >= 0 ? '▲' : '▼' }}
                 {{ Math.abs(deltaPct(reportData?.revenue?.total, reportData?.revenue?.yesterday)).toFixed(1) }}%
               </span>
-              <span class="app-text-muted">{{ t('report.daily.metrics.vsYesterday') }}</span>
+              <span class="tw:text-muted">{{ t('report.daily.metrics.vsYesterday') }}</span>
             </template>
           </div>
-          <p class="tw:mt-1 tw:text-xs app-text-muted">
+          <p class="tw:mt-1 tw:text-xs tw:text-muted">
             {{ t('report.daily.metrics.vsMonthAvg') }}:
             {{ fmtCompact(reportData?.revenue?.avg30Days) }}
           </p>
@@ -410,7 +410,7 @@ const exportItems = computed(() => [
           <prime-skeleton height="1rem" width="55%" />
         </template>
         <template v-else>
-          <p class="tw:text-xs tw:font-medium app-text-muted tw:mb-2">
+          <p class="tw:text-xs tw:font-medium tw:text-muted tw:mb-2">
             {{ t('report.daily.metrics.orders') }}
           </p>
           <p class="tw:text-2xl tw:font-bold tw:tabular-nums">
@@ -423,7 +423,7 @@ const exportItems = computed(() => [
               class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
             />
           </div>
-          <p class="tw:mt-1 tw:text-xs app-text-muted">
+          <p class="tw:mt-1 tw:text-xs tw:text-muted">
             {{ t('report.daily.metrics.cancelled') }}: {{ reportData?.orders?.cancelled ?? 0 }}
             &nbsp;·&nbsp;
             {{ t('report.daily.metrics.pending') }}: {{ reportData?.orders?.pending ?? 0 }}
@@ -440,7 +440,7 @@ const exportItems = computed(() => [
           <prime-skeleton height="1rem" width="55%" />
         </template>
         <template v-else>
-          <p class="tw:text-xs tw:font-medium app-text-muted tw:mb-2">
+          <p class="tw:text-xs tw:font-medium tw:text-muted tw:mb-2">
             {{ t('report.daily.metrics.avgPerOrder') }}
           </p>
           <p class="tw:text-2xl tw:font-bold tw:tabular-nums">
@@ -457,10 +457,10 @@ const exportItems = computed(() => [
                 {{ deltaPct(reportData?.averages?.revenuePerOrder, reportData?.averages?.revenuePerOrderMonthAvg) >= 0 ? '▲' : '▼' }}
                 {{ Math.abs(deltaPct(reportData?.averages?.revenuePerOrder, reportData?.averages?.revenuePerOrderMonthAvg)).toFixed(0) }}%
               </span>
-              <span class="app-text-muted">{{ t('report.daily.metrics.vsMonthAvg') }}</span>
+              <span class="tw:text-muted">{{ t('report.daily.metrics.vsMonthAvg') }}</span>
             </template>
           </div>
-          <p class="tw:mt-1 tw:text-xs app-text-muted">
+          <p class="tw:mt-1 tw:text-xs tw:text-muted">
             {{ t('report.daily.metrics.vsMonthAvg') }}:
             {{ fmt(reportData?.averages?.revenuePerOrderMonthAvg) }}
           </p>
@@ -476,7 +476,7 @@ const exportItems = computed(() => [
           <prime-skeleton height="1rem" width="55%" />
         </template>
         <template v-else>
-          <p class="tw:text-xs tw:font-medium app-text-muted tw:mb-2">
+          <p class="tw:text-xs tw:font-medium tw:text-muted tw:mb-2">
             {{ t('report.daily.metrics.itemsPerOrder') }}
           </p>
           <p class="tw:text-2xl tw:font-bold tw:tabular-nums">
@@ -489,7 +489,7 @@ const exportItems = computed(() => [
               class="tw:text-[11px]! tw:px-1.5! tw:py-0.5!"
             />
           </div>
-          <p class="tw:mt-1 tw:text-xs app-text-muted">
+          <p class="tw:mt-1 tw:text-xs tw:text-muted">
             {{ t('report.daily.metrics.totalItems') }}:
             {{ orders.reduce((s, o) => s + (o.items?.length ?? 0), 0) }}
           </p>
@@ -514,7 +514,7 @@ const exportItems = computed(() => [
         <template v-else>
           <!-- Payment section -->
           <div>
-            <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest app-text-muted tw:mb-3">
+            <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest tw:text-muted tw:mb-3">
               {{ t('report.daily.payment.title') }}
             </p>
             <!-- Cash row -->
@@ -527,7 +527,7 @@ const exportItems = computed(() => [
                 class="pb-animate tw:flex-1 tw:h-1.5!"
                 style="--pb-color: #14B8A6; --pb-delay: 0ms"
               />
-              <span class="tw:text-xs tw:w-8 tw:text-right app-text-muted">{{ cashPct }}%</span>
+              <span class="tw:text-xs tw:w-8 tw:text-right tw:text-muted">{{ cashPct }}%</span>
               <span class="tw:text-sm tw:font-medium tw:w-15 tw:text-right tw:tabular-nums">
                 {{ fmt(reportData?.revenue?.cash) }}
               </span>
@@ -542,7 +542,7 @@ const exportItems = computed(() => [
                 class="pb-animate tw:flex-1 tw:h-1.5!"
                 style="--pb-color: #60A5FA; --pb-delay: 100ms"
               />
-              <span class="tw:text-xs tw:w-8 tw:text-right app-text-muted">{{ transferPct }}%</span>
+              <span class="tw:text-xs tw:w-8 tw:text-right tw:text-muted">{{ transferPct }}%</span>
               <span class="tw:text-sm tw:font-medium tw:w-15 tw:text-right tw:tabular-nums">
                 {{ fmt(reportData?.revenue?.transfer) }}
               </span>
@@ -552,16 +552,16 @@ const exportItems = computed(() => [
           <!-- Stats section -->
           <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-4 tw:space-y-2.5">
             <div class="tw:flex tw:justify-between tw:text-sm">
-              <span class="app-text-muted">{{ t('report.daily.stats.peakHour') }}</span>
+              <span class="tw:text-muted">{{ t('report.daily.stats.peakHour') }}</span>
               <span v-if="reportData?.peakHour" class="tw:font-medium tw:text-right">
                 {{ reportData.peakHour.hour }} ·
                 {{ fmtCompact(reportData.peakHour.revenue) }} ·
                 {{ reportData.peakHour.percentage }}% {{ t('report.daily.metrics.revenue').toLowerCase() }}
               </span>
-              <span v-else class="app-text-muted">—</span>
+              <span v-else class="tw:text-muted">—</span>
             </div>
             <div class="tw:flex tw:justify-between tw:text-sm">
-              <span class="app-text-muted">{{ t('report.daily.stats.estimatedGuests') }}</span>
+              <span class="tw:text-muted">{{ t('report.daily.stats.estimatedGuests') }}</span>
               <span class="tw:font-medium">
                 ~{{ orders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + (i.quantity ?? 1), 0) ?? 0), 0) }}
               </span>
@@ -570,15 +570,15 @@ const exportItems = computed(() => [
 
           <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-4 tw:space-y-2.5">
             <div class="tw:flex tw:justify-between tw:text-sm">
-              <span class="app-text-muted">{{ t('report.daily.stats.yesterday') }}</span>
+              <span class="tw:text-muted">{{ t('report.daily.stats.yesterday') }}</span>
               <span class="tw:font-medium tw:tabular-nums">{{ fmt(reportData?.revenue?.yesterday) }}</span>
             </div>
             <div class="tw:flex tw:justify-between tw:text-sm">
-              <span class="app-text-muted">{{ t('report.daily.stats.avg7Days') }}</span>
+              <span class="tw:text-muted">{{ t('report.daily.stats.avg7Days') }}</span>
               <span class="tw:font-medium tw:tabular-nums">{{ fmt(reportData?.revenue?.avg7Days) }}</span>
             </div>
             <div class="tw:flex tw:justify-between tw:text-sm">
-              <span class="app-text-muted">{{ t('report.daily.stats.avg30Days') }}</span>
+              <span class="tw:text-muted">{{ t('report.daily.stats.avg30Days') }}</span>
               <span class="tw:font-medium tw:tabular-nums">{{ fmt(reportData?.revenue?.avg30Days) }}</span>
             </div>
           </div>
@@ -597,7 +597,7 @@ const exportItems = computed(() => [
         <template v-else>
           <!-- Top products -->
           <div>
-            <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest app-text-muted tw:mb-3">
+            <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest tw:text-muted tw:mb-3">
               {{ t('report.daily.topProducts.title') }}
             </p>
             <div class="tw:space-y-3">
@@ -607,7 +607,7 @@ const exportItems = computed(() => [
                 class="tw:space-y-1"
               >
                 <div class="tw:flex tw:items-center tw:gap-2">
-                  <span class="tw:text-xs tw:font-bold tw:w-4 tw:text-center app-text-muted tw:shrink-0">{{ idx + 1 }}</span>
+                  <span class="tw:text-xs tw:font-bold tw:w-4 tw:text-center tw:text-muted tw:shrink-0">{{ idx + 1 }}</span>
                   <span class="tw:text-sm tw:w-24 tw:truncate tw:shrink-0">{{ product.name }}</span>
                   <prime-progress-bar
                     :value="progressReady ? Math.round((product.revenue / maxProductRevenue) * 100) : 0"
@@ -615,11 +615,11 @@ const exportItems = computed(() => [
                     class="pb-animate tw:flex-1 tw:h-1!"
                     :style="{ '--pb-color': '#F59E0B', '--pb-delay': `${idx * 120}ms` }"
                   />
-                  <span class="tw:text-xs app-text-muted tw:w-8 tw:text-right tw:shrink-0">{{ product.quantity }} ly</span>
+                  <span class="tw:text-xs tw:text-muted tw:w-8 tw:text-right tw:shrink-0">{{ product.quantity }} ly</span>
                   <span class="tw:text-xs tw:font-medium tw:tabular-nums tw:w-10 tw:text-right tw:shrink-0">{{ fmtCompact(product.revenue) }}</span>
                 </div>
               </div>
-              <p v-if="!reportData?.topProducts?.length" class="tw:text-sm app-text-muted tw:text-center tw:py-2">
+              <p v-if="!reportData?.topProducts?.length" class="tw:text-sm tw:text-muted tw:text-center tw:py-2">
                 —
               </p>
             </div>
@@ -627,7 +627,7 @@ const exportItems = computed(() => [
 
           <!-- Top categories -->
           <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-4">
-            <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest app-text-muted tw:mb-3">
+            <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest tw:text-muted tw:mb-3">
               {{ t('report.daily.topCategories.title') }}
             </p>
             <div class="tw:space-y-2.5">
@@ -647,10 +647,10 @@ const exportItems = computed(() => [
                   class="pb-animate tw:flex-1 tw:h-1.5!"
                   :style="{ '--pb-color': categoryColor(idx), '--pb-delay': `${idx * 120}ms` }"
                 />
-                <span class="tw:text-xs app-text-muted tw:w-8 tw:text-right tw:shrink-0">{{ cat.percentage }}%</span>
+                <span class="tw:text-xs tw:text-muted tw:w-8 tw:text-right tw:shrink-0">{{ cat.percentage }}%</span>
                 <span class="tw:text-xs tw:font-medium tw:tabular-nums tw:w-10 tw:text-right tw:shrink-0">{{ fmtCompact(cat.revenue) }}</span>
               </div>
-              <p v-if="!reportData?.topCategories?.length" class="tw:text-sm app-text-muted tw:text-center tw:py-2">
+              <p v-if="!reportData?.topCategories?.length" class="tw:text-sm tw:text-muted tw:text-center tw:py-2">
                 —
               </p>
             </div>
@@ -664,7 +664,7 @@ const exportItems = computed(() => [
       <div class="tw:flex tw:flex-wrap tw:items-start tw:justify-between tw:gap-3 tw:mb-4">
         <div>
           <p class="tw:text-sm tw:font-semibold">{{ t('report.daily.hourlyChart.title') }}</p>
-          <p class="tw:text-xs app-text-muted">{{ t('report.daily.hourlyChart.subtitle') }}</p>
+          <p class="tw:text-xs tw:text-muted">{{ t('report.daily.hourlyChart.subtitle') }}</p>
         </div>
         <div class="tw:flex tw:items-center tw:gap-4">
           <prime-chip
@@ -673,7 +673,7 @@ const exportItems = computed(() => [
             class="tw:text-xs!"
           />
           <!-- Custom legend -->
-          <div class="tw:flex tw:items-center tw:gap-3 tw:text-xs app-text-muted">
+          <div class="tw:flex tw:items-center tw:gap-3 tw:text-xs tw:text-muted">
             <span class="tw:flex tw:items-center tw:gap-1.5">
               <span class="tw:inline-block tw:w-3 tw:h-3 tw:rounded-sm" style="background: #EF9F27" />
               {{ t('report.daily.hourlyChart.today') }}
@@ -702,11 +702,11 @@ const exportItems = computed(() => [
       <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3 tw:mb-4">
         <div class="tw:flex tw:items-center tw:gap-3">
           <p class="tw:text-sm tw:font-semibold">{{ t('report.daily.ordersTable.title') }}</p>
-          <span class="tw:flex tw:items-center tw:gap-1 tw:text-[11px] app-text-muted">
+          <span class="tw:flex tw:items-center tw:gap-1 tw:text-[11px] tw:text-muted">
             <span class="tw:w-2 tw:h-2 tw:rounded-full tw:bg-emerald-500 tw:shrink-0" />
             {{ t('report.daily.payment.cash') }}
           </span>
-          <span class="tw:flex tw:items-center tw:gap-1 tw:text-[11px] app-text-muted">
+          <span class="tw:flex tw:items-center tw:gap-1 tw:text-[11px] tw:text-muted">
             <span class="tw:w-2 tw:h-2 tw:rounded-full tw:bg-blue-400 tw:shrink-0" />
             {{ t('report.daily.payment.transfer') }}
           </span>
@@ -830,13 +830,13 @@ const exportItems = computed(() => [
         </prime-column>
 
         <template #empty>
-          <p class="tw:text-center tw:py-6 app-text-muted tw:text-sm">
+          <p class="tw:text-center tw:py-6 tw:text-muted tw:text-sm">
             {{ t('report.daily.ordersTable.noData') }}
           </p>
         </template>
 
         <template #footer>
-          <div class="tw:flex tw:justify-between tw:items-center tw:text-xs app-text-muted tw:pt-1">
+          <div class="tw:flex tw:justify-between tw:items-center tw:text-xs tw:text-muted tw:pt-1">
             <span>
               {{ t('report.daily.ordersTable.showing', { shown: filteredOrders.length, total: orders.filter(o => o.status !== 'cancelled' && o.paymentStatus !== 'unpaid').length }) }}
             </span>
@@ -872,15 +872,15 @@ const exportItems = computed(() => [
       <!-- Meta -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-2 tw:text-sm">
         <div>
-          <p class="tw:text-xs app-text-muted tw:mb-0.5">{{ t('report.daily.ordersTable.colTime') }}</p>
+          <p class="tw:text-xs tw:text-muted tw:mb-0.5">{{ t('report.daily.ordersTable.colTime') }}</p>
           <p class="tw:font-medium">{{ fmtTime(drawerOrder.createdAt) }}</p>
         </div>
         <div>
-          <p class="tw:text-xs app-text-muted tw:mb-0.5">{{ t('report.daily.ordersTable.colTable') }}</p>
+          <p class="tw:text-xs tw:text-muted tw:mb-0.5">{{ t('report.daily.ordersTable.colTable') }}</p>
           <p class="tw:font-medium">{{ t('report.daily.tableNum', { n: drawerOrder.tableNumber }) }}</p>
         </div>
         <div>
-          <p class="tw:text-xs app-text-muted tw:mb-0.5">{{ t('report.daily.ordersTable.colPayment') }}</p>
+          <p class="tw:text-xs tw:text-muted tw:mb-0.5">{{ t('report.daily.ordersTable.colPayment') }}</p>
           <prime-tag
             :value="paymentBadge(drawerOrder.paymentMethod).label"
             :severity="paymentBadge(drawerOrder.paymentMethod).severity"
@@ -888,7 +888,7 @@ const exportItems = computed(() => [
           />
         </div>
         <div>
-          <p class="tw:text-xs app-text-muted tw:mb-0.5">{{ t('report.daily.ordersTable.colAmount') }}</p>
+          <p class="tw:text-xs tw:text-muted tw:mb-0.5">{{ t('report.daily.ordersTable.colAmount') }}</p>
           <p
             class="tw:font-semibold tw:text-base tw:tabular-nums"
             :class="{
@@ -900,7 +900,7 @@ const exportItems = computed(() => [
       </div>
       <!-- Items -->
       <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-3">
-        <p class="tw:text-xs app-text-muted tw:mb-2">{{ t('report.daily.ordersTable.colItems') }}</p>
+        <p class="tw:text-xs tw:text-muted tw:mb-2">{{ t('report.daily.ordersTable.colItems') }}</p>
         <div class="tw:space-y-1.5">
           <div
             v-for="(item, i) in drawerOrder.items"
@@ -908,7 +908,7 @@ const exportItems = computed(() => [
             class="tw:flex tw:justify-between tw:text-sm"
           >
             <span>{{ item.name }}</span>
-            <span class="app-text-muted">x{{ item.quantity }}</span>
+            <span class="tw:text-muted">x{{ item.quantity }}</span>
           </div>
         </div>
       </div>

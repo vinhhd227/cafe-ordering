@@ -175,7 +175,7 @@ const openDrawer = (row) => {
           {{ t('categories.breadcrumb') }}
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('categories.list.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           {{ t('categories.list.subtitle') }}
         </p>
       </div>
@@ -272,7 +272,7 @@ const openDrawer = (row) => {
               <p class="tw:text-sm tw:font-semibold">{{ t('categories.list.filterTitle') }}</p>
 
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('categories.list.col.status') }}</label>
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t('categories.list.col.status') }}</label>
                 <prime-select
                   v-model="statusFilter"
                   :options="statusOptions"
@@ -311,7 +311,7 @@ const openDrawer = (row) => {
             />
           </div>
           <!-- Description -->
-          <p v-if="data.description" class="tw:text-xs app-text-muted tw:line-clamp-2">{{ data.description }}</p>
+          <p v-if="data.description" class="tw:text-xs tw:text-muted tw:line-clamp-2">{{ data.description }}</p>
           <p v-else class="tw:text-xs app-text-subtle">—</p>
           <!-- Actions -->
           <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
@@ -324,7 +324,7 @@ const openDrawer = (row) => {
       </template>
 
       <template #col-description="{ data }">
-        <span v-if="data.description" class="tw:text-sm app-text-muted tw:line-clamp-1">{{ data.description }}</span>
+        <span v-if="data.description" class="tw:text-sm tw:text-muted tw:line-clamp-1">{{ data.description }}</span>
         <span v-else class="tw:text-sm app-text-subtle">—</span>
       </template>
 

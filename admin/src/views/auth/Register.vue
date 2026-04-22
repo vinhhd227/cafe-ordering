@@ -187,14 +187,14 @@ onBeforeUnmount(() => {
           />
           <div class="tw:space-y-1">
             <h2 class="tw:text-3xl tw:font-semibold">Account created!</h2>
-            <p class="tw:text-sm app-text-muted">
+            <p class="tw:text-sm tw:text-muted">
               Welcome, <span class="tw:font-medium tw:text-primary-300">@{{ registeredUsername }}</span>
             </p>
           </div>
         </div>
 
         <div class="tw:mt-8 tw:space-y-3">
-          <p class="tw:text-sm app-text-muted">
+          <p class="tw:text-sm tw:text-muted">
             Signing you in automatically in
             <span class="tw:font-semibold tw:tabular-nums">{{ countdown }}s</span>…
           </p>
@@ -211,7 +211,7 @@ onBeforeUnmount(() => {
         <div class="tw:mt-8">
           <router-link
             :to="{ name: 'login' }"
-            class="tw:text-sm tw:text-primary-300 hover:tw:text-primary-200"
+            class="tw:text-sm tw:text-primary-300 tw:hover:text-primary-200"
           >
             Sign in now →
           </router-link>
@@ -244,7 +244,7 @@ onBeforeUnmount(() => {
               </prime-button>
             </div>
             <h2 class="tw:text-3xl tw:font-semibold">Create account</h2>
-            <p class="tw:text-sm app-text-muted">
+            <p class="tw:text-sm tw:text-muted">
               Set up your profile and start placing orders in minutes.
             </p>
           </div>
@@ -384,9 +384,9 @@ onBeforeUnmount(() => {
               class="app-panel"
               size="small"
             />
-            <label for="agree" class="tw:text-sm app-text-muted">
+            <label for="agree" class="tw:text-sm tw:text-muted">
               I agree to the team guidelines and
-              <router-link class="tw:text-primary-300 hover:tw:text-primary-200" to="/policy">
+              <router-link class="tw:text-primary-300 tw:hover:text-primary-200" to="/policy">
                 data policy
               </router-link>
             </label>
@@ -407,7 +407,7 @@ onBeforeUnmount(() => {
             class="tw:mt-8 tw:w-full tw:rounded-xl tw:px-4 tw:py-3 tw:text-sm tw:font-semibold tw:transition tw:border-0!"
             :class="[
               canSubmit && !isSubmitting
-                ? 'tw:shadow-lg tw:shadow-primary-500/30 hover:tw:bg-primary-400'
+                ? 'tw:shadow-lg tw:shadow-primary-500/30 tw:hover:bg-primary-400'
                 : 'tw:cursor-not-allowed!',
             ]"
             :disabled="isSubmitting || !canSubmit"
@@ -429,7 +429,7 @@ onBeforeUnmount(() => {
           <div class="tw:mt-6 tw:flex tw:items-center tw:justify-between tw:text-sm">
             <span class="app-text-subtle">Already have access?</span>
             <router-link
-              class="tw:text-primary-300 hover:tw:text-primary-200"
+              class="tw:text-primary-300 tw:hover:text-primary-200"
               :to="{ name: 'login' }"
             >
               Sign in
@@ -441,7 +441,7 @@ onBeforeUnmount(() => {
           class="auth-card auth-card--delay app-card tw:mt-6 tw:rounded-2xl tw:border tw:p-6 tw:backdrop-blur"
         >
           <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] app-text-subtle">Shift tip</p>
-          <p class="tw:mt-3 tw:text-sm app-text-muted">
+          <p class="tw:mt-3 tw:text-sm tw:text-muted">
             Prep a simple onboarding checklist to keep new staff confident.
           </p>
         </div>

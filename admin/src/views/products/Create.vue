@@ -106,7 +106,7 @@ onMounted(loadCategories);
       <div>
         <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('products.breadcrumb') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('products.create.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('products.create.subtitle') }}</p>
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('products.create.subtitle') }}</p>
       </div>
       <prime-button
         :label="t('products.create.backToList')"
@@ -178,7 +178,7 @@ onMounted(loadCategories);
             <div class="tw:space-y-1.5">
               <label class="tw:text-sm tw:font-medium">
                 {{ t('products.form.description') }}
-                <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
+                <span class="tw:text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
               </label>
               <prime-textarea
                 v-model="form.description"
@@ -193,7 +193,7 @@ onMounted(loadCategories);
             <div class="tw:space-y-1.5">
               <label class="tw:text-sm tw:font-medium">
                 {{ t('products.form.estimatedPrepMinutes') }}
-                <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
+                <span class="tw:text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
               </label>
               <prime-input-number
                 v-model="form.estimatedPrepMinutes"
@@ -208,7 +208,7 @@ onMounted(loadCategories);
             <div class="tw:space-y-1.5">
               <label class="tw:text-sm tw:font-medium">
                 {{ t('products.form.image') }}
-                <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
+                <span class="tw:text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
               </label>
               <div class="tw:flex tw:gap-2">
                 <input
@@ -249,7 +249,7 @@ onMounted(loadCategories);
           <div class="tw:space-y-5">
             <div>
               <p class="tw:text-sm tw:font-medium tw:mb-1">{{ t('products.options.title') }}</p>
-              <p class="tw:text-xs app-text-muted">{{ t('products.options.subtitle') }}</p>
+              <p class="tw:text-xs tw:text-muted">{{ t('products.options.subtitle') }}</p>
             </div>
 
             <div class="tw:space-y-4">
@@ -258,7 +258,7 @@ onMounted(loadCategories);
               <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
                   <p class="tw:text-sm tw:font-medium">{{ t('products.options.temperature.label') }}</p>
-                  <p class="tw:text-xs app-text-muted tw:mt-0.5">{{ t('products.options.temperature.hint') }}</p>
+                  <p class="tw:text-xs tw:text-muted tw:mt-0.5">{{ t('products.options.temperature.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasTemperatureOption" />
               </div>
@@ -267,7 +267,7 @@ onMounted(loadCategories);
               <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
                   <p class="tw:text-sm tw:font-medium">{{ t('products.options.iceLevel.label') }}</p>
-                  <p class="tw:text-xs app-text-muted tw:mt-0.5">{{ t('products.options.iceLevel.hint') }}</p>
+                  <p class="tw:text-xs tw:text-muted tw:mt-0.5">{{ t('products.options.iceLevel.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasIceLevelOption" />
               </div>
@@ -276,7 +276,7 @@ onMounted(loadCategories);
               <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
                   <p class="tw:text-sm tw:font-medium">{{ t('products.options.sugarLevel.label') }}</p>
-                  <p class="tw:text-xs app-text-muted tw:mt-0.5">{{ t('products.options.sugarLevel.hint') }}</p>
+                  <p class="tw:text-xs tw:text-muted tw:mt-0.5">{{ t('products.options.sugarLevel.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasSugarLevelOption" />
               </div>
@@ -285,7 +285,7 @@ onMounted(loadCategories);
               <div class="app-card tw:flex tw:items-start tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:p-4">
                 <div>
                   <p class="tw:text-sm tw:font-medium">{{ t('products.options.accompaniment.label') }}</p>
-                  <p class="tw:text-xs app-text-muted tw:mt-0.5">{{ t('products.options.accompaniment.hint') }}</p>
+                  <p class="tw:text-xs tw:text-muted tw:mt-0.5">{{ t('products.options.accompaniment.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.isAccompaniment" />
               </div>

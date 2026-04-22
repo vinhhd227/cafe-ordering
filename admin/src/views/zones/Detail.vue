@@ -136,11 +136,11 @@ onMounted(load)
   <prime-dialog v-model:visible="showEditDialog" header="Edit zone" :modal="true" :style="{ width: '24rem' }">
     <div class="tw:space-y-4">
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Zone name</label>
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">Zone name</label>
         <prime-input-text v-model="editName" placeholder="e.g. Tầng 1" class="app-input tw:w-full" @keyup.enter="handleEdit" />
       </div>
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Display order</label>
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">Display order</label>
         <prime-input-number v-model="editDisplayOrder" :min="0" :show-buttons="true" button-layout="horizontal" class="app-input tw:w-full" />
         <p class="tw:text-[11px] app-text-subtle">Smaller number = shown first</p>
       </div>
@@ -217,11 +217,11 @@ onMounted(load)
         <div class="tw:mb-3 tw:flex tw:items-center tw:justify-between">
           <h2 class="tw:text-base tw:font-semibold">
             Tables in this zone
-            <span class="tw:ml-1.5 tw:text-sm tw:font-normal app-text-muted">({{ tablesInZone.length }})</span>
+            <span class="tw:ml-1.5 tw:text-sm tw:font-normal tw:text-muted">({{ tablesInZone.length }})</span>
           </h2>
         </div>
 
-        <div v-if="tablesInZone.length === 0" class="tw:rounded-xl tw:border tw:border-dashed tw:border-white/10 tw:p-6 tw:text-center app-text-muted tw:text-sm">
+        <div v-if="tablesInZone.length === 0" class="tw:rounded-xl tw:border tw:border-dashed tw:border-white/10 tw:p-6 tw:text-center tw:text-muted tw:text-sm">
           No tables assigned yet.
         </div>
 
@@ -259,12 +259,12 @@ onMounted(load)
         <div class="tw:mb-3">
           <h2 class="tw:text-base tw:font-semibold">
             Unzoned tables
-            <span class="tw:ml-1.5 tw:text-sm tw:font-normal app-text-muted">({{ unzonedTables.length }})</span>
+            <span class="tw:ml-1.5 tw:text-sm tw:font-normal tw:text-muted">({{ unzonedTables.length }})</span>
           </h2>
-          <p class="tw:mt-0.5 tw:text-xs app-text-muted">Click <iconify icon="ph:plus-bold" class="tw:inline" /> to assign a table to this zone.</p>
+          <p class="tw:mt-0.5 tw:text-xs tw:text-muted">Click <iconify icon="ph:plus-bold" class="tw:inline" /> to assign a table to this zone.</p>
         </div>
 
-        <div v-if="unzonedTables.length === 0" class="tw:rounded-xl tw:border tw:border-dashed tw:border-white/10 tw:p-6 tw:text-center app-text-muted tw:text-sm">
+        <div v-if="unzonedTables.length === 0" class="tw:rounded-xl tw:border tw:border-dashed tw:border-white/10 tw:p-6 tw:text-center tw:text-muted tw:text-sm">
           All tables have been assigned to a zone.
         </div>
 

@@ -119,7 +119,7 @@ onBeforeUnmount(() => {
           Products
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Catalog overview</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           Track pricing, stock, and status across the menu.
         </p>
       </div>

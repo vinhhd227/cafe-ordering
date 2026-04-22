@@ -24,7 +24,7 @@ const dateRange = computed({
   <div class="tw:flex tw:flex-col tw:gap-4">
     <!-- Search (mobile drawer only) -->
     <div v-if="showSearch" class="tw:space-y-1.5">
-      <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+      <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
         {{ t('orders.filter.searchOrder').replace('…', '').trim() }}
       </label>
       <prime-input-text
@@ -36,7 +36,7 @@ const dateRange = computed({
 
     <!-- Date range -->
     <div class="tw:space-y-1.5">
-      <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+      <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
         {{ t('orders.filter.dateRange') }}
       </label>
       <prime-date-picker
@@ -52,7 +52,7 @@ const dateRange = computed({
 
     <!-- Order status -->
     <div class="tw:space-y-1.5">
-      <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+      <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
         {{ t('orders.filter.orderStatus') }}
       </label>
       <prime-select
@@ -68,7 +68,7 @@ const dateRange = computed({
 
     <!-- Payment status -->
     <div class="tw:space-y-1.5">
-      <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+      <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
         {{ t('orders.filter.paymentStatus') }}
       </label>
       <prime-select
@@ -84,7 +84,7 @@ const dateRange = computed({
 
     <!-- Payment method -->
     <div class="tw:space-y-1.5">
-      <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+      <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
         {{ t('orders.filter.paymentMethod') }}
       </label>
       <prime-select
@@ -100,7 +100,7 @@ const dateRange = computed({
 
     <!-- Total range -->
     <div class="tw:space-y-1.5">
-      <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+      <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
         {{ t('orders.filter.total') }}
       </label>
       <div class="tw:flex tw:items-center tw:gap-2">
@@ -111,7 +111,7 @@ const dateRange = computed({
           :use-grouping="true"
           class="app-input tw:flex-1"
         />
-        <span class="app-text-muted tw:text-sm">–</span>
+        <span class="tw:text-muted tw:text-sm">–</span>
         <prime-input-number
           v-model="filters.maxTotal"
           :placeholder="t('orders.filter.max')"
@@ -124,7 +124,7 @@ const dateRange = computed({
 
     <!-- Table code -->
     <div class="tw:space-y-1.5">
-      <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+      <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
         {{ t('orders.filter.table') }}
       </label>
       <prime-input-text

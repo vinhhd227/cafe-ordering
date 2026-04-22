@@ -9,7 +9,7 @@
     --app-header-bg: rgba(251, 250, 248, 0.8);
     --app-sidebar-bg: rgba(248, 244, 238, 0.94);
     --app-text: #0f172a;
-    --app-text-muted: #64748b;
+    --tw:text-muted: #64748b;
     --app-text-subtle: #94a3b8;
     --app-border: rgba(15, 23, 42, 0.12);
     --app-glow-emerald: rgba(16, 185, 129, 0.15);
@@ -26,7 +26,7 @@
     --app-header-bg: rgba(15, 22, 34, 0.65);
     --app-sidebar-bg: rgba(12, 18, 28, 0.88);
     --app-text: #e2e8f0;
-    --app-text-muted: #94a3b8;
+    --tw:text-muted: #94a3b8;
     --app-text-subtle: #64748b;
     --app-border: rgba(255, 255, 255, 0.12);
     --app-glow-emerald: rgba(16, 185, 129, 0.25);
@@ -68,8 +68,8 @@
 
 /* ─── Typography ─── */
 
-.app-text-muted {
-    color: var(--app-text-muted);
+.tw:text-muted {
+    color: var(--tw:text-muted);
 }
 
 .app-text-subtle {

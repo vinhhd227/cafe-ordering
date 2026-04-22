@@ -134,7 +134,7 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
               isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
               isActive(item.to)
                 ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
-                : 'app-text-muted hover:tw:bg-white/5 hover:tw:text-white'
+                : 'tw:text-muted tw:hover:bg-white/5 tw:hover:text-white'
             ]"
             :title="isCollapsed ? t(item.labelKey) : undefined"
             @click="close"
@@ -159,14 +159,14 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
             class="tw:flex-1 tw:rounded-lg tw:py-1 tw:text-xs tw:font-semibold tw:transition-all tw:duration-150"
             :class="locale === l.code
               ? 'tw:bg-emerald-500/15 tw:text-emerald-400'
-              : 'app-text-subtle hover:tw:bg-white/5 hover:tw:text-white'"
+              : 'app-text-subtle tw:hover:bg-white/5 tw:hover:text-white'"
             @click="setLocale(l.code)"
           >
             {{ l.label }}
           </button>
           <button
             type="button"
-            class="tw:rounded-lg tw:px-2 tw:py-1 tw:text-xs tw:transition-all tw:duration-150 app-text-subtle hover:tw:bg-white/5 hover:tw:text-white"
+            class="tw:rounded-lg tw:px-2 tw:py-1 tw:text-xs tw:transition-all tw:duration-150 app-text-subtle tw:hover:bg-white/5 tw:hover:text-white"
             :title="themeStore.isDark ? 'Switch to light' : 'Switch to dark'"
             @click="themeStore.toggleTheme()"
           >
@@ -176,7 +176,7 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
         <button
           v-else
           type="button"
-          class="tw:rounded-lg tw:p-1.5 tw:text-xs tw:transition-all tw:duration-150 app-text-subtle hover:tw:bg-white/5 hover:tw:text-white"
+          class="tw:rounded-lg tw:p-1.5 tw:text-xs tw:transition-all tw:duration-150 app-text-subtle tw:hover:bg-white/5 tw:hover:text-white"
           :title="themeStore.isDark ? 'Switch to light' : 'Switch to dark'"
           @click="themeStore.toggleTheme()"
         >
@@ -188,7 +188,7 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
       <div class="tw:shrink-0 tw:border-t tw:p-3" style="border-color: var(--app-border)">
         <button
           type="button"
-          class="tw:flex tw:w-full tw:items-center tw:rounded-xl tw:py-2.5 tw:transition-all tw:duration-150 hover:tw:bg-white/5"
+          class="tw:flex tw:w-full tw:items-center tw:rounded-xl tw:py-2.5 tw:transition-all tw:duration-150 tw:hover:bg-white/5"
           :class="isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3'"
           :title="isCollapsed ? fullName : undefined"
           @click="toggleProfileMenu"
@@ -224,7 +224,7 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
           <!-- Mobile: toggle sidebar -->
           <button
             type="button"
-            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-lg tw:transition-colors hover:tw:bg-white/5 tw:lg:hidden"
+            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-lg tw:transition-colors tw:hover:bg-white/5 tw:lg:hidden"
             @click="toggle"
           >
             <iconify icon="ph:list-bold" class="tw:text-lg" />
@@ -232,7 +232,7 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
           <!-- Desktop: collapse sidebar -->
           <button
             type="button"
-            class="tw:hidden tw:lg:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-lg tw:transition-colors hover:tw:bg-white/5"
+            class="tw:hidden tw:lg:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-lg tw:transition-colors tw:hover:bg-white/5"
             @click="toggleCollapse"
           >
             <iconify icon="ph:sidebar-simple-bold" class="tw:text-lg" />

@@ -132,7 +132,7 @@ onBeforeUnmount(() => {
                     :class="
                       locale === l.code
                         ? 'tw:bg-primary-500/15 tw:text-primary-400'
-                        : 'app-text-subtle hover:tw:bg-white/5 hover:app-text-muted'
+                        : 'app-text-subtle tw:hover:bg-white/5 hover:tw:text-muted'
                     "
                     @click="setLocale(l.code)"
                   >
@@ -157,7 +157,7 @@ onBeforeUnmount(() => {
             <h2 class="tw:text-3xl tw:font-semibold">
               {{ t("login.title") }}
             </h2>
-            <p class="tw:text-sm app-text-muted">
+            <p class="tw:text-sm tw:text-muted">
               {{ t("login.subtitle") }}
             </p>
           </div>
@@ -222,11 +222,11 @@ onBeforeUnmount(() => {
                 class="app-panel"
                 size="small"
               />
-              <label for="rememberMe" class="tw:text-sm app-text-muted">
+              <label for="rememberMe" class="tw:text-sm tw:text-muted">
                 {{ t("login.rememberMe") }}
               </label>
               <router-link
-                class="tw:text-sm tw:text-primary-300 hover:tw:text-primary-200 tw:ml-auto!"
+                class="tw:text-sm tw:text-primary-300 tw:hover:text-primary-200 tw:ml-auto!"
                 to="/forgot-password"
               >
                 {{ t("login.forgotPassword") }}
@@ -251,7 +251,7 @@ onBeforeUnmount(() => {
             >
               <span class="app-text-subtle">{{ t("login.newUser") }}</span>
               <router-link
-                class="tw:text-primary-300 hover:tw:text-primary-200"
+                class="tw:text-primary-300 tw:hover:text-primary-200"
                 to="/register"
               >
                 {{ t("login.register") }}
@@ -272,7 +272,7 @@ onBeforeUnmount(() => {
           >
             {{ t("login.shiftTip.label") }}
           </p>
-          <p class="tw:mt-3 tw:text-sm app-text-muted">
+          <p class="tw:mt-3 tw:text-sm tw:text-muted">
             {{ t("login.shiftTip.text") }}
           </p>
         </template>

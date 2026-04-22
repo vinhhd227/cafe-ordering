@@ -138,7 +138,7 @@ function typeIcon(type) {
       <div>
         <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('notifications.list.breadcrumb') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('notifications.list.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('notifications.list.subtitle') }}</p>
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('notifications.list.subtitle') }}</p>
       </div>
       <prime-button
         v-if="store.unreadCount > 0"
@@ -167,41 +167,41 @@ function typeIcon(type) {
 
     <!-- Loading -->
     <div v-if="loading && items.length === 0" class="tw:flex tw:justify-center tw:py-16">
-      <iconify icon="ph:circle-notch-bold" class="tw:text-3xl tw:animate-spin app-text-muted" />
+      <iconify icon="ph:circle-notch-bold" class="tw:text-3xl tw:animate-spin tw:text-muted" />
     </div>
 
     <template v-else>
 
       <!-- Tab: Tất cả -->
       <template v-if="activeTab === '0'">
-        <div v-if="items.length === 0" class="tw:flex tw:flex-col tw:items-center tw:py-20 tw:gap-3 app-text-muted">
+        <div v-if="items.length === 0" class="tw:flex tw:flex-col tw:items-center tw:py-20 tw:gap-3 tw:text-muted">
           <iconify icon="ph:bell-slash-bold" class="tw:text-5xl" />
           <p class="tw:text-sm">{{ t('notifications.list.empty') }}</p>
         </div>
         <template v-else>
           <div v-for="group in groupedItems" :key="group.key" class="tw:space-y-2">
             <!-- Group label ngoài card -->
-            <p class="tw:px-1 tw:text-xs tw:font-semibold app-text-muted">{{ group.label }}</p>
+            <p class="tw:px-1 tw:text-xs tw:font-semibold tw:text-muted">{{ group.label }}</p>
             <!-- Mỗi notification = 1 card -->
             <div
               v-for="noti in group.items"
               :key="noti.id"
               :class="[appCard, !noti.isRead ? 'noti-unread' : '']"
-              class="tw:rounded-xl tw:flex tw:items-start tw:gap-4 tw:p-4 tw:cursor-pointer tw:transition-colors hover:tw:bg-white/5!"
+              class="tw:rounded-xl tw:flex tw:items-start tw:gap-4 tw:p-4 tw:cursor-pointer tw:transition-colors tw:hover:bg-white/5!"
               @click="openNotification(noti)"
             >
               <div class="tw:mt-0.5 tw:flex tw:h-9 tw:w-9 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-xl" :class="noti.isRead ? 'tw:bg-white/5' : 'tw:bg-emerald-500/15'">
-                <iconify :icon="typeIcon(noti.type)" class="tw:text-base" :class="noti.isRead ? 'app-text-muted' : 'tw:text-emerald-400'" />
+                <iconify :icon="typeIcon(noti.type)" class="tw:text-base" :class="noti.isRead ? 'tw:text-muted' : 'tw:text-emerald-400'" />
               </div>
               <div class="tw:flex-1 tw:min-w-0">
                 <div class="tw:flex tw:items-center tw:justify-between tw:gap-2">
-                  <p class="tw:text-sm tw:font-semibold" :class="noti.isRead ? 'app-text-muted' : ''">{{ noti.title }}</p>
+                  <p class="tw:text-sm tw:font-semibold" :class="noti.isRead ? 'tw:text-muted' : ''">{{ noti.title }}</p>
                   <div class="tw:flex tw:items-center tw:gap-1.5 tw:shrink-0">
                     <span v-if="!noti.isRead" class="tw:block tw:h-2 tw:w-2 tw:rounded-full tw:bg-emerald-400" />
-                    <span class="tw:text-xs app-text-muted tw:tabular-nums">{{ formatTime(noti.createdAt) }}</span>
+                    <span class="tw:text-xs tw:text-muted tw:tabular-nums">{{ formatTime(noti.createdAt) }}</span>
                   </div>
                 </div>
-                <p class="tw:text-xs app-text-muted tw:mt-1">{{ noti.body }}</p>
+                <p class="tw:text-xs tw:text-muted tw:mt-1">{{ noti.body }}</p>
               </div>
               <div class="tw:flex tw:items-center tw:shrink-0">
                 <prime-button :class="btnIcon" severity="secondary" text size="small" @click.stop="openMenu($event, noti)">
@@ -225,7 +225,7 @@ function typeIcon(type) {
 
       <!-- Tab: Chưa đọc -->
       <template v-else-if="activeTab === '1'">
-        <div v-if="unreadItems.length === 0" class="tw:flex tw:flex-col tw:items-center tw:py-20 tw:gap-3 app-text-muted">
+        <div v-if="unreadItems.length === 0" class="tw:flex tw:flex-col tw:items-center tw:py-20 tw:gap-3 tw:text-muted">
           <iconify icon="ph:check-circle-bold" class="tw:text-5xl" />
           <p class="tw:text-sm">{{ t('notifications.list.emptyUnread') }}</p>
         </div>
@@ -234,7 +234,7 @@ function typeIcon(type) {
             v-for="noti in unreadItems"
             :key="noti.id"
             :class="[appCard, 'noti-unread']"
-            class="tw:rounded-xl tw:flex tw:items-start tw:gap-4 tw:p-4 tw:cursor-pointer tw:transition-colors hover:tw:bg-white/5!"
+            class="tw:rounded-xl tw:flex tw:items-start tw:gap-4 tw:p-4 tw:cursor-pointer tw:transition-colors tw:hover:bg-white/5!"
             @click="openNotification(noti)"
           >
             <div class="tw:mt-0.5 tw:flex tw:h-9 tw:w-9 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-xl tw:bg-emerald-500/15">
@@ -245,10 +245,10 @@ function typeIcon(type) {
                 <p class="tw:text-sm tw:font-semibold">{{ noti.title }}</p>
                 <div class="tw:flex tw:items-center tw:gap-1.5 tw:shrink-0">
                   <span class="tw:block tw:h-2 tw:w-2 tw:rounded-full tw:bg-emerald-400" />
-                  <span class="tw:text-xs app-text-muted tw:tabular-nums">{{ formatTime(noti.createdAt) }}</span>
+                  <span class="tw:text-xs tw:text-muted tw:tabular-nums">{{ formatTime(noti.createdAt) }}</span>
                 </div>
               </div>
-              <p class="tw:text-xs app-text-muted tw:mt-1">{{ noti.body }}</p>
+              <p class="tw:text-xs tw:text-muted tw:mt-1">{{ noti.body }}</p>
             </div>
             <div class="tw:flex tw:items-center tw:shrink-0">
               <prime-button :class="btnIcon" severity="secondary" text size="small" @click.stop="openMenu($event, noti)">

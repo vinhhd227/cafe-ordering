@@ -259,7 +259,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
           {{ t('products.breadcrumb') }}
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('products.list.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('products.list.subtitle') }}</p>
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('products.list.subtitle') }}</p>
       </div>
       <div class="tw:flex tw:items-center tw:gap-2">
         <widget-settings-button
@@ -367,7 +367,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
               <div class="tw:space-y-1.5">
                 <label
                   for="filter-category"
-                  class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
+                  class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest"
                   >{{ t('products.form.category') }}</label
                 >
                 <prime-select
@@ -387,7 +387,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
               <div class="tw:space-y-1.5">
                 <label
                   for="filter-status"
-                  class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
+                  class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest"
                   >{{ t('common.status') }}</label
                 >
                 <prime-select
@@ -406,7 +406,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
               <!-- Price range -->
               <div class="tw:space-y-1.5">
                 <label
-                  class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest"
+                  class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest"
                   >{{ t('products.list.priceRange') }}</label
                 >
                 <div class="tw:flex tw:items-center tw:gap-2">
@@ -419,7 +419,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
                     class="app-input tw:flex-1"
                     size="small"
                   />
-                  <span class="app-text-muted tw:text-sm">–</span>
+                  <span class="tw:text-muted tw:text-sm">–</span>
                   <prime-input-number
                     v-model="maxPrice"
                     input-id="filter-max-price"
@@ -463,7 +463,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
               v-else
               class="tw:h-10 tw:w-10 tw:rounded-lg tw:bg-white/10 tw:flex-shrink-0 tw:flex tw:items-center tw:justify-center"
             >
-              <iconify icon="ph:coffee-bold" class="tw:text-sm app-text-muted" />
+              <iconify icon="ph:coffee-bold" class="tw:text-sm tw:text-muted" />
             </div>
             <span class="tw:font-medium tw:text-sm tw:line-clamp-2 tw:leading-tight">{{ data.name }}</span>
           </div>
@@ -471,7 +471,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
           <p class="tw:font-semibold tw:text-sm">{{ formatVnd(data.price) }}</p>
           <!-- Category + Status -->
           <div class="tw:flex tw:items-center tw:gap-1.5 tw:flex-wrap">
-            <span v-if="data.category" class="tw:text-xs app-text-muted">{{ data.category }}</span>
+            <span v-if="data.category" class="tw:text-xs tw:text-muted">{{ data.category }}</span>
             <prime-tag
               :value="statusTag(data.status).label"
               :severity="statusTag(data.status).severity"
@@ -500,7 +500,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
             v-else
             class="tw:h-9 tw:w-9 tw:rounded-lg tw:bg-white/10 tw:flex-shrink-0 tw:flex tw:items-center tw:justify-center"
           >
-            <iconify icon="ph:coffee-bold" class="tw:text-sm app-text-muted" />
+            <iconify icon="ph:coffee-bold" class="tw:text-sm tw:text-muted" />
           </div>
           <span class="tw:font-medium tw:text-sm">{{ data.name }}</span>
         </div>

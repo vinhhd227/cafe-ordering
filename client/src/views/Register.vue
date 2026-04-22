@@ -119,13 +119,13 @@ onBeforeUnmount(() => {
           <iconify icon="ph:check-circle-bold" class="tw:text-6xl tw:text-emerald-400" />
           <div class="tw:space-y-1">
             <h2 class="tw:text-3xl tw:font-semibold">{{ t('register.success.title') }}</h2>
-            <p class="tw:text-sm app-text-muted">
+            <p class="tw:text-sm tw:text-muted">
               {{ t('register.success.welcome', { username: registeredUsername }) }}
             </p>
           </div>
         </div>
         <div class="tw:mt-8 tw:space-y-3">
-          <p class="tw:text-sm app-text-muted">
+          <p class="tw:text-sm tw:text-muted">
             {{ t('register.success.countdown', { seconds: countdown }) }}
           </p>
           <div class="app-panel tw:h-1.5 tw:w-full tw:overflow-hidden tw:rounded-full tw:border">
@@ -136,7 +136,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
         <div class="tw:mt-8">
-          <router-link :to="{ name: 'login' }" class="tw:text-sm tw:text-emerald-400 hover:tw:text-emerald-300">
+          <router-link :to="{ name: 'login' }" class="tw:text-sm tw:text-emerald-400 tw:hover:text-emerald-300">
             {{ t('register.success.signInNow') }}
           </router-link>
         </div>
@@ -154,18 +154,18 @@ onBeforeUnmount(() => {
                 :key="l.code"
                 type="button"
                 class="tw:rounded-md tw:px-2 tw:py-1 tw:text-xs tw:font-semibold tw:transition-all"
-                :class="locale === l.code ? 'tw:bg-emerald-500/15 tw:text-emerald-400' : 'app-text-subtle hover:tw:bg-white/5'"
+                :class="locale === l.code ? 'tw:bg-emerald-500/15 tw:text-emerald-400' : 'app-text-subtle tw:hover:bg-white/5'"
                 @click="setLocale(l.code)"
               >
                 {{ l.label }}
               </button>
-              <button type="button" class="tw:rounded-md tw:p-1 tw:text-xs tw:transition-all app-text-subtle hover:tw:bg-white/5" @click="themeStore.toggleTheme()">
+              <button type="button" class="tw:rounded-md tw:p-1 tw:text-xs tw:transition-all app-text-subtle tw:hover:bg-white/5" @click="themeStore.toggleTheme()">
                 <iconify :icon="themeStore.isDark ? 'ph:sun-bold' : 'ph:moon-bold'" class="tw:text-sm" />
               </button>
             </div>
           </div>
           <h2 class="tw:text-3xl tw:font-semibold">{{ t('register.title') }}</h2>
-          <p class="tw:text-sm app-text-muted">{{ t('register.subtitle') }}</p>
+          <p class="tw:text-sm tw:text-muted">{{ t('register.subtitle') }}</p>
         </div>
 
         <prime-form class="tw:mt-8" @submit="onSubmit">
@@ -259,9 +259,9 @@ onBeforeUnmount(() => {
               class="app-panel tw:mt-0.5"
               size="small"
             />
-            <label for="agree" class="tw:text-sm app-text-muted">
+            <label for="agree" class="tw:text-sm tw:text-muted">
               {{ t('register.agreePrefix') }}
-              <router-link class="tw:text-emerald-400 hover:tw:text-emerald-300" to="/policy">{{ t('register.agreePolicy') }}</router-link>
+              <router-link class="tw:text-emerald-400 tw:hover:text-emerald-300" to="/policy">{{ t('register.agreePolicy') }}</router-link>
             </label>
           </div>
           <prime-message v-if="errors.agree" severity="error" size="small" variant="simple" :closable="false" class="tw:mt-2">
@@ -284,7 +284,7 @@ onBeforeUnmount(() => {
 
           <div class="tw:mt-5 tw:flex tw:items-center tw:justify-between tw:text-sm">
             <span class="app-text-subtle">{{ t('register.alreadyHave') }}</span>
-            <router-link class="tw:text-emerald-400 hover:tw:text-emerald-300" :to="{ name: 'login' }">
+            <router-link class="tw:text-emerald-400 tw:hover:text-emerald-300" :to="{ name: 'login' }">
               {{ t('register.signIn') }}
             </router-link>
           </div>

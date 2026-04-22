@@ -156,7 +156,7 @@ const hasPreview = computed(() => !!qrContent.value.trim())
     <div>
       <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('nav.groups.utilities') }}</p>
       <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('utilities.paymentQr.title') }}</h1>
-      <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('utilities.paymentQr.subtitle') }}</p>
+      <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('utilities.paymentQr.subtitle') }}</p>
     </div>
 
     <div class="tw:grid tw:grid-cols-1 tw:lg:grid-cols-2 tw:gap-8 tw:items-start">
@@ -166,7 +166,7 @@ const hasPreview = computed(() => !!qrContent.value.trim())
 
         <!-- QR content -->
         <div class="tw:space-y-1.5">
-          <label for="qr-content" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label for="qr-content" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('utilities.paymentQr.content') }}
           </label>
           <prime-textarea
@@ -183,10 +183,10 @@ const hasPreview = computed(() => !!qrContent.value.trim())
         <prime-divider />
 
         <!-- Text lines -->
-        <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted tw:-mb-1">{{ t('utilities.paymentQr.textLines') }}</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted tw:-mb-1">{{ t('utilities.paymentQr.textLines') }}</p>
 
         <div class="tw:space-y-1.5">
-          <label for="line1" class="tw:text-xs app-text-muted">{{ t('utilities.paymentQr.line1') }}</label>
+          <label for="line1" class="tw:text-xs tw:text-muted">{{ t('utilities.paymentQr.line1') }}</label>
           <prime-input-text
             id="line1"
             v-model="line1"
@@ -196,7 +196,7 @@ const hasPreview = computed(() => !!qrContent.value.trim())
         </div>
 
         <div class="tw:space-y-1.5">
-          <label for="line2" class="tw:text-xs app-text-muted">{{ t('utilities.paymentQr.line2') }}</label>
+          <label for="line2" class="tw:text-xs tw:text-muted">{{ t('utilities.paymentQr.line2') }}</label>
           <prime-input-text
             id="line2"
             v-model="line2"
@@ -206,7 +206,7 @@ const hasPreview = computed(() => !!qrContent.value.trim())
         </div>
 
         <div class="tw:space-y-1.5">
-          <label for="line3" class="tw:text-xs app-text-muted">{{ t('utilities.paymentQr.line3') }}</label>
+          <label for="line3" class="tw:text-xs tw:text-muted">{{ t('utilities.paymentQr.line3') }}</label>
           <prime-input-text
             id="line3"
             v-model="line3"
@@ -240,7 +240,7 @@ const hasPreview = computed(() => !!qrContent.value.trim())
 
       <!-- ── Right: Preview ─────────────────────────────────────── -->
       <div class="tw:flex tw:flex-col tw:items-center tw:gap-4">
-        <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted tw:self-start">
+        <p class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted tw:self-start">
           {{ t('utilities.paymentQr.preview') }}
         </p>
 

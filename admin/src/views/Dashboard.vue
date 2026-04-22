@@ -195,7 +195,7 @@ const expensesArea = buildArea("expenses");
     <!-- ── Header ──────────────────────────────────────────────────── -->
     <page-header>
       <template #subtitle>
-        <p class="tw:text-sm app-text-muted">{{ todayLabel }} &mdash; {{ t('dashboard.snapshotToday') }}</p>
+        <p class="tw:text-sm tw:text-muted">{{ todayLabel }} &mdash; {{ t('dashboard.snapshotToday') }}</p>
       </template>
       <prime-button severity="secondary" outlined size="small" @click="router.push({ name: 'orders' })">
         <iconify icon="ph:receipt-bold" class="tw:mr-1" />
@@ -214,7 +214,7 @@ const expensesArea = buildArea("expenses");
       <prime-card class="app-card tw:rounded-2xl tw:border">
         <template #content>
           <div class="tw:flex tw:items-start tw:justify-between">
-            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">{{ t('dashboard.kpi.revenue') }}</p>
+            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-muted">{{ t('dashboard.kpi.revenue') }}</p>
             <iconify icon="ph:trend-up-bold" class="tw:text-emerald-400 tw:opacity-60 tw:text-lg" />
           </div>
           <p class="tw:mt-3 tw:text-2xl tw:font-bold tw:tracking-tight">{{ fmt(kpi.revenue.total) }}</p>
@@ -230,7 +230,7 @@ const expensesArea = buildArea("expenses");
             </span>
             <span class="tw:text-xs app-text-subtle">{{ t('dashboard.kpi.vsYesterday') }}</span>
           </div>
-          <div class="tw:mt-2 tw:flex tw:gap-x-3 tw:text-xs app-text-muted tw:flex-wrap">
+          <div class="tw:mt-2 tw:flex tw:gap-x-3 tw:text-xs tw:text-muted tw:flex-wrap">
             <span>{{ t('dashboard.kpi.cash') }} <span class="tw:font-medium">{{ fmtK(kpi.revenue.cash) }}₫</span></span>
             <span>{{ t('dashboard.kpi.bank') }} <span class="tw:font-medium">{{ fmtK(kpi.revenue.bank) }}₫</span></span>
           </div>
@@ -241,7 +241,7 @@ const expensesArea = buildArea("expenses");
       <prime-card class="app-card tw:rounded-2xl tw:border">
         <template #content>
           <div class="tw:flex tw:items-start tw:justify-between">
-            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">{{ t('dashboard.kpi.orders') }}</p>
+            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-muted">{{ t('dashboard.kpi.orders') }}</p>
             <iconify icon="ph:receipt-bold" class="tw:text-blue-400 tw:opacity-60 tw:text-lg" />
           </div>
           <p class="tw:mt-3 tw:text-2xl tw:font-bold tw:tracking-tight">{{ kpi.orders.total }}</p>
@@ -256,7 +256,7 @@ const expensesArea = buildArea("expenses");
               <iconify icon="ph:check-circle-bold" class="tw:text-[11px]" /> {{ t('orders.status.COMPLETED') }} {{ kpi.orders.completed }}
             </prime-tag>
           </div>
-          <div class="tw:mt-2 tw:flex tw:gap-x-3 tw:text-xs app-text-muted tw:flex-wrap">
+          <div class="tw:mt-2 tw:flex tw:gap-x-3 tw:text-xs tw:text-muted tw:flex-wrap">
             <span class="tw:inline-flex tw:items-center tw:gap-1">
               <iconify icon="ph:calculator-bold" />
               {{ t('dashboard.kpi.avg') }} <span class="tw:font-medium">{{ fmtK(kpi.orders.avgOrder) }}₫</span>
@@ -277,13 +277,13 @@ const expensesArea = buildArea("expenses");
       <prime-card class="app-card tw:rounded-2xl tw:border">
         <template #content>
           <div class="tw:flex tw:items-start tw:justify-between">
-            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">{{ t('dashboard.kpi.tables') }}</p>
+            <p class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-muted">{{ t('dashboard.kpi.tables') }}</p>
             <iconify icon="ph:table-bold" class="tw:text-purple-400 tw:opacity-60 tw:text-lg" />
           </div>
           <!-- Occupancy rate -->
           <div class="tw:mt-3 tw:flex tw:items-end tw:justify-between">
             <p class="tw:text-2xl tw:font-bold tw:tracking-tight">{{ tablesOccupancy }}%</p>
-            <p class="tw:text-xs app-text-muted tw:mb-0.5">{{ t('dashboard.kpi.tablesCount', { n: kpi.tables.total }) }}</p>
+            <p class="tw:text-xs tw:text-muted tw:mb-0.5">{{ t('dashboard.kpi.tablesCount', { n: kpi.tables.total }) }}</p>
           </div>
           <!-- Progress bar -->
           <div class="tw:mt-2 tw:h-1.5 tw:rounded-full tw:bg-white/10 tw:overflow-hidden">
@@ -294,7 +294,7 @@ const expensesArea = buildArea("expenses");
           </div>
           <p class="tw:mt-1 tw:text-[10px] app-text-subtle">{{ t('dashboard.kpi.occupancyRate') }}</p>
           <!-- Breakdown -->
-          <div class="tw:mt-3 tw:flex tw:gap-x-3 tw:text-xs app-text-muted">
+          <div class="tw:mt-3 tw:flex tw:gap-x-3 tw:text-xs tw:text-muted">
             <span class="tw:inline-flex tw:items-center tw:gap-1">
               <iconify icon="ph:user-bold" class="tw:text-blue-400" />
               {{ t('dashboard.kpi.occupied') }} <span class="tw:font-medium">{{ kpi.tables.occupied }}</span>
@@ -316,12 +316,12 @@ const expensesArea = buildArea("expenses");
         <template #content>
           <div class="tw:flex tw:items-start tw:justify-between">
             <div class="tw:flex tw:items-center tw:gap-1.5">
-              <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-muted">{{ t('dashboard.kpi.profit') }}</p>
+              <p class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-muted">{{ t('dashboard.kpi.profit') }}</p>
               <span
                 v-tooltip.bottom="t('dashboard.kpi.profitTooltip')"
                 class="tw:inline-flex tw:items-center tw:justify-center tw:size-3.5 tw:rounded-full tw:bg-white/10 tw:cursor-help"
               >
-                <iconify icon="ph:question-bold" class="tw:text-[8px] app-text-muted" />
+                <iconify icon="ph:question-bold" class="tw:text-[8px] tw:text-muted" />
               </span>
             </div>
             <iconify icon="ph:chart-bar-bold" class="tw:text-emerald-400 tw:opacity-60 tw:text-lg" />
@@ -329,7 +329,7 @@ const expensesArea = buildArea("expenses");
           <p class="tw:mt-3 tw:text-2xl tw:font-bold tw:tracking-tight tw:text-emerald-400">
             {{ fmt(kpi.profit.amount) }}
           </p>
-          <div class="tw:mt-2 tw:text-xs app-text-muted">
+          <div class="tw:mt-2 tw:text-xs tw:text-muted">
             {{ t('dashboard.kpi.margin') }}
             <span class="tw:text-emerald-400 tw:font-semibold tw:ml-1">{{ kpi.profit.margin }}%</span>
           </div>
@@ -347,9 +347,9 @@ const expensesArea = buildArea("expenses");
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <div>
               <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.charts.revExpenses') }}</p>
-              <p class="tw:text-xs app-text-muted">{{ t('dashboard.charts.last7days') }}</p>
+              <p class="tw:text-xs tw:text-muted">{{ t('dashboard.charts.last7days') }}</p>
             </div>
-            <div class="tw:flex tw:items-center tw:gap-4 tw:text-xs app-text-muted">
+            <div class="tw:flex tw:items-center tw:gap-4 tw:text-xs tw:text-muted">
               <span class="tw:flex tw:items-center tw:gap-1.5">
                 <span class="tw:inline-block tw:size-2 tw:rounded-full tw:bg-emerald-400"></span>
                 {{ t('dashboard.charts.revenue') }}
@@ -416,7 +416,7 @@ const expensesArea = buildArea("expenses");
         <template #content>
           <div class="tw:mb-4">
             <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.charts.ordersByHour') }}</p>
-            <p class="tw:text-xs app-text-muted">{{ t('dashboard.charts.todayPeakOrders', { h: '12h', n: maxOrdersHour }) }}</p>
+            <p class="tw:text-xs tw:text-muted">{{ t('dashboard.charts.todayPeakOrders', { h: '12h', n: maxOrdersHour }) }}</p>
           </div>
 
           <div class="tw:flex tw:items-end tw:gap-1 tw:h-24">
@@ -456,7 +456,7 @@ const expensesArea = buildArea("expenses");
               <iconify icon="ph:fire-bold" class="tw:text-emerald-400" />
               {{ t('dashboard.charts.heatmap') }}
             </p>
-            <p class="tw:text-xs app-text-muted">
+            <p class="tw:text-xs tw:text-muted">
               {{ t('dashboard.charts.todayPeakRev', { h: peakHour.h, rev: fmtK(peakHour.rev) + '₫' }) }}
             </p>
           </div>
@@ -494,7 +494,7 @@ const expensesArea = buildArea("expenses");
               <iconify icon="ph:lightning-bold" />
               {{ t('dashboard.charts.peakLabel', { h: peakHour.h, rev: fmtK(peakHour.rev) + '₫' }) }}
             </p>
-            <p class="tw:mt-1 tw:text-[11px] app-text-muted tw:leading-relaxed">
+            <p class="tw:mt-1 tw:text-[11px] tw:text-muted tw:leading-relaxed">
               {{ t('dashboard.charts.prepareBefore') }}
               <span class="tw:font-medium">11h45</span>
             </p>
@@ -512,7 +512,7 @@ const expensesArea = buildArea("expenses");
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <div>
               <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.tableStatus.title') }}</p>
-              <p class="tw:text-xs app-text-muted">{{ t('dashboard.tableStatus.occupiedCount', { n: kpi.tables.occupied }) }}</p>
+              <p class="tw:text-xs tw:text-muted">{{ t('dashboard.tableStatus.occupiedCount', { n: kpi.tables.occupied }) }}</p>
             </div>
           </div>
 
@@ -533,7 +533,7 @@ const expensesArea = buildArea("expenses");
           <!-- Legend -->
           <div class="tw:mt-4 tw:pt-3 tw:border-t tw:border-white/10 tw:flex tw:items-center tw:gap-5">
             <template v-for="(meta, key) in tableStatusMeta" :key="key">
-              <span class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs app-text-muted">
+              <span class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs tw:text-muted">
                 <span class="tw:size-2.5 tw:rounded-full tw:flex-shrink-0" :class="meta.dot" />
                 {{ meta.label }}
               </span>
@@ -548,7 +548,7 @@ const expensesArea = buildArea("expenses");
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <div>
               <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.recentOrders.title') }}</p>
-              <p class="tw:text-xs app-text-muted">{{ t('dashboard.recentOrders.subtitle') }}</p>
+              <p class="tw:text-xs tw:text-muted">{{ t('dashboard.recentOrders.subtitle') }}</p>
             </div>
             <prime-button
               severity="secondary"
@@ -573,7 +573,7 @@ const expensesArea = buildArea("expenses");
                   <span class="tw:text-xs tw:font-mono tw:font-semibold">{{ o.number }}</span>
                 </div>
                 <div class="tw:min-w-0">
-                  <p class="tw:text-xs app-text-muted tw:truncate">{{ o.table }}</p>
+                  <p class="tw:text-xs tw:text-muted tw:truncate">{{ o.table }}</p>
                 </div>
               </div>
               <div class="tw:flex tw:items-center tw:gap-2 tw:flex-shrink-0">
@@ -616,7 +616,7 @@ const expensesArea = buildArea("expenses");
                 <iconify icon="ph:currency-circle-dollar-bold" class="tw:text-emerald-400" />
                 {{ t('dashboard.revenueDrivers.title') }}
               </p>
-              <p class="tw:text-xs app-text-muted">{{ t('dashboard.revenueDrivers.subtitle') }}</p>
+              <p class="tw:text-xs tw:text-muted">{{ t('dashboard.revenueDrivers.subtitle') }}</p>
             </div>
           </div>
 
@@ -654,7 +654,7 @@ const expensesArea = buildArea("expenses");
           </div>
 
           <!-- Insight footer -->
-          <div class="tw:mt-3 tw:pt-3 tw:border-t tw:border-white/10 tw:text-[11px] app-text-muted tw:leading-relaxed">
+          <div class="tw:mt-3 tw:pt-3 tw:border-t tw:border-white/10 tw:text-[11px] tw:text-muted tw:leading-relaxed">
             <iconify icon="ph:lightbulb-bold" class="tw:text-amber-400 tw:mr-1" />
             {{ t('dashboard.revenueDrivers.insightPre') }} <span class="tw:font-medium">{{ t('dashboard.revenueDrivers.upsell') }}</span>
             {{ t('dashboard.revenueDrivers.insightPost') }}
@@ -675,7 +675,7 @@ const expensesArea = buildArea("expenses");
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
             <div>
               <p class="tw:text-sm tw:font-semibold">{{ t('dashboard.paymentRatio.title') }}</p>
-              <p class="tw:text-xs app-text-muted">{{ t('dashboard.paymentRatio.today') }}</p>
+              <p class="tw:text-xs tw:text-muted">{{ t('dashboard.paymentRatio.today') }}</p>
             </div>
             <iconify icon="ph:credit-card-bold" class="tw:text-blue-400 tw:opacity-60 tw:text-lg" />
           </div>
@@ -700,23 +700,23 @@ const expensesArea = buildArea("expenses");
             <div class="tw:flex tw:items-center tw:justify-between">
               <span class="tw:flex tw:items-center tw:gap-2 tw:text-sm">
                 <span class="tw:size-2.5 tw:rounded-full tw:bg-emerald-500 tw:flex-shrink-0" />
-                <iconify icon="ph:money-bold" class="app-text-muted" />
+                <iconify icon="ph:money-bold" class="tw:text-muted" />
                 {{ t('dashboard.paymentRatio.cash') }}
               </span>
               <div class="tw:text-right">
                 <span class="tw:text-sm tw:font-semibold">{{ fmtK(kpi.revenue.cash) }}₫</span>
-                <span class="tw:text-xs app-text-muted tw:ml-2">{{ paymentRatio.cash }}%</span>
+                <span class="tw:text-xs tw:text-muted tw:ml-2">{{ paymentRatio.cash }}%</span>
               </div>
             </div>
             <div class="tw:flex tw:items-center tw:justify-between">
               <span class="tw:flex tw:items-center tw:gap-2 tw:text-sm">
                 <span class="tw:size-2.5 tw:rounded-full tw:bg-blue-500 tw:flex-shrink-0" />
-                <iconify icon="ph:bank-bold" class="app-text-muted" />
+                <iconify icon="ph:bank-bold" class="tw:text-muted" />
                 {{ t('dashboard.paymentRatio.bank') }}
               </span>
               <div class="tw:text-right">
                 <span class="tw:text-sm tw:font-semibold">{{ fmtK(kpi.revenue.bank) }}₫</span>
-                <span class="tw:text-xs app-text-muted tw:ml-2">{{ paymentRatio.bank }}%</span>
+                <span class="tw:text-xs tw:text-muted tw:ml-2">{{ paymentRatio.bank }}%</span>
               </div>
             </div>
           </div>

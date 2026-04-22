@@ -124,7 +124,7 @@ onMounted(loadConfigs)
     <div>
       <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('notificationConfigs.breadcrumb') }}</p>
       <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('notificationConfigs.title') }}</h1>
-      <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('notificationConfigs.subtitle') }}</p>
+      <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('notificationConfigs.subtitle') }}</p>
     </div>
 
     <!-- Error -->
@@ -145,12 +145,12 @@ onMounted(loadConfigs)
         </div>
         <div>
           <p class="tw:text-sm tw:font-medium">{{ t('notificationConfigs.retention.title') }}</p>
-          <p class="tw:text-[11px] app-text-muted">{{ t('notificationConfigs.retention.hint') }}</p>
+          <p class="tw:text-[11px] tw:text-muted">{{ t('notificationConfigs.retention.hint') }}</p>
         </div>
       </div>
 
       <div class="tw:space-y-3">
-        <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">
+        <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">
           {{ t('notificationConfigs.retention.label') }}
         </label>
 
@@ -170,7 +170,7 @@ onMounted(loadConfigs)
 
           <!-- Custom input inline -->
           <div class="tw:flex tw:items-center tw:gap-2">
-            <span class="tw:text-xs app-text-muted">{{ t('notificationConfigs.retention.custom') }}:</span>
+            <span class="tw:text-xs tw:text-muted">{{ t('notificationConfigs.retention.custom') }}:</span>
             <prime-input-number
               id="retention-days"
               v-model="retentionDays"
@@ -218,12 +218,12 @@ onMounted(loadConfigs)
               <iconify
                 :icon="typeMeta(cfg.type).icon"
                 class="tw:text-base"
-                :class="cfg.isEnabled ? 'tw:text-emerald-400' : 'app-text-muted'"
+                :class="cfg.isEnabled ? 'tw:text-emerald-400' : 'tw:text-muted'"
               />
             </div>
             <div>
               <p class="tw:text-sm tw:font-medium">{{ t(typeMeta(cfg.type).labelKey) }}</p>
-              <p class="tw:text-[11px] app-text-muted tw:font-mono">{{ cfg.type }}</p>
+              <p class="tw:text-[11px] tw:text-muted tw:font-mono">{{ cfg.type }}</p>
             </div>
           </div>
 
@@ -276,7 +276,7 @@ onMounted(loadConfigs)
         </div>
 
         <!-- Disabled hint -->
-        <p v-if="!cfg.isEnabled" class="tw:mt-2 tw:text-xs app-text-muted tw:pl-12">
+        <p v-if="!cfg.isEnabled" class="tw:mt-2 tw:text-xs tw:text-muted tw:pl-12">
           {{ t('notificationConfigs.disabledHint') }}
         </p>
       </div>

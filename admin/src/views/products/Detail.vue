@@ -165,7 +165,7 @@ onMounted(() => {
             :severity="product.isActive ? 'success' : 'danger'"
           />
         </h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           Product #{{ productId }}
           <template v-if="product">
             · Created {{ formatDate(product.createdAt) }}
@@ -246,7 +246,7 @@ onMounted(() => {
               >
                 <iconify
                   icon="ph:image-bold"
-                  class="tw:text-4xl app-text-muted"
+                  class="tw:text-4xl tw:text-muted"
                 />
               </div>
             </div>
@@ -254,7 +254,7 @@ onMounted(() => {
             <!-- Info rows -->
             <div class="tw:mt-5 tw:space-y-3">
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">{{ t('products.detail.info.category') }}</span>
+                <span class="tw:text-muted">{{ t('products.detail.info.category') }}</span>
                 <span class="tw:font-medium">
                   {{
                     categories.find((c) => c.id === form.categoryId)?.name ||
@@ -264,20 +264,20 @@ onMounted(() => {
                 </span>
               </div>
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">{{ t('products.detail.info.price') }}</span>
+                <span class="tw:text-muted">{{ t('products.detail.info.price') }}</span>
                 <span class="tw:font-semibold tw:text-emerald-300">{{
                   formatVnd(product.price)
                 }}</span>
               </div>
               <div class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">{{ t('products.detail.info.status') }}</span>
+                <span class="tw:text-muted">{{ t('products.detail.info.status') }}</span>
                 <prime-tag
                   :value="product.isActive ? t('products.status.active') : t('products.status.inactive')"
                   :severity="product.isActive ? 'success' : 'danger'"
                 />
               </div>
               <div v-if="product.estimatedPrepMinutes" class="tw:flex tw:justify-between tw:text-sm">
-                <span class="app-text-muted">{{ t('products.detail.info.estimatedPrepMinutes') }}</span>
+                <span class="tw:text-muted">{{ t('products.detail.info.estimatedPrepMinutes') }}</span>
                 <span>{{ product.estimatedPrepMinutes }} {{ t('products.detail.info.minutes') }}</span>
               </div>
             </div>
@@ -317,7 +317,7 @@ onMounted(() => {
                   severity="warn"
                 />
               </div>
-              <p v-else class="tw:text-xs app-text-muted">{{ t('products.detail.info.noOptions') }}</p>
+              <p v-else class="tw:text-xs tw:text-muted">{{ t('products.detail.info.noOptions') }}</p>
             </div>
 
             <!-- Description -->
@@ -325,7 +325,7 @@ onMounted(() => {
               <p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-subtle tw:mb-1">
                 {{ t('products.detail.info.description') }}
               </p>
-              <p class="tw:text-sm app-text-muted tw:leading-relaxed">
+              <p class="tw:text-sm tw:text-muted tw:leading-relaxed">
                 {{ product.description }}
               </p>
             </div>
@@ -381,7 +381,7 @@ onMounted(() => {
               <div class="tw:space-y-1.5">
                 <label class="tw:text-sm tw:font-medium">
                   {{ t('products.form.description') }}
-                  <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
+                  <span class="tw:text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
                 </label>
                 <prime-textarea
                   v-model="form.description"
@@ -395,7 +395,7 @@ onMounted(() => {
               <div class="tw:space-y-1.5">
                 <label class="tw:text-sm tw:font-medium">
                   {{ t('products.form.estimatedPrepMinutes') }}
-                  <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
+                  <span class="tw:text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
                 </label>
                 <prime-input-number
                   v-model="form.estimatedPrepMinutes"
@@ -410,7 +410,7 @@ onMounted(() => {
               <div class="tw:space-y-1.5">
                 <label class="tw:text-sm tw:font-medium">
                   {{ t('products.form.image') }}
-                  <span class="app-text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
+                  <span class="tw:text-muted tw:font-normal">{{ t('products.form.optional') }}</span>
                 </label>
                 <div class="tw:flex tw:gap-2">
                   <input
@@ -455,7 +455,7 @@ onMounted(() => {
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
                   <p class="tw:text-sm tw:font-medium">{{ t('products.options.temperature.label') }}</p>
-                  <p class="tw:text-xs app-text-muted">{{ t('products.options.temperature.hint') }}</p>
+                  <p class="tw:text-xs tw:text-muted">{{ t('products.options.temperature.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasTemperatureOption" />
               </div>
@@ -464,7 +464,7 @@ onMounted(() => {
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
                   <p class="tw:text-sm tw:font-medium">{{ t('products.options.iceLevel.label') }}</p>
-                  <p class="tw:text-xs app-text-muted">{{ t('products.options.iceLevel.hint') }}</p>
+                  <p class="tw:text-xs tw:text-muted">{{ t('products.options.iceLevel.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasIceLevelOption" />
               </div>
@@ -473,7 +473,7 @@ onMounted(() => {
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
                   <p class="tw:text-sm tw:font-medium">{{ t('products.options.sugarLevel.label') }}</p>
-                  <p class="tw:text-xs app-text-muted">{{ t('products.options.sugarLevel.hint') }}</p>
+                  <p class="tw:text-xs tw:text-muted">{{ t('products.options.sugarLevel.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.hasSugarLevelOption" />
               </div>
@@ -482,7 +482,7 @@ onMounted(() => {
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
                   <p class="tw:text-sm tw:font-medium">{{ t('products.options.accompaniment.label') }}</p>
-                  <p class="tw:text-xs app-text-muted">{{ t('products.options.accompaniment.hint') }}</p>
+                  <p class="tw:text-xs tw:text-muted">{{ t('products.options.accompaniment.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.isAccompaniment" />
               </div>
@@ -493,7 +493,7 @@ onMounted(() => {
               <div class="tw:flex tw:items-center tw:justify-between">
                 <div>
                   <p class="tw:text-sm tw:font-semibold">{{ t('products.detail.activeOption.label') }}</p>
-                  <p class="tw:text-xs app-text-muted">{{ t('products.detail.activeOption.hint') }}</p>
+                  <p class="tw:text-xs tw:text-muted">{{ t('products.detail.activeOption.hint') }}</p>
                 </div>
                 <prime-toggle-switch v-model="form.isActive" />
               </div>
@@ -529,7 +529,7 @@ onMounted(() => {
     <!-- ── Not found ──────────────────────────────────────────────── -->
     <prime-card v-else class="app-card tw:rounded-2xl tw:border">
       <template #content>
-        <div class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted">
+        <div class="tw:flex tw:flex-col tw:items-center tw:py-10 tw:text-muted">
           <iconify icon="ph:warning-bold" class="tw:text-3xl tw:mb-2" />
           <p class="tw:text-sm">{{ t('products.detail.notFound') }}</p>
         </div>

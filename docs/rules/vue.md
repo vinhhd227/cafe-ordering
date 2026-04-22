@@ -124,10 +124,10 @@ Luôn dùng `<prime-button>` thay vì `<button>` HTML thuần:
 
 ```html
 <!-- ✅ Đúng — chỉ là text mô tả, không liên kết với input -->
-<p class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Template</p>
+<p class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">Template</p>
 
 <!-- ❌ Sai -->
-<label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">Template</label>
+<label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">Template</label>
 ```
 
 ## PrimeVue Components

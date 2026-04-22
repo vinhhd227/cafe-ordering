@@ -177,7 +177,7 @@ onBeforeRouteLeave(() => {
   >
     <div class="tw:space-y-4">
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           Zone name
         </label>
         <prime-input-text
@@ -188,7 +188,7 @@ onBeforeRouteLeave(() => {
         />
       </div>
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           Display order
         </label>
         <prime-input-number
@@ -222,7 +222,7 @@ onBeforeRouteLeave(() => {
   >
     <div class="tw:space-y-4">
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           Zone name
         </label>
         <prime-input-text
@@ -233,7 +233,7 @@ onBeforeRouteLeave(() => {
         />
       </div>
       <div class="tw:space-y-1.5">
-        <label class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           Display order
         </label>
         <prime-input-number
@@ -265,7 +265,7 @@ onBeforeRouteLeave(() => {
           Operations
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Zones</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           Manage dining areas such as floors, terraces, or private rooms.
         </p>
       </div>
@@ -310,7 +310,7 @@ onBeforeRouteLeave(() => {
               class="tw:text-[11px]! tw:px-1.5! tw:py-0.5! tw:flex-shrink-0"
             />
           </div>
-          <p class="tw:text-xs app-text-muted">{{ data.tableCount }} table(s)</p>
+          <p class="tw:text-xs tw:text-muted">{{ data.tableCount }} table(s)</p>
           <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
             <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
               <iconify icon="ph:dots-three-bold" />

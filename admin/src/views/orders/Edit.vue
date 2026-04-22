@@ -438,7 +438,7 @@ onMounted(async () => {
         <!-- Empty state -->
         <prime-panel
           v-else-if="!loadingMenu && visibleCategories.length === 0"
-          class="app-panel tw:rounded-2xl tw:border tw:p-12 tw:text-center app-text-muted"
+          class="app-panel tw:rounded-2xl tw:border tw:p-12 tw:text-center tw:text-muted"
         >
           <iconify icon="ph:magnifying-glass-bold" class="tw:text-3xl tw:mb-3 tw:block tw:mx-auto tw:opacity-40" />
           {{ t("orders.create.noProducts") }}
@@ -458,7 +458,7 @@ onMounted(async () => {
             <article
               v-for="product in category.filteredProducts"
               :key="product.id"
-              class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all hover:tw:-translate-y-0.5 hover:tw:border-emerald-500/50"
+              class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all tw:hover:-translate-y-0.5 tw:hover:border-emerald-500/50"
               style="border-color: var(--app-border); background: var(--app-bg-subtle)"
               @click="handleAddToCart(product)"
             >
@@ -468,7 +468,7 @@ onMounted(async () => {
                   v-if="product.imageUrl"
                   :src="product.imageUrl"
                   :alt="product.name"
-                  class="tw:h-32 tw:w-full tw:object-cover tw:transition group-hover:tw:scale-105"
+                  class="tw:h-32 tw:w-full tw:object-cover tw:transition group-tw:hover:scale-105"
                 />
                 <div
                   v-else
@@ -487,7 +487,7 @@ onMounted(async () => {
               </div>
               <div class="tw:flex tw:flex-1 tw:flex-col tw:gap-0.5 tw:p-3">
                 <p class="tw:text-sm tw:font-semibold tw:leading-snug">{{ product.name }}</p>
-                <p v-if="product.description" class="tw:text-xs app-text-muted tw:leading-snug tw:line-clamp-2">
+                <p v-if="product.description" class="tw:text-xs tw:text-muted tw:leading-snug tw:line-clamp-2">
                   {{ product.description }}
                 </p>
                 <p class="tw:mt-auto tw:pt-1 tw:text-sm tw:font-bold tw:text-emerald-400">
@@ -513,7 +513,7 @@ onMounted(async () => {
           <!-- Empty state -->
           <div
             v-if="cart.length === 0"
-            class="tw:py-8 tw:text-center app-text-muted tw:text-sm tw:rounded-xl tw:border tw:border-dashed"
+            class="tw:py-8 tw:text-center tw:text-muted tw:text-sm tw:rounded-xl tw:border tw:border-dashed"
             style="border-color: var(--app-border)"
           >
             {{ t("orders.create.cartEmpty") }}<br />
@@ -539,7 +539,7 @@ onMounted(async () => {
                     v-if="item.isTakeaway"
                     class="tw:inline-block tw:mt-1 tw:text-xs tw:px-1.5 tw:py-0.5 tw:rounded tw:bg-sky-500/10 tw:text-sky-400"
                   >{{ t("orders.create.takeaway") }}</span>
-                  <p v-if="item.note" class="tw:text-xs tw:mt-1 tw:italic app-text-muted">{{ item.note }}</p>
+                  <p v-if="item.note" class="tw:text-xs tw:mt-1 tw:italic tw:text-muted">{{ item.note }}</p>
                 </div>
                 <div class="tw:flex tw:items-center tw:gap-1 tw:shrink-0">
                   <prime-button
@@ -569,12 +569,12 @@ onMounted(async () => {
             <!-- Total summary -->
             <div class="tw:rounded-xl tw:p-3 tw:mt-1" style="background: var(--app-bg-subtle)">
               <div class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:mb-1">
-                <span class="app-text-muted">{{ t("orders.create.subtotal") }}</span>
+                <span class="tw:text-muted">{{ t("orders.create.subtotal") }}</span>
                 <span class="tw:font-medium">{{ formatVnd(cartTotal) }}</span>
               </div>
               <div class="tw:flex tw:items-center tw:justify-between tw:text-xs tw:mb-2">
-                <span class="app-text-muted">{{ t("orders.create.serviceCharge") }}</span>
-                <span class="app-text-muted">{{ t("orders.create.free") }}</span>
+                <span class="tw:text-muted">{{ t("orders.create.serviceCharge") }}</span>
+                <span class="tw:text-muted">{{ t("orders.create.free") }}</span>
               </div>
               <div class="tw:border-t tw:pt-2" style="border-color: var(--app-border)">
                 <div class="tw:flex tw:items-center tw:justify-between tw:font-bold">
@@ -595,7 +595,7 @@ onMounted(async () => {
               <div class="tw:flex tw:items-center tw:gap-2 tw:min-w-0">
                 <iconify icon="ph:tag-bold" class="tw:text-emerald-400 tw:shrink-0" />
                 <span class="tw:font-medium tw:text-sm tw:text-emerald-300">{{ promoInfo.code }}</span>
-                <span class="tw:text-xs app-text-muted tw:truncate">{{ promoInfo.name }}</span>
+                <span class="tw:text-xs tw:text-muted tw:truncate">{{ promoInfo.name }}</span>
               </div>
               <div class="tw:flex tw:items-center tw:gap-2 tw:shrink-0">
                 <span v-if="promoInfo.estimatedDiscount" class="tw:text-emerald-400 tw:text-sm tw:font-medium">
@@ -662,7 +662,7 @@ onMounted(async () => {
         <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t("orders.create.optionsDialog.quantity") }}</p>
         <div class="tw:flex tw:items-center tw:gap-3">
           <button
-            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
+            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition tw:hover:border-emerald-400 tw:text-muted"
             style="border-color: var(--app-border)"
             @click="pendingQuantity = Math.max(1, pendingQuantity - 1)"
           >
@@ -670,7 +670,7 @@ onMounted(async () => {
           </button>
           <span class="tw:min-w-10 tw:text-center tw:text-xl tw:font-bold">{{ pendingQuantity }}</span>
           <button
-            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition hover:tw:border-emerald-400 app-text-muted"
+            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition tw:hover:border-emerald-400 tw:text-muted"
             style="border-color: var(--app-border)"
             @click="pendingQuantity++"
           >

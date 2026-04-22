@@ -275,7 +275,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
       <div>
         <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('users.breadcrumb') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('users.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">
           {{ t('users.subtitle') }}
         </p>
       </div>
@@ -336,7 +336,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
               </div>
               <div>
                 <p class="tw:text-sm tw:font-semibold tw:leading-snug">{{ data.username }}</p>
-                <p class="tw:text-xs app-text-muted">{{ data.fullName }}</p>
+                <p class="tw:text-xs tw:text-muted">{{ data.fullName }}</p>
               </div>
             </div>
             <prime-tag
@@ -388,7 +388,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
               <p class="tw:text-sm tw:font-semibold">{{ t('users.filter.title') }}</p>
 
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('users.filter.roleLabel') }}</label>
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t('users.filter.roleLabel') }}</label>
                 <prime-select
                   v-model="roleFilter"
                   :options="roleFilterOptions"
@@ -401,7 +401,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
               </div>
 
               <div class="tw:space-y-1.5">
-                <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('users.filter.statusLabel') }}</label>
+                <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t('users.filter.statusLabel') }}</label>
                 <prime-select
                   v-model="statusFilter"
                   :options="statusFilterOptions"
@@ -438,13 +438,13 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           </div>
           <div>
             <p class="tw:text-sm tw:font-medium">{{ data.username }}</p>
-            <p class="tw:text-xs app-text-muted">{{ data.fullName }}</p>
+            <p class="tw:text-xs tw:text-muted">{{ data.fullName }}</p>
           </div>
         </div>
       </template>
 
       <template #col-email="{ data }">
-        <span class="tw:text-sm app-text-muted">{{ data.email || '—' }}</span>
+        <span class="tw:text-sm tw:text-muted">{{ data.email || '—' }}</span>
       </template>
 
       <template #col-roles="{ data }">
@@ -455,7 +455,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           :severity="roleSeverity(role)"
           class="tw:mr-1"
         />
-        <span v-if="!data.roles?.length" class="app-text-muted tw:text-xs">—</span>
+        <span v-if="!data.roles?.length" class="tw:text-muted tw:text-xs">—</span>
       </template>
 
       <template #col-isActive="{ data }">
@@ -466,7 +466,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
       </template>
 
       <template #col-createdAt="{ data }">
-        <span class="tw:text-xs app-text-muted">{{ formatDate(data.createdAt) }}</span>
+        <span class="tw:text-xs tw:text-muted">{{ formatDate(data.createdAt) }}</span>
       </template>
 
       <template #col-actions="{ data }">
@@ -610,7 +610,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
       style="width: 26rem"
     >
       <div class="tw:space-y-4 tw:pt-2">
-        <p class="tw:text-sm app-text-muted">
+        <p class="tw:text-sm tw:text-muted">
           {{ t('users.tempPasswordDialog.notice') }}
         </p>
         <div class="tw:rounded-xl tw:border tw:p-4 tw:space-y-3 app-card">
@@ -660,7 +660,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
       @update:visible="(v) => { if (!v) confirmDeactivateUser = null }"
     >
       <div class="tw:pt-2">
-        <p class="tw:text-sm app-text-muted">
+        <p class="tw:text-sm tw:text-muted">
           {{ t('users.deactivateDialog.confirmText', { username: confirmDeactivateUser?.username }) }}
         </p>
       </div>

@@ -73,7 +73,7 @@ const fmt = (value) =>
 
       <div v-if="prevPeriodRevenue != null || avg30DayRevenue != null" class="tw:space-y-1 tw:mt-2 tw:pt-2 tw:border-t tw:border-white/8">
         <div v-if="prevPeriodRevenue != null" class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:min-w-0">
-          <span class="tw:flex tw:items-center tw:gap-1 tw:text-[10px] tw:uppercase tw:tracking-[0.15em] app-text-muted">
+          <span class="tw:flex tw:items-center tw:gap-1 tw:text-[10px] tw:uppercase tw:tracking-[0.15em] tw:text-muted">
             <iconify :icon="pctVsPrev !== null && pctVsPrev >= 0 ? 'ph:trend-up-bold' : 'ph:trend-down-bold'"
               class="tw:text-sm tw:shrink-0"
               :class="pctVsPrev !== null && pctVsPrev >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'" />
@@ -87,7 +87,7 @@ const fmt = (value) =>
           </div>
         </div>
         <div v-if="avg30DayRevenue != null" class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:min-w-0">
-          <span class="tw:flex tw:items-center tw:gap-1 tw:text-[10px] tw:uppercase tw:tracking-[0.15em] app-text-muted">
+          <span class="tw:flex tw:items-center tw:gap-1 tw:text-[10px] tw:uppercase tw:tracking-[0.15em] tw:text-muted">
             <iconify :icon="pctVsAvg30 !== null && pctVsAvg30 >= 0 ? 'ph:trend-up-bold' : 'ph:trend-down-bold'"
               class="tw:text-sm tw:shrink-0"
               :class="pctVsAvg30 !== null && pctVsAvg30 >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'" />
