@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
@@ -26,7 +26,7 @@ const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm();
 const { can } = usePermission();
-const orderId = Number(route.params.id);
+const orderId = computed(() => Number(route.params.id));
 
 // ── State ──────────────────────────────────────────────────────────
 const order = ref(null);
@@ -96,7 +96,7 @@ const loadOrder = async () => {
   loading.value = true;
   errorMessage.value = "";
   try {
-    const res = await getOrderById(orderId);
+    const res = await getOrderById(orderId.value);
     order.value = res?.data;
   } catch (err) {
     errorMessage.value =
@@ -106,14 +106,14 @@ const loadOrder = async () => {
   }
 };
 
-onMounted(loadOrder);
+watch(orderId, loadOrder, { immediate: true });
 
 // ── Status actions ────────────────────────────────────────────────
 const moveOrder = async (toStatus) => {
   updatingId.value = "status";
   errorMessage.value = "";
   try {
-    await updateOrderStatus(orderId, toStatus);
+    await updateOrderStatus(orderId.value, toStatus);
     order.value.status = toStatus;
   } catch (err) {
     errorMessage.value =
@@ -127,7 +127,7 @@ const cancelOrder = async () => {
   updatingId.value = "status";
   errorMessage.value = "";
   try {
-    await updateOrderStatus(orderId, ORDER_STATUS.CANCELLED);
+    await updateOrderStatus(orderId.value, ORDER_STATUS.CANCELLED);
     order.value.status = ORDER_STATUS.CANCELLED;
   } catch (err) {
     errorMessage.value =
@@ -167,7 +167,7 @@ const confirmPayment = async () => {
   errorMessage.value = "";
   try {
     await updatePayment(
-      orderId,
+      orderId.value,
       PAYMENT_STATUS.PAID,
       payMethod.value,
       payAmountReceived.value,
@@ -201,7 +201,7 @@ const handleUpdateOrderDate = async () => {
   if (!editDate.value) return;
   editDateLoading.value = true;
   try {
-    await updateOrderDate(orderId, editDate.value.toISOString());
+    await updateOrderDate(orderId.value, editDate.value.toISOString());
     order.value.orderDate = editDate.value.toISOString();
     editDatePanel.value.hide();
     toast.add({ severity: "success", summary: t("orders.detail.info.orderDateUpdated"), life: 3000 });
@@ -232,7 +232,7 @@ const handleDeleteOrder = () => {
     acceptProps: { severity: 'danger', size: 'small', label: t('orders.detail.deleteOrder') },
     accept: async () => {
       try {
-        await deleteOrder(orderId)
+        await deleteOrder(orderId.value)
         toast.add({ severity: 'success', summary: t('orders.detail.deleteOrderSuccess', { orderNumber: order.value?.orderNumber }), life: 3000 })
         router.push({ name: 'ordersList' })
       } catch (err) {
@@ -249,7 +249,7 @@ const setItemQty = async (productId, newQty) => {
   itemUpdating.value = productId;
   errorMessage.value = "";
   try {
-    const res = await updateOrderItem(orderId, productId, newQty);
+    const res = await updateOrderItem(orderId.value, productId, newQty);
     // Backend automatically removes free gift items and cancels empty orders.
     order.value.items = res.data.items;
     order.value.totalAmount = res.data.totalAmount;
@@ -356,7 +356,7 @@ const openMergeDialog = async () => {
     const res = await getOrders({ paymentStatus: PAYMENT_STATUS.UNPAID, pageSize: 100 });
     const all = res?.data?.items ?? [];
     mergeOrders_.value = all.filter(
-      (o) => o.id !== orderId && o.status !== ORDER_STATUS.CANCELLED,
+      (o) => o.id !== orderId.value && o.status !== ORDER_STATUS.CANCELLED,
     );
   } catch {
     mergeOrders_.value = [];
@@ -370,7 +370,7 @@ const confirmMerge = async () => {
   mergeLoading.value = true;
   errorMessage.value = "";
   try {
-    await mergeOrders(orderId, mergeSelected.value);
+    await mergeOrders(orderId.value, mergeSelected.value);
     mergeDialog.value = false;
     await loadOrder();
     toast.add({
@@ -428,7 +428,7 @@ const confirmSplit = async () => {
   splitLoading.value = true;
   errorMessage.value = "";
   try {
-    const res = await splitOrder(orderId, items);
+    const res = await splitOrder(orderId.value, items);
     const result = res?.data;
     splitDialog.value = false;
     await loadOrder();
@@ -465,7 +465,7 @@ const confirmSplit = async () => {
         />
         <div class="tw:flex-1 tw:min-w-0">
           <p class="tw:text-sm tw:font-semibold">{{ message.summary }}</p>
-          <p class="tw:text-xs app-text-muted">{{ message.detail }}</p>
+          <p class="tw:text-xs tw:text-muted">{{ message.detail }}</p>
         </div>
         <prime-button
           :label="t('orders.detail.split.viewNew')"
@@ -492,7 +492,7 @@ const confirmSplit = async () => {
     :style="{ width: '36rem' }"
   >
     <div class="tw:space-y-3">
-      <p class="tw:text-sm app-text-muted">
+      <p class="tw:text-sm tw:text-muted">
         {{ t('orders.detail.merge.instruction', { orderNumber: order?.orderNumber }) }}
       </p>
 
@@ -504,7 +504,7 @@ const confirmSplit = async () => {
       <!-- Empty state -->
       <div
         v-else-if="!mergeOrders_.length"
-        class="tw:flex tw:flex-col tw:items-center tw:py-8 app-text-muted tw:text-sm"
+        class="tw:flex tw:flex-col tw:items-center tw:py-8 tw:text-muted tw:text-sm"
       >
         <iconify icon="ph:tray-bold" class="tw:text-2xl tw:mb-2" />
         {{ t('orders.detail.merge.empty') }}
@@ -531,17 +531,17 @@ const confirmSplit = async () => {
           <div class="tw:flex-1 tw:min-w-0">
             <p class="tw:font-mono tw:font-semibold tw:text-sm tw:flex tw:items-center tw:gap-1.5">
               {{ o.orderNumber }}
-              <span v-if="o.tableCode" class="tw:text-xs tw:font-normal app-text-muted">
+              <span v-if="o.tableCode" class="tw:text-xs tw:font-normal tw:text-muted">
                 · <iconify icon="ph:table-bold" class="tw:inline tw:text-[10px]" />
                 {{ o.tableCode }}
               </span>
-              <span v-else class="tw:text-xs tw:font-normal tw:italic app-text-muted">· {{ t('orders.detail.noTable') }}</span>
+              <span v-else class="tw:text-xs tw:font-normal tw:italic tw:text-muted">· {{ t('orders.detail.noTable') }}</span>
             </p>
             <ul class="tw:mt-0.5 tw:space-y-0.5">
               <li
                 v-for="item in o.items"
                 :key="item.productId"
-                class="tw:text-xs app-text-muted tw:flex tw:items-center tw:gap-1"
+                class="tw:text-xs tw:text-muted tw:flex tw:items-center tw:gap-1"
               >
                 <iconify icon="ph:circle-fill" class="tw:text-[5px] tw:shrink-0" />
                 {{ item.productName }}
@@ -587,7 +587,7 @@ const confirmSplit = async () => {
     :style="{ width: '32rem' }"
   >
     <div class="tw:space-y-4">
-      <p class="tw:text-sm app-text-muted">
+      <p class="tw:text-sm tw:text-muted">
         {{ t('orders.detail.split.instruction') }}
       </p>
 
@@ -605,12 +605,12 @@ const confirmSplit = async () => {
             <p class="tw:text-sm tw:font-medium tw:truncate">
               {{ item.productName }}
             </p>
-            <p class="tw:text-xs app-text-muted">
+            <p class="tw:text-xs tw:text-muted">
               {{ t('orders.detail.split.itemDetail', { n: item.quantity, price: formatVnd(item.unitPrice) }) }}
             </p>
           </div>
           <div class="tw:flex tw:items-center tw:gap-2 tw:shrink-0">
-            <span class="tw:text-xs app-text-muted tw:mr-1">{{ t('orders.detail.split.toNew') }}</span>
+            <span class="tw:text-xs tw:text-muted tw:mr-1">{{ t('orders.detail.split.toNew') }}</span>
             <prime-button
               severity="secondary"
               size="small"
@@ -646,11 +646,11 @@ const confirmSplit = async () => {
         class="tw:rounded-xl tw:border tw:border-blue-500/30 tw:bg-blue-500/5 tw:px-4 tw:py-3 tw:text-sm tw:space-y-1"
       >
         <div class="tw:flex tw:justify-between">
-          <span class="app-text-muted">{{ t('orders.detail.split.thisOrderKeeps') }}</span>
+          <span class="tw:text-muted">{{ t('orders.detail.split.thisOrderKeeps') }}</span>
           <span class="tw:font-medium">{{ t('orders.detail.split.itemCount', { n: splitPreview.keepQty }) }}</span>
         </div>
         <div class="tw:flex tw:justify-between">
-          <span class="app-text-muted">{{ t('orders.detail.split.newOrderGets') }}</span>
+          <span class="tw:text-muted">{{ t('orders.detail.split.newOrderGets') }}</span>
           <span class="tw:font-medium tw:text-blue-400"
             >{{ t('orders.detail.split.itemCount', { n: splitPreview.toNewQty }) }}</span
           >
@@ -708,13 +708,13 @@ const confirmSplit = async () => {
           :class="
             addItemSelected?.id === p.id
               ? 'tw:border-emerald-500/50 tw:bg-emerald-500/10'
-              : 'hover:tw:bg-white/5'
+              : 'tw:hover:bg-white/5'
           "
           @click="addItemSelected = p"
         >
           <div>
             <p class="tw:text-sm tw:font-medium">{{ p.name }}</p>
-            <p class="tw:text-xs app-text-muted">{{ formatVnd(p.price) }}</p>
+            <p class="tw:text-xs tw:text-muted">{{ formatVnd(p.price) }}</p>
           </div>
           <iconify
             v-if="addItemSelected?.id === p.id"
@@ -724,14 +724,14 @@ const confirmSplit = async () => {
         </div>
         <p
           v-if="!addItemFiltered.length"
-          class="tw:text-sm app-text-muted tw:text-center tw:py-4"
+          class="tw:text-sm tw:text-muted tw:text-center tw:py-4"
         >
           {{ t('orders.detail.addItem.noProducts') }}
         </p>
       </div>
 
       <div v-if="addItemSelected" class="tw:flex tw:items-center tw:gap-3">
-        <label class="tw:text-xs app-text-muted tw:shrink-0">{{ t('orders.detail.addItem.quantity') }}</label>
+        <label class="tw:text-xs tw:text-muted tw:shrink-0">{{ t('orders.detail.addItem.quantity') }}</label>
         <div class="tw:flex tw:items-center tw:gap-2">
           <prime-button
             severity="secondary" size="small" outlined
@@ -795,7 +795,7 @@ const confirmSplit = async () => {
             <prime-tag v-if="order.isManual" value="Thủ công" severity="secondary" />
           </template>
         </h1>
-        <p v-if="order" class="tw:mt-2 tw:text-sm app-text-muted">
+        <p v-if="order" class="tw:mt-2 tw:text-sm tw:text-muted">
           {{ formatDate(order.orderDate) }}
         </p>
         <prime-skeleton v-else width="14rem" height="1rem" class="tw:mt-2" />
@@ -806,7 +806,7 @@ const confirmSplit = async () => {
           severity="secondary"
           outlined
           size="small"
-          @click="router.push({ name: 'ordersEditManual', params: { id: orderId } })"
+          @click="router.push({ name: 'ordersEditManual', params: { id: orderId.value } })"
         >
           <iconify icon="ph:pencil-line-bold" />
           <span>Sửa thủ công</span>
@@ -871,7 +871,7 @@ const confirmSplit = async () => {
               <p class="tw:text-sm tw:font-semibold tw:mb-4">{{ t('orders.detail.info.title') }}</p>
               <div class="tw:space-y-3">
                 <div class="tw:flex tw:justify-between tw:text-sm tw:items-center">
-                  <span class="app-text-muted">{{ t('orders.detail.info.orderNumber') }}</span>
+                  <span class="tw:text-muted">{{ t('orders.detail.info.orderNumber') }}</span>
                   <div class="tw:flex tw:items-center tw:gap-1">
                     <span class="tw:font-mono tw:font-semibold">{{ order.orderNumber }}</span>
                     <prime-button
@@ -886,7 +886,7 @@ const confirmSplit = async () => {
                   </div>
                 </div>
                 <div class="tw:flex tw:justify-between tw:text-sm tw:items-center">
-                  <span class="app-text-muted">{{ t('orders.detail.info.date') }}</span>
+                  <span class="tw:text-muted">{{ t('orders.detail.info.date') }}</span>
                   <div class="tw:flex tw:items-center tw:gap-1">
                     <span class="tw:font-medium">{{ formatDate(order.orderDate) }}</span>
                     <prime-button
@@ -922,45 +922,45 @@ const confirmSplit = async () => {
                   </div>
                 </prime-popover>
                 <div class="tw:flex tw:justify-between tw:text-sm">
-                  <span class="app-text-muted">{{ t('orders.detail.info.status') }}</span>
+                  <span class="tw:text-muted">{{ t('orders.detail.info.status') }}</span>
                   <prime-tag
                     :value="statusTag(order.status).label"
                     :severity="statusTag(order.status).severity"
                   />
                 </div>
                 <div class="tw:flex tw:justify-between tw:text-sm tw:items-center">
-                  <span class="app-text-muted">{{ t('orders.detail.info.table') }}</span>
+                  <span class="tw:text-muted">{{ t('orders.detail.info.table') }}</span>
                   <span v-if="order.tableCode" class="tw:font-semibold tw:font-mono">
                     {{ order.tableCode }}
                   </span>
-                  <span v-else class="app-text-muted tw:italic tw:text-xs">—</span>
+                  <span v-else class="tw:text-muted tw:italic tw:text-xs">—</span>
                 </div>
                 <div
                   class="tw:flex tw:justify-between tw:text-sm tw:items-center"
                 >
-                  <span class="app-text-muted">{{ t('orders.detail.info.session') }}</span>
+                  <span class="tw:text-muted">{{ t('orders.detail.info.session') }}</span>
                   <span
-                    class="tw:font-mono tw:text-xs app-text-muted tw:max-w-28 tw:truncate"
+                    class="tw:font-mono tw:text-xs tw:text-muted tw:max-w-28 tw:truncate"
                     :title="String(order.sessionId)"
                     >{{ String(order.sessionId).slice(0, 8) }}…</span
                   >
                 </div>
                 <div v-if="order.guestCount" class="tw:flex tw:justify-between tw:text-sm tw:items-center">
-                  <span class="app-text-muted tw:flex tw:items-center tw:gap-1">
+                  <span class="tw:text-muted tw:flex tw:items-center tw:gap-1">
                     <iconify icon="ph:users" class="tw:text-sm" />
                     {{ t('orders.detail.info.guestCount') }}
                   </span>
                   <span class="tw:font-semibold">{{ order.guestCount }}</span>
                 </div>
                 <div v-if="order.completedAt" class="tw:flex tw:justify-between tw:text-sm tw:items-center">
-                  <span class="app-text-muted tw:flex tw:items-center tw:gap-1">
+                  <span class="tw:text-muted tw:flex tw:items-center tw:gap-1">
                     <iconify icon="ph:check-circle" class="tw:text-sm tw:text-green-500" />
                     {{ t('orders.detail.info.completedAt') }}
                   </span>
                   <span class="tw:text-xs tw:font-mono">{{ formatDate(order.completedAt) }}</span>
                 </div>
                 <div v-if="order.paidAt" class="tw:flex tw:justify-between tw:text-sm tw:items-center">
-                  <span class="app-text-muted tw:flex tw:items-center tw:gap-1">
+                  <span class="tw:text-muted tw:flex tw:items-center tw:gap-1">
                     <iconify icon="ph:currency-circle-dollar" class="tw:text-sm tw:text-blue-400" />
                     {{ t('orders.detail.info.paidAt') }}
                   </span>
@@ -968,7 +968,7 @@ const confirmSplit = async () => {
                 </div>
                 <prime-divider />
                 <div v-if="order.totalDiscount > 0" class="tw:flex tw:justify-between tw:text-xs tw:mb-1">
-                  <span class="tw:flex tw:items-center tw:gap-1 app-text-muted">
+                  <span class="tw:flex tw:items-center tw:gap-1 tw:text-muted">
                     <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
                     {{ t('orders.detail.info.discount') }}
                   </span>
@@ -979,7 +979,7 @@ const confirmSplit = async () => {
                   <div class="tw:text-right">
                     <span
                       v-if="order.totalDiscount > 0"
-                      class="app-text-muted tw:line-through tw:text-xs tw:mr-1"
+                      class="tw:text-muted tw:line-through tw:text-xs tw:mr-1"
                     >{{ formatVnd(order.totalAmount) }}</span>
                     <span class="tw:font-semibold tw:text-base" :class="order.totalDiscount > 0 ? 'tw:text-emerald-400' : ''">
                       {{ formatVnd(order.finalAmount) }}
@@ -1104,7 +1104,7 @@ const confirmSplit = async () => {
               <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
                 <p class="tw:text-sm tw:font-semibold">
                   {{ t('orders.detail.items') }}
-                  <span class="app-text-muted tw:font-normal"
+                  <span class="tw:text-muted tw:font-normal"
                     >({{ order.items?.length }})</span
                   >
                 </p>
@@ -1115,7 +1115,7 @@ const confirmSplit = async () => {
                     severity="secondary"
                     outlined
                     size="small"
-                    @click="router.push({ name: 'ordersEdit', params: { id: orderId } })"
+                    @click="router.push({ name: 'ordersEdit', params: { id: orderId.value } })"
                   >
                     <iconify icon="ph:pencil-simple-bold" />
                     <span>{{ t('orders.detail.editOrder') }}</span>
@@ -1223,7 +1223,7 @@ const confirmSplit = async () => {
                       <span class="tw:font-semibold">{{
                         formatVnd(item.totalPrice)
                       }}</span>
-                      <span class="app-text-muted tw:text-xs tw:ml-1">
+                      <span class="tw:text-muted tw:text-xs tw:ml-1">
                         ({{ formatVnd(item.unitPrice) }} ea.)
                       </span>
                     </div>
@@ -1253,7 +1253,7 @@ const confirmSplit = async () => {
                   :key="promo.promotionId"
                   class="tw:flex tw:justify-between tw:items-center tw:text-xs"
                 >
-                  <span class="tw:flex tw:items-center tw:gap-1 app-text-muted">
+                  <span class="tw:flex tw:items-center tw:gap-1 tw:text-muted">
                     <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
                     {{ promo.promoCode }}
                   </span>
@@ -1266,7 +1266,7 @@ const confirmSplit = async () => {
                 <div class="tw:text-right">
                   <span
                     v-if="order.totalDiscount > 0"
-                    class="app-text-muted tw:line-through tw:text-xs tw:mr-1"
+                    class="tw:text-muted tw:line-through tw:text-xs tw:mr-1"
                   >{{ formatVnd(order.totalAmount) }}</span>
                   <span class="tw:font-semibold tw:text-base" :class="order.totalDiscount > 0 ? 'tw:text-emerald-400' : ''">
                     {{ formatVnd(order.finalAmount) }}
@@ -1296,7 +1296,7 @@ const confirmSplit = async () => {
               <template v-if="order.paymentStatus === PAYMENT_STATUS.PAID">
                 <div class="tw:space-y-3">
                   <div class="tw:flex tw:justify-between tw:text-sm">
-                    <span class="app-text-muted">{{ t('orders.pay.paymentMethod') }}</span>
+                    <span class="tw:text-muted">{{ t('orders.pay.paymentMethod') }}</span>
                     <span class="tw:font-medium">{{
                       t(`orders.paymentMethod.${order.paymentMethod}`, PAYMENT_METHOD_MAP[order.paymentMethod]?.label ?? order.paymentMethod)
                     }}</span>
@@ -1305,7 +1305,7 @@ const confirmSplit = async () => {
                     v-if="order.amountReceived != null"
                     class="tw:flex tw:justify-between tw:text-sm"
                   >
-                    <span class="app-text-muted">{{ t('orders.pay.amountReceived') }}</span>
+                    <span class="tw:text-muted">{{ t('orders.pay.amountReceived') }}</span>
                     <span class="tw:font-medium">{{
                       formatVnd(order.amountReceived)
                     }}</span>
@@ -1314,14 +1314,14 @@ const confirmSplit = async () => {
                     v-if="order.tipAmount"
                     class="tw:flex tw:justify-between tw:text-sm"
                   >
-                    <span class="app-text-muted">{{ t('orders.pay.tip') }}</span>
+                    <span class="tw:text-muted">{{ t('orders.pay.tip') }}</span>
                     <span class="tw:font-medium tw:text-emerald-400">{{
                       formatVnd(order.tipAmount)
                     }}</span>
                   </div>
                   <prime-divider />
                   <div v-if="order.totalDiscount > 0" class="tw:flex tw:justify-between tw:text-xs tw:mb-1">
-                    <span class="tw:flex tw:items-center tw:gap-1 app-text-muted">
+                    <span class="tw:flex tw:items-center tw:gap-1 tw:text-muted">
                       <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
                       {{ t('orders.detail.info.discount') }}
                     </span>
@@ -1347,7 +1347,7 @@ const confirmSplit = async () => {
                   <div class="tw:space-y-1.5">
                     <label
                       for="amountReceived"
-                      class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+                      class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted"
                     >
                       {{ t('orders.pay.amountReceived') }}
                     </label>
@@ -1365,7 +1365,7 @@ const confirmSplit = async () => {
                       v-if="payChange !== null && payChange < 0"
                       class="tw:flex tw:items-center tw:justify-between tw:text-sm"
                     >
-                      <span class="app-text-muted">{{ t('orders.pay.short') }}</span>
+                      <span class="tw:text-muted">{{ t('orders.pay.short') }}</span>
                       <span class="tw:text-red-400 tw:font-semibold">{{
                         formatVnd(Math.abs(payChange))
                       }}</span>
@@ -1374,14 +1374,14 @@ const confirmSplit = async () => {
                       <div
                         class="tw:flex tw:items-center tw:justify-between tw:text-sm"
                       >
-                        <span class="app-text-muted">{{ t('orders.pay.change') }}</span>
+                        <span class="tw:text-muted">{{ t('orders.pay.change') }}</span>
                         <span class="tw:font-semibold">{{
                           formatVnd(payChange)
                         }}</span>
                       </div>
                       <div class="tw:space-y-1">
                         <label
-                          class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+                          class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted"
                           >{{ t('orders.pay.tip') }}</label
                         >
                         <div class="tw:flex tw:gap-2">
@@ -1407,11 +1407,11 @@ const confirmSplit = async () => {
                       <div
                         class="tw:flex tw:items-center tw:justify-between tw:text-sm"
                       >
-                        <span class="app-text-muted">{{ t('orders.pay.returnToCustomer') }}</span>
+                        <span class="tw:text-muted">{{ t('orders.pay.returnToCustomer') }}</span>
                         <span
                           :class="
                             payReturn === 0
-                              ? 'app-text-muted'
+                              ? 'tw:text-muted'
                               : 'tw:text-emerald-400 tw:font-semibold'
                           "
                         >
@@ -1422,7 +1422,7 @@ const confirmSplit = async () => {
                   </div>
                   <div class="tw:space-y-1.5">
                     <label
-                      class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted"
+                      class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted"
                       >{{ t('orders.pay.paymentMethod') }}</label
                     >
                     <prime-select-button
@@ -1455,7 +1455,7 @@ const confirmSplit = async () => {
 
               <!-- Other statuses -->
               <template v-else>
-                <p class="tw:text-sm app-text-muted">
+                <p class="tw:text-sm tw:text-muted">
                   {{ paymentTag(order.paymentStatus, order.paymentMethod).label }}
                 </p>
               </template>
@@ -1469,7 +1469,7 @@ const confirmSplit = async () => {
     <prime-card v-else-if="!loading" :class="[appCard, 'tw:rounded-2xl']">
       <template #content>
         <div
-          class="tw:flex tw:flex-col tw:items-center tw:py-10 app-text-muted"
+          class="tw:flex tw:flex-col tw:items-center tw:py-10 tw:text-muted"
         >
           <iconify icon="ph:receipt-x-bold" class="tw:text-3xl tw:mb-2" />
           <p class="tw:text-sm">{{ t('orders.detail.orderNotFound') }}</p>
