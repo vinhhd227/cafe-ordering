@@ -13,6 +13,7 @@ import { SUGAR_LEVEL, SUGAR_LEVEL_OPTIONS } from "@/constants/sugarLevel";
 const router = useRouter();
 const toast = useToast();
 const { t } = useI18n();
+const notificationStore = useNotificationStore();
 
 // ── Data ─────────────────────────────────────────────────────────
 const tables = ref([]);
@@ -186,6 +187,7 @@ const submit = async () => {
   if (!canSave.value) return;
   errorMessage.value = "";
   saving.value = true;
+  notificationStore.creatingOrder = true;
   try {
     const res = await createManualOrder({
       tableId: selectedTableId.value,
@@ -215,6 +217,7 @@ const submit = async () => {
       t("orders.manual.errorFallback");
   } finally {
     saving.value = false;
+    notificationStore.creatingOrder = false;
   }
 };
 
