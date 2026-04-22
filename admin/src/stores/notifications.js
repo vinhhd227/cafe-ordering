@@ -4,6 +4,7 @@ import {
   getUnreadCount,
   markRead as markReadApi,
   markAllRead as markAllReadApi,
+  deleteNotification as deleteNotificationApi,
 } from '@/services/notification.service'
 
 export const useNotificationStore = defineStore('notifications', () => {
@@ -53,6 +54,21 @@ export const useNotificationStore = defineStore('notifications', () => {
     } catch { /* silent */ }
   }
 
+  async function deleteNotification(id) {
+    try {
+      await deleteNotificationApi(id)
+      const idx = items.value.findIndex(n => n.id === id)
+      if (idx !== -1) {
+        const n = items.value[idx]
+        items.value.splice(idx, 1)
+        totalCount.value = Math.max(0, totalCount.value - 1)
+        if (!n.isRead && unreadCount.value > 0) unreadCount.value--
+      }
+    } catch (err) {
+      console.error('[deleteNotification] API error:', err?.response?.status, err?.response?.data)
+    }
+  }
+
   // Gọi khi SSE báo có đơn mới — refetch để có notification mới nhất
   async function onNewOrder() {
     await fetchNotifications()
@@ -69,6 +85,7 @@ export const useNotificationStore = defineStore('notifications', () => {
     fetchUnreadCount,
     markRead,
     markAllRead,
+    deleteNotification,
     onNewOrder,
   }
 })
