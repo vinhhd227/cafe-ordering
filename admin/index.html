@@ -10,12 +10,122 @@
     <!-- iOS Home Screen -->
     <link rel="apple-touch-icon" href="/apple-touch-icon-v2.png" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <meta name="apple-mobile-web-app-title" content="Cafe Admin" />
     <!-- Theme color -->
     <meta name="theme-color" content="#10b981" />
+    <style>
+      #app-loading {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        background: #0b1119;
+        z-index: 9999;
+        transition:
+          opacity 0.3s ease,
+          visibility 0.3s ease;
+      }
+      #app-loading.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .app-loading-logo {
+        width: 48px;
+        height: 48px;
+        background: rgba(16, 185, 129, 0.15);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .app-loading-logo svg {
+        width: 28px;
+        height: 28px;
+        color: #10b981;
+      }
+      .app-loading-squares {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px;
+        width: 24px;
+        height: 24px;
+      }
+      .app-loading-squares span {
+        display: block;
+        background: #10b981;
+        border-radius: 3px;
+        animation: sq-pulse 0.6s ease-in-out infinite;
+        will-change: transform;
+      }
+      .app-loading-squares span:nth-child(1) { animation-delay: 0s; }
+      .app-loading-squares span:nth-child(2) { animation-delay: 0.15s; }
+      .app-loading-squares span:nth-child(3) { animation-delay: 0.45s; }
+      .app-loading-squares span:nth-child(4) { animation-delay: 0.3s; }
+      @keyframes sq-pulse {
+        0%, 100% { transform: scale(1);   opacity: 0.5; }
+        20%       { transform: scale(1.2); opacity: 1;   }
+      }
+      .app-loading-bar {
+        width: 120px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .app-loading-fill {
+        height: 100%;
+        width: 0%;
+        background: #10b981;
+        border-radius: 999px;
+        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .app-loading-pct {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.3);
+        letter-spacing: 0.05em;
+        min-width: 36px;
+        text-align: right;
+      }
+    </style>
   </head>
   <body>
+    <div id="app-loading" aria-hidden="true">
+      <div class="app-loading-logo">
+        <div class="app-loading-squares">
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+        "
+      >
+        <div class="app-loading-bar">
+          <div class="app-loading-fill" id="app-loading-fill"></div>
+        </div>
+        <span class="app-loading-pct" id="app-loading-pct">0%</span>
+      </div>
+    </div>
+    <script>
+      globalThis._setLoadPct = function (n) {
+        var fill = document.getElementById("app-loading-fill");
+        var pct = document.getElementById("app-loading-pct");
+        if (fill) fill.style.width = n + "%";
+        if (pct) pct.textContent = n + "%";
+      };
+      globalThis._setLoadPct(10);
+    </script>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
