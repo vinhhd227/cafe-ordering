@@ -42,7 +42,10 @@
       "yieldPlaceholder": "VD: 1200ml ≈ 40 cốc",
       "yieldHint": "Lượng nguyên liệu thu được hoặc số cốc pha được",
       "content": "Công thức / hướng dẫn",
-      "contentPlaceholder": "Nhập đầy đủ công thức, nguyên liệu và các bước thực hiện...",
+      "contentPlaceholder": "Nhập đầy đủ công thức, nguyên liệu và các bước thực hiện...\nHỗ trợ Markdown: **đậm**, *nghiêng*, ## tiêu đề, - danh sách",
+      "write": "Soạn thảo",
+      "preview": "Xem trước",
+      "previewEmpty": "Bắt đầu soạn thảo để xem trước...",
       "notes": "Ghi chú bảo quản",
       "notesPlaceholder": "VD: Bảo quản tủ mát, sử dụng trong 3 ngày..."
     },

@@ -140,7 +140,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
       <div>
         <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('nav.groups.operations') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('recipes.title') }}</h1>
-        <p class="tw:mt-2 tw:text-sm app-text-muted">{{ t('recipes.subtitle') }}</p>
+        <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('recipes.subtitle') }}</p>
       </div>
       <prime-button
         v-if="can('recipe.create')"
@@ -207,7 +207,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
             <p class="tw:text-sm tw:font-semibold">{{ t('recipes.filter.title') }}</p>
 
             <div class="tw:space-y-1.5">
-              <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('recipes.filter.type') }}</label>
+              <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t('recipes.filter.type') }}</label>
               <prime-select
                 v-model="typeFilter"
                 :options="typeOptions"
@@ -220,7 +220,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
             </div>
 
             <div class="tw:space-y-1.5">
-              <label class="tw:text-xs app-text-muted tw:uppercase tw:tracking-widest">{{ t('recipes.filter.category') }}</label>
+              <label class="tw:text-xs tw:text-muted tw:uppercase tw:tracking-widest">{{ t('recipes.filter.category') }}</label>
               <prime-select
                 v-model="categoryFilter"
                 :options="categoryOptions"
@@ -248,7 +248,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
             <prime-tag :value="typeTag(data.type).label" :severity="typeTag(data.type).severity"
               class="tw:text-[11px]! tw:px-1.5! tw:py-0.5! tw:shrink-0" />
           </div>
-          <p class="tw:text-xs app-text-muted">{{ categoryLabel(data.category) }}</p>
+          <p class="tw:text-xs tw:text-muted">{{ categoryLabel(data.category) }}</p>
           <p v-if="data.yield" class="tw:text-xs app-text-subtle tw:truncate">{{ data.yield }}</p>
           <div class="tw:border-t tw:border-slate-200 tw:dark:border-white/10 tw:pt-2">
             <prime-button severity="secondary" outlined size="small" fluid @click="openDrawer(data)">
@@ -272,11 +272,11 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
       </template>
 
       <template #col-category="{ data }">
-        <span class="tw:text-sm app-text-muted">{{ categoryLabel(data.category) }}</span>
+        <span class="tw:text-sm tw:text-muted">{{ categoryLabel(data.category) }}</span>
       </template>
 
       <template #col-yield="{ data }">
-        <span class="tw:text-sm app-text-muted tw:truncate tw:block tw:max-w-48">{{ data.yield ?? '—' }}</span>
+        <span class="tw:text-sm tw:text-muted tw:truncate tw:block tw:max-w-48">{{ data.yield ?? '—' }}</span>
       </template>
 
       <template #col-actions="{ data }">

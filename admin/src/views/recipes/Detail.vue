@@ -1,4 +1,6 @@
 <script setup>
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import { getRecipe, deleteRecipe, chatRecipe } from '@/services/recipe.service'
 
 const { t }   = useI18n()
@@ -13,6 +15,9 @@ const id = computed(() => parseInt(route.params.id))
 const loading      = ref(false)
 const errorMessage = ref('')
 const recipe       = ref(null)
+const recipeContentHtml = computed(() =>
+  recipe.value?.content ? DOMPurify.sanitize(marked.parse(recipe.value.content)) : ''
+)
 
 const load = async () => {
   loading.value = true
@@ -85,7 +90,7 @@ onMounted(load)
     <div class="tw:flex tw:flex-wrap tw:items-start tw:justify-between tw:gap-4">
       <div>
         <button
-          class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs app-text-muted tw:mb-3 tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0 tw:hover:text-primary-500 tw:transition-colors"
+          class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs tw:text-muted tw:mb-3 tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0 tw:hover:text-primary-500 tw:transition-colors"
           @click="router.push({ name: 'recipes' })"
         >
           <iconify icon="ph:arrow-left-bold" />
@@ -155,7 +160,7 @@ onMounted(load)
         <!-- Content -->
         <div :class="appCard" class="tw:rounded-2xl tw:p-5 tw:space-y-2">
           <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-subtle">{{ t('recipes.form.content') }}</p>
-          <pre class="tw:text-sm tw:leading-relaxed tw:whitespace-pre-wrap tw:font-sans tw:m-0">{{ recipe.content }}</pre>
+          <div class="tw:prose tw:prose-invert tw:prose-sm tw:max-w-none" v-html="recipeContentHtml" />
         </div>
 
         <!-- Notes -->
@@ -183,7 +188,7 @@ onMounted(load)
         <div ref="chatBody" class="tw:flex-1 tw:overflow-y-auto tw:flex tw:flex-col tw:gap-3 tw:pr-1">
           <div v-if="chatMessages.length === 0" class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:h-full tw:gap-3 tw:text-center">
             <iconify icon="ph:chat-circle-dots-bold" class="tw:text-3xl tw:text-slate-400" />
-            <p class="tw:text-sm app-text-muted">{{ t('recipes.detail.chat.placeholder') }}</p>
+            <p class="tw:text-sm tw:text-muted">{{ t('recipes.detail.chat.placeholder') }}</p>
           </div>
 
           <template v-for="(msg, i) in chatMessages" :key="i">

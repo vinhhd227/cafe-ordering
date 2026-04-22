@@ -1,4 +1,6 @@
 <script setup>
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import { getRecipe, createRecipe, updateRecipe } from '@/services/recipe.service'
 
 const { t }  = useI18n()
@@ -6,14 +8,7 @@ const router = useRouter()
 const route  = useRoute()
 const toast  = useToast()
 
-const isNew = computed(() => route.name === 'recipeNew')
-const id    = computed(() => route.params.id ? parseInt(route.params.id) : null)
-
-// ── Form ───────────────────────────────────────────────────────────
-const loading = ref(false)
-const saving  = ref(false)
-const errorMessage = ref('')
-
+// ── Form (declared early — toolbar functions reference form.content) ──
 const form = reactive({
   name:     '',
   type:     'Drink',
@@ -22,6 +17,134 @@ const form = reactive({
   yield:    '',
   notes:    '',
 })
+
+const contentPreview = computed(() =>
+  DOMPurify.sanitize(marked.parse(form.content || ''))
+)
+
+// ── Markdown toolbar ───────────────────────────────────────────────
+const getTextarea = () => document.getElementById('recipe-content')
+
+// ── Undo/Redo history stack ────────────────────────────────────────
+const undoStack = ref([])
+const redoStack = ref([])
+let _isUndoRedo       = false
+let _fromToolbar      = false
+let _typingTimer      = null
+let _snapBeforeTyping = null
+
+const pushSnapshot = () => {
+  undoStack.value.push(form.content)
+  if (undoStack.value.length > 200) undoStack.value.shift()
+  redoStack.value = []
+  _fromToolbar = true
+}
+
+watch(() => form.content, (_, oldVal) => {
+  if (_isUndoRedo) return
+  if (_fromToolbar) { _fromToolbar = false; return }
+  if (_typingTimer === null) _snapBeforeTyping = oldVal
+  clearTimeout(_typingTimer)
+  _typingTimer = setTimeout(() => {
+    _typingTimer = null
+    undoStack.value.push(_snapBeforeTyping)
+    if (undoStack.value.length > 200) undoStack.value.shift()
+    redoStack.value = []
+    _snapBeforeTyping = null
+  }, 500)
+})
+
+const undoContent = () => {
+  if (!undoStack.value.length) return
+  _isUndoRedo = true
+  redoStack.value.push(form.content)
+  form.content = undoStack.value.pop()
+  nextTick(() => { _isUndoRedo = false; getTextarea()?.focus() })
+}
+
+const redoContent = () => {
+  if (!redoStack.value.length) return
+  _isUndoRedo = true
+  undoStack.value.push(form.content)
+  form.content = redoStack.value.pop()
+  nextTick(() => { _isUndoRedo = false; getTextarea()?.focus() })
+}
+
+const insertWrap = (prefix, suffix, placeholder = 'text') => {
+  const el = getTextarea()
+  if (!el) return
+  pushSnapshot()
+  const start = el.selectionStart
+  const end   = el.selectionEnd
+  const sel   = form.content.slice(start, end) || placeholder
+  form.content = form.content.slice(0, start) + prefix + sel + suffix + form.content.slice(end)
+  nextTick(() => {
+    el.focus()
+    el.setSelectionRange(start + prefix.length, start + prefix.length + sel.length)
+  })
+}
+
+const insertLinePrefix = (prefix) => {
+  const el = getTextarea()
+  if (!el) return
+  pushSnapshot()
+  const start     = el.selectionStart
+  const lineStart = form.content.lastIndexOf('\n', start - 1) + 1
+  form.content    = form.content.slice(0, lineStart) + prefix + form.content.slice(lineStart)
+  nextTick(() => { el.focus(); el.setSelectionRange(start + prefix.length, start + prefix.length) })
+}
+
+const insertBlock = (text) => {
+  const el = getTextarea()
+  if (!el) return
+  pushSnapshot()
+  const pos = el.selectionStart
+  const pad = pos > 0 && form.content[pos - 1] !== '\n' ? '\n' : ''
+  form.content = form.content.slice(0, pos) + pad + text + form.content.slice(pos)
+  const newPos = pos + pad.length + text.length
+  nextTick(() => { el.focus(); el.setSelectionRange(newPos, newPos) })
+}
+
+const headingOptions = [
+  { label: 'Paragraph', value: '' },
+  { label: 'Heading 1', value: '# ' },
+  { label: 'Heading 2', value: '## ' },
+  { label: 'Heading 3', value: '### ' },
+  { label: 'Heading 4', value: '#### ' },
+]
+const selectedHeading = ref('')
+const applyHeading = (prefix) => {
+  if (!prefix) return
+  insertLinePrefix(prefix)
+  nextTick(() => { selectedHeading.value = '' })
+}
+
+const mdTools = [
+  { icon: 'ph:text-b-bold',            title: 'Bold',          action: () => insertWrap('**', '**') },
+  { icon: 'ph:text-italic-bold',        title: 'Italic',        action: () => insertWrap('*', '*') },
+  { icon: 'ph:text-strikethrough-bold', title: 'Strikethrough', action: () => insertWrap('~~', '~~') },
+  { type: 'sep' },
+  { icon: 'ph:list-bullets-bold',       title: 'Bullet list',   action: () => insertLinePrefix('- ') },
+  { icon: 'ph:list-numbers-bold',       title: 'Numbered list', action: () => insertLinePrefix('1. ') },
+  { icon: 'ph:list-checks-bold',        title: 'Checklist',     action: () => insertLinePrefix('- [ ] ') },
+  { type: 'sep' },
+  { icon: 'ph:quotes-bold',             title: 'Blockquote',    action: () => insertLinePrefix('> ') },
+  { icon: 'ph:code-block-bold',         title: 'Code block',    action: () => insertBlock('```\n\n```') },
+  { type: 'sep' },
+  { icon: 'ph:table-bold',              title: 'Table',         action: () => insertBlock('| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n| Cell | Cell | Cell |\n') },
+  { icon: 'ph:minus-bold',              title: 'Divider',       action: () => insertBlock('---\n') },
+  { type: 'sep' },
+  { icon: 'ph:link-bold',               title: 'Link',          action: () => insertWrap('[', '](url)', 'link text') },
+  { icon: 'ph:image-bold',              title: 'Image',         action: () => insertWrap('![', '](url)', 'alt text') },
+]
+
+const isNew = computed(() => route.name === 'recipeNew')
+const id    = computed(() => route.params.id ? parseInt(route.params.id) : null)
+
+// ── Form ───────────────────────────────────────────────────────────
+const loading = ref(false)
+const saving  = ref(false)
+const errorMessage = ref('')
 const originalForm = ref(null)
 const isDirty = computed(() => JSON.stringify(form) !== JSON.stringify(originalForm.value))
 
@@ -56,6 +179,13 @@ const load = async () => {
     errorMessage.value = t('recipes.error.loadDetailFailed')
   } finally {
     loading.value = false
+    nextTick(() => {
+      clearTimeout(_typingTimer)
+      _typingTimer = null
+      _snapBeforeTyping = null
+      undoStack.value = []
+      redoStack.value = []
+    })
   }
 }
 
@@ -103,6 +233,7 @@ const handleCancel = () => {
 }
 
 onMounted(load)
+onBeforeUnmount(() => clearTimeout(_typingTimer))
 </script>
 
 <template>
@@ -112,7 +243,7 @@ onMounted(load)
     <div class="tw:flex tw:flex-wrap tw:items-start tw:justify-between tw:gap-4">
       <div>
         <button
-          class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs app-text-muted tw:mb-3 tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0 tw:hover:text-primary-500 tw:transition-colors"
+          class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs tw:text-muted tw:mb-3 tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0 tw:hover:text-primary-500 tw:transition-colors"
           @click="handleCancel"
         >
           <iconify icon="ph:arrow-left-bold" />
@@ -158,11 +289,11 @@ onMounted(load)
     </div>
 
     <!-- Form -->
-    <div v-else :class="appCard" class="tw:rounded-2xl tw:p-6 tw:space-y-5 tw:max-w-3xl">
+    <div v-else :class="appCard" class="tw:rounded-2xl tw:p-6 tw:space-y-5">
 
       <!-- Name -->
       <div class="tw:space-y-1.5">
-        <label for="recipe-name" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label for="recipe-name" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('recipes.form.name') }}
         </label>
         <prime-input-text
@@ -178,7 +309,7 @@ onMounted(load)
       <!-- Type + Category -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-4">
         <div class="tw:space-y-1.5">
-          <label for="recipe-type" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label for="recipe-type" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('recipes.form.type') }}
           </label>
           <prime-select
@@ -191,7 +322,7 @@ onMounted(load)
           />
         </div>
         <div class="tw:space-y-1.5">
-          <label for="recipe-category" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+          <label for="recipe-category" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('recipes.form.category') }}
           </label>
           <prime-select
@@ -207,7 +338,7 @@ onMounted(load)
 
       <!-- Yield -->
       <div class="tw:space-y-1.5">
-        <label for="recipe-yield" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label for="recipe-yield" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('recipes.form.yield') }}
         </label>
         <prime-input-text
@@ -220,25 +351,68 @@ onMounted(load)
       </div>
 
       <!-- Content -->
-      <div class="tw:space-y-1.5">
-        <label for="recipe-content" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+      <div>
+        <label for="recipe-content" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('recipes.form.content') }}
         </label>
-        <prime-textarea
-          id="recipe-content"
-          v-model="form.content"
-          :placeholder="t('recipes.form.contentPlaceholder')"
-          class="app-input tw:w-full tw:font-mono tw:text-sm"
-          :rows="12"
-          auto-resize
-          :class="{ 'p-invalid': errors.content }"
-        />
+        <!-- Toolbar -->
+        <div class="tw:flex tw:items-center tw:gap-0.5 tw:flex-wrap tw:rounded-t-xl tw:border tw:border-b-0 tw:border-white/10 tw:bg-white/3 tw:px-2 tw:py-1.5">
+          <button type="button" v-tooltip.top="'Undo'" :disabled="!undoStack.length" class="tw:flex tw:items-center tw:justify-center tw:w-7 tw:h-7 tw:rounded tw:text-sm tw:transition-colors tw:text-muted tw:hover:text-white tw:hover:bg-white/10 tw:disabled:opacity-30 tw:disabled:cursor-not-allowed tw:disabled:pointer-events-none" @click="undoContent">
+            <iconify icon="ph:arrow-counter-clockwise-bold" />
+          </button>
+          <button type="button" v-tooltip.top="'Redo'" :disabled="!redoStack.length" class="tw:flex tw:items-center tw:justify-center tw:w-7 tw:h-7 tw:rounded tw:text-sm tw:transition-colors tw:text-muted tw:hover:text-white tw:hover:bg-white/10 tw:disabled:opacity-30 tw:disabled:cursor-not-allowed tw:disabled:pointer-events-none" @click="redoContent">
+            <iconify icon="ph:arrow-clockwise-bold" />
+          </button>
+          <div class="tw:w-px tw:h-4 tw:bg-white/10 tw:mx-1" />
+          <prime-select
+            v-model="selectedHeading"
+            :options="headingOptions"
+            option-label="label"
+            option-value="value"
+            placeholder="Paragraph"
+            class="tw:h-7 tw:text-xs tw:w-28"
+            :pt="{
+              root: { class: 'tw:h-7! tw:min-w-0! tw:border-white/10! tw:bg-transparent!' },
+              label: { class: 'tw:text-xs! tw:py-0! tw:px-2! tw:flex! tw:items-center! tw:leading-none!' },
+              dropdown: { class: 'tw:w-5! tw:px-0!' },
+            }"
+            @change="applyHeading(selectedHeading)"
+          />
+          <div class="tw:w-px tw:h-4 tw:bg-white/10 tw:mx-1" />
+          <template v-for="tool in mdTools" :key="tool.icon ?? tool.type">
+            <div v-if="tool.type === 'sep'" class="tw:w-px tw:h-4 tw:bg-white/10 tw:mx-1" />
+            <button
+              v-else
+              type="button"
+              v-tooltip.top="tool.title"
+              class="tw:flex tw:items-center tw:justify-center tw:w-7 tw:h-7 tw:rounded tw:text-sm tw:transition-colors tw:text-muted tw:hover:text-white tw:hover:bg-white/10"
+              @click="tool.action()"
+            >
+              <iconify :icon="tool.icon" />
+            </button>
+          </template>
+        </div>
+        <!-- Editor + Preview side by side -->
+        <div class="tw:grid tw:lg:grid-cols-2 tw:border tw:border-white/10 tw:rounded-b-xl tw:overflow-hidden">
+          <prime-textarea
+            id="recipe-content"
+            v-model="form.content"
+            :placeholder="t('recipes.form.contentPlaceholder')"
+            class="app-input tw:w-full tw:font-mono tw:text-sm tw:rounded-none! tw:border-0! tw:border-r! tw:border-white/10! tw:resize-none!"
+            :rows="16"
+            :class="{ 'p-invalid': errors.content }"
+          />
+          <div
+            class="tw:p-4 tw:prose tw:prose-invert tw:prose-sm tw:max-w-none tw:min-h-48 tw:overflow-y-auto tw:border-t tw:border-white/10 tw:lg:border-t-0"
+            v-html="contentPreview || `<span class='tw:opacity-30 tw:text-sm'>${t('recipes.form.previewEmpty')}</span>`"
+          />
+        </div>
         <p v-if="errors.content" class="tw:text-xs tw:text-red-400">{{ errors.content }}</p>
       </div>
 
       <!-- Notes -->
       <div class="tw:space-y-1.5">
-        <label for="recipe-notes" class="tw:text-xs tw:uppercase tw:tracking-widest app-text-muted">
+        <label for="recipe-notes" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
           {{ t('recipes.form.notes') }}
         </label>
         <prime-textarea

@@ -42,7 +42,10 @@
       "yieldPlaceholder": "E.g. 1200ml ≈ 40 cups",
       "yieldHint": "Amount produced or number of cups per batch",
       "content": "Recipe / instructions",
-      "contentPlaceholder": "Enter full recipe, ingredients and preparation steps...",
+      "contentPlaceholder": "Enter full recipe, ingredients and preparation steps...\nMarkdown supported: **bold**, *italic*, ## heading, - list",
+      "write": "Write",
+      "preview": "Preview",
+      "previewEmpty": "Start writing to see preview...",
       "notes": "Storage notes",
       "notesPlaceholder": "E.g. Refrigerate, use within 3 days..."
     },
