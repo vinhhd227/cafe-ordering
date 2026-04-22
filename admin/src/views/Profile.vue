@@ -1,18 +1,21 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "@/stores/auth";
 import { useThemeStore } from "@/stores/theme";
-import { updateUser } from "@/services/user.service";
+import { updateUser, uploadAvatar } from "@/services/user.service";
 import { changePassword } from "@/services/auth.service";
 
+const { t } = useI18n()
 const auth = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 
-const userName = computed(() => auth.user?.fullName || "Unknown");
+const userName    = computed(() => auth.user?.fullName || "Unknown");
+const avatarImage = computed(() => auth.user?.avatarUrl || null);
 const userInitials = computed(() =>
   (auth.user?.fullName ?? "")
     .split(" ")
@@ -65,6 +68,40 @@ const extractError = (err) =>
   err?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
   err?.response?.data?.message ||
   "Đã có lỗi xảy ra.";
+
+// ── Avatar upload ────────────────────────────────────────────────────
+const avatarFileInput = ref(null)
+const avatarUploading = ref(false)
+
+const triggerAvatarPicker = () => avatarFileInput.value?.click()
+
+const handleAvatarChange = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    toast.add({ severity: 'error', summary: 'Lỗi', detail: t('auth.avatarInvalidType'), life: 4000 })
+    event.target.value = ''
+    return
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    toast.add({ severity: 'error', summary: 'Lỗi', detail: t('auth.avatarFileTooLarge'), life: 4000 })
+    event.target.value = ''
+    return
+  }
+
+  avatarUploading.value = true
+  try {
+    await uploadAvatar(auth.user.id, file)
+    await auth.doRefreshToken()
+    toast.add({ severity: 'success', summary: 'Đã lưu', detail: t('auth.avatarSaved'), life: 3000 })
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'Lỗi', detail: extractError(err), life: 4000 })
+  } finally {
+    avatarUploading.value = false
+    event.target.value = ''
+  }
+}
 
 // ── Edit profile dialog ──────────────────────────────────────────────
 const showEditDialog = ref(false);
@@ -168,7 +205,7 @@ const savePassword = async () => {
         Profile
       </p>
       <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Account</h1>
-      <p class="tw:mt-2 tw:text-sm app-text-muted">
+      <p class="tw:mt-2 tw:text-sm tw:text-muted">
         Overview and settings for your staff account.
       </p>
     </div>
@@ -179,18 +216,49 @@ const savePassword = async () => {
         <prime-card class="app-card tw:rounded-2xl tw:border">
           <template #content>
             <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-6">
-              <prime-avatar
-                :label="userInitials"
-                shape="circle"
-                size="xlarge"
-                class="tw:bg-emerald-500/20 tw:text-emerald-200"
-              />
+              <!-- Avatar with upload overlay -->
+              <div class="tw:relative tw:shrink-0 tw:group tw:cursor-pointer" @click="triggerAvatarPicker">
+                <prime-avatar
+                  v-if="avatarImage"
+                  :image="avatarImage"
+                  shape="circle"
+                  size="xlarge"
+                />
+                <prime-avatar
+                  v-else
+                  :label="userInitials"
+                  shape="circle"
+                  size="xlarge"
+                  class="tw:bg-emerald-500/20 tw:text-emerald-200"
+                />
+                <!-- Upload overlay -->
+                <div
+                  class="tw:absolute tw:inset-0 tw:rounded-full tw:bg-black/50 tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-0.5 tw:opacity-0 tw:group-hover:opacity-100 tw:transition-opacity"
+                  :class="{ 'tw:opacity-100': avatarUploading }"
+                >
+                  <iconify
+                    :icon="avatarUploading ? 'ph:spinner-bold' : 'ph:camera-bold'"
+                    class="tw:text-white tw:text-lg"
+                    :class="{ 'tw:animate-spin': avatarUploading }"
+                  />
+                  <span v-if="!avatarUploading" class="tw:text-white tw:text-[10px] tw:font-medium tw:leading-none">
+                    {{ t('auth.changeAvatar') }}
+                  </span>
+                </div>
+                <input
+                  ref="avatarFileInput"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  class="tw:hidden"
+                  @change="handleAvatarChange"
+                />
+              </div>
               <div class="tw:space-y-2">
                 <div class="tw:flex tw:items-center tw:gap-3">
                   <h2 class="tw:text-xl tw:font-semibold">{{ userName }}</h2>
                   <prime-tag :value="userRole" severity="success" />
                 </div>
-                <p class="tw:text-sm app-text-muted">{{ userEmail }}</p>
+                <p class="tw:text-sm tw:text-muted">{{ userEmail }}</p>
               </div>
             </div>
 
@@ -202,21 +270,21 @@ const savePassword = async () => {
                   Shift
                 </p>
                 <p class="tw:mt-2 tw:text-lg tw:font-semibold">Morning</p>
-                <p class="tw:text-xs app-text-muted">Starts 7:00 AM</p>
+                <p class="tw:text-xs tw:text-muted">Starts 7:00 AM</p>
               </div>
               <div class="app-panel tw:rounded-xl tw:border tw:p-4">
                 <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] app-text-subtle">
                   Team
                 </p>
                 <p class="tw:mt-2 tw:text-lg tw:font-semibold">Front Counter</p>
-                <p class="tw:text-xs app-text-muted">Lead role</p>
+                <p class="tw:text-xs tw:text-muted">Lead role</p>
               </div>
               <div class="app-panel tw:rounded-xl tw:border tw:p-4">
                 <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] app-text-subtle">
                   Status
                 </p>
                 <p class="tw:mt-2 tw:text-lg tw:font-semibold">Active</p>
-                <p class="tw:text-xs app-text-muted">Last login today</p>
+                <p class="tw:text-xs tw:text-muted">Last login today</p>
               </div>
             </div>
 
@@ -245,7 +313,7 @@ const savePassword = async () => {
             <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-4">
               <div>
                 <p class="tw:text-base tw:font-semibold">Theme</p>
-                <p class="tw:text-sm app-text-muted">
+                <p class="tw:text-sm tw:text-muted">
                   Toggle dark mode for the admin panel.
                 </p>
               </div>
@@ -260,7 +328,7 @@ const savePassword = async () => {
             <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-4">
               <div>
                 <p class="tw:text-base tw:font-semibold">Notifications</p>
-                <p class="tw:text-sm app-text-muted">
+                <p class="tw:text-sm tw:text-muted">
                   Manage order and shift alerts.
                 </p>
               </div>
@@ -292,7 +360,7 @@ const savePassword = async () => {
 
         <div class="tw:flex tw:flex-col tw:gap-1">
           <label class="tw:text-sm tw:font-medium">
-            Email <span class="tw:text-xs app-text-muted">(optional)</span>
+            Email <span class="tw:text-xs tw:text-muted">(optional)</span>
           </label>
           <prime-input-text
             v-model="editForm.email"

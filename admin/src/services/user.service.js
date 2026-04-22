@@ -23,3 +23,11 @@ export const changeUserRole = (id, role) =>
 
 export const resetUserPassword = (id) =>
   api.post(`/admin/users/${id}/reset-password`, {})
+
+export const uploadAvatar = (id, file) => {
+  const form = new FormData()
+  form.append('file', file)
+  return api.post(`/admin/users/${id}/avatar`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}

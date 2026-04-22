@@ -36,6 +36,7 @@ const userFromToken = (token) => {
     id: p.sub ?? "",
     username: p.username ?? "",
     fullName: p.fullName ?? "",
+    avatarUrl: p.avatarUrl ?? null,
     roles: toArray(p[ROLE_CLAIM]),
     permissions: toArray(p.permission),
   };
