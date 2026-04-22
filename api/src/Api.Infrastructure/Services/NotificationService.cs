@@ -57,8 +57,10 @@ public class NotificationService(
             }
 
             // Lưu notification vào DB cho từng user
+            // pushBody chứa thông tin chi tiết hơn (item list, tổng tiền) → ưu tiên lưu
+            var storedBody = pushBody ?? body;
             var notifications = userIds
-                .Select(uid => Notification.Create(uid, type, title, body, url, referenceId))
+                .Select(uid => Notification.Create(uid, type, title, storedBody, url, referenceId))
                 .ToList();
             await notificationRepo.AddRangeAsync(notifications, ct);
 
