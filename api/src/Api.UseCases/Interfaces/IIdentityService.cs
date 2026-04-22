@@ -73,6 +73,11 @@ public interface IIdentityService
   Task<Result> UpdateUserAsync(Guid userId, string fullName, string? email);
 
   /// <summary>
+  /// Update a user's avatar URL.
+  /// </summary>
+  Task<Result<string>> UpdateAvatarAsync(Guid userId, string avatarUrl);
+
+  /// <summary>
   /// Re-activate a previously deactivated user account.
   /// </summary>
   Task<Result> ActivateUserAsync(Guid userId);

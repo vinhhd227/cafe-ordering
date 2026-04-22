@@ -104,7 +104,8 @@ public class IdentityService : IIdentityService
       roles: roles,
       permissions: permissions,
       staffId: user.StaffId,
-      customerId: user.CustomerId);
+      customerId: user.CustomerId,
+      avatarUrl: user.AvatarUrl);
 
     var refreshToken = await IssueRefreshTokenAsync(user.Id);
 
@@ -155,7 +156,8 @@ public class IdentityService : IIdentityService
       roles: roles,
       permissions: permissions,
       staffId: user.StaffId,
-      customerId: user.CustomerId);
+      customerId: user.CustomerId,
+      avatarUrl: user.AvatarUrl);
 
     var newRefreshToken = await IssueRefreshTokenAsync(user.Id);
 
@@ -332,6 +334,23 @@ public class IdentityService : IIdentityService
 
     _logger.LogInformation("User {UserId} profile updated", userId);
     return Result.Success();
+  }
+
+  public async Task<Result<string>> UpdateAvatarAsync(Guid userId, string avatarUrl)
+  {
+    var user = await _userManager.FindByIdAsync(userId.ToString());
+    if (user is null)
+      return Result<string>.NotFound();
+
+    user.AvatarUrl = avatarUrl;
+    user.UpdatedAt = DateTime.UtcNow;
+
+    var result = await _userManager.UpdateAsync(user);
+    if (!result.Succeeded)
+      return Result<string>.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
+
+    _logger.LogInformation("Avatar updated for user {UserId}", userId);
+    return Result<string>.Success(avatarUrl);
   }
 
   public async Task<Result> ActivateUserAsync(Guid userId)

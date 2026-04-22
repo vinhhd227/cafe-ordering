@@ -18,7 +18,8 @@ public interface IJwtService
     IList<string> roles,
     IList<string> permissions,
     Guid? staffId = null,
-    Guid? customerId = null);
+    Guid? customerId = null,
+    string? avatarUrl = null);
 
   /// <summary>
   /// Generate a cryptographically-random refresh token string (64-byte Base64).

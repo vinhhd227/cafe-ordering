@@ -14,6 +14,9 @@ public class ApplicationUser : IdentityUser<Guid>
   /// <summary>Full display name (required).</summary>
   public string FullName { get; set; } = string.Empty;
 
+  /// <summary>Avatar image URL (optional).</summary>
+  public string? AvatarUrl { get; set; }
+
   /// <summary>Links to Staff aggregate (if this user is a staff member).</summary>
   public Guid? StaffId { get; set; }
 

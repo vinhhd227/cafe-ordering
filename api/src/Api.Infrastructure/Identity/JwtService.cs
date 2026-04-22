@@ -37,7 +37,8 @@ public class JwtService : IJwtService
     IList<string> roles,
     IList<string> permissions,
     Guid? staffId = null,
-    Guid? customerId = null)
+    Guid? customerId = null,
+    string? avatarUrl = null)
   {
     var claims = new List<Claim>
     {
@@ -58,6 +59,9 @@ public class JwtService : IJwtService
 
     if (customerId.HasValue)
       claims.Add(new Claim("customerId", customerId.Value.ToString()));
+
+    if (!string.IsNullOrEmpty(avatarUrl))
+      claims.Add(new Claim("avatarUrl", avatarUrl));
 
     var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
     var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
