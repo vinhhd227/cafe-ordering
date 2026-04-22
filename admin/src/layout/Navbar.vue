@@ -1,18 +1,13 @@
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { computed, reactive, watch } from "vue";
+import { useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { useThemeStore } from "@/stores/theme";
 import { navGroups } from "@/layout/nav";
 import { useSidebar } from "@/composables/useSidebar";
 
 const { t } = useI18n()
-const { locale, locales, setLocale } = useLocale()
-
 const route = useRoute();
-const router = useRouter();
 const auth = useAuthStore();
-const themeStore = useThemeStore();
 const { isOpen, isCollapsed, close } = useSidebar();
 
 const canAccess = (item) => {
@@ -29,7 +24,6 @@ const visibleNavGroups = computed(() =>
     .map(group => ({ ...group, items: group.items.filter(canAccess) }))
     .filter(group => group.items.length > 0)
 )
-const profileMenu = ref();
 
 const isActive = (to) => route.name === to.name;
 
@@ -73,71 +67,6 @@ watch(route, () => {
   });
 }, { immediate: true });
 
-const fullName = computed(() => auth.user?.fullName || "Staff");
-
-const roleLabel = computed(() => {
-  if (Array.isArray(auth.user?.roles) && auth.user.roles.length > 0) {
-    return auth.user.roles[0];
-  }
-  return auth.user?.role || "Staff";
-});
-
-const roleTextColor = computed(() => {
-  const role = roleLabel.value.toLowerCase();
-  if (role === "admin") return "tw:text-emerald-400";
-  if (role === "manager") return "tw:text-sky-400";
-  return "tw:text-amber-400";
-});
-
-const roleDotColor = computed(() => {
-  const role = roleLabel.value.toLowerCase();
-  if (role === "admin") return "tw:bg-emerald-400";
-  if (role === "manager") return "tw:bg-sky-400";
-  return "tw:bg-amber-400";
-});
-
-const avatarLabel = computed(() => {
-  const parts = fullName.value.split(" ").filter(Boolean);
-  if (parts.length === 0) return "ST";
-  const initials = parts
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-  return initials || "ST";
-});
-
-const avatarImage = computed(() => {
-  return auth.user?.avatarUrl || auth.user?.avatar || null;
-});
-
-const profileItems = computed(() => [
-  {
-    label: t('auth.profile'),
-    command: () => router.push({ name: "profile", query: { tab: "overview" } }),
-  },
-  {
-    label: t('auth.settings'),
-    command: () => router.push({ name: "profile", query: { tab: "settings" } }),
-  },
-  { separator: true },
-  {
-    label: themeStore.isDark ? t('auth.switchToLight') : t('auth.switchToDark'),
-    command: () => themeStore.toggleTheme(),
-  },
-  {
-    label: t('auth.helpSupport'),
-    command: () => window.open("mailto:support@cafe.com", "_blank"),
-  },
-  { separator: true },
-  {
-    label: t('auth.logout'),
-    command: () => auth.logout(),
-  },
-]);
-
-const toggleProfileMenu = (event) => {
-  profileMenu.value?.toggle(event);
-};
 </script>
 
 <template>
@@ -151,7 +80,7 @@ const toggleProfileMenu = (event) => {
 
     <!-- Brand -->
     <div
-      class="tw:shrink-0 tw:flex tw:border-b tw:transition-all tw:duration-300 tw:h-[5.25rem]"
+      class="tw:shrink-0 tw:flex tw:border-b tw:transition-all tw:duration-300 tw:h-21"
       :class="isCollapsed ? 'tw:items-center tw:justify-center tw:px-2' : 'tw:flex-col tw:justify-center tw:px-6'"
       style="border-color: var(--app-border)"
     >
@@ -172,7 +101,7 @@ const toggleProfileMenu = (event) => {
       <div
         v-for="group in visibleNavGroups"
         :key="group.labelKey"
-        class="tw:mb-5 last:tw:mb-0"
+        class="tw:mb-5 tw:last:mb-0"
       >
         <!-- Section label -->
         <template v-if="!isCollapsed">
@@ -194,7 +123,7 @@ const toggleProfileMenu = (event) => {
                   isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
                   isParentActive(item)
                     ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
-                    : 'app-text-muted hover:tw:bg-white/5 hover:tw:text-white'
+                    : 'tw:text-muted tw:hover:bg-white/5 tw:hover:text-white'
                 ]"
                 :title="isCollapsed ? t(item.labelKey) : undefined"
                 @click="handleParentClick(item)"
@@ -217,7 +146,7 @@ const toggleProfileMenu = (event) => {
                   class="tw:flex tw:items-center tw:rounded-lg tw:py-2 tw:px-3 tw:text-sm tw:font-medium tw:transition-all tw:duration-150 tw:no-underline tw:gap-3"
                   :class="isActive(child.to)
                     ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
-                    : 'app-text-muted hover:tw:bg-white/5 hover:tw:text-white'"
+                    : 'tw:text-muted! tw:hover:bg-white/5 tw:hover:text-white'"
                   @click="close"
                 >
                   <iconify :icon="child.icon" class="tw:shrink-0 tw:text-sm" />
@@ -235,7 +164,7 @@ const toggleProfileMenu = (event) => {
                 isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
                 isActive(item.to)
                   ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
-                  : 'app-text-muted hover:tw:bg-white/5 hover:tw:text-white'
+                  : 'tw:text-muted tw:hover:bg-white/5 tw:hover:text-white'
               ]"
               :title="isCollapsed ? t(item.labelKey) : undefined"
               @click="close"
@@ -248,62 +177,6 @@ const toggleProfileMenu = (event) => {
       </div>
     </nav>
 
-    <!-- Language toggle -->
-    <div
-      v-if="!isCollapsed"
-      class="tw:shrink-0 tw:border-t tw:px-4 tw:py-2 tw:flex tw:gap-1"
-      style="border-color: var(--app-border)"
-    >
-      <button
-        v-for="l in locales"
-        :key="l.code"
-        type="button"
-        class="tw:flex-1 tw:rounded-lg tw:py-1 tw:text-xs tw:font-semibold tw:transition-all tw:duration-150"
-        :class="locale === l.code
-          ? 'tw:bg-emerald-500/15 tw:text-emerald-400'
-          : 'app-text-subtle hover:tw:bg-white/5 hover:tw:text-white'"
-        @click="setLocale(l.code)"
-      >
-        {{ l.label }}
-      </button>
-    </div>
-
-    <!-- User profile footer -->
-    <div class="tw:shrink-0 tw:border-t tw:p-3" style="border-color: var(--app-border)">
-      <button
-        type="button"
-        class="tw:flex tw:w-full tw:items-center tw:rounded-xl tw:py-2.5 tw:transition-all tw:duration-150 hover:tw:bg-white/5"
-        :class="isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3'"
-        :title="isCollapsed ? fullName : undefined"
-        @click="toggleProfileMenu"
-      >
-        <prime-avatar
-          v-if="avatarImage"
-          :image="avatarImage"
-          shape="circle"
-          size="normal"
-          class="tw:shrink-0"
-        />
-        <prime-avatar
-          v-else
-          :label="avatarLabel"
-          shape="circle"
-          size="normal"
-          class="tw:shrink-0 tw:bg-emerald-500/20 tw:text-emerald-300"
-        />
-        <template v-if="!isCollapsed">
-          <div class="tw:min-w-0 tw:flex-1 tw:text-left">
-            <p class="tw:truncate tw:text-sm tw:font-semibold">{{ fullName }}</p>
-            <p class="tw:flex tw:items-center tw:gap-1 tw:mt-0.5">
-              <span class="tw:inline-block tw:h-1.5 tw:w-1.5 tw:rounded-full tw:shrink-0" :class="roleDotColor" style="opacity: 0.85" />
-              <span class="tw:truncate tw:text-xs tw:font-medium tw:capitalize" :class="roleTextColor">{{ roleLabel }}</span>
-            </p>
-          </div>
-          <iconify icon="ph:dots-three-bold" class="tw:shrink-0 tw:text-base app-text-subtle" />
-        </template>
-      </button>
-      <prime-menu ref="profileMenu" :model="profileItems" popup />
-    </div>
 
   </aside>
 </template>

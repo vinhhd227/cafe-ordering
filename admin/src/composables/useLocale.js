@@ -2,8 +2,8 @@ export function useLocale() {
   const { locale } = useI18n()
 
   const locales = [
-    { code: 'en', label: 'EN' },
-    { code: 'vi', label: 'VI' },
+    { code: 'en', label: 'EN', name: 'English' },
+    { code: 'vi', label: 'VI', name: 'Tiếng Việt' },
   ]
 
   function setLocale(code) {

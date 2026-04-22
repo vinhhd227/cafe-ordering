@@ -4,6 +4,7 @@
     "greeting": "Good shift, team.",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
-    "export": "Export"
+    "export": "Export",
+    "language": "Language"
   }
 }

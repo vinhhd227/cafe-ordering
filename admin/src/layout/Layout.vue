@@ -1,9 +1,13 @@
 <script setup>
+import { watch } from 'vue'
+import { useRoute } from 'vue-router'
 import AdminNavbar from "@/layout/Navbar.vue";
 import AdminHeader from "@/layout/Header.vue";
 import { useSidebar } from "@/composables/useSidebar";
 
 const { isOpen, isCollapsed, close } = useSidebar();
+const route = useRoute();
+watch(() => route.path, () => close());
 </script>
 
 <template>
