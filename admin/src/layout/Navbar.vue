@@ -123,7 +123,7 @@ watch(route, () => {
                   isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
                   isParentActive(item)
                     ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
-                    : 'tw:text-muted tw:hover:bg-white/5 tw:hover:text-white'
+                    : 'tw:text-muted tw:hover:bg-black/5 tw:dark:hover:bg-white/5 tw:hover:text-gray-900 tw:dark:hover:text-white'
                 ]"
                 :title="isCollapsed ? t(item.labelKey) : undefined"
                 @click="handleParentClick(item)"
@@ -146,7 +146,7 @@ watch(route, () => {
                   class="tw:flex tw:items-center tw:rounded-lg tw:py-2 tw:px-3 tw:text-sm tw:font-medium tw:transition-all tw:duration-150 tw:no-underline tw:gap-3"
                   :class="isActive(child.to)
                     ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
-                    : 'tw:text-muted! tw:hover:bg-white/5 tw:hover:text-white'"
+                    : 'tw:text-muted! tw:hover:bg-black/5 tw:dark:hover:bg-white/5 tw:hover:text-gray-900 tw:dark:hover:text-white'"
                   @click="close"
                 >
                   <iconify :icon="child.icon" class="tw:shrink-0 tw:text-sm" />
@@ -164,7 +164,7 @@ watch(route, () => {
                 isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
                 isActive(item.to)
                   ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
-                  : 'tw:text-muted tw:hover:bg-white/5 tw:hover:text-white'
+                  : 'tw:text-muted tw:hover:bg-black/5 tw:dark:hover:bg-white/5 tw:hover:text-gray-900 tw:dark:hover:text-white'
               ]"
               :title="isCollapsed ? t(item.labelKey) : undefined"
               @click="close"
