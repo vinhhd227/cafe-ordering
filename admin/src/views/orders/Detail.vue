@@ -297,6 +297,9 @@ const removeItem = (item) => {
   });
 };
 
+// ── Print dialog ──────────────────────────────────────────────────
+const showPrintDialog = ref(false)
+
 // ── Add item dialog ────────────────────────────────────────────────
 const addItemDialog = ref(false);
 const addItemSearch = ref("");
@@ -454,6 +457,13 @@ const confirmSplit = async () => {
 <template>
   <prime-confirm-popup />
   <prime-confirm-dialog />
+
+  <PrintDrinkLabelsDialog
+    v-model:visible="showPrintDialog"
+    :order-id="orderId"
+    :order-number="order?.orderNumber ?? ''"
+    :items="order?.items ?? []"
+  />
 
   <!-- Split result toast with navigate link -->
   <prime-toast group="split-result" position="bottom-right">
@@ -801,6 +811,17 @@ const confirmSplit = async () => {
         <prime-skeleton v-else width="14rem" height="1rem" class="tw:mt-2" />
       </div>
       <div class="tw:flex tw:gap-2">
+        <prime-button
+          v-if="can('order.print') && order"
+          severity="secondary"
+          outlined
+          size="small"
+          :class="btnIcon"
+          v-tooltip.top="t('printers.print.title')"
+          @click="showPrintDialog = true"
+        >
+          <iconify icon="ph:printer-bold" />
+        </prime-button>
         <prime-button
           v-if="order?.isManual"
           severity="secondary"
