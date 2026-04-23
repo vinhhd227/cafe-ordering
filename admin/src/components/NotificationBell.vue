@@ -156,7 +156,7 @@ function collapse(id) {
     </prime-button>
 
     <!-- Overlay panel -->
-    <prime-popover ref="overlay">
+    <prime-popover ref="overlay" :pt="{ root: { class: 'tw:bg-white! tw:dark:bg-neutral-900/90! tw:border! tw:border-slate-200! tw:shadow-sm! tw:dark:border-white/15! tw:dark:shadow-xl! tw:dark:backdrop-blur-xl!' } }">
       <div class="tw:w-80">
         <!-- Header -->
         <div class="tw:flex tw:items-center tw:justify-between tw:mb-3">
