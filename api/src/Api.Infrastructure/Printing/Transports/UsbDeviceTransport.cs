@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using Api.Core.Aggregates.PrinterAggregate;
 using Api.Infrastructure.Printing.Abstractions;
-using ESCPOS_NET;
 
 namespace Api.Infrastructure.Printing.Transports;
 
@@ -12,15 +11,19 @@ public class UsbDeviceTransport(ILogger<UsbDeviceTransport> logger) : IPrinterTr
 
   public async Task SendAsync(byte[] data, string connectionParamsJson, CancellationToken ct = default)
   {
-    var p = Parse(connectionParamsJson);
+    var p    = Parse(connectionParamsJson);
     var path = p.DevicePath ?? throw new InvalidOperationException("DevicePath is required (e.g. /dev/usb/lp0 on Linux, \\\\.\\USB001 on Windows).");
     logger.LogInformation("Sending {Bytes} bytes to USB device '{Path}'", data.Length, path);
-    await SendViaFileStreamAsync(data, path, ct);
+
+    await using var fs = new FileStream(path, FileMode.Open, FileAccess.Write,
+      FileShare.ReadWrite, bufferSize: 4096, useAsync: true);
+    await fs.WriteAsync(data, ct);
+    await fs.FlushAsync(ct);
   }
 
   public async Task<bool> TestConnectionAsync(string connectionParamsJson, CancellationToken ct = default)
   {
-    var p = Parse(connectionParamsJson);
+    var p          = Parse(connectionParamsJson);
     var devicePath = p.DevicePath;
     if (string.IsNullOrWhiteSpace(devicePath)) return false;
 
@@ -36,15 +39,6 @@ public class UsbDeviceTransport(ILogger<UsbDeviceTransport> logger) : IPrinterTr
     }
 
     return File.Exists(devicePath);
-  }
-
-  private static Task SendViaFileStreamAsync(byte[] data, string path, CancellationToken ct)
-  {
-    return Task.Run(() =>
-    {
-      using var printer = new FilePrinter(filePath: path);
-      printer.Write(data);
-    }, ct);
   }
 
   private static UsbDeviceParams Parse(string json)

@@ -17,9 +17,10 @@ const ROLES = ['DRINK_LABEL', 'RECEIPT', 'KITCHEN']
 const ROLE_ICON = { DRINK_LABEL: 'ph:tag-bold', RECEIPT: 'ph:receipt-bold', KITCHEN: 'ph:cooking-pot-bold' }
 
 const FORMATTER_OPTIONS = [
-  { label: 'ESC/POS',   value: 'ESC_POS' },
-  { label: 'ZPL',       value: 'ZPL' },
-  { label: 'STAR PRNT', value: 'STAR_PRNT' },
+  { label: 'TSPL (TSC label)',  value: 'TSPL' },
+  { label: 'ESC/POS (receipt)', value: 'ESC_POS' },
+  { label: 'ZPL',               value: 'ZPL' },
+  { label: 'STAR PRNT',         value: 'STAR_PRNT' },
 ]
 const TRANSPORT_OPTIONS = computed(() => [
   { label: t('printers.transport.USB_DEVICE'), value: 'USB_DEVICE' },
@@ -79,7 +80,7 @@ onMounted(load)
 
 // ── Form helpers ───────────────────────────────────────────────────
 const emptyForm = () => ({
-  name: '', role: 'DRINK_LABEL', formatterType: 'ESC_POS',
+  name: '', role: 'DRINK_LABEL', formatterType: 'TSPL',
   transportType: 'USB_DEVICE', paperWidthMm: 58,
   devicePath: '/dev/usb/lp0', host: '', port: 9100, vendorId: '', productId: '',
 })

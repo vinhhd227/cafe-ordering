@@ -10,6 +10,7 @@ public static class PrintingServiceExtensions
   public static IServiceCollection AddPrinting(this IServiceCollection services)
   {
     services.AddScoped<IPrintFormatter, EscPosPrintFormatter>();
+    services.AddScoped<IPrintFormatter, TsplPrintFormatter>();
     services.AddScoped<IPrinterTransport, UsbDeviceTransport>();
     services.AddScoped<IPrintingService, PrintingService>();
     return services;
