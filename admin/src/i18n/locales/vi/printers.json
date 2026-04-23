@@ -1,0 +1,95 @@
+{
+  "printers": {
+    "groupLabel": "Cài đặt",
+    "title": "Máy in",
+    "subtitle": "Quản lý cấu hình máy in thermal cho tem đồ uống và bill.",
+    "addPrinter": "Thêm máy in",
+    "empty": "Chưa có máy in nào. Thêm máy in để bắt đầu in tem đồ uống.",
+    "role": {
+      "DRINK_LABEL": "Tem đồ uống",
+      "RECEIPT": "Bill / Hóa đơn",
+      "KITCHEN": "Phiếu bếp"
+    },
+    "transport": {
+      "USB_DEVICE": "USB (kết nối server)",
+      "TCP": "TCP / Ethernet",
+      "WEB_USB": "WebUSB (kết nối client)"
+    },
+    "badge": {
+      "default": "Mặc định",
+      "inactive": "Tắt"
+    },
+    "form": {
+      "name": "Tên máy in",
+      "namePlaceholder": "VD: Quầy Bar - ITP3300",
+      "role": "Loại máy",
+      "roleReadonly": "Không thể thay đổi loại sau khi tạo.",
+      "formatter": "Giao thức",
+      "paper": "Khổ giấy",
+      "transport": "Kết nối",
+      "devicePath": "Device path (Linux / Windows)",
+      "devicePathHint": "Linux: /dev/usb/lp0 — Windows: \\\\.\\USB001",
+      "host": "IP / Host",
+      "port": "Port",
+      "vendorId": "Vendor ID",
+      "productId": "Product ID"
+    },
+    "actions": {
+      "testTooltip": "Kiểm tra kết nối",
+      "editTooltip": "Chỉnh sửa",
+      "deleteTooltip": "Xóa",
+      "setDefault": "Đặt làm mặc định"
+    },
+    "toast": {
+      "created": "Đã thêm máy in",
+      "updated": "Đã cập nhật máy in",
+      "deleted": "Đã xóa máy in",
+      "defaultSet": "Đã đặt làm mặc định",
+      "testOk": "Kết nối thành công",
+      "testFailed": "Kết nối thất bại"
+    },
+    "error": {
+      "loadFailed": "Không tải được danh sách máy in",
+      "createFailed": "Thêm máy in thất bại",
+      "updateFailed": "Cập nhật máy in thất bại",
+      "deleteFailed": "Xóa máy in thất bại",
+      "setDefaultFailed": "Đặt mặc định thất bại",
+      "printFailed": "In thất bại"
+    },
+    "create": {
+      "title": "Thêm máy in",
+      "submit": "Thêm"
+    },
+    "edit": {
+      "title": "Chỉnh sửa máy in"
+    },
+    "print": {
+      "title": "In tem đồ uống",
+      "order": "Đơn hàng",
+      "selectItems": "Chọn món cần in",
+      "selectAll": "Chọn tất cả",
+      "deselectAll": "Bỏ chọn tất cả",
+      "noItemsSelected": "Vui lòng chọn ít nhất 1 món",
+      "printer": "Máy in",
+      "defaultPrinter": "Máy mặc định",
+      "copies": "Số bản",
+      "preview": "Xem trước",
+      "previewTable": "Bàn: —",
+      "previewNote": "Ghi chú",
+      "printBtn": "In tem",
+      "success": "Đã gửi lệnh in",
+      "takeaway": "Mang đi",
+      "ice": "Đá",
+      "sugar": "Đường",
+      "temp": {
+        "HOT": "Nóng",
+        "COLD": "Lạnh"
+      },
+      "level": {
+        "LESS": "Ít",
+        "NORMAL": "Vừa",
+        "MORE": "Nhiều"
+      }
+    }
+  }
+}

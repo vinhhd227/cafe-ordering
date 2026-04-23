@@ -26,18 +26,22 @@ public static class IdentitySeedData
       "promotion.create", "promotion.read", "promotion.update", "promotion.delete",
       "notification.config",
       "report.read",
-      "utility.read", "utility.create", "utility.update", "utility.delete"
+      "utility.read", "utility.create", "utility.update", "utility.delete",
+      "printer.read", "printer.create", "printer.update", "printer.delete",
+      "order.print"
     ],
     ["Staff"] =
     [
       "admin.access",
       "menu.read",
       "order.createManual", "order.read", "order.update",
+      "order.print",
       "product.read",
       "table.read", "table.update",
       "zone.read",
       "expense.read", "expense.create", "expense.update",
-      "utility.read", "utility.create", "utility.update", "utility.delete"
+      "utility.read", "utility.create", "utility.update", "utility.delete",
+      "printer.read"
     ],
     ["Customer"] =
     [

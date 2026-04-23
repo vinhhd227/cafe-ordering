@@ -89,6 +89,15 @@ public static class PermissionRegistry
       ["utility.create"]     = "Save WiFi profiles and other utility data",
       ["utility.update"]     = "Edit saved utility data",
       ["utility.delete"]     = "Delete saved utility data",
+
+      // Printers
+      ["printer.read"]       = "View printer configurations",
+      ["printer.create"]     = "Add new printer configurations",
+      ["printer.update"]     = "Edit printer configurations",
+      ["printer.delete"]     = "Delete printer configurations",
+
+      // Print actions
+      ["order.print"]        = "Print drink labels and receipts for orders",
     };
 
   /// <summary>Returns the description for a permission value, or null if unknown.</summary>

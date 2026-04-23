@@ -22,6 +22,7 @@
     "menuDesign": "Menu Design",
     "wifiQr": "WiFi QR Code",
     "paymentQr": "Payment QR",
+    "printers": "Printers",
     "notificationConfigs": "Notification Settings",
     "groups": {
       "overview": "Overview",

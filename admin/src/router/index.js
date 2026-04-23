@@ -260,6 +260,12 @@ const routes = [
         meta: { requiresAuth: true, requiredClaim: "utility.read", section: "nav.groups.utilities", pageTitle: "utilities.paymentQr.title" },
       },
       {
+        path: "settings/printers",
+        name: "printers",
+        component: () => import("@/views/printers/List.vue"),
+        meta: { requiresAuth: true, requiredClaim: "printer.read", section: "nav.groups.settings", pageTitle: "printers.title" },
+      },
+      {
         path: "settings/notification-configs",
         name: "notificationConfigs",
         component: () => import("@/views/settings/NotificationConfigs.vue"),

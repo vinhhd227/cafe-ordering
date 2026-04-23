@@ -1,0 +1,95 @@
+{
+  "printers": {
+    "groupLabel": "Settings",
+    "title": "Printers",
+    "subtitle": "Manage thermal printer configurations for drink labels and receipts.",
+    "addPrinter": "Add Printer",
+    "empty": "No printers configured. Add a printer to start printing drink labels.",
+    "role": {
+      "DRINK_LABEL": "Drink Label",
+      "RECEIPT": "Receipt",
+      "KITCHEN": "Kitchen Ticket"
+    },
+    "transport": {
+      "USB_DEVICE": "USB (server-connected)",
+      "TCP": "TCP / Ethernet",
+      "WEB_USB": "WebUSB (client-side)"
+    },
+    "badge": {
+      "default": "Default",
+      "inactive": "Inactive"
+    },
+    "form": {
+      "name": "Printer Name",
+      "namePlaceholder": "E.g. Bar Counter - ITP3300",
+      "role": "Role",
+      "roleReadonly": "Role cannot be changed after creation.",
+      "formatter": "Format",
+      "paper": "Paper Width",
+      "transport": "Connection",
+      "devicePath": "Device Path (Linux / Windows)",
+      "devicePathHint": "Linux: /dev/usb/lp0 — Windows: \\\\.\\USB001",
+      "host": "IP / Host",
+      "port": "Port",
+      "vendorId": "Vendor ID",
+      "productId": "Product ID"
+    },
+    "actions": {
+      "testTooltip": "Test connection",
+      "editTooltip": "Edit",
+      "deleteTooltip": "Delete",
+      "setDefault": "Set as Default"
+    },
+    "toast": {
+      "created": "Printer added",
+      "updated": "Printer updated",
+      "deleted": "Printer deleted",
+      "defaultSet": "Set as default",
+      "testOk": "Connection successful",
+      "testFailed": "Connection failed"
+    },
+    "error": {
+      "loadFailed": "Failed to load printers",
+      "createFailed": "Failed to create printer",
+      "updateFailed": "Failed to update printer",
+      "deleteFailed": "Failed to delete printer",
+      "setDefaultFailed": "Failed to set default",
+      "printFailed": "Print failed"
+    },
+    "create": {
+      "title": "Add Printer",
+      "submit": "Add"
+    },
+    "edit": {
+      "title": "Edit Printer"
+    },
+    "print": {
+      "title": "Print Drink Labels",
+      "order": "Order",
+      "selectItems": "Select items to print",
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "noItemsSelected": "Please select at least 1 item",
+      "printer": "Printer",
+      "defaultPrinter": "Default printer",
+      "copies": "Copies",
+      "preview": "Preview",
+      "previewTable": "Table: —",
+      "previewNote": "Note",
+      "printBtn": "Print Labels",
+      "success": "Print command sent",
+      "takeaway": "Takeaway",
+      "ice": "Ice",
+      "sugar": "Sugar",
+      "temp": {
+        "HOT": "Hot",
+        "COLD": "Cold"
+      },
+      "level": {
+        "LESS": "Less",
+        "NORMAL": "Normal",
+        "MORE": "More"
+      }
+    }
+  }
+}

@@ -44,6 +44,10 @@ services:
       - Vapid__Subject=${VAPID_SUBJECT:-mailto:admin@cafe-ordering.com}
     volumes:
       - cafe-uploads:/app/uploads
+    devices:
+      - /dev/usb/lp0:/dev/usb/lp0   # USB thermal printer — adjust path if needed
+    group_add:
+      - lp                            # give container access to printer group
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8080/api/health > /dev/null || exit 1"]
       interval: 10s

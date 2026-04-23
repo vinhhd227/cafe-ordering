@@ -1,6 +1,7 @@
 ﻿using Api.Core.Aggregates.NotificationAggregate;
 using Api.Core.Interfaces;
 using Api.Infrastructure.Identity;
+using Api.Infrastructure.Printing;
 using Api.Infrastructure.Services;
 using Api.UseCases.Interfaces;
 using Api.UseCases.Orders.Interfaces;
@@ -99,6 +100,9 @@ public static class DependencyInjection
     // === Gemini AI ===
     services.Configure<GeminiOptions>(configuration.GetSection("Gemini"));
     services.AddHttpClient<IGeminiService, GeminiService>();
+
+    // === Printing ===
+    services.AddPrinting();
 
     logger.LogInformation("{Project} services registered", "Infrastructure");
 

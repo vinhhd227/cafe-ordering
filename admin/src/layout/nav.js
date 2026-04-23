@@ -138,6 +138,12 @@ export const navGroups = [
     labelKey: "nav.groups.settings",
     items: [
       {
+        labelKey: "nav.printers",
+        icon: "ph:printer-bold",
+        to: { name: "printers" },
+        requiredClaim: "printer.read",
+      },
+      {
         labelKey: "nav.notificationConfigs",
         icon: "ph:bell-ringing-bold",
         to: { name: "notificationConfigs" },
