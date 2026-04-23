@@ -70,6 +70,7 @@ Tài liệu tham khảo trong `docs/wiki/` — chỉ đọc khi task liên quan,
 | `docs/wiki/auth-flow.md` | Liên quan đến JWT, refresh token, permissions |
 | `docs/wiki/promotions.md` | Liên quan đến hệ thống khuyến mãi |
 | `docs/wiki/notifications.md` | Liên quan đến SSE, push notification |
+| `docs/wiki/printing.md` | Liên quan đến in tem đồ uống, bill, cấu hình máy in thermal |
 | `docs/wiki/api-conventions.md` | Cần ví dụ thêm về FastEndpoints/CQRS/Result |
 | `docs/wiki/frontend-patterns.md` | Cần ví dụ thêm về Vue patterns, Pinia, Axios |
 | `docs/wiki/devops.md` | Liên quan đến Docker, migrations, deploy |

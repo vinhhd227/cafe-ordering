@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "rules/i18n.md",
+                "file": "wiki/printing.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "i18n"
+              "title": "printing"
             }
           }
         ]
@@ -185,6 +185,9 @@
   },
   "active": "3e7f944193cc8d51",
   "lastOpenFiles": [
+    "wiki/api-conventions.md",
+    "wiki/printing.md",
+    "rules/i18n.md",
     "rules/git.md",
     "rules/dotnet.md",
     "wiki/log.md",
@@ -193,7 +196,6 @@
     "wiki/frontend-patterns.md",
     "WIKI_PIPELINE.md",
     "wiki/domain-model.md",
-    "wiki/api-conventions.md",
     "wiki/architecture.md",
     "wiki/promotions.md",
     "Untitled.canvas"

@@ -29,6 +29,7 @@ Hệ thống đặt món quán cafe. Monorepo gồm backend .NET 10 + 2 frontend
 | [[session-flow]] | GuestSession & Table lifecycle: QR scan, mở/đóng bàn |
 | [[promotions]] | Hệ thống khuyến mãi: auto-apply, manual code, tính discount |
 | [[notifications]] | Thông báo realtime: SSE, push notification, notification configs |
+| [[printing]] | In tem đồ uống & bill: thermal printer, ESC/POS, formatter/transport pattern |
 | [[frontend-patterns]] | Vue conventions: auto-import, Tailwind prefix, Axios service, Pinia |
 | [[api-conventions]] | Backend conventions: FastEndpoints, CQRS, Result pattern, Specification |
 | [[devops]] | Docker, environments, EF migrations, deploy scripts |
