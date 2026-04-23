@@ -1,6 +1,7 @@
 namespace Api.UseCases.Orders.DTOs;
 
 public record OrderItemDto(
+  int Id,
   int ProductId,
   string ProductName,
   decimal UnitPrice,

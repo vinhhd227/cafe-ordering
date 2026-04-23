@@ -113,6 +113,7 @@ public class UpdateManualOrderHandler(
       order.CompletedAt,
       order.PaidAt,
       order.Items.Select(i => new OrderItemDto(
+        i.Id,
         i.ProductId,
         i.ProductName,
         i.UnitPrice,

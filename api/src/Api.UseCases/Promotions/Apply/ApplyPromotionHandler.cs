@@ -133,7 +133,7 @@ public class ApplyPromotionHandler(
     order.CompletedAt,
     order.PaidAt,
     order.Items.Select(i => new OrderItemDto(
-      i.ProductId, i.ProductName, i.UnitPrice, i.Quantity, i.Discount, i.TotalPrice,
+      i.Id, i.ProductId, i.ProductName, i.UnitPrice, i.Quantity, i.Discount, i.TotalPrice,
       i.Temperature?.Name.ToUpperInvariant(),
       i.IceLevel?.Name.ToUpperInvariant(),
       i.SugarLevel?.Name.ToUpperInvariant(),

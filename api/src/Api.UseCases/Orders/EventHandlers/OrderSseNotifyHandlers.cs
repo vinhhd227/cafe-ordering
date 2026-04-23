@@ -53,6 +53,7 @@ file static class OrderDtoMapper
       order.CompletedAt,
       order.PaidAt,
       order.Items.Select(i => new OrderItemDto(
+        i.Id,
         i.ProductId,
         i.ProductName,
         i.UnitPrice,

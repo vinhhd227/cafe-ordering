@@ -118,6 +118,7 @@ public class ListOrdersHandler(
         o.CompletedAt,
         o.PaidAt,
         o.Items.Select(i => new OrderItemDto(
+          i.Id,
           i.ProductId,
           i.ProductName,
           i.UnitPrice,
