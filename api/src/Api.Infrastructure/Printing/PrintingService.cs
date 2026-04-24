@@ -89,7 +89,12 @@ public class PrintingService(
     string?                    cafeName,
     string?                    cafeAddress,
     string?                    cafePhone,
-    string?                    qrUrl,
+    string?                    qrRaw,
+    string?                    bankAccountName,
+    string?                    bankAccountNumber,
+    string?                    bankBranch,
+    string?                    wifiName,
+    string?                    wifiPassword,
     CancellationToken          ct = default)
   {
     var formatter = formatters.FirstOrDefault(f => f.Supports(config.FormatterType));
@@ -101,7 +106,7 @@ public class PrintingService(
       return new PrintLabelsResultDto(false, false, null, $"No transport for {config.TransportType.Name}.");
 
     var receiptItems = items.Select(i => new ReceiptItem(i.ProductName, i.Quantity, i.UnitPrice, i.TotalPrice)).ToList();
-    var data = new ReceiptData(orderNumber, tableCode, receiptItems, subtotal, discount, total, paymentMethod, DateTime.Now, cafeName, cafeAddress, cafePhone, qrUrl);
+    var data = new ReceiptData(orderNumber, tableCode, receiptItems, subtotal, discount, total, paymentMethod, DateTime.Now, cafeName, cafeAddress, cafePhone, qrRaw, bankAccountName, bankAccountNumber, bankBranch, wifiName, wifiPassword);
 
     byte[] bytes;
     try

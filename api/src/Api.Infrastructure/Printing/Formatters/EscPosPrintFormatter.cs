@@ -2,7 +2,6 @@ using Api.Core.Aggregates.PrinterAggregate;
 using Api.Infrastructure.Printing.Abstractions;
 using ESCPOS_NET.Emitters;
 using ESCPOS_NET.Utilities;
-using QRCoder;
 
 namespace Api.Infrastructure.Printing.Formatters;
 
@@ -136,26 +135,39 @@ public class EscPosPrintFormatter : IPrintFormatter
     parts.Add(E.PrintLine(PadBetween("THANH TOAN:", FormatVnd(data.Total), charWidth)));
     parts.Add(E.SetStyles(PrintStyle.None));
 
-    // Payment method
-    if (!string.IsNullOrWhiteSpace(data.PaymentMethod))
-    {
-      string method = data.PaymentMethod switch
-      {
-        "CASH"          => "Tien mat",
-        "BANK_TRANSFER" => "Chuyen khoan",
-        _               => data.PaymentMethod
-      };
-      parts.Add(E.PrintLine(PadBetween("Phuong thuc:", method, charWidth)));
-    }
-
     parts.Add(E.PrintLine(sep2));
 
-    // QR code (optional)
-    if (!string.IsNullOrWhiteSpace(data.QrUrl))
+    // QR + bank info (optional, all centered)
+    bool hasQr   = !string.IsNullOrWhiteSpace(data.QrRaw);
+    bool hasBank = !string.IsNullOrWhiteSpace(data.BankAccountNumber);
+    if (hasQr || hasBank)
     {
       parts.Add(E.CenterAlign());
-      parts.Add(RenderQr(data.QrUrl, moduleSize: 4));
-      parts.Add(E.PrintLine(""));
+      if (hasQr)
+      {
+        parts.Add(NativeQr(data.QrRaw!, moduleSize: 6));
+        parts.Add(E.PrintLine(""));
+      }
+      if (hasBank)
+      {
+        if (!string.IsNullOrWhiteSpace(data.BankAccountName))
+          parts.Add(E.PrintLine(StripDiacritics(data.BankAccountName)));
+        parts.Add(E.PrintLine(data.BankAccountNumber!));
+        if (!string.IsNullOrWhiteSpace(data.BankBranch))
+          parts.Add(E.PrintLine(StripDiacritics(data.BankBranch)));
+      }
+      parts.Add(E.PrintLine(sep2));
+    }
+
+    // WiFi info (optional)
+    bool hasWifi = !string.IsNullOrWhiteSpace(data.WifiName);
+    if (hasWifi)
+    {
+      parts.Add(E.CenterAlign());
+      parts.Add(E.PrintLine($"Wifi: {data.WifiName}"));
+      if (!string.IsNullOrWhiteSpace(data.WifiPassword))
+        parts.Add(E.PrintLine($"Pass: {data.WifiPassword}"));
+      parts.Add(E.PrintLine(sep2));
     }
 
     // Footer
@@ -189,46 +201,28 @@ public class EscPosPrintFormatter : IPrintFormatter
     );
   }
 
-  /// Render QR code as ESC/POS raster bitmap (GS v 0).
-  /// moduleSize: pixels per QR module (3–5 looks good on 80mm).
-  private static byte[] RenderQr(string content, int moduleSize = 4)
+  /// Native ESC/POS QR code commands (GS ( k) — model 2.
+  /// moduleSize: 1–16, size 5–6 looks good on 80mm paper.
+  private static byte[] NativeQr(string content, int moduleSize = 6)
   {
-    using var qrGenerator = new QRCodeGenerator();
-    var qrData  = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.M);
-    var matrix  = qrData.ModuleMatrix; // List<BitArray>, each = one row
-    int modules = matrix.Count;
-    int px      = modules * moduleSize; // total pixels wide & tall
+    var data  = System.Text.Encoding.UTF8.GetBytes(content);
+    int pLen  = data.Length + 3; // store command payload length
+    byte pL   = (byte)(pLen & 0xFF);
+    byte pH   = (byte)(pLen >> 8);
 
-    int bytesPerRow = (px + 7) / 8;
-    var pixels      = new byte[bytesPerRow * px];
-
-    for (int row = 0; row < modules; row++)
-    {
-      for (int mr = 0; mr < moduleSize; mr++) // repeat each module row
-      {
-        int y = row * moduleSize + mr;
-        for (int col = 0; col < modules; col++)
-        {
-          if (!matrix[row][col]) continue; // white → skip (0 = white for ESC/POS)
-          for (int mc = 0; mc < moduleSize; mc++) // repeat each module col
-          {
-            int x    = col * moduleSize + mc;
-            int bit  = 7 - (x % 8);
-            pixels[y * bytesPerRow + x / 8] |= (byte)(1 << bit);
-          }
-        }
-      }
-    }
-
-    // GS v 0: 1D 76 30 mode xL xH yL yH [data]
-    var cmd = new byte[8 + pixels.Length];
-    cmd[0] = 0x1D; cmd[1] = 0x76; cmd[2] = 0x30; cmd[3] = 0x00; // GS v 0, normal
-    cmd[4] = (byte)(bytesPerRow & 0xFF);
-    cmd[5] = (byte)(bytesPerRow >> 8);
-    cmd[6] = (byte)(px & 0xFF);
-    cmd[7] = (byte)(px >> 8);
-    Buffer.BlockCopy(pixels, 0, cmd, 8, pixels.Length);
-    return cmd;
+    var cmd = new List<byte>();
+    // Select model 2
+    cmd.AddRange(new byte[] { 0x1D, 0x28, 0x6B, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00 });
+    // Set module size
+    cmd.AddRange(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, (byte)moduleSize });
+    // Error correction level M
+    cmd.AddRange(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x30 });
+    // Store data
+    cmd.AddRange(new byte[] { 0x1D, 0x28, 0x6B, pL, pH, 0x31, 0x50, 0x30 });
+    cmd.AddRange(data);
+    // Print
+    cmd.AddRange(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x51, 0x30 });
+    return cmd.ToArray();
   }
 
   // Raw feed + cut — compatible with Chinese printers that don't support GS V

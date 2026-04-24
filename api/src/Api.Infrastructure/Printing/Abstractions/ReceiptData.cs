@@ -12,7 +12,12 @@ public record ReceiptData(
   string?                     CafeName = null,
   string?                     CafeAddress = null,
   string?                     CafePhone = null,
-  string?                     QrUrl = null
+  string?                     QrRaw = null,
+  string?                     BankAccountName = null,
+  string?                     BankAccountNumber = null,
+  string?                     BankBranch = null,
+  string?                     WifiName = null,
+  string?                     WifiPassword = null
 );
 
 public record ReceiptItem(

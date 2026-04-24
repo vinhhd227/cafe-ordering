@@ -25,7 +25,12 @@ public interface IPrintingService
     string?                   cafeName,
     string?                   cafeAddress,
     string?                   cafePhone,
-    string?                   qrUrl,
+    string?                   qrRaw,
+    string?                   bankAccountName,
+    string?                   bankAccountNumber,
+    string?                   bankBranch,
+    string?                   wifiName,
+    string?                   wifiPassword,
     CancellationToken         ct = default);
 
   Task<bool> TestConnectionAsync(PrinterConfig config, CancellationToken ct = default);

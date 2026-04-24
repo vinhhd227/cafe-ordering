@@ -45,7 +45,12 @@ services:
       - CafeInfo__Name=${CAFE_NAME:-Cafe}
       - CafeInfo__Address=${CAFE_ADDRESS:-}
       - CafeInfo__Phone=${CAFE_PHONE:-}
-      - CafeInfo__QrUrl=${CAFE_QR_URL:-}
+      - CafeInfo__QrRaw=${CAFE_QR_RAW:-}
+      - CafeInfo__BankAccountName=${CAFE_BANK_ACCOUNT_NAME:-}
+      - CafeInfo__BankAccountNumber=${CAFE_BANK_ACCOUNT_NUMBER:-}
+      - CafeInfo__BankBranch=${CAFE_BANK_BRANCH:-}
+      - CafeInfo__WifiName=${CAFE_WIFI_NAME:-}
+      - CafeInfo__WifiPassword=${CAFE_WIFI_PASSWORD:-}
     volumes:
       - cafe-uploads:/app/uploads
     devices:

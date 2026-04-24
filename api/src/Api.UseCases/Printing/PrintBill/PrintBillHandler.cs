@@ -55,10 +55,15 @@ public class PrintBillHandler(
       .Select(i => new BillItemInfo(i.ProductName, i.Quantity, i.UnitPrice, i.TotalPrice))
       .ToList();
 
-    var cafeName    = configuration["CafeInfo:Name"];
-    var cafeAddress = configuration["CafeInfo:Address"];
-    var cafePhone   = configuration["CafeInfo:Phone"];
-    var qrUrl       = configuration["CafeInfo:QrUrl"];
+    var cafeName          = configuration["CafeInfo:Name"];
+    var cafeAddress       = configuration["CafeInfo:Address"];
+    var cafePhone         = configuration["CafeInfo:Phone"];
+    var qrRaw             = configuration["CafeInfo:QrRaw"];
+    var bankAccountName   = configuration["CafeInfo:BankAccountName"];
+    var bankAccountNumber = configuration["CafeInfo:BankAccountNumber"];
+    var bankBranch        = configuration["CafeInfo:BankBranch"];
+    var wifiName          = configuration["CafeInfo:WifiName"];
+    var wifiPassword      = configuration["CafeInfo:WifiPassword"];
 
     var result = await printingService.PrintBillAsync(
       printerConfig,
@@ -72,7 +77,12 @@ public class PrintBillHandler(
       cafeName,
       cafeAddress,
       cafePhone,
-      qrUrl,
+      qrRaw,
+      bankAccountName,
+      bankAccountNumber,
+      bankBranch,
+      wifiName,
+      wifiPassword,
       ct);
 
     return Result.Success(result);
