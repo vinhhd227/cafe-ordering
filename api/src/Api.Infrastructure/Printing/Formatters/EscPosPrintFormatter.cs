@@ -102,24 +102,45 @@ public class EscPosPrintFormatter : IPrintFormatter
     parts.Add(E.PrintLine($"Thoi gian: {data.PrintedAt:HH:mm dd/MM/yyyy}"));
     parts.Add(E.PrintLine(sep));
 
-    // Items
-    foreach (var item in data.Items)
+    // Items — tabular layout
     {
-      string name   = StripDiacritics(item.ProductName);
-      string qty    = $"x{item.Quantity}";
-      string price  = FormatVnd(item.TotalPrice);
+      bool showUnit = charWidth >= 44; // unit price column only on 80mm paper
+      const int idxW   = 2;
+      const int qtyW   = 3;
+      const int priceW = 10; // fits "1.500.000d"
+      int unitW  = showUnit ? priceW : 0;
+      int fixedW = idxW + 1 + qtyW + 1 + (showUnit ? unitW + 1 : 0) + priceW;
+      int nameW  = Math.Max(1, charWidth - fixedW);
 
-      // Name line with qty on left, price on right
-      int remaining = charWidth - qty.Length - 1 - price.Length;
-      string nameTrunc = Truncate(name, Math.Max(0, remaining));
-      string namePadded = nameTrunc.PadRight(remaining);
-      parts.Add(E.PrintLine($"{qty} {namePadded}{price}"));
+      // Header row
+      string hdrName  = "Ten mon".PadRight(nameW);
+      string hdrQty   = "SL".PadLeft(qtyW);
+      string hdrTotal = "T.tien".PadLeft(priceW);
+      string hdr = showUnit
+        ? $"{"#".PadLeft(idxW)} {hdrName}{hdrQty} {"Don gia".PadLeft(unitW)} {hdrTotal}"
+        : $"{"#".PadLeft(idxW)} {hdrName}{hdrQty} {hdrTotal}";
+      parts.Add(E.PrintLine(hdr));
+      parts.Add(E.PrintLine(sep));
 
-      // Unit price if qty > 1
-      if (item.Quantity > 1)
+      int idx = 1;
+      foreach (var item in data.Items)
       {
-        string unitLine = $"  ({FormatVnd(item.UnitPrice)} x {item.Quantity})";
-        parts.Add(E.PrintLine(unitLine));
+        string name  = Truncate(StripDiacritics(item.ProductName), nameW).PadRight(nameW);
+        string qty   = item.Quantity.ToString().PadLeft(qtyW);
+        string total = FormatVnd(item.TotalPrice).PadLeft(priceW);
+
+        if (showUnit)
+        {
+          string unit = FormatVnd(item.UnitPrice).PadLeft(unitW);
+          parts.Add(E.PrintLine($"{idx.ToString().PadLeft(idxW)} {name}{qty} {unit} {total}"));
+        }
+        else
+        {
+          parts.Add(E.PrintLine($"{idx.ToString().PadLeft(idxW)} {name}{qty} {total}"));
+          if (item.Quantity > 1)
+            parts.Add(E.PrintLine($"   {FormatVnd(item.UnitPrice)}/cai"));
+        }
+        idx++;
       }
     }
     parts.Add(E.PrintLine(sep));
