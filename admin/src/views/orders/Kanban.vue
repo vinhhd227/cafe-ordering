@@ -702,16 +702,16 @@ onUnmounted(() => {
 
     <!-- Kanban board -->
     <div
-      class="tw:flex tw:gap-4 tw:overflow-x-auto tw:pb-2"
+      class="tw:flex tw:gap-4 tw:overflow-x-auto tw:pb-2 tw:h-[calc(100vh-22rem)]"
     >
       <div
         v-for="col in STATUSES"
         :key="col.key"
-        class="tw:flex tw:flex-col tw:gap-3 tw:min-w-72 tw:flex-1"
+        class="tw:flex tw:flex-col tw:gap-3 tw:min-w-72 tw:flex-1 tw:min-h-0"
       >
         <!-- Column header -->
         <div
-          class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-4 tw:py-3"
+          class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-4 tw:py-3 tw:shrink-0"
           :class="col.bg"
         >
           <span
@@ -730,7 +730,7 @@ onUnmounted(() => {
 
         <!-- Cards -->
         <div
-          class="tw:flex tw:flex-col tw:gap-3 tw:min-h-80 tw:rounded-xl tw:transition-colors tw:p-3"
+          class="tw:flex tw:flex-col tw:gap-3 tw:flex-1 tw:overflow-y-auto tw:rounded-xl tw:transition-colors tw:p-3"
           :class="dragOverCol === col.key ? col.bg : ''"
           @dragover="handleDragOver($event, col.key)"
           @dragleave="handleDragleave"

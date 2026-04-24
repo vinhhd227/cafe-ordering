@@ -737,6 +737,7 @@ const exportItems = computed(() => [
           headerCell: { class: 'tw:bg-transparent!' },
           bodyRow: { class: 'tw:bg-transparent!' },
           footer: { class: 'tw:bg-transparent!' },
+          emptyMessage: { class: 'tw:bg-transparent!' },
         }"
       >
         <prime-column

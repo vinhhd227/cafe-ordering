@@ -210,10 +210,10 @@ const savePassword = async () => {
       </p>
     </div>
 
-    <prime-tab-view v-model:activeIndex="activeIndex">
+    <prime-tab-view v-model:activeIndex="activeIndex" :pt="{ root: { class: 'tw:bg-transparent!' }, tablist: { class: 'tw:bg-transparent!' }, panels: { class: 'tw:px-0! tw:py-4!' } }">
       <!-- ── Overview tab ───────────────────────────────────────────── -->
       <prime-tab-panel header="Overview">
-        <prime-card class="app-card tw:rounded-2xl tw:border">
+        <prime-card :class="[appCard, 'tw:rounded-2xl']">
           <template #content>
             <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-6">
               <!-- Avatar with upload overlay -->
@@ -222,23 +222,22 @@ const savePassword = async () => {
                   v-if="avatarImage"
                   :image="avatarImage"
                   shape="circle"
-                  size="xlarge"
+                  :pt="{ root: { class: 'tw:rounded-full! tw:overflow-hidden! tw:w-20! tw:h-20!' } }"
                 />
                 <prime-avatar
                   v-else
                   :label="userInitials"
                   shape="circle"
-                  size="xlarge"
-                  class="tw:bg-emerald-500/20 tw:text-emerald-200"
+                  :pt="{ root: { class: 'tw:rounded-full! tw:overflow-hidden! tw:w-20! tw:h-20! tw:text-2xl! tw:bg-emerald-500/20! tw:text-emerald-200!' } }"
                 />
                 <!-- Upload overlay -->
                 <div
                   class="tw:absolute tw:inset-0 tw:rounded-full tw:bg-black/50 tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-0.5 tw:opacity-0 tw:group-hover:opacity-100 tw:transition-opacity"
-                  :class="{ 'tw:opacity-100': avatarUploading }"
+                  :class="{ 'tw:opacity-100!': avatarUploading }"
                 >
                   <iconify
                     :icon="avatarUploading ? 'ph:spinner-bold' : 'ph:camera-bold'"
-                    class="tw:text-white tw:text-lg"
+                    class="tw:text-white tw:text-xl"
                     :class="{ 'tw:animate-spin': avatarUploading }"
                   />
                   <span v-if="!avatarUploading" class="tw:text-white tw:text-[10px] tw:font-medium tw:leading-none">
@@ -308,7 +307,7 @@ const savePassword = async () => {
 
       <!-- ── Settings tab ──────────────────────────────────────────── -->
       <prime-tab-panel header="Settings">
-        <prime-card class="app-card tw:rounded-2xl tw:border">
+        <prime-card :class="[appCard, 'tw:rounded-2xl']">
           <template #content>
             <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-4">
               <div>
@@ -469,3 +468,12 @@ const savePassword = async () => {
     </prime-dialog>
   </section>
 </template>
+
+<style scoped>
+:deep(.p-tabview-panels),
+:deep(.p-tabview-tablist-container),
+:deep(.p-tabview-tablist-scroll-container),
+:deep(.p-tabview-tablist) {
+  background: transparent;
+}
+</style>

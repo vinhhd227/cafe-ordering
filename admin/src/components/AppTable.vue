@@ -50,6 +50,7 @@ const props = defineProps({
   rowsPerPageOptions: { type: Array, default: () => [10, 20, 50] },
   columns: { type: Array, default: () => [] },
   emptyMessage: { type: String, default: null },
+  size: { type: String, default: null },
 });
 
 const emit = defineEmits([
@@ -207,6 +208,7 @@ watch(
         :lazy="true"
         :paginator="false"
         responsiveLayout="scroll"
+        :size="size ?? undefined"
       >
         <template #empty>
           <div class="tw:py-14 tw:flex tw:flex-col tw:items-center tw:gap-3 tw:text-muted">

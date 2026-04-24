@@ -128,6 +128,8 @@ const toMidnight = (d) => {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 };
 
+const shortOrderNum = (num) => num ? `ORD-${num.slice(-6)}` : num
+
 const formatVnd = (value) =>
   new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value ?? 0);
 
@@ -165,6 +167,7 @@ const saveCurrentState = () => {
     maxTotal: filters.maxTotal,
     dateFrom: filters.dateFrom?.toISOString?.() ?? filters.dateFrom,
     dateTo: filters.dateTo?.toISOString?.() ?? filters.dateTo,
+    colDefs: columns.value.map(c => ({ key: c.key ?? c.field, visible: c.visible })),
   });
 };
 
@@ -217,23 +220,34 @@ watch(
   () => { first.value = 0; loadOrders(); },
 );
 
+
 const onPage = (e) => {
   first.value = e.first;
   rows.value = e.rows;
   loadOrders();
 };
 
-const columns = computed(() => [
-  { field: 'orderNumber',   header: t('orders.list.col.orderNumber'), width: '9rem' },
-  { field: 'orderDate',     header: t('orders.list.col.date'),        width: '10rem' },
-  { field: 'status',        header: t('orders.list.col.status'),      width: '8rem' },
-  { field: 'paymentStatus', header: t('orders.list.col.payment'),     width: '10rem' },
-  { field: 'guestCount',    header: t('orders.list.col.guests'),      width: '6rem' },
-  { key: 'items',           header: t('orders.list.col.items'),       width: '14rem' },
-  { key: 'promos',          header: t('orders.list.col.discount'),    width: '11rem' },
-  { field: 'totalAmount',   header: t('orders.list.col.total'),       width: '9rem' },
+const buildColDefs = () => [
+  { field: 'orderNumber',   header: t('orders.list.col.orderNumber'), width: '9rem',  visible: true },
+  { field: 'orderDate',     header: t('orders.list.col.date'),        width: '10rem', visible: true },
+  { field: 'status',        header: t('orders.list.col.status'),      width: '8rem',  visible: true },
+  { field: 'paymentStatus', header: t('orders.list.col.payment'),     width: '10rem', visible: true },
+  { field: 'guestCount',    header: t('orders.list.col.guests'),      width: '6rem',  visible: true },
+  { key: 'items',           header: t('orders.list.col.items'),       width: '11rem', visible: true },
+  { key: 'promos',          header: t('orders.list.col.discount'),    width: '11rem', visible: true },
+  { field: 'totalAmount',   header: t('orders.list.col.total'),       width: '7rem',  visible: true },
   { key: 'actions',         header: t('orders.list.col.actions'),     width: '12rem', toggleable: false },
-])
+]
+const columns = ref(buildColDefs())
+if (_cached?.colDefs) {
+  const cachedMap = Object.fromEntries(_cached.colDefs.map(c => [c.key, c]))
+  columns.value = columns.value.map(col => {
+    if (col.toggleable === false) return col
+    const id = col.key ?? col.field
+    const c = cachedMap[id]
+    return c ? { ...col, visible: c.visible } : col
+  })
+}
 
 // ── Payment dialog ────────────────────────────────────────────────
 const payOrder = ref(null);
@@ -246,7 +260,18 @@ const onPaid = (order, { paymentMethod }) => {
 
 // ── Copy ──────────────────────────────────────────────────────────
 const copyOrderNumber = async (orderNumber) => {
-  await navigator.clipboard.writeText(orderNumber)
+  try {
+    await navigator.clipboard.writeText(orderNumber)
+  } catch {
+    const el = document.createElement('textarea')
+    el.value = orderNumber
+    el.style.position = 'fixed'
+    el.style.opacity = '0'
+    document.body.appendChild(el)
+    el.select()
+    document.execCommand('copy')
+    document.body.removeChild(el)
+  }
   toast.add({ severity: 'success', summary: t('orders.list.copyOrderNumberSuccess'), life: 2000 })
 }
 
@@ -410,6 +435,7 @@ const handleDeleteOrder = (order) => {
     <!-- Table -->
     <AppTable
       lazy
+      size="small"
       v-model:first="first"
       v-model:rows="rows"
       :value="orders"
@@ -417,6 +443,7 @@ const handleDeleteOrder = (order) => {
       :totalRecords="totalRecords"
       :rowsPerPageOptions="[10, 20, 50]"
       :columns="columns"
+      @update:columns="(cols) => saveCache({ ...restoreCache(), colDefs: cols.map(c => ({ key: c.key ?? c.field, visible: c.visible })) })"
       @page="onPage"
     >
       <template #toolbar-left>
@@ -482,7 +509,7 @@ const handleDeleteOrder = (order) => {
           <div class="tw:flex tw:items-start tw:justify-between tw:gap-2">
             <div>
               <div class="tw:flex tw:items-center tw:gap-1.5">
-                <span class="tw:font-mono tw:font-bold tw:text-sm">{{ data.orderNumber }}</span>
+                <span class="tw:font-mono tw:font-bold tw:text-sm" v-tooltip.top="data.orderNumber">{{ shortOrderNum(data.orderNumber) }}</span>
                 <prime-tag v-if="data.isManual" value="Thủ công" severity="secondary" class="tw:text-[10px]! tw:px-1.5! tw:py-0!" />
               </div>
               <p class="tw:text-[11px] tw:text-muted tw:mt-0.5">{{ formatDate(data.orderDate) }}</p>
@@ -558,7 +585,7 @@ const handleDeleteOrder = (order) => {
       <template #col-orderNumber="{ data }">
         <div class="tw:flex tw:flex-col tw:gap-0.5">
           <div class="tw:flex tw:items-center tw:gap-1">
-            <span class="tw:font-mono tw:text-sm tw:font-semibold">{{ data.orderNumber }}</span>
+            <span class="tw:font-mono tw:text-sm tw:font-semibold tw:whitespace-nowrap" v-tooltip.top="data.orderNumber">{{ shortOrderNum(data.orderNumber) }}</span>
             <prime-button
               :class="btnIcon"
               size="small"
