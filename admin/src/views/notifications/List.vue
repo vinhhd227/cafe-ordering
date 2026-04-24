@@ -3,6 +3,7 @@ const { t } = useI18n()
 const router = useRouter()
 const store = useNotificationStore()
 const toast = useToast()
+const confirm = useConfirm()
 
 // ── Table state ────────────────────────────────────────────────────
 const loading = ref(false)
@@ -42,6 +43,26 @@ async function openNotification(item) {
     if (local) { local.isRead = true; local.readAt = new Date().toISOString() }
   }
   if (item.url) router.push(item.url)
+}
+
+const readCount = computed(() => items.value.filter(n => n.isRead).length)
+
+async function handleDeleteRead() {
+  confirm.require({
+    message: t('notifications.list.deleteReadConfirm'),
+    header: t('notifications.list.deleteRead'),
+    icon: 'ph:trash-bold',
+    rejectProps: { severity: 'secondary', outlined: true },
+    acceptProps: { severity: 'danger' },
+    accept: async () => {
+      const { deleteReadNotifications } = await import('@/services/notification.service')
+      const res = await deleteReadNotifications()
+      const deleted = res.data ?? 0
+      items.value = items.value.filter(n => !n.isRead)
+      totalCount.value = Math.max(0, totalCount.value - deleted)
+      toast.add({ severity: 'success', summary: t('notifications.list.deleteReadDone', { n: deleted }), life: 3000 })
+    },
+  })
 }
 
 async function handleMarkAllRead() {
@@ -140,16 +161,28 @@ function typeIcon(type) {
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('notifications.list.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('notifications.list.subtitle') }}</p>
       </div>
-      <prime-button
-        v-if="store.unreadCount > 0"
-        severity="secondary"
-        outlined
-        size="small"
-        @click="handleMarkAllRead"
-      >
-        <iconify icon="ph:check-circle-bold" />
-        <span>{{ t('notifications.markAllRead') }}</span>
-      </prime-button>
+      <div class="tw:flex tw:gap-2">
+        <prime-button
+          v-if="readCount > 0"
+          severity="danger"
+          outlined
+          size="small"
+          @click="handleDeleteRead"
+        >
+          <iconify icon="ph:trash-bold" />
+          <span>{{ t('notifications.list.deleteRead') }}</span>
+        </prime-button>
+        <prime-button
+          v-if="store.unreadCount > 0"
+          severity="secondary"
+          outlined
+          size="small"
+          @click="handleMarkAllRead"
+        >
+          <iconify icon="ph:check-circle-bold" />
+          <span>{{ t('notifications.markAllRead') }}</span>
+        </prime-button>
+      </div>
     </div>
 
     <!-- Tabs header -->
@@ -260,6 +293,8 @@ function typeIcon(type) {
       </template>
 
     </template>
+
+    <prime-confirm-dialog />
 
     <!-- Shared notification context menu -->
     <prime-popover ref="menuRef">

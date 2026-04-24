@@ -34,7 +34,10 @@
       "emptyUnread": "No unread notifications",
       "markRead": "Mark as read",
       "delete": "Delete this notification",
-      "deleteDone": "Notification deleted"
+      "deleteDone": "Notification deleted",
+      "deleteRead": "Clear read",
+      "deleteReadDone": "{n} read notification deleted | {n} read notifications deleted",
+      "deleteReadConfirm": "Delete all read notifications?"
     }
   }
 }
