@@ -102,6 +102,10 @@ public class TsplPrintFormatter : IPrintFormatter
     return Encoding.ASCII.GetBytes(sb.ToString());
   }
 
+  // TSPL is for label printers — receipts are not supported
+  public byte[] FormatReceipt(ReceiptData data, PrinterConfig config) =>
+    throw new NotSupportedException("Receipt printing is not supported on TSPL label printers.");
+
   public byte[] FormatTestPage(PrinterConfig config)
   {
     int widthMm = config.PaperWidthMm;

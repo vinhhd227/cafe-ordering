@@ -6,5 +6,6 @@ public interface IPrintFormatter
 {
   bool Supports(PrintFormatterType type);
   byte[] FormatDrinkLabel(DrinkLabelData data, PrinterConfig config);
+  byte[] FormatReceipt(ReceiptData data, PrinterConfig config);
   byte[] FormatTestPage(PrinterConfig config);
 }

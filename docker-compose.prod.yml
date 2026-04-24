@@ -42,6 +42,10 @@ services:
       - Vapid__PublicKey=${VAPID_PUBLIC_KEY:?VAPID_PUBLIC_KEY is required}
       - Vapid__PrivateKey=${VAPID_PRIVATE_KEY:?VAPID_PRIVATE_KEY is required}
       - Vapid__Subject=${VAPID_SUBJECT:-mailto:admin@cafe-ordering.com}
+      - CafeInfo__Name=${CAFE_NAME:-Cafe}
+      - CafeInfo__Address=${CAFE_ADDRESS:-}
+      - CafeInfo__Phone=${CAFE_PHONE:-}
+      - CafeInfo__QrUrl=${CAFE_QR_URL:-}
     volumes:
       - cafe-uploads:/app/uploads
     devices:

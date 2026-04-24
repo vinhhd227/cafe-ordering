@@ -13,8 +13,30 @@ public interface IPrintingService
     int                        copiesPerItem,
     CancellationToken          ct = default);
 
+  Task<PrintLabelsResultDto> PrintBillAsync(
+    PrinterConfig             config,
+    string                    orderNumber,
+    string?                   tableCode,
+    IReadOnlyList<BillItemInfo> items,
+    decimal                   subtotal,
+    decimal                   discount,
+    decimal                   total,
+    string?                   paymentMethod,
+    string?                   cafeName,
+    string?                   cafeAddress,
+    string?                   cafePhone,
+    string?                   qrUrl,
+    CancellationToken         ct = default);
+
   Task<bool> TestConnectionAsync(PrinterConfig config, CancellationToken ct = default);
 }
+
+public record BillItemInfo(
+  string  ProductName,
+  int     Quantity,
+  decimal UnitPrice,
+  decimal TotalPrice
+);
 
 public record DrinkLabelItemInfo(
   int     ItemId,

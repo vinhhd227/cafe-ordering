@@ -77,6 +77,58 @@ public class PrintingService(
     return new PrintLabelsResultDto(true, false, null, null);
   }
 
+  public async Task<PrintLabelsResultDto> PrintBillAsync(
+    PrinterConfig              config,
+    string                     orderNumber,
+    string?                    tableCode,
+    IReadOnlyList<BillItemInfo> items,
+    decimal                    subtotal,
+    decimal                    discount,
+    decimal                    total,
+    string?                    paymentMethod,
+    string?                    cafeName,
+    string?                    cafeAddress,
+    string?                    cafePhone,
+    string?                    qrUrl,
+    CancellationToken          ct = default)
+  {
+    var formatter = formatters.FirstOrDefault(f => f.Supports(config.FormatterType));
+    if (formatter is null)
+      return new PrintLabelsResultDto(false, false, null, $"No formatter for {config.FormatterType.Name}.");
+
+    var transport = transports.FirstOrDefault(t => t.Supports(config.TransportType));
+    if (transport is null)
+      return new PrintLabelsResultDto(false, false, null, $"No transport for {config.TransportType.Name}.");
+
+    var receiptItems = items.Select(i => new ReceiptItem(i.ProductName, i.Quantity, i.UnitPrice, i.TotalPrice)).ToList();
+    var data = new ReceiptData(orderNumber, tableCode, receiptItems, subtotal, discount, total, paymentMethod, DateTime.Now, cafeName, cafeAddress, cafePhone, qrUrl);
+
+    byte[] bytes;
+    try
+    {
+      bytes = formatter.FormatReceipt(data, config);
+    }
+    catch (NotSupportedException ex)
+    {
+      return new PrintLabelsResultDto(false, false, null, ex.Message);
+    }
+
+    bool isWebUsb = config.TransportType == PrintTransportType.WebUsb;
+    if (isWebUsb)
+      return new PrintLabelsResultDto(false, true, Convert.ToBase64String(bytes), null);
+
+    try
+    {
+      await transport.SendAsync(bytes, config.ConnectionParams, ct);
+      return new PrintLabelsResultDto(true, false, null, null);
+    }
+    catch (Exception ex)
+    {
+      logger.LogError(ex, "Failed to send receipt to printer {PrinterId}", config.Id);
+      return new PrintLabelsResultDto(false, false, null, ex.Message);
+    }
+  }
+
   public async Task<bool> TestConnectionAsync(PrinterConfig config, CancellationToken ct = default)
   {
     var formatter = formatters.FirstOrDefault(f => f.Supports(config.FormatterType));

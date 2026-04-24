@@ -63,6 +63,10 @@
     "edit": {
       "title": "Edit Printer"
     },
+    "printBill": {
+      "title": "Print Bill",
+      "printBtn": "Print Bill"
+    },
     "print": {
       "title": "Print Drink Labels",
       "order": "Order",

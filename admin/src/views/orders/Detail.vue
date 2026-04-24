@@ -297,8 +297,9 @@ const removeItem = (item) => {
   });
 };
 
-// ── Print dialog ──────────────────────────────────────────────────
+// ── Print dialogs ─────────────────────────────────────────────────
 const showPrintDialog = ref(false)
+const showBillDialog  = ref(false)
 
 // ── Add item dialog ────────────────────────────────────────────────
 const addItemDialog = ref(false);
@@ -463,6 +464,12 @@ const confirmSplit = async () => {
     :order-id="orderId"
     :order-number="order?.orderNumber ?? ''"
     :items="order?.items ?? []"
+  />
+
+  <PrintBillDialog
+    v-model:visible="showBillDialog"
+    :order-id="orderId"
+    :order-number="order?.orderNumber ?? ''"
   />
 
   <!-- Split result toast with navigate link -->
@@ -821,6 +828,17 @@ const confirmSplit = async () => {
           @click="showPrintDialog = true"
         >
           <iconify icon="ph:printer-bold" />
+        </prime-button>
+        <prime-button
+          v-if="can('order.print') && order"
+          severity="secondary"
+          outlined
+          size="small"
+          :class="btnIcon"
+          v-tooltip.top="t('printers.printBill.title')"
+          @click="showBillDialog = true"
+        >
+          <iconify icon="ph:receipt-bold" />
         </prime-button>
         <prime-button
           v-if="order?.isManual"
