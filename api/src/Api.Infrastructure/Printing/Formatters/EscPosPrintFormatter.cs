@@ -29,10 +29,12 @@ public class EscPosPrintFormatter : IPrintFormatter
     parts.Add(E.PrintLine(PadBetween(left, right, charWidth)));
     parts.Add(E.PrintLine(sep));
 
-    // Product name — bold + double size
+    // Product name — bold + double size, wrapped if too long
     parts.Add(E.CenterAlign());
     parts.Add(E.SetStyles(PrintStyle.Bold | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth));
-    parts.Add(E.PrintLine(Truncate(StripDiacritics(data.ProductName), charWidth / 2)));
+    int nameMaxW = charWidth / 2;
+    foreach (var nameLine in WrapWords(StripDiacritics(data.ProductName), nameMaxW))
+      parts.Add(E.PrintLine(nameLine));
     parts.Add(E.SetStyles(PrintStyle.None));
 
     // Options
@@ -47,17 +49,10 @@ public class EscPosPrintFormatter : IPrintFormatter
     if (!string.IsNullOrWhiteSpace(data.Note))
       parts.Add(E.PrintLine($"Ghi chu: {StripDiacritics(data.Note)}"));
 
-    // Quantity > 1
-    if (data.Quantity > 1)
-      parts.Add(E.PrintLine($"So luong: x{data.Quantity}"));
-
-    // Takeaway
-    if (data.IsTakeaway)
-    {
-      parts.Add(E.SetStyles(PrintStyle.Bold));
-      parts.Add(E.PrintLine("** MANG DI **"));
-      parts.Add(E.SetStyles(PrintStyle.None));
-    }
+    // Price — right-aligned
+    parts.Add(E.RightAlign());
+    parts.Add(E.PrintLine(FormatVnd(data.UnitPrice)));
+    parts.Add(E.LeftAlign());
 
     parts.Add(E.PrintLine(sep));
 
@@ -278,6 +273,32 @@ public class EscPosPrintFormatter : IPrintFormatter
 
   private static string Truncate(string s, int max) =>
     s.Length > max ? s[..max] : s;
+
+  private static IEnumerable<string> WrapWords(string s, int max)
+  {
+    if (s.Length <= max) { yield return s; yield break; }
+    var words = s.Split(' ');
+    var line  = new System.Text.StringBuilder();
+    foreach (var word in words)
+    {
+      if (line.Length == 0)
+      {
+        line.Append(word.Length > max ? word[..max] : word);
+      }
+      else if (line.Length + 1 + word.Length <= max)
+      {
+        line.Append(' ');
+        line.Append(word);
+      }
+      else
+      {
+        yield return line.ToString();
+        line.Clear();
+        line.Append(word.Length > max ? word[..max] : word);
+      }
+    }
+    if (line.Length > 0) yield return line.ToString();
+  }
 
   // Strip Vietnamese diacritics → ASCII-safe for printers without Unicode support
   private static string StripDiacritics(string s)

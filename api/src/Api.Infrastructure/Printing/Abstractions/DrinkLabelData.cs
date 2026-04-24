@@ -5,6 +5,7 @@ public record DrinkLabelData(
   string?  TableCode,
   string   ProductName,
   int      Quantity,
+  decimal  UnitPrice,
   string?  Temperature,
   string?  IceLevel,
   string?  SugarLevel,

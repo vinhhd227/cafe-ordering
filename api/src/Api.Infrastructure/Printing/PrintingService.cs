@@ -39,7 +39,7 @@ public class PrintingService(
     {
       var item = items[i];
       var data = new DrinkLabelData(
-        orderNumber, tableCode, item.ProductName, item.Quantity,
+        orderNumber, tableCode, item.ProductName, item.Quantity, item.UnitPrice,
         item.Temperature, item.IceLevel, item.SugarLevel,
         item.Note, item.IsTakeaway,
         ItemIndex: i + 1, TotalItems: totalItems,

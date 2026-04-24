@@ -66,6 +66,7 @@ public class PrintDrinkLabelsHandler(
       i.Id,
       i.ProductName,
       i.Quantity,
+      i.UnitPrice,
       i.Temperature?.Name,
       i.IceLevel?.Name,
       i.SugarLevel?.Name,

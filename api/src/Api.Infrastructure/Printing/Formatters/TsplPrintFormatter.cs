@@ -24,82 +24,121 @@ public class TsplPrintFormatter : IPrintFormatter
 
   public byte[] FormatDrinkLabel(DrinkLabelData data, PrinterConfig config)
   {
-    int widthMm   = config.PaperWidthMm;
-    int widthDots = widthMm * DotsPerMm;
-    int usable    = widthDots - MarginX * 2;
+    int paperWmm = config.PaperWidthMm; // 55
+    const int paperHmm = 33;
+
+    // Label box: 50×30mm centered on 58×34mm paper
+    const int boxWmm = 50, boxHmm = 30;
+    int boxW  = boxWmm * DotsPerMm;  // 400
+    int boxH  = boxHmm * DotsPerMm;  // 240
+    int boxX1 = (paperWmm * DotsPerMm - boxW) / 2;  // 32
+    int boxY1 = (paperHmm * DotsPerMm - boxH) / 2;  // 16
+    int boxX2 = boxX1 + boxW - 1;   // 431
+    int boxY2 = boxY1 + boxH - 1;   // 255
+
+    const int pad = 32;  // inner padding from box edge
+    int cx  = boxX1 + pad;   // 40
+    int cxR = boxX2 - pad;   // 423
+    int cW  = cxR - cx;      // 383
 
     var sb = new StringBuilder();
-    AppendHeader(sb, widthMm, heightMm: 40);
+    AppendHeader(sb, paperWmm, paperHmm);
 
-    int y = 8;
+    // Rounded border box (radius 8 dots ≈ 1mm)
+    Line(sb, $"BOX {boxX1},{boxY1},{boxX2},{boxY2},2,8");
 
-    // Row 1: Table code (left) + Order number (right) — Font "2"
+    int y = boxY1 + pad;  // 24
+
+    // Row 1: table code (left) + order number (right) — Font "2"
     string tableStr = data.TableCode != null ? $"Ban: {data.TableCode}" : "Mang di";
-    Line(sb, $"TEXT {MarginX},{y},\"2\",0,1,1,\"{Esc(tableStr)}\"");
-    int orderX = widthDots - MarginX - data.OrderNumber.Length * Font2W;
-    if (orderX > MarginX)
+    Line(sb, $"TEXT {cx},{y},\"2\",0,1,1,\"{Esc(tableStr)}\"");
+    int orderX = cxR - data.OrderNumber.Length * Font2W;
+    if (orderX > cx)
       Line(sb, $"TEXT {orderX},{y},\"2\",0,1,1,\"{Esc(data.OrderNumber)}\"");
-    y += Font2H + 2;
+    y += Font2H + 4;
 
-    // Separator bar
-    Line(sb, $"BAR {MarginX},{y},{usable},2");
-    y += 8;
+    // Separator
+    Line(sb, $"BAR {cx},{y},{cW},2");
+    y += 2 + 6;
 
-    // Product name — Font "2" doubled (24x40 per char), centered
-    string product  = StripDiacritics(Truncate(data.ProductName, usable / (Font2W * 2)));
-    int    prodDots = product.Length * Font2W * 2;
-    int    prodX    = Math.Max(MarginX, (widthDots - prodDots) / 2);
-    Line(sb, $"TEXT {prodX},{y},\"2\",0,2,2,\"{Esc(product)}\"");
-    y += Font2H * 2 + 6;
+    // Product name — Font "2" ×2, centered, word-wrapped
+    int nameMaxChars = cW / (Font2W * 2);  // 383/24 ≈ 15 chars per line
+    var nameLines    = WrapWords(StripDiacritics(data.ProductName), nameMaxChars);
+    foreach (var nameLine in nameLines)
+    {
+      int lineW = nameLine.Length * Font2W * 2;
+      int nameX = cx + Math.Max(0, (cW - lineW) / 2);
+      Line(sb, $"TEXT {nameX},{y},\"2\",0,2,2,\"{Esc(nameLine)}\"");
+      y += Font2H * 2 + 4;
+    }
+    y += 2;
 
-    // Options line — Font "1"
+    // Options — Font "1"
     var opts = new List<string>();
     if (data.Temperature != null) opts.Add(FormatTemperature(data.Temperature));
     if (data.IceLevel    != null) opts.Add($"Da: {FormatLevel(data.IceLevel)}");
     if (data.SugarLevel  != null) opts.Add($"Duong: {FormatLevel(data.SugarLevel)}");
     if (opts.Count > 0)
     {
-      Line(sb, $"TEXT {MarginX},{y},\"1\",0,1,1,\"{Esc(string.Join(" | ", opts))}\"");
+      Line(sb, $"TEXT {cx},{y},\"1\",0,1,1,\"{Esc(string.Join(" | ", opts))}\"");
       y += Font1H + 4;
     }
 
-    // Note
+    // Note — Font "1"
     if (!string.IsNullOrWhiteSpace(data.Note))
     {
-      string note = StripDiacritics(Truncate(data.Note, usable / Font1W));
-      Line(sb, $"TEXT {MarginX},{y},\"1\",0,1,1,\"{Esc($"Ghi chu: {note}")}\"");
-      y += Font1H + 4;
+      string note = StripDiacritics(Truncate(data.Note, cW / Font1W));
+      Line(sb, $"TEXT {cx},{y},\"1\",0,1,1,\"{Esc($"Ghi chu: {note}")}\"");
     }
 
-    // Quantity > 1
-    if (data.Quantity > 1)
-    {
-      Line(sb, $"TEXT {MarginX},{y},\"1\",0,1,1,\"So luong: x{data.Quantity}\"");
-      y += Font1H + 4;
-    }
+    // Price — right-aligned, Font "2", anchored above bottom separator
+    int yPrice  = boxY2 - pad - Font1H - 6 - 2 - 6 - Font2H;  // 235-6-2-6-20=201
+    string priceStr = FormatVnd(data.UnitPrice);
+    int priceX = cxR - priceStr.Length * Font2W;
+    if (priceX >= cx)
+      Line(sb, $"TEXT {priceX},{yPrice},\"2\",0,1,1,\"{priceStr}\"");
 
-    // Takeaway
-    if (data.IsTakeaway)
-    {
-      Line(sb, $"TEXT {MarginX},{y},\"2\",0,1,1,\"** MANG DI **\"");
-      y += Font2H + 4;
-    }
+    // Footer anchored to bottom of box
+    int yFooter = boxY2 - pad - Font1H;   // 235
+    int ySepBot = yFooter - 6;            // 229
+    Line(sb, $"BAR {cx},{ySepBot},{cW},2");
 
-    // Bottom separator bar
-    Line(sb, $"BAR {MarginX},{y},{usable},2");
-    y += 8;
-
-    // Footer: time (left) + item index (right) — Font "1"
     string time  = data.PrintedAt.ToString("HH:mm dd/MM");
     string index = $"{data.ItemIndex}/{data.TotalItems}";
-    Line(sb, $"TEXT {MarginX},{y},\"1\",0,1,1,\"{time}\"");
-    int indexX = widthDots - MarginX - index.Length * Font1W;
-    if (indexX > MarginX)
-      Line(sb, $"TEXT {indexX},{y},\"1\",0,1,1,\"{index}\"");
+    Line(sb, $"TEXT {cx},{yFooter},\"1\",0,1,1,\"{time}\"");
+    int indexX = cxR - index.Length * Font1W;
+    if (indexX > cx)
+      Line(sb, $"TEXT {indexX},{yFooter},\"1\",0,1,1,\"{index}\"");
 
     Line(sb, "PRINT 1");
-
     return Encoding.ASCII.GetBytes(sb.ToString());
+  }
+
+  private static List<string> WrapWords(string s, int max)
+  {
+    var result = new List<string>();
+    if (max <= 0) { result.Add(s); return result; }
+    var words = s.Split(' ');
+    var line  = new StringBuilder();
+    foreach (var word in words)
+    {
+      string w = word.Length > max ? word[..max] : word;
+      if (line.Length == 0)
+      {
+        line.Append(w);
+      }
+      else if (line.Length + 1 + w.Length <= max)
+      {
+        line.Append(' ').Append(w);
+      }
+      else
+      {
+        result.Add(line.ToString());
+        line.Clear().Append(w);
+      }
+    }
+    if (line.Length > 0) result.Add(line.ToString());
+    return result;
   }
 
   // TSPL is for label printers — receipts are not supported
@@ -155,6 +194,9 @@ public class TsplPrintFormatter : IPrintFormatter
     }
     return sb.ToString().Replace('đ', 'd').Replace('Đ', 'D');
   }
+
+  private static string FormatVnd(decimal value) =>
+    ((long)value).ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) + "d";
 
   private static string FormatTemperature(string v) => v switch
   {
