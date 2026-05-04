@@ -122,6 +122,141 @@ await store.onNewOrder()  // gọi khi SSE báo có đơn mới
 
 ---
 
+## Web Push Notifications
+
+### Tổng quan
+
+Web Push dùng **VAPID** (Voluntary Application Server Identification) và **WebPush** NuGet package. Mỗi trình duyệt/thiết bị có một `PushSubscription` riêng, lưu vào DB.
+
+```
+Frontend subscribe → lưu (endpoint, p256dh, auth) vào DB
+    ↓
+INotificationService.SendAsync(type, title, body, pushBody?)
+    ↓
+NotificationService → tra cứu PushSubscription theo userId
+    ↓
+IPushNotificationService.SendToSnapshotsAsync → WebPushClient.SendNotificationAsync (VAPID)
+    ↓
+Browser nhận push → sw.js hiển thị notification + postMessage PUSH_NEW_ORDER tới app
+```
+
+### PushSubscription Entity
+
+| Property | Type | Mô tả |
+|----------|------|-------|
+| `UserId` | string | User sở hữu subscription |
+| `Endpoint` | string | URL push endpoint do browser vendor cấp (Google FCM / Apple APNs) — unique |
+| `P256dh` | string | ECDH public key của client (base64url) |
+| `Auth` | string | Auth secret (base64url) |
+
+Nếu subscription hết hạn (browser trả `410 Gone`), service tự xóa khỏi DB sau khi gửi.
+
+### VAPID Config
+
+Cấu hình trong `appsettings.json` (hoặc biến môi trường production):
+
+```json
+"Vapid": {
+  "Subject": "mailto:admin@yourapp.com",
+  "PublicKey": "<base64url VAPID public key>",
+  "PrivateKey": "<base64url VAPID private key>"
+}
+```
+
+Tham chiếu qua `IOptions<VapidSettings>` được inject vào `PushNotificationService`.
+
+### API Endpoints (Push)
+
+| Method | Path | Policy | Mô tả |
+|--------|------|--------|-------|
+| `GET` | `/api/admin/push/vapid-public-key` | StaffOrAdmin | Lấy VAPID public key |
+| `POST` | `/api/admin/push/subscribe` | StaffOrAdmin | Đăng ký subscription |
+| `DELETE` | `/api/admin/push/subscribe` | StaffOrAdmin | Hủy subscription |
+
+### `INotificationService.SendAsync` — tham số `pushBody`
+
+```csharp
+Task SendAsync(
+    NotificationType type,
+    string title,
+    string body,           // body lưu DB + fallback push body
+    string? url = null,
+    int? referenceId = null,
+    string? pushBody = null, // body riêng cho push (chi tiết hơn, hỗ trợ newline)
+    CancellationToken ct = default);
+```
+
+`pushBody` cho phép push notification hiển thị nội dung chi tiết hơn DB record.  
+Ví dụ: push hiển thị từng item + tổng tiền; DB chỉ lưu `"Bàn A1 · 3 món"`.
+
+### `IPushNotificationService`
+
+Hai overload:
+
+```csharp
+// Có sẵn domain entity (đã load từ repo)
+Task SendToSubscriptionsAsync(IEnumerable<PushSubscription> subscriptions, string title, string body, string? url, CancellationToken ct);
+
+// Dùng snapshot (plain data) — an toàn hơn khi cross DI scope
+Task SendToSnapshotsAsync(IEnumerable<PushSubSnapshot> snapshots, string title, string body, string? url, string? detail, CancellationToken ct);
+```
+
+`PushSubSnapshot` là `record(Endpoint, P256dh, Auth)` — không phụ thuộc vào EF tracking.
+
+### Frontend — `usePushNotifications.js`
+
+```js
+const {
+  isSupported,   // bool — browser hỗ trợ Push API
+  permission,    // 'default' | 'granted' | 'denied'
+  isSubscribed,  // bool — đã subscribe và lưu server chưa
+  loading,
+  toggle,              // subscribe nếu chưa, unsubscribe nếu đã có
+  requestAndSubscribe, // request permission → subscribe → return bool
+  unsubscribe,
+} = usePushNotifications()
+```
+
+`onMounted` tự động:
+1. Register `/sw.js` ngầm
+2. Check subscription hiện tại
+3. Lắng nghe `message` event từ SW để play chime khi `PUSH_NEW_ORDER`
+
+### Service Worker — `admin/public/sw.js`
+
+Xử lý 2 event:
+
+| Event | Hành động |
+|-------|-----------|
+| `push` | Parse JSON payload `{title, body, url}` → `showNotification()` + postMessage `PUSH_NEW_ORDER` tới mọi tab app đang mở |
+| `notificationclick` | Đóng notification → focus tab admin đang mở (hoặc mở tab mới) → navigate tới `notification.data.url` |
+
+Notification tag = `url` → notifications cùng URL group lại, không spam.
+
+### Payload format (server → browser)
+
+```json
+{ "title": "🛎 Bàn A1 · 3 món", "body": "• Cà phê sữa x2 40,000đ\n• Trà đào x1 35,000đ\n──────────────\nTổng: 115,000đ", "url": "/orders/123" }
+```
+
+### File liên quan (Web Push)
+
+| File | Mô tả |
+|------|-------|
+| `Api.Core/Aggregates/PushSubscriptionAggregate/PushSubscription.cs` | Domain entity |
+| `Api.Core/Interfaces/IPushNotificationService.cs` | Interface + `PushSubSnapshot` |
+| `Api.Infrastructure/Services/PushNotificationService.cs` | Gửi push, tự xóa expired |
+| `Api.Infrastructure/Services/VapidSettings.cs` | Config POJO |
+| `Api.Web/Endpoints/Push/` | 3 endpoints: vapid-key, subscribe, unsubscribe |
+| `Api.UseCases/Push/Subscribe/` | `SubscribePushCommand` + handler (upsert by endpoint) |
+| `Api.UseCases/Push/Unsubscribe/` | `UnsubscribePushCommand` + handler |
+| `Api.UseCases/Orders/EventHandlers/OrderPushNotifyHandlers.cs` | Domain event → push |
+| `admin/src/composables/usePushNotifications.js` | Composable quản lý subscription |
+| `admin/src/services/push.service.js` | Axios wrappers |
+| `admin/public/sw.js` | Service Worker xử lý push event |
+
+---
+
 ## SSE (Server-Sent Events)
 
 Admin frontend subscribe SSE để nhận event real-time:
