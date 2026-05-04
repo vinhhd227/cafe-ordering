@@ -15,11 +15,10 @@ namespace Api.Infrastructure.Identity;
 /// </summary>
 public class JwtService : IJwtService
 {
-  private const int AccessTokenExpiryMinutes = 15;
-
   private readonly string _key;
   private readonly string _issuer;
   private readonly string _audience;
+  private readonly int _expiryMinutes;
 
   public JwtService(IConfiguration configuration)
   {
@@ -28,6 +27,7 @@ public class JwtService : IJwtService
     _issuer = configuration["Jwt:Issuer"]
       ?? throw new InvalidOperationException("JWT Issuer not configured (Jwt:Issuer)");
     _audience = configuration["Jwt:Audience"] ?? _issuer;
+    _expiryMinutes = int.TryParse(configuration["Jwt:ExpiresMinutes"], out var m) ? m : 15;
   }
 
   public string GenerateAccessToken(
@@ -70,7 +70,7 @@ public class JwtService : IJwtService
       issuer: _issuer,
       audience: _audience,
       claims: claims,
-      expires: DateTime.UtcNow.AddMinutes(AccessTokenExpiryMinutes),
+      expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
       signingCredentials: credentials);
 
     return new JwtSecurityTokenHandler().WriteToken(token);
