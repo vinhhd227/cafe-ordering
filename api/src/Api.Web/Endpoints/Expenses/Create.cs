@@ -22,7 +22,7 @@ public class CreateExpense(IMediator mediator) : Endpoint<CreateExpenseRequest, 
   {
     Post("/api/admin/expenses");
     Policies("expense.create");
-    Roles("Admin"); 
+    Policies("expense.create");
     DontAutoTag();
     Description(b => b.WithTags("Expenses"));
   }
