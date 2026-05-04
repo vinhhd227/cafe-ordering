@@ -3,7 +3,14 @@ set -e
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 ENV_FILE="$REPO_DIR/.env.prod"
-COMPOSE_CMD="docker compose -p cafe-prod --env-file $ENV_FILE -f $REPO_DIR/docker-compose.prod.yml"
+
+PRINTER_OVERRIDE=""
+if [ -e /dev/usb/lp0 ]; then
+  echo "==> USB printer detected at /dev/usb/lp0, enabling device access..."
+  PRINTER_OVERRIDE="-f $REPO_DIR/docker-compose.printer.yml"
+fi
+
+COMPOSE_CMD="docker compose -p cafe-prod --env-file $ENV_FILE -f $REPO_DIR/docker-compose.prod.yml $PRINTER_OVERRIDE"
 
 # Kiểm tra .env.prod tồn tại
 if [ ! -f "$ENV_FILE" ]; then

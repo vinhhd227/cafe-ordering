@@ -1,0 +1,6 @@
+services:
+  api:
+    devices:
+      - /dev/usb/lp0:/dev/usb/lp0
+    group_add:
+      - lp
