@@ -93,6 +93,7 @@ public class JwtService : IJwtService
     {
       var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
       {
+        ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(signingKey),
         ValidateIssuer = true,
