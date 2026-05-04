@@ -16,6 +16,7 @@ declare module 'vue' {
     NotificationBell: typeof import('./components/NotificationBell.vue')['default']
     PageHeader: typeof import('./components/PageHeader.vue')['default']
     PaymentQrCustomizer: typeof import('./components/PaymentQrCustomizer.vue')['default']
+    PrintBillDialog: typeof import('./components/printing/PrintBillDialog.vue')['default']
     PrintDrinkLabelsDialog: typeof import('./components/printing/PrintDrinkLabelsDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
