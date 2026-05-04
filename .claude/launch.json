@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "admin-dev",
-      "runtimeExecutable": "/bin/sh",
-      "runtimeArgs": ["-c", "PATH=/opt/homebrew/bin:$PATH pnpm dev"],
+      "runtimeExecutable": "/opt/homebrew/bin/pnpm",
+      "runtimeArgs": ["dev"],
       "port": 5173,
       "autoPort": true,
       "cwd": "admin"
