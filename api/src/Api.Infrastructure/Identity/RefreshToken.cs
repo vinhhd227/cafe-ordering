@@ -20,6 +20,8 @@ public class RefreshToken
 
   public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+  public bool RememberMe { get; set; }
+
   // === Navigation ===
   public ApplicationUser User { get; set; } = null!;
 

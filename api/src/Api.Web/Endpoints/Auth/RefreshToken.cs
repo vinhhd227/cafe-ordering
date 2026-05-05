@@ -42,14 +42,17 @@ public class RefreshTokenEndpoint(IMediator mediator, IWebHostEnvironment env)
       return;
     }
 
-    HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken, new CookieOptions
+    var cookieOptions = new CookieOptions
     {
       HttpOnly = true,
       Secure = !env.IsDevelopment(),
       SameSite = SameSiteMode.Strict,
-      MaxAge = TimeSpan.FromDays(7),
       Path = "/api/auth"
-    });
+    };
+    if (result.Value.RememberMe)
+      cookieOptions.MaxAge = TimeSpan.FromDays(30);
+
+    HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken, cookieOptions);
 
     await SendOkAsync(new RefreshTokenResponse
     {

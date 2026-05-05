@@ -12,6 +12,9 @@ public sealed class LoginRequest
 
   /// <summary>Account password.</summary>
   public string Password { get; set; } = string.Empty;
+
+  /// <summary>Whether to issue a long-lived session (30 days) or a short session cookie (1 day).</summary>
+  public bool RememberMe { get; set; }
 }
 
 public sealed class LoginResponse
@@ -42,7 +45,7 @@ public class LoginEndpoint(IMediator mediator, IWebHostEnvironment env) : Ep.Req
       return;
     }
 
-    var result = await mediator.Send(new LoginCommand(req.Username, req.Password, AppType.Admin), ct);
+    var result = await mediator.Send(new LoginCommand(req.Username, req.Password, AppType.Admin, req.RememberMe), ct);
 
     if (!result.IsSuccess)
     {
@@ -50,14 +53,17 @@ public class LoginEndpoint(IMediator mediator, IWebHostEnvironment env) : Ep.Req
       return;
     }
 
-    HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken, new CookieOptions
+    var cookieOptions = new CookieOptions
     {
       HttpOnly = true,
       Secure = !env.IsDevelopment(),
       SameSite = SameSiteMode.Strict,
-      MaxAge = TimeSpan.FromDays(7),
       Path = "/api/auth"
-    });
+    };
+    if (result.Value.RememberMe)
+      cookieOptions.MaxAge = TimeSpan.FromDays(30);
+
+    HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken, cookieOptions);
 
     await SendOkAsync(new LoginResponse
     {

@@ -7,4 +7,4 @@ namespace Api.UseCases.Auth.Login;
 /// Returns a JWT access token and a refresh token on success.
 /// Fails with Forbidden if the user's role does not have access to the requested app.
 /// </summary>
-public record LoginCommand(string Username, string Password, AppType App) : ICommand<Result<AuthResponseDto>>;
+public record LoginCommand(string Username, string Password, AppType App, bool RememberMe) : ICommand<Result<AuthResponseDto>>;

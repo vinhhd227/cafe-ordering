@@ -23,7 +23,7 @@ public interface IIdentityService
   /// Authenticate user by username and generate JWT + refresh token.
   /// Returns Forbidden if the user's role lacks the required app access permission.
   /// </summary>
-  Task<Result<AuthResponseDto>> LoginAsync(string username, string password, AppType app);
+  Task<Result<AuthResponseDto>> LoginAsync(string username, string password, AppType app, bool rememberMe);
 
   /// <summary>
   /// Refresh access token using a refresh token.
@@ -131,7 +131,7 @@ public interface IIdentityService
 }
 
 /// <summary>Response returned after a successful login or token refresh.</summary>
-public record AuthResponseDto(string AccessToken, string RefreshToken, DateTime ExpiresAt);
+public record AuthResponseDto(string AccessToken, string RefreshToken, DateTime ExpiresAt, bool RememberMe);
 
 /// <summary>Response returned after creating a staff account.</summary>
 public record TemporaryPasswordDto(string Username, string TemporaryPassword);

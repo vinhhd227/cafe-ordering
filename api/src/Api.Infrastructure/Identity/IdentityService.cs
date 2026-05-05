@@ -15,7 +15,8 @@ namespace Api.Infrastructure.Identity;
 /// </summary>
 public class IdentityService : IIdentityService
 {
-  private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(7);
+  private static readonly TimeSpan ShortSession = TimeSpan.FromDays(1);
+  private static readonly TimeSpan LongSession  = TimeSpan.FromDays(30);
 
   private readonly UserManager<ApplicationUser> _userManager;
   private readonly SignInManager<ApplicationUser> _signInManager;
@@ -75,7 +76,7 @@ public class IdentityService : IIdentityService
     return Result<string>.Success(user.Id.ToString());
   }
 
-  public async Task<Result<AuthResponseDto>> LoginAsync(string username, string password, AppType app)
+  public async Task<Result<AuthResponseDto>> LoginAsync(string username, string password, AppType app, bool rememberMe)
   {
     var user = await _userManager.FindByNameAsync(username);
     if (user is null || !user.IsActive)
@@ -107,14 +108,14 @@ public class IdentityService : IIdentityService
       customerId: user.CustomerId,
       avatarUrl: user.AvatarUrl);
 
-    var refreshToken = await IssueRefreshTokenAsync(user.Id);
+    var refreshToken = await IssueRefreshTokenAsync(user.Id, rememberMe);
 
     user.UpdatedAt = DateTime.UtcNow;
     await _userManager.UpdateAsync(user);
 
-    var expiresAt = DateTime.UtcNow.AddDays(7);
+    var expiresAt = DateTime.UtcNow.Add(rememberMe ? LongSession : ShortSession);
 
-    return Result<AuthResponseDto>.Success(new AuthResponseDto(accessToken, refreshToken.Token, expiresAt));
+    return Result<AuthResponseDto>.Success(new AuthResponseDto(accessToken, refreshToken.Token, expiresAt, rememberMe));
   }
 
   public async Task<Result<AuthResponseDto>> RefreshTokenAsync(string refreshToken)
@@ -159,14 +160,15 @@ public class IdentityService : IIdentityService
       customerId: user.CustomerId,
       avatarUrl: user.AvatarUrl);
 
-    var newRefreshToken = await IssueRefreshTokenAsync(user.Id);
+    var rememberMe = storedToken.RememberMe;
+    var newRefreshToken = await IssueRefreshTokenAsync(user.Id, rememberMe);
 
     user.UpdatedAt = DateTime.UtcNow;
     await _userManager.UpdateAsync(user);
 
-    var expiresAt = DateTime.UtcNow.AddDays(7);
+    var expiresAt = DateTime.UtcNow.Add(rememberMe ? LongSession : ShortSession);
 
-    return Result<AuthResponseDto>.Success(new AuthResponseDto(newAccessToken, newRefreshToken.Token, expiresAt));
+    return Result<AuthResponseDto>.Success(new AuthResponseDto(newAccessToken, newRefreshToken.Token, expiresAt, rememberMe));
   }
 
   public async Task<Result<TemporaryPasswordDto>> CreateStaffAccountAsync(
@@ -570,7 +572,7 @@ public class IdentityService : IIdentityService
 
   // ===== Private Helpers =====
 
-  private async Task<RefreshToken> IssueRefreshTokenAsync(Guid userId)
+  private async Task<RefreshToken> IssueRefreshTokenAsync(Guid userId, bool rememberMe)
   {
     // Clean up expired tokens for this user
     var expiredTokens = await _identityDb.RefreshTokens
@@ -584,8 +586,9 @@ public class IdentityService : IIdentityService
       UserId = userId,
       Token = _jwtService.GenerateRefreshToken(),
       CreatedAt = DateTime.UtcNow,
-      ExpiresAt = DateTime.UtcNow.Add(RefreshTokenLifetime),
-      IsRevoked = false
+      ExpiresAt = DateTime.UtcNow.Add(rememberMe ? LongSession : ShortSession),
+      IsRevoked = false,
+      RememberMe = rememberMe
     };
 
     _identityDb.RefreshTokens.Add(token);

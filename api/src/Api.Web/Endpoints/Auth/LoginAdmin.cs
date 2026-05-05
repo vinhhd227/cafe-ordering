@@ -21,7 +21,7 @@ public class LoginAdminEndpoint(IMediator mediator, IWebHostEnvironment env) : E
             return;
         }
 
-        var result = await mediator.Send(new LoginCommand(req.Username, req.Password, AppType.Admin), ct);
+        var result = await mediator.Send(new LoginCommand(req.Username, req.Password, AppType.Admin, req.RememberMe), ct);
 
         if (result.Status == Ardalis.Result.ResultStatus.Forbidden)
         {
@@ -35,14 +35,17 @@ public class LoginAdminEndpoint(IMediator mediator, IWebHostEnvironment env) : E
             return;
         }
 
-        HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken, new CookieOptions
+        var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
             Secure = !env.IsDevelopment(),
             SameSite = SameSiteMode.Strict,
-            MaxAge = TimeSpan.FromDays(7),
             Path = "/api/auth"
-        });
+        };
+        if (result.Value.RememberMe)
+            cookieOptions.MaxAge = TimeSpan.FromDays(30);
+
+        HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken, cookieOptions);
 
         await SendOkAsync(new LoginResponse
         {
