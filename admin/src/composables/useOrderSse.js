@@ -79,14 +79,14 @@ export function useOrderSse({ onOrderCreated, onOrderUpdated, onConnected, onDis
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Token hết hạn — thử refresh rồi reconnect
+          // Token hết hạn — refresh rồi để watch tự reconnect khi token thay đổi.
+          // Không gọi scheduleRetry() ở đây: nếu watch flush trước scheduleRetry(0),
+          // cả 2 timer sẽ tồn tại đồng thời → 2 connections song song.
           try {
             await authStore.doRefreshToken()
           } catch {
             onError?.('Authentication failed. Please refresh the page.')
-            return
           }
-          scheduleRetry(0) // reconnect ngay
           return
         }
         throw new Error(`SSE connect failed: ${response.status}`)
@@ -125,6 +125,10 @@ export function useOrderSse({ onOrderCreated, onOrderUpdated, onConnected, onDis
     // Kết nối kết thúc (server restart, network issue, ...)
     connected.value = false
     onDisconnected?.()
+
+    // Nếu kết thúc do abort (token refresh từ watch) → watch tự schedule reconnect,
+    // không gọi scheduleRetry() để tránh tạo 2 connection song song.
+    if (abortController?.signal.aborted) return
 
     scheduleRetry()
   }
