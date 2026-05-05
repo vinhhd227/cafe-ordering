@@ -43,12 +43,6 @@ const { connected: sseConnected } = useOrderSse({
     await store.onNewOrder()
     if (store.creatingOrder) return
     playBeep()
-    toast.add({
-      severity: 'info',
-      summary: t('notifications.newOrder'),
-      detail: buildDetail(order),
-      life: 6000,
-    })
   },
 })
 
@@ -56,15 +50,6 @@ const { connected: sseConnected } = useOrderSse({
 onMounted(() => store.fetchNotifications(1, 10))
 
 // ── Helpers ────────────────────────────────────────────────────────
-function buildDetail(order) {
-  const parts = []
-  if (order.tableCode) parts.push(`${t('notifications.table')} ${order.tableCode}`)
-  if (order.items?.length) parts.push(t('notifications.itemCount', { n: order.items.length }))
-  const amount = order.finalAmount ?? order.totalAmount
-  if (amount) parts.push(new Intl.NumberFormat('vi-VN').format(amount) + 'đ')
-  return parts.join(' · ')
-}
-
 function formatTime(at) {
   return new Date(at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
 }
