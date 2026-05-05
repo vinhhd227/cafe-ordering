@@ -13,7 +13,9 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppAlert: typeof import('./components/AppAlert.vue')['default']
     AppTable: typeof import('./components/AppTable.vue')['default']
+    FindPromosDialog: typeof import('./components/orders/FindPromosDialog.vue')['default']
     NotificationBell: typeof import('./components/NotificationBell.vue')['default']
+    OrderOptionsDialog: typeof import('./components/orders/OrderOptionsDialog.vue')['default']
     PageHeader: typeof import('./components/PageHeader.vue')['default']
     PaymentQrCustomizer: typeof import('./components/PaymentQrCustomizer.vue')['default']
     PrintBillDialog: typeof import('./components/printing/PrintBillDialog.vue')['default']
