@@ -119,3 +119,4 @@ docs/outputs/
 !docs/raw/.gitkeep
 !docs/outputs/.gitkeep
 tmp-*.txt
+.claude/settings.local.json
