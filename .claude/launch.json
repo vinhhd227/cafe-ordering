@@ -3,16 +3,16 @@
   "configurations": [
     {
       "name": "admin-dev",
-      "runtimeExecutable": "/opt/homebrew/bin/pnpm",
-      "runtimeArgs": ["dev"],
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-e", "require('child_process').spawn('pnpm',['dev'],{stdio:'inherit',shell:true})"],
       "port": 5173,
       "autoPort": true,
       "cwd": "admin"
     },
     {
       "name": "client-dev",
-      "runtimeExecutable": "/opt/homebrew/bin/pnpm",
-      "runtimeArgs": ["dev"],
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-e", "require('child_process').spawn('pnpm',['dev'],{stdio:'inherit',shell:true})"],
       "port": 5174,
       "autoPort": true,
       "cwd": "client"

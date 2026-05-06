@@ -1,28 +1,33 @@
-# Claude Preview — launch.json Setup
+# Claude Preview — Quy tắc sử dụng
 
-File `.claude/launch.json` cấu hình dev server cho `preview_start` tool.
+## Nguyên tắc cốt lõi
 
-## Cấu trúc cơ bản
+- **User tự chạy** frontend dev server và backend — Claude không tự khởi động
+- Claude **không được kill** process nào của user
+- Claude **không gọi `preview_start`** trừ khi user yêu cầu xem preview
 
-```json
-{
-  "version": "0.0.1",
-  "configurations": [
-    {
-      "name": "admin-dev",
-      "runtimeExecutable": "...",
-      "runtimeArgs": [...],
-      "port": 5173,
-      "autoPort": true,
-      "cwd": "admin"
-    }
-  ]
-}
+---
+
+## Khi user yêu cầu xem preview
+
+### Bước 1 — Lấy serverId bằng `preview_start`
+
+`preview_start` sẽ reuse server nếu Claude đã từng start trước đó trên cùng port.  
+Nếu port đang bị chiếm bởi server của user, tool sẽ phân bổ port khác (`autoPort: true`) — lúc đó **nhờ user dừng server của mình trước**, rồi gọi lại.
+
+### Bước 2 — Dùng serverId để screenshot/navigate/inspect
+
+```
+preview_screenshot(serverId) → xem layout tổng thể
+preview_navigate(serverId, url) → chuyển trang
+preview_inspect(serverId, selector) → kiểm tra CSS cụ thể
 ```
 
-## Cross-platform (Mac + Windows) — dùng Node
+---
 
-Node có sẵn trên cả 2 OS. `shell: true` tự resolve `pnpm` từ PATH của hệ điều hành — không cần hardcode path.
+## Cấu hình `.claude/launch.json`
+
+Dùng Node + `shell: true` để hoạt động trên cả Mac lẫn Windows:
 
 ```json
 {
@@ -48,43 +53,10 @@ Node có sẵn trên cả 2 OS. `shell: true` tự resolve `pnpm` từ PATH củ
 }
 ```
 
-## Mac only — absolute path (Homebrew)
+---
 
-```json
-{
-  "runtimeExecutable": "/opt/homebrew/bin/pnpm",
-  "runtimeArgs": ["dev"]
-}
-```
+## Không làm
 
-Lỗi trên Windows vì path Homebrew không tồn tại.
-
-## Mac only — shell wrapper
-
-```json
-{
-  "runtimeExecutable": "/bin/sh",
-  "runtimeArgs": ["-c", "PATH=/opt/homebrew/bin:$PATH pnpm dev"]
-}
-```
-
-Dùng khi MCP không inherit PATH của user. Lỗi trên Windows vì `/bin/sh` không tồn tại.
-
-## Windows only — cmd wrapper
-
-```json
-{
-  "runtimeExecutable": "cmd.exe",
-  "runtimeArgs": ["/c", "pnpm dev"]
-}
-```
-
-`cmd.exe /c` tự resolve PATH của user. Lỗi trên Mac.
-
-## Quyết định nhanh
-
-| Tình huống | Dùng cách nào |
-|-----------|---------------|
-| Chỉ Mac | absolute path (`/opt/homebrew/bin/pnpm`) |
-| Chỉ Windows | `cmd.exe /c pnpm dev` |
-| Cả 2 OS | Node + `shell: true` |
+- ❌ Tự gọi `preview_start` khi không được yêu cầu
+- ❌ Kill process của user để giải phóng port
+- ❌ Chạy `pnpm dev` / `dotnet run` qua Bash
