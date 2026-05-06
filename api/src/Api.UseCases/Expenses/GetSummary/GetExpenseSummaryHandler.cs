@@ -41,10 +41,10 @@ public class GetExpenseSummaryHandler(
 
     // ── Expenses theo category ─────────────────────────────────────────
     // Nếu có categoryFilter: chỉ query category đó, các category khác = 0
-    async Task<decimal> SumCategory(ExpenseCategory cat) =>
+    async Task<long> SumCategory(ExpenseCategory cat) =>
       categoryFilter is null || categoryFilter == cat
-        ? (await expenseRepository.ListAsync(new ExpensesTotalByCategorySpec(cat, dateFrom, dateTo, paymentFilter), ct)).Sum()
-        : 0m;
+        ? (await expenseRepository.ListAsync(new ExpensesTotalByCategorySpec(cat, dateFrom, dateTo, paymentFilter), ct)).Sum(x => (long)x)
+        : 0L;
 
     var ingredient   = await SumCategory(ExpenseCategory.Ingredient);
     var supply       = await SumCategory(ExpenseCategory.Supply);
@@ -55,28 +55,28 @@ public class GetExpenseSummaryHandler(
     // ── Expenses theo payment method ──────────────────────────────────
     // Nếu có paymentFilter: slot tương ứng = expenseTotal, slot còn lại = 0
     // Nếu không: query từng method (có thể kết hợp categoryFilter)
-    decimal expCash, expBank;
+    long expCash, expBank;
     if (paymentFilter == PaymentMethod.Cash)
     {
       expCash = expenseTotal;
-      expBank = 0m;
+      expBank = 0L;
     }
     else if (paymentFilter == PaymentMethod.BankTransfer)
     {
-      expCash = 0m;
+      expCash = 0L;
       expBank = expenseTotal;
     }
     else
     {
-      expCash = (await expenseRepository.ListAsync(new ExpensesTotalByPaymentMethodSpec(PaymentMethod.Cash,        dateFrom, dateTo, categoryFilter), ct)).Sum();
-      expBank = (await expenseRepository.ListAsync(new ExpensesTotalByPaymentMethodSpec(PaymentMethod.BankTransfer, dateFrom, dateTo, categoryFilter), ct)).Sum();
+      expCash = (await expenseRepository.ListAsync(new ExpensesTotalByPaymentMethodSpec(PaymentMethod.Cash,        dateFrom, dateTo, categoryFilter), ct)).Sum(x => (long)x);
+      expBank = (await expenseRepository.ListAsync(new ExpensesTotalByPaymentMethodSpec(PaymentMethod.BankTransfer, dateFrom, dateTo, categoryFilter), ct)).Sum(x => (long)x);
     }
 
     var expenses = new ExpenseByCategoryDto(
       ingredient, supply, equipment, other, expenseTotal,
       Cash: expCash, Bank: expBank);
 
-    var profit = revenue.Total - expenseTotal;
+    var profit = revenue.Total - (decimal)expenseTotal;
 
     return Result.Success(new ExpenseSummaryDto(revenue, expenses, profit));
   }

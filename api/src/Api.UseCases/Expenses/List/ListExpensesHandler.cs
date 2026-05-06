@@ -28,7 +28,7 @@ public class ListExpensesHandler(IReadRepositoryBase<Expense> repository)
     var expenses   = await repository.ListAsync(listSpec, ct);
 
     var dtos = expenses.Select(CreateExpenseHandler.ToDto).ToList();
-    var grandTotal = dtos.Sum(d => d.TotalAmount);
+    var grandTotal = dtos.Sum(d => (long)d.TotalAmount);
 
     return Result.Success(new PagedExpensesDto(dtos, totalCount, request.Page, request.PageSize, grandTotal));
   }

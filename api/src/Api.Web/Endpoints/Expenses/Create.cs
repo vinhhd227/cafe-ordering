@@ -12,6 +12,7 @@ public sealed class CreateExpenseRequest
   public decimal Quantity { get; set; }
   public string? Unit { get; set; }
   public decimal UnitPrice { get; set; }
+  public int? TotalAmount { get; set; }
   public DateTime PurchaseDate { get; set; }
   public string? Notes { get; set; }
 }
@@ -32,7 +33,7 @@ public class CreateExpense(IMediator mediator) : Endpoint<CreateExpenseRequest, 
     var result = await mediator.Send(
       new CreateExpenseCommand(
         req.Name, req.Category, req.PaymentMethod, req.Quantity, req.Unit,
-        req.UnitPrice, req.PurchaseDate, req.Notes), ct);
+        req.UnitPrice, req.PurchaseDate, req.Notes, req.TotalAmount), ct);
 
     await this.SendResultAsync(result, ct);
   }

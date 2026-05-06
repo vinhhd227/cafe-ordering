@@ -7,8 +7,8 @@ public record ExpenseDto(
   string PaymentMethod,
   decimal Quantity,
   string? Unit,
-  decimal UnitPrice,
-  decimal TotalAmount,
+  int UnitPrice,
+  int TotalAmount,
   DateTime PurchaseDate,
   string? Notes,
   DateTime CreatedAt,
@@ -20,5 +20,5 @@ public record PagedExpensesDto(
   int TotalCount,
   int Page,
   int PageSize,
-  decimal GrandTotal
+  long GrandTotal
 );

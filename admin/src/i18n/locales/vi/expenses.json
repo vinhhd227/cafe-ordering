@@ -48,8 +48,13 @@
       "quantity": "Số lượng",
       "unit": "Đơn vị",
       "unitPlaceholder": "kg, hộp, chai…",
+      "priceMode": "Ưu tiên nhập",
+      "modeUnitPrice": "Đơn giá",
+      "modeTotal": "Tổng tiền",
       "unitPrice": "Đơn giá",
-      "totalAuto": "Tổng (tự động)",
+      "unitPriceComputed": "Đơn giá (tự tính)",
+      "totalAuto": "Tổng tiền",
+      "totalComputed": "Tổng tiền (tự tính)",
       "notes": "Ghi chú",
       "notesPlaceholder": "Ghi chú thêm…",
       "cancel": "Hủy",
@@ -59,7 +64,8 @@
     "validation": {
       "nameRequired": "Tên mặt hàng không được để trống.",
       "quantityRequired": "Số lượng phải lớn hơn 0.",
-      "unitPriceRequired": "Đơn giá phải từ 0 trở lên."
+      "unitPriceRequired": "Đơn giá phải từ 0 trở lên.",
+      "totalAmountRequired": "Tổng tiền phải từ 0 trở lên."
     },
     "toast": {
       "updatedTitle": "Đã cập nhật",

@@ -21,7 +21,8 @@ public class CreateExpenseHandler(IRepositoryBase<Expense> repository)
       request.Unit,
       request.UnitPrice,
       purchaseDate,
-      request.Notes);
+      request.Notes,
+      request.TotalAmount);
 
     await repository.AddAsync(expense, ct);
 

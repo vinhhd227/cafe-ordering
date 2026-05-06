@@ -26,7 +26,8 @@ public class UpdateExpenseHandler(IRepositoryBase<Expense> repository)
       request.Unit,
       request.UnitPrice,
       purchaseDate,
-      request.Notes);
+      request.Notes,
+      request.TotalAmount);
 
     await repository.UpdateAsync(expense, ct);
 

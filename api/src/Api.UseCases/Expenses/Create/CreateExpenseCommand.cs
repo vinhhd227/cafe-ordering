@@ -10,5 +10,6 @@ public record CreateExpenseCommand(
   string? Unit,
   decimal UnitPrice,
   DateTime PurchaseDate,
-  string? Notes
+  string? Notes,
+  int? TotalAmount = null
 ) : ICommand<Result<ExpenseDto>>;

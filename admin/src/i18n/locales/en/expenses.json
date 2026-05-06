@@ -48,8 +48,13 @@
       "quantity": "Quantity",
       "unit": "Unit",
       "unitPlaceholder": "kg, box, bottle…",
+      "priceMode": "Enter by",
+      "modeUnitPrice": "Unit price",
+      "modeTotal": "Total",
       "unitPrice": "Unit price",
-      "totalAuto": "Total (auto)",
+      "unitPriceComputed": "Unit price (computed)",
+      "totalAuto": "Total",
+      "totalComputed": "Total (computed)",
       "notes": "Notes",
       "notesPlaceholder": "Additional notes…",
       "cancel": "Cancel",
@@ -59,7 +64,8 @@
     "validation": {
       "nameRequired": "Item name is required.",
       "quantityRequired": "Quantity must be greater than 0.",
-      "unitPriceRequired": "Unit price must be 0 or greater."
+      "unitPriceRequired": "Unit price must be 0 or greater.",
+      "totalAmountRequired": "Total amount must be 0 or greater."
     },
     "toast": {
       "updatedTitle": "Updated",

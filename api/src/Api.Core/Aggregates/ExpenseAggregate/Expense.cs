@@ -12,8 +12,8 @@ public class Expense : SoftDeletableEntity<int>, IAggregateRoot
   public PaymentMethod PaymentMethod { get; private set; } = PaymentMethod.Cash;
   public decimal Quantity { get; private set; }
   public string? Unit { get; private set; }
-  public decimal UnitPrice { get; private set; }
-  public decimal TotalAmount { get; private set; }
+  public int UnitPrice { get; private set; }
+  public int TotalAmount { get; private set; }
   public DateTime PurchaseDate { get; private set; }
   public string? Notes { get; private set; }
 
@@ -25,7 +25,8 @@ public class Expense : SoftDeletableEntity<int>, IAggregateRoot
     string? unit,
     decimal unitPrice,
     DateTime purchaseDate,
-    string? notes = null)
+    string? notes = null,
+    decimal? totalAmount = null)
   {
     Guard.Against.NullOrWhiteSpace(name);
     Guard.Against.NegativeOrZero(quantity);
@@ -38,8 +39,8 @@ public class Expense : SoftDeletableEntity<int>, IAggregateRoot
       PaymentMethod = paymentMethod,
       Quantity      = quantity,
       Unit          = unit?.Trim() is { Length: > 0 } u ? u : null,
-      UnitPrice     = unitPrice,
-      TotalAmount   = quantity * unitPrice,
+      UnitPrice     = (int)Math.Round(unitPrice, MidpointRounding.AwayFromZero),
+      TotalAmount   = (int)Math.Round(totalAmount ?? quantity * unitPrice, MidpointRounding.AwayFromZero),
       PurchaseDate  = purchaseDate,
       Notes         = notes?.Trim() is { Length: > 0 } n ? n : null,
     };
@@ -57,7 +58,8 @@ public class Expense : SoftDeletableEntity<int>, IAggregateRoot
     string? unit,
     decimal unitPrice,
     DateTime purchaseDate,
-    string? notes)
+    string? notes,
+    decimal? totalAmount = null)
   {
     Guard.Against.NullOrWhiteSpace(name);
     Guard.Against.NegativeOrZero(quantity);
@@ -68,8 +70,8 @@ public class Expense : SoftDeletableEntity<int>, IAggregateRoot
     PaymentMethod = paymentMethod;
     Quantity      = quantity;
     Unit          = unit?.Trim() is { Length: > 0 } u ? u : null;
-    UnitPrice     = unitPrice;
-    TotalAmount   = quantity * unitPrice;
+    UnitPrice     = (int)Math.Round(unitPrice, MidpointRounding.AwayFromZero);
+    TotalAmount   = (int)Math.Round(totalAmount ?? quantity * unitPrice, MidpointRounding.AwayFromZero);
     PurchaseDate  = purchaseDate;
     Notes         = notes?.Trim() is { Length: > 0 } n ? n : null;
 

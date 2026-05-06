@@ -58,21 +58,51 @@ const fPaymentMethod = ref(EXPENSE_PAYMENT_METHOD.CASH);
 const fQuantity = ref(null);
 const fUnit = ref('');
 const fUnitPrice = ref(null);
+const fTotalAmount = ref(null);
+// null = cả 2 đều trống, 'unitPrice' = user nhập đơn giá, 'total' = user nhập tổng
+const lastEdited = ref(null);
 const fPurchaseDate = ref(todayMidnight());
 const fNotes = ref('');
 
-const fTotalAmount = computed(() => (fQuantity.value ?? 0) * (fUnitPrice.value ?? 0));
+const unitPriceDisabled = computed(() => lastEdited.value === 'total');
+const totalAmountDisabled = computed(() => lastEdited.value === 'unitPrice');
+
+const onUnitPriceInput = (e) => {
+  fUnitPrice.value = e.value;
+  if (!e.value) {
+    lastEdited.value = null;
+    fTotalAmount.value = null;
+  } else {
+    lastEdited.value = 'unitPrice';
+    fTotalAmount.value = Math.round(e.value * (fQuantity.value ?? 0));
+  }
+};
+
+const onTotalAmountInput = (e) => {
+  fTotalAmount.value = e.value;
+  if (!e.value) {
+    lastEdited.value = null;
+    fUnitPrice.value = null;
+  } else {
+    lastEdited.value = 'total';
+    const qty = fQuantity.value ?? 0;
+    fUnitPrice.value = qty > 0 ? Math.round(e.value / qty) : 0;
+  }
+};
+
+// quantity thay đổi → recompute field bị lock
+watch(fQuantity, (qty) => {
+  if (lastEdited.value === 'unitPrice' && fUnitPrice.value) {
+    fTotalAmount.value = Math.round(fUnitPrice.value * (qty ?? 0));
+  } else if (lastEdited.value === 'total' && fTotalAmount.value) {
+    fUnitPrice.value = (qty ?? 0) > 0 ? Math.round(fTotalAmount.value / qty) : 0;
+  }
+});
 const isEditMode = computed(() => props.expense !== null);
 const dialogHeader = computed(() =>
   isEditMode.value ? t('expenses.dialog.titleEdit') : t('expenses.dialog.titleCreate')
 );
 
-const formatVnd = (value) =>
-  new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-  }).format(value ?? 0);
 
 watch(() => props.visible, (val) => {
   if (!val) return;
@@ -84,8 +114,12 @@ watch(() => props.visible, (val) => {
     fQuantity.value = props.expense.quantity;
     fUnit.value = props.expense.unit ?? '';
     fUnitPrice.value = props.expense.unitPrice;
+    fTotalAmount.value = props.expense.totalAmount;
     fPurchaseDate.value = new Date(props.expense.purchaseDate);
     fNotes.value = props.expense.notes ?? '';
+    // Detect: nếu total không khớp qty × unitPrice → lần trước nhập theo total
+    const expectedTotal = Math.round(props.expense.quantity * props.expense.unitPrice);
+    lastEdited.value = Math.abs(expectedTotal - props.expense.totalAmount) > 0.01 ? 'total' : 'unitPrice';
   } else {
     fName.value = '';
     fCategory.value = EXPENSE_CATEGORY.INGREDIENT;
@@ -93,6 +127,8 @@ watch(() => props.visible, (val) => {
     fQuantity.value = null;
     fUnit.value = '';
     fUnitPrice.value = null;
+    fTotalAmount.value = null;
+    lastEdited.value = null;
     fPurchaseDate.value = todayMidnight();
     fNotes.value = '';
   }
@@ -108,8 +144,12 @@ const submitForm = async () => {
     formError.value = t('expenses.validation.quantityRequired');
     return;
   }
-  if (fUnitPrice.value === null || fUnitPrice.value < 0) {
+  if (lastEdited.value !== 'total' && (fUnitPrice.value === null || fUnitPrice.value < 0)) {
     formError.value = t('expenses.validation.unitPriceRequired');
+    return;
+  }
+  if (lastEdited.value === 'total' && (fTotalAmount.value === null || fTotalAmount.value < 0)) {
+    formError.value = t('expenses.validation.totalAmountRequired');
     return;
   }
 
@@ -121,7 +161,8 @@ const submitForm = async () => {
       paymentMethod: fPaymentMethod.value,
       quantity: fQuantity.value,
       unit: fUnit.value.trim() || null,
-      unitPrice: fUnitPrice.value,
+      unitPrice: fUnitPrice.value ?? 0,
+      totalAmount: lastEdited.value === 'total' ? fTotalAmount.value : null,
       purchaseDate: fPurchaseDate.value?.toISOString?.() ?? fPurchaseDate.value,
       notes: fNotes.value.trim() || null,
     };
@@ -270,29 +311,43 @@ const submitForm = async () => {
         </div>
       </div>
 
-      <!-- Unit price + Total (computed) -->
+      <!-- Unit price + Total -->
       <div class="tw:grid tw:grid-cols-2 tw:gap-3">
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
-            {{ t('expenses.dialog.unitPrice') }} <span class="tw:text-red-400">*</span>
+          <label for="expense-unit-price" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
+            {{ t('expenses.dialog.unitPrice') }}
+            <span v-if="lastEdited !== 'total'" class="tw:text-red-400">*</span>
           </label>
           <prime-input-number
+            id="expense-unit-price"
             v-model="fUnitPrice"
+            :disabled="unitPriceDisabled"
             :min="0"
+            :max-fraction-digits="0"
             :use-grouping="true"
             suffix=" ₫"
             placeholder="0 ₫"
             class="app-input tw:w-full"
-            @input="(e) => (fUnitPrice = e.value)"
+            @input="onUnitPriceInput"
           />
         </div>
         <div class="tw:space-y-1.5">
-          <label class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
+          <label for="expense-total" class="tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted">
             {{ t('expenses.dialog.totalAuto') }}
+            <span v-if="lastEdited === 'total'" class="tw:text-red-400">*</span>
           </label>
-          <div class="tw:flex tw:items-center tw:h-10 tw:px-3 tw:rounded-lg tw:border tw:border-white/10 tw:bg-white/5 tw:text-sm tw:font-semibold">
-            {{ formatVnd(fTotalAmount) }}
-          </div>
+          <prime-input-number
+            id="expense-total"
+            v-model="fTotalAmount"
+            :disabled="totalAmountDisabled"
+            :min="0"
+            :max-fraction-digits="0"
+            :use-grouping="true"
+            suffix=" ₫"
+            placeholder="0 ₫"
+            class="app-input tw:w-full"
+            @input="onTotalAmountInput"
+          />
         </div>
       </div>
 

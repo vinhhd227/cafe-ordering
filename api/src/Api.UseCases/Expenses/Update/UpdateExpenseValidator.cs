@@ -31,7 +31,8 @@ public class UpdateExpenseValidator : AbstractValidator<UpdateExpenseCommand>
       .When(x => x.Unit is not null);
 
     RuleFor(x => x.UnitPrice)
-      .GreaterThanOrEqualTo(0).WithMessage("Đơn giá không được âm");
+      .GreaterThanOrEqualTo(0).WithMessage("Đơn giá không được âm")
+      .Must(p => p == Math.Floor(p)).WithMessage("Đơn giá phải là số nguyên");
 
     RuleFor(x => x.Notes)
       .MaximumLength(500).WithMessage("Ghi chú không quá 500 ký tự")

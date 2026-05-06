@@ -1,13 +1,13 @@
 namespace Api.UseCases.Expenses.DTOs;
 
 public record ExpenseByCategoryDto(
-  decimal Ingredient,
-  decimal Supply,
-  decimal Equipment,
-  decimal Other,
-  decimal Total,
-  decimal Cash,
-  decimal Bank
+  long Ingredient,
+  long Supply,
+  long Equipment,
+  long Other,
+  long Total,
+  long Cash,
+  long Bank
 );
 
 public record RevenueSummaryDto(

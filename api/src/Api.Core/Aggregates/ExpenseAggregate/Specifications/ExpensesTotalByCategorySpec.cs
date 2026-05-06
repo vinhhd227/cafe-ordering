@@ -7,7 +7,7 @@ namespace Api.Core.Aggregates.ExpenseAggregate.Specifications;
 ///   trong khoảng ngày mua, tuỳ chọn lọc theo payment method.
 ///   Dùng để tổng hợp chi phí theo loại (P&amp;L).
 /// </summary>
-public class ExpensesTotalByCategorySpec : Specification<Expense, decimal>
+public class ExpensesTotalByCategorySpec : Specification<Expense, int>
 {
   public ExpensesTotalByCategorySpec(
     ExpenseCategory category,
