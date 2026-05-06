@@ -9,3 +9,4 @@ global using Serilog;
 global using Serilog.Extensions.Logging;
 global using Api.Core.Interfaces;
 global using Mediator;
+using FluentValidation;

@@ -17,6 +17,6 @@ public class GetVapidPublicKeyEndpoint(IOptions<VapidSettings> vapid)
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        await SendOkAsync(vapid.Value.PublicKey, ct);
+        await Send.OkAsync(vapid.Value.PublicKey, ct);
     }
 }

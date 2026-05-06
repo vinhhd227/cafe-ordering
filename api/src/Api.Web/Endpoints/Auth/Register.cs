@@ -1,5 +1,6 @@
 // Deprecated: use /api/client/auth/register instead.
 using Api.UseCases.Auth.Register;
+using FluentValidation;
 using Mediator;
 
 namespace Api.Web.Endpoints.Auth;
@@ -37,7 +38,18 @@ public sealed class RegisterResponse
   public string Email { get; init; } = string.Empty;
 }
 
-public class RegisterEndpoint(IMediator mediator) : Ep.Req<RegisterRequest>.Res<RegisterResponse> 
+sealed class RegisterRequestValidator : Validator<RegisterRequest>
+{
+  public RegisterRequestValidator()
+  {
+    RuleFor(x => x.Username).NotEmpty().WithMessage("Username is required");
+    RuleFor(x => x.Email).NotEmpty().WithMessage("Email is required").EmailAddress().WithMessage("Invalid email address");
+    RuleFor(x => x.Password).NotEmpty().WithMessage("Password is required");
+    RuleFor(x => x.FullName).NotEmpty().WithMessage("Full name is required");
+  }
+}
+
+public class RegisterEndpoint(IMediator mediator) : Ep.Req<RegisterRequest>.Res<RegisterResponse>
 {
   public override void Configure()
   {
@@ -59,7 +71,7 @@ public class RegisterEndpoint(IMediator mediator) : Ep.Req<RegisterRequest>.Res<
 
     if (result.IsSuccess)
     {
-      await SendOkAsync(new RegisterResponse
+      await Send.OkAsync(new RegisterResponse
       {
         CustomerId = result.Value.CustomerId,
         Email = result.Value.Email
@@ -68,7 +80,7 @@ public class RegisterEndpoint(IMediator mediator) : Ep.Req<RegisterRequest>.Res<
     else
     {
       AddError(string.Join(", ", result.Errors));
-      await SendErrorsAsync(400, ct);
+      await Send.ErrorsAsync(400, ct);
     }
   }
 }

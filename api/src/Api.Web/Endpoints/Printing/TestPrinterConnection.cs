@@ -34,6 +34,6 @@ public class TestPrinterConnection(IMediator mediator) : Endpoint<TestPrinterReq
     }
 
     var ok = result.Value;
-    await SendAsync(new TestPrinterResponse { Success = ok, Error = ok ? null : "Connection failed." }, cancellation: ct);
+    await Send.OkAsync(new TestPrinterResponse { Success = ok, Error = ok ? null : "Connection failed." }, cancellation: ct);
   }
 }

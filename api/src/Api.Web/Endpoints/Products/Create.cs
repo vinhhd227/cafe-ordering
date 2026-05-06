@@ -79,7 +79,7 @@ public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
 
     if (result.IsSuccess)
     {
-      await SendAsync(new { Id = result.Value }, StatusCodes.Status201Created, ct);
+      await Send.ResponseAsync(new { Id = result.Value }, StatusCodes.Status201Created, ct);
       return;
     }
 

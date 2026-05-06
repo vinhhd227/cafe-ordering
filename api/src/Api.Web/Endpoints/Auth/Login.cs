@@ -1,5 +1,5 @@
 using Api.UseCases.Auth.Login;
-using Microsoft.AspNetCore.Hosting;
+using FluentValidation;
 
 // Deprecated: use /api/admin/auth/login or /api/client/auth/login instead.
 
@@ -27,6 +27,15 @@ public sealed class LoginResponse
   public DateTime? ExpiresAt { get; init; }
 }
 
+sealed class LoginRequestValidator : Validator<LoginRequest>
+{
+  public LoginRequestValidator()
+  {
+    RuleFor(x => x.Username).NotEmpty().WithMessage("Username is required");
+    RuleFor(x => x.Password).NotEmpty().WithMessage("Password is required");
+  }
+}
+
 public class LoginEndpoint(IMediator mediator, IWebHostEnvironment env) : Ep.Req<LoginRequest>.Res<LoginResponse>
 {
   public override void Configure()
@@ -39,17 +48,11 @@ public class LoginEndpoint(IMediator mediator, IWebHostEnvironment env) : Ep.Req
 
   public override async Task HandleAsync(LoginRequest req, CancellationToken ct)
   {
-    if (string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Password))
-    {
-      await SendAsync(new LoginResponse { Success = false, Message = "Username and password are required" }, 400, ct);
-      return;
-    }
-
     var result = await mediator.Send(new LoginCommand(req.Username, req.Password, AppType.Admin, req.RememberMe), ct);
 
     if (!result.IsSuccess)
     {
-      await SendAsync(new LoginResponse { Success = false, Message = "Invalid credentials" }, 401, ct);
+      await Send.ResponseAsync(new LoginResponse { Success = false, Message = "Invalid credentials" }, 401, ct);
       return;
     }
 
@@ -65,7 +68,7 @@ public class LoginEndpoint(IMediator mediator, IWebHostEnvironment env) : Ep.Req
 
     HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken, cookieOptions);
 
-    await SendOkAsync(new LoginResponse
+    await Send.OkAsync(new LoginResponse
     {
       Success = true,
       Message = "Login successful",

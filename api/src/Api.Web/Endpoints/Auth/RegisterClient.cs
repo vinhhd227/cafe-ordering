@@ -20,7 +20,7 @@ public class RegisterClientEndpoint(IMediator mediator) : Ep.Req<RegisterRequest
 
         if (result.IsSuccess)
         {
-            await SendOkAsync(new RegisterResponse
+            await Send.OkAsync(new RegisterResponse
             {
                 CustomerId = result.Value.CustomerId,
                 Email = result.Value.Email
@@ -29,7 +29,7 @@ public class RegisterClientEndpoint(IMediator mediator) : Ep.Req<RegisterRequest
         else
         {
             AddError(string.Join(", ", result.Errors));
-            await SendErrorsAsync(400, ct);
+            await Send.ErrorsAsync(400, ct);
         }
     }
 }

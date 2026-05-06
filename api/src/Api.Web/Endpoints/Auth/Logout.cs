@@ -23,6 +23,6 @@ public class LogoutEndpoint(IIdentityService identityService) : EndpointWithoutR
 
     HttpContext.Response.Cookies.Delete("refreshToken", new CookieOptions { Path = "/api/auth" });
 
-    await SendNoContentAsync(ct);
+    await Send.NoContentAsync(ct);
   }
 }

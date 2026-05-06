@@ -37,10 +37,10 @@ public class ResetUserPasswordEndpoint(IMediator mediator)
       return;
     }
 
-    await SendAsync(new ResetUserPasswordResponse
+    await Send.OkAsync(new ResetUserPasswordResponse
     {
       Username = result.Value.Username,
       TemporaryPassword = result.Value.TemporaryPassword
-    }, 200, ct);
+    }, ct);
   }
 }

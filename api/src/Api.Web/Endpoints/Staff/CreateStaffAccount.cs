@@ -43,7 +43,7 @@ public class CreateStaffAccountEndpoint(IMediator mediator)
       return;
     }
 
-    await SendAsync(new CreateStaffAccountResponse
+    await Send.ResponseAsync(new CreateStaffAccountResponse
     {
       Username = result.Value.Username,
       TemporaryPassword = result.Value.TemporaryPassword

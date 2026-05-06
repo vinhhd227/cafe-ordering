@@ -30,7 +30,7 @@ public class RefreshTokenEndpoint(IMediator mediator, IWebHostEnvironment env)
 
     if (string.IsNullOrWhiteSpace(token))
     {
-      await SendAsync(new RefreshTokenResponse { Success = false, Message = "Refresh token is required" }, 400, ct);
+      await Send.ResponseAsync(new RefreshTokenResponse { Success = false, Message = "Refresh token is required" }, 400, ct);
       return;
     }
 
@@ -38,7 +38,7 @@ public class RefreshTokenEndpoint(IMediator mediator, IWebHostEnvironment env)
 
     if (!result.IsSuccess)
     {
-      await SendAsync(new RefreshTokenResponse { Success = false, Message = "Invalid or expired refresh token" }, 401, ct);
+      await Send.ResponseAsync(new RefreshTokenResponse { Success = false, Message = "Invalid or expired refresh token" }, 401, ct);
       return;
     }
 
@@ -54,7 +54,7 @@ public class RefreshTokenEndpoint(IMediator mediator, IWebHostEnvironment env)
 
     HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken, cookieOptions);
 
-    await SendOkAsync(new RefreshTokenResponse
+    await Send.OkAsync(new RefreshTokenResponse
     {
       Success = true,
       Message = "Token refreshed successfully",

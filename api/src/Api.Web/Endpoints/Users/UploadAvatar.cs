@@ -40,21 +40,21 @@ public class UploadAvatarEndpoint(IMediator mediator, IFileStorageService storag
     if (file is null || file.Length == 0)
     {
       AddError("file", "No file provided.");
-      await SendErrorsAsync(400, ct);
+      await Send.ErrorsAsync(400, ct);
       return;
     }
 
     if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
     {
       AddError("file", "Only image files are allowed (JPEG, PNG, WEBP).");
-      await SendErrorsAsync(400, ct);
+      await Send.ErrorsAsync(400, ct);
       return;
     }
 
     if (file.Length > MaxFileSizeBytes)
     {
       AddError("file", "Avatar size must not exceed 2 MB.");
-      await SendErrorsAsync(400, ct);
+      await Send.ErrorsAsync(400, ct);
       return;
     }
 
@@ -68,7 +68,7 @@ public class UploadAvatarEndpoint(IMediator mediator, IFileStorageService storag
       return;
     }
 
-    await SendAsync(new UploadAvatarResponse { AvatarUrl = avatarUrl }, StatusCodes.Status200OK, ct);
+    await Send.OkAsync(new UploadAvatarResponse { AvatarUrl = avatarUrl }, ct);
   }
 }
 
@@ -78,7 +78,7 @@ public class UploadAvatarSummary : Summary<UploadAvatarEndpoint>
   {
     Summary = "Upload avatar for a user";
     Description = "Uploads an avatar image (JPEG, PNG, WEBP, max 2 MB) and saves the URL to the user's profile.";
-    Response<UploadAvatarResponse>(200, "Avatar uploaded successfully");
+    Response<UploadAvatarResponse>(StatusCodes.Status200OK, "Avatar uploaded successfully");
     Response(400, "Invalid file (missing, not an image, or too large)");
     Response(401, "Unauthorized");
     Response(403, "Forbidden");

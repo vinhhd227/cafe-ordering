@@ -27,6 +27,6 @@ public class HealthCheck : Ep.NoReq.Res<HealthCheckResponse>
 
   public override async Task HandleAsync(CancellationToken ct)
   {
-    await SendOkAsync(new HealthCheckResponse(), ct);
+    await Send.OkAsync(new HealthCheckResponse(), ct);
   }
 }

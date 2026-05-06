@@ -1,4 +1,5 @@
 using Api.UseCases.Interfaces;
+using FluentValidation;
 
 namespace Api.Web.Endpoints.Auth;
 
@@ -20,6 +21,14 @@ public sealed class CheckUsernameResponse
   public bool Exists { get; init; }
 }
 
+sealed class CheckUsernameRequestValidator : Validator<CheckUsernameRequest>
+{
+  public CheckUsernameRequestValidator()
+  {
+    RuleFor(x => x.Username).NotEmpty().WithMessage("Username is required");
+  }
+}
+
 public class CheckUsernameEndpoint(IIdentityService identityService)
   : Ep.Req<CheckUsernameRequest>.Res<CheckUsernameResponse>
 {
@@ -34,6 +43,6 @@ public class CheckUsernameEndpoint(IIdentityService identityService)
   public override async Task HandleAsync(CheckUsernameRequest req, CancellationToken ct)
   {
     var isAvailable = await identityService.IsUsernameAvailableAsync(req.Username);
-    await SendOkAsync(new CheckUsernameResponse { Exists = !isAvailable }, ct);
+    await Send.OkAsync(new CheckUsernameResponse { Exists = !isAvailable }, ct);
   }
 }

@@ -36,20 +36,20 @@ public class GetCurrentUserEndpoint(UserManager<ApplicationUser> userManager)
     var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
     if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
     {
-      await SendUnauthorizedAsync(ct);
+      await Send.UnauthorizedAsync(ct);
       return;
     }
 
     var user = await userManager.FindByIdAsync(userId.ToString());
     if (user == null || !user.IsActive)
     {
-      await SendUnauthorizedAsync(ct);
+      await Send.UnauthorizedAsync(ct);
       return;
     }
 
     var roles = await userManager.GetRolesAsync(user);
 
-    await SendOkAsync(new GetCurrentUserResponse
+    await Send.OkAsync(new GetCurrentUserResponse
     {
       Success = true,
       User = new UserDto

@@ -34,27 +34,27 @@ public class UploadImage(IFileStorageService storage) : Endpoint<UploadImageRequ
     if (file is null || file.Length == 0)
     {
       AddError("file", "No file provided.");
-      await SendErrorsAsync(400, ct);
+      await Send.ErrorsAsync(400, ct);
       return;
     }
 
     if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
     {
       AddError("file", "Only image files are allowed (JPEG, PNG, WEBP, GIF).");
-      await SendErrorsAsync(400, ct);
+      await Send.ErrorsAsync(400, ct);
       return;
     }
 
     if (file.Length > MaxFileSizeBytes)
     {
       AddError("file", "File size must not exceed 5 MB.");
-      await SendErrorsAsync(400, ct);
+      await Send.ErrorsAsync(400, ct);
       return;
     }
 
     await using var stream = file.OpenReadStream();
     var url = await storage.UploadAsync(stream, file.FileName, file.ContentType, ct);
 
-    await SendAsync(new UploadImageResponse { Url = url }, StatusCodes.Status200OK, ct);
+    await Send.OkAsync(new UploadImageResponse { Url = url }, ct);
   }
 }

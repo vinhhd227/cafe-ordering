@@ -31,7 +31,7 @@ public class ChatRecipe(IMediator mediator) : Endpoint<ChatRecipeHttpRequest, Ch
     var result = await mediator.Send(query, ct);
 
     if (result.IsSuccess)
-      await SendAsync(new ChatRecipeHttpResponse { Reply = result.Value }, cancellation: ct);
+      await Send.ResponseAsync(new ChatRecipeHttpResponse { Reply = result.Value }, cancellation: ct);
     else
       await this.SendResultAsync(result, ct);
   }
