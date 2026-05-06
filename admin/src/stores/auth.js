@@ -149,8 +149,10 @@ export const useAuthStore = defineStore("auth", {
 
     scheduleTokenRefresh() {
       this.clearTokenRefresh();
-      if (!this.expiresAt) return;
-      const expiresAtMs = new Date(this.expiresAt).getTime();
+      if (!this.accessToken) return;
+      const payload = parseJwt(this.accessToken);
+      if (!payload.exp) return;
+      const expiresAtMs = payload.exp * 1000; // exp là Unix timestamp tính bằng giây
       const refreshAtMs = Math.max(expiresAtMs - 30_000, Date.now() + 1_000);
       const delay = refreshAtMs - Date.now();
       this.refreshTimer = setTimeout(() => {
