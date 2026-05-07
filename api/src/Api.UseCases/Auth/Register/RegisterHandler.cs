@@ -1,4 +1,4 @@
-using Api.Core.Aggregates.CustomerAggregate;
+﻿using Api.Core.Aggregates.CustomerAggregate;
 using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.Register;
@@ -29,7 +29,8 @@ public class RegisterHandler : ICommandHandler<RegisterCommand, Result<RegisterR
       email: cmd.Email,
       password: cmd.Password,
       fullName: cmd.FullName,
-      role: "Customer");
+      role: "Customer",
+      ct: ct);
 
     if (!identityResult.IsSuccess)
     {

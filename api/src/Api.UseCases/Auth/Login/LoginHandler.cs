@@ -1,4 +1,4 @@
-using Api.UseCases.Interfaces;
+﻿using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.Login;
 
@@ -13,6 +13,6 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result<AuthResponseDto
 
   public async ValueTask<Result<AuthResponseDto>> Handle(LoginCommand cmd, CancellationToken ct)
   {
-    return await _identityService.LoginAsync(cmd.Username, cmd.Password, cmd.App, cmd.RememberMe);
+    return await _identityService.LoginAsync(cmd.Username, cmd.Password, cmd.App, cmd.RememberMe, ct);
   }
 }

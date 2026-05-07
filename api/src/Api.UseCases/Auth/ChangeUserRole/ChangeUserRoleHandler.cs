@@ -1,4 +1,4 @@
-using Api.UseCases.Interfaces;
+﻿using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.ChangeUserRole;
 
@@ -12,5 +12,5 @@ public class ChangeUserRoleHandler : ICommandHandler<ChangeUserRoleCommand, Resu
   }
 
   public async ValueTask<Result> Handle(ChangeUserRoleCommand cmd, CancellationToken ct)
-    => await _identityService.ChangeUserRoleAsync(cmd.UserId, cmd.Role);
+    => await _identityService.ChangeUserRoleAsync(cmd.UserId, cmd.Role, ct);
 }

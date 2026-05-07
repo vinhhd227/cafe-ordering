@@ -1,4 +1,4 @@
-using Api.UseCases.Interfaces;
+﻿using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.ChangePassword;
 
@@ -21,6 +21,6 @@ public class ChangePasswordHandler : ICommandHandler<ChangePasswordCommand, Resu
     if (string.IsNullOrWhiteSpace(userIdString) || !Guid.TryParse(userIdString, out var userId))
       return Result.Unauthorized();
 
-    return await _identityService.ChangePasswordAsync(userId, cmd.CurrentPassword, cmd.NewPassword);
+    return await _identityService.ChangePasswordAsync(userId, cmd.CurrentPassword, cmd.NewPassword, ct);
   }
 }

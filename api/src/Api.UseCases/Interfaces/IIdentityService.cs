@@ -17,26 +17,27 @@ public interface IIdentityService
     string? email,
     string password,
     string fullName,
-    string role);
+    string role,
+    CancellationToken ct = default);
 
   /// <summary>
   /// Authenticate user by username and generate JWT + refresh token.
   /// Returns Forbidden if the user's role lacks the required app access permission.
   /// </summary>
-  Task<Result<AuthResponseDto>> LoginAsync(string username, string password, AppType app, bool rememberMe);
+  Task<Result<AuthResponseDto>> LoginAsync(string username, string password, AppType app, bool rememberMe, CancellationToken ct = default);
 
   /// <summary>
   /// Refresh access token using a refresh token.
   /// Rotates the token (old is revoked, new is issued).
   /// On suspicious usage (token not found or revoked), all user tokens are revoked.
   /// </summary>
-  Task<Result<AuthResponseDto>> RefreshTokenAsync(string refreshToken);
+  Task<Result<AuthResponseDto>> RefreshTokenAsync(string refreshToken, CancellationToken ct = default);
 
   /// <summary>
   /// Revoke a specific refresh token (used on logout).
   /// Returns NotFound if the token does not exist.
   /// </summary>
-  Task<Result> RevokeTokenAsync(string refreshToken);
+  Task<Result> RevokeTokenAsync(string refreshToken, CancellationToken ct = default);
 
   /// <summary>
   /// Create a staff account with an auto-generated temporary password.
@@ -44,76 +45,77 @@ public interface IIdentityService
   Task<Result<TemporaryPasswordDto>> CreateStaffAccountAsync(
     string username,
     string fullName,
-    string role);
+    string role,
+    CancellationToken ct = default);
 
   /// <summary>
   /// Change user password. Revokes all refresh tokens after a successful change.
   /// </summary>
-  Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
+  Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken ct = default);
 
   /// <summary>
   /// Deactivate user account (prevents login) and revoke all refresh tokens.
   /// </summary>
-  Task<Result> DeactivateUserAsync(Guid userId);
+  Task<Result> DeactivateUserAsync(Guid userId, CancellationToken ct = default);
 
   /// <summary>
   /// Check whether a username is available (not yet taken).
   /// Used for real-time availability check during registration.
   /// </summary>
-  Task<bool> IsUsernameAvailableAsync(string username);
+  Task<bool> IsUsernameAvailableAsync(string username, CancellationToken ct = default);
 
   /// <summary>
   /// Get a paged, filterable list of all users for admin management.
   /// </summary>
-  Task<Result<PagedUsersDto>> GetUsersAsync(int page, int pageSize, string? search, string? role, bool? isActive);
+  Task<Result<PagedUsersDto>> GetUsersAsync(int page, int pageSize, string? search, string? role, bool? isActive, CancellationToken ct = default);
 
   /// <summary>
   /// Update a user's FullName and Email.
   /// </summary>
-  Task<Result> UpdateUserAsync(Guid userId, string fullName, string? email);
+  Task<Result> UpdateUserAsync(Guid userId, string fullName, string? email, CancellationToken ct = default);
 
   /// <summary>
   /// Update a user's avatar URL.
   /// </summary>
-  Task<Result<string>> UpdateAvatarAsync(Guid userId, string avatarUrl);
+  Task<Result<string>> UpdateAvatarAsync(Guid userId, string avatarUrl, CancellationToken ct = default);
 
   /// <summary>
   /// Re-activate a previously deactivated user account.
   /// </summary>
-  Task<Result> ActivateUserAsync(Guid userId);
+  Task<Result> ActivateUserAsync(Guid userId, CancellationToken ct = default);
 
   /// <summary>
   /// Reset a user's password to a newly generated temporary password.
   /// Revokes all active refresh tokens after the reset.
   /// </summary>
-  Task<Result<TemporaryPasswordDto>> ResetUserPasswordAsync(Guid userId);
+  Task<Result<TemporaryPasswordDto>> ResetUserPasswordAsync(Guid userId, CancellationToken ct = default);
 
   /// <summary>
   /// Replace all current roles of a user with a single new role.
   /// </summary>
-  Task<Result> ChangeUserRoleAsync(Guid userId, string newRole);
+  Task<Result> ChangeUserRoleAsync(Guid userId, string newRole, CancellationToken ct = default);
 
   /// <summary>
   /// Get a single user by ID for the admin detail view.
   /// </summary>
-  Task<Result<UserDto>> GetUserByIdAsync(Guid userId);
+  Task<Result<UserDto>> GetUserByIdAsync(Guid userId, CancellationToken ct = default);
 
   // ===== Role Management =====
 
   /// <summary>Get a paged, searchable list of all roles.</summary>
-  Task<Result<PagedRolesDto>> GetRolesAsync(int page, int pageSize, string? search);
+  Task<Result<PagedRolesDto>> GetRolesAsync(int page, int pageSize, string? search, CancellationToken ct = default);
 
   /// <summary>Get a single role by ID.</summary>
-  Task<Result<RoleDto>> GetRoleByIdAsync(Guid roleId);
+  Task<Result<RoleDto>> GetRoleByIdAsync(Guid roleId, CancellationToken ct = default);
 
   /// <summary>Create a new role. Returns Conflict if name already exists.</summary>
-  Task<Result> CreateRoleAsync(string name, string? description);
+  Task<Result> CreateRoleAsync(string name, string? description, CancellationToken ct = default);
 
   /// <summary>Update a role's name and description.</summary>
-  Task<Result> UpdateRoleAsync(Guid roleId, string name, string? description);
+  Task<Result> UpdateRoleAsync(Guid roleId, string name, string? description, CancellationToken ct = default);
 
   /// <summary>Delete a role. Returns Conflict if users are still assigned.</summary>
-  Task<Result> DeleteRoleAsync(Guid roleId);
+  Task<Result> DeleteRoleAsync(Guid roleId, CancellationToken ct = default);
 
   // ===== Role Permissions =====
 
@@ -121,13 +123,13 @@ public interface IIdentityService
   /// Get all known permissions with their descriptions,
   /// flagging which ones are currently assigned to the given role.
   /// </summary>
-  Task<Result<List<RolePermissionDto>>> GetRolePermissionsAsync(Guid roleId);
+  Task<Result<List<RolePermissionDto>>> GetRolePermissionsAsync(Guid roleId, CancellationToken ct = default);
 
   /// <summary>
   /// Replace all permission claims on a role with the provided set.
   /// Unknown permission values are rejected with Invalid result.
   /// </summary>
-  Task<Result> SetRolePermissionsAsync(Guid roleId, IList<string> permissions);
+  Task<Result> SetRolePermissionsAsync(Guid roleId, IList<string> permissions, CancellationToken ct = default);
 }
 
 /// <summary>Response returned after a successful login or token refresh.</summary>

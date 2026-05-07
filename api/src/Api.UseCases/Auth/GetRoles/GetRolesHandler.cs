@@ -1,4 +1,4 @@
-using Api.UseCases.Common.Interfaces;
+﻿using Api.UseCases.Common.Interfaces;
 using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.GetRoles;
@@ -14,6 +14,6 @@ public class GetRolesHandler : IQueryHandler<GetRolesQuery, Result<PagedRolesDto
 
   public async ValueTask<Result<PagedRolesDto>> Handle(GetRolesQuery query, CancellationToken ct)
   {
-    return await _identityService.GetRolesAsync(query.Page, query.PageSize, query.Search);
+    return await _identityService.GetRolesAsync(query.Page, query.PageSize, query.Search, ct);
   }
 }

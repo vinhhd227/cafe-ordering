@@ -1,4 +1,4 @@
-using Api.UseCases.Interfaces;
+﻿using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.UpdateUser;
 
@@ -13,6 +13,6 @@ public class UpdateUserHandler : ICommandHandler<UpdateUserCommand, Result>
 
   public async ValueTask<Result> Handle(UpdateUserCommand cmd, CancellationToken ct)
   {
-    return await _identityService.UpdateUserAsync(cmd.UserId, cmd.FullName, cmd.Email);
+    return await _identityService.UpdateUserAsync(cmd.UserId, cmd.FullName, cmd.Email, ct);
   }
 }

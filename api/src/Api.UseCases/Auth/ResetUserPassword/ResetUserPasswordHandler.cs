@@ -1,4 +1,4 @@
-using Api.Core.Interfaces;
+﻿using Api.Core.Interfaces;
 using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.ResetUserPassword;
@@ -11,6 +11,6 @@ public class ResetUserPasswordHandler(IIdentityService identityService, ICurrent
     if (currentUser.UserId == cmd.UserId.ToString())
       return Result<TemporaryPasswordDto>.Forbidden();
 
-    return await identityService.ResetUserPasswordAsync(cmd.UserId);
+    return await identityService.ResetUserPasswordAsync(cmd.UserId, ct);
   }
 }

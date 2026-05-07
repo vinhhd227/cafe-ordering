@@ -1,4 +1,4 @@
-using Api.UseCases.Interfaces;
+﻿using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.ActivateUser;
 
@@ -13,6 +13,6 @@ public class ActivateUserHandler : ICommandHandler<ActivateUserCommand, Result>
 
   public async ValueTask<Result> Handle(ActivateUserCommand cmd, CancellationToken ct)
   {
-    return await _identityService.ActivateUserAsync(cmd.UserId);
+    return await _identityService.ActivateUserAsync(cmd.UserId, ct);
   }
 }

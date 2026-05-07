@@ -1,4 +1,4 @@
-using Api.UseCases.Common.Interfaces;
+﻿using Api.UseCases.Common.Interfaces;
 using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.UpdateRole;
@@ -17,6 +17,6 @@ public class UpdateRoleHandler : ICommandHandler<UpdateRoleCommand, Result>
     if (string.IsNullOrWhiteSpace(cmd.Name))
       return Result.Invalid(new ValidationError(nameof(cmd.Name), "Role name is required."));
 
-    return await _identityService.UpdateRoleAsync(cmd.RoleId, cmd.Name.Trim(), cmd.Description?.Trim());
+    return await _identityService.UpdateRoleAsync(cmd.RoleId, cmd.Name.Trim(), cmd.Description?.Trim(), ct);
   }
 }

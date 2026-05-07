@@ -1,4 +1,4 @@
-using Api.UseCases.Interfaces;
+﻿using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.CreateStaffAccount;
 
@@ -12,5 +12,5 @@ public class CreateStaffAccountHandler : ICommandHandler<CreateStaffAccountComma
   }
 
   public async ValueTask<Result<TemporaryPasswordDto>> Handle(CreateStaffAccountCommand cmd, CancellationToken ct)
-    => await _identityService.CreateStaffAccountAsync(cmd.Username, cmd.FullName, cmd.Role);
+    => await _identityService.CreateStaffAccountAsync(cmd.Username, cmd.FullName, cmd.Role, ct);
 }

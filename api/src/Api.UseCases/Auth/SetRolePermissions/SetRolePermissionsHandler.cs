@@ -1,4 +1,4 @@
-using Api.UseCases.Common.Interfaces;
+﻿using Api.UseCases.Common.Interfaces;
 using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.SetRolePermissions;
@@ -14,6 +14,6 @@ public class SetRolePermissionsHandler : ICommandHandler<SetRolePermissionsComma
 
   public async ValueTask<Result> Handle(SetRolePermissionsCommand cmd, CancellationToken ct)
   {
-    return await _identityService.SetRolePermissionsAsync(cmd.RoleId, cmd.Permissions);
+    return await _identityService.SetRolePermissionsAsync(cmd.RoleId, cmd.Permissions, ct);
   }
 }

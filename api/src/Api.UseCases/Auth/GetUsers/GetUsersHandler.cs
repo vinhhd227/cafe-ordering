@@ -1,4 +1,4 @@
-using Api.UseCases.Interfaces;
+﻿using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.GetUsers;
 
@@ -18,6 +18,7 @@ public class GetUsersHandler : IQueryHandler<GetUsersQuery, Result<PagedUsersDto
       query.PageSize,
       query.Search,
       query.Role,
-      query.IsActive);
+      query.IsActive,
+      ct);
   }
 }

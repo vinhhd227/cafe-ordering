@@ -1,4 +1,4 @@
-using Api.UseCases.Common.Interfaces;
+﻿using Api.UseCases.Common.Interfaces;
 using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.GetRole;
@@ -14,6 +14,6 @@ public class GetRoleHandler : IQueryHandler<GetRoleQuery, Result<RoleDto>>
 
   public async ValueTask<Result<RoleDto>> Handle(GetRoleQuery query, CancellationToken ct)
   {
-    return await _identityService.GetRoleByIdAsync(query.RoleId);
+    return await _identityService.GetRoleByIdAsync(query.RoleId, ct);
   }
 }

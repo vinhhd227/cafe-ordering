@@ -1,4 +1,4 @@
-using Api.UseCases.Interfaces;
+﻿using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.RefreshToken;
 
@@ -13,6 +13,6 @@ public class RefreshTokenHandler : ICommandHandler<RefreshTokenCommand, Result<A
 
   public async ValueTask<Result<AuthResponseDto>> Handle(RefreshTokenCommand cmd, CancellationToken ct)
   {
-    return await _identityService.RefreshTokenAsync(cmd.RefreshToken);
+    return await _identityService.RefreshTokenAsync(cmd.RefreshToken, ct);
   }
 }

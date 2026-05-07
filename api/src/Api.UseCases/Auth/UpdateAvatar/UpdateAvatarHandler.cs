@@ -1,4 +1,4 @@
-using Api.UseCases.Interfaces;
+﻿using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.UpdateAvatar;
 
@@ -7,6 +7,6 @@ public class UpdateAvatarHandler(IIdentityService identityService)
 {
   public async ValueTask<Result<string>> Handle(UpdateAvatarCommand cmd, CancellationToken ct)
   {
-    return await identityService.UpdateAvatarAsync(cmd.UserId, cmd.AvatarUrl);
+    return await identityService.UpdateAvatarAsync(cmd.UserId, cmd.AvatarUrl, ct);
   }
 }

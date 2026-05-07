@@ -1,4 +1,4 @@
-using Api.UseCases.Common.Interfaces;
+﻿using Api.UseCases.Common.Interfaces;
 using Api.UseCases.Interfaces;
 
 namespace Api.UseCases.Auth.DeleteRole;
@@ -14,6 +14,6 @@ public class DeleteRoleHandler : ICommandHandler<DeleteRoleCommand, Result>
 
   public async ValueTask<Result> Handle(DeleteRoleCommand cmd, CancellationToken ct)
   {
-    return await _identityService.DeleteRoleAsync(cmd.RoleId);
+    return await _identityService.DeleteRoleAsync(cmd.RoleId, ct);
   }
 }
