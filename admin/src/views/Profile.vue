@@ -410,6 +410,7 @@ const savePassword = async () => {
             toggleMask
             class="tw:w-full"
             input-class="tw:w-full"
+            :inputProps="{ autocomplete: 'current-password' }"
           />
         </div>
 
@@ -424,6 +425,7 @@ const savePassword = async () => {
             toggleMask
             class="tw:w-full"
             input-class="tw:w-full"
+            :inputProps="{ autocomplete: 'new-password' }"
           />
         </div>
 
@@ -438,6 +440,7 @@ const savePassword = async () => {
             toggleMask
             class="tw:w-full"
             input-class="tw:w-full"
+            :inputProps="{ autocomplete: 'new-password' }"
           />
         </div>
 

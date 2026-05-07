@@ -276,6 +276,7 @@ onBeforeUnmount(() => {
               id="username"
               type="text"
               fluid
+              autocomplete="username"
               placeholder="your-username"
               v-model="username"
               v-bind="usernameAttrs"
@@ -323,6 +324,7 @@ onBeforeUnmount(() => {
               fluid
               v-model="password"
               v-bind="passwordAttrs"
+              :inputProps="{ autocomplete: 'new-password' }"
               :pt="passwordCustom"
             />
             <prime-message
