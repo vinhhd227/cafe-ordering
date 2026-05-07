@@ -7,6 +7,8 @@ switch ($action) {
     Invoke-Expression "$COMPOSE_CMD up -d --build"
     Write-Host "==> Done! Services are running:"
     Invoke-Expression "$COMPOSE_CMD ps"
+    Write-Host ""
+    Write-Host "==> Seq UI: http://localhost:5341"
   }
   "down" {
     Write-Host "==> Stopping dev services..."
@@ -18,6 +20,8 @@ switch ($action) {
     Invoke-Expression "$COMPOSE_CMD up -d --build"
     Write-Host "==> Done! Services are running:"
     Invoke-Expression "$COMPOSE_CMD ps"
+    Write-Host ""
+    Write-Host "==> Seq UI: http://localhost:5341"
   }
   "logs" {
     $service = if ($args.Count -gt 1) { $args[1] } else { "" }
@@ -26,8 +30,11 @@ switch ($action) {
   "ps" {
     Invoke-Expression "$COMPOSE_CMD ps"
   }
+  "seq" {
+    Start-Process "http://localhost:5341"
+  }
   default {
-    Write-Host "Usage: .\dev.ps1 [up|down|restart|logs [service]|ps]"
+    Write-Host "Usage: .\dev.ps1 [up|down|restart|logs [service]|ps|seq]"
     exit 1
   }
 }

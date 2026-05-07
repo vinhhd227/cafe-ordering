@@ -12,6 +12,8 @@ case "${1:-up}" in
     $COMPOSE_CMD up -d --build
     echo "==> Done! Services are running:"
     $COMPOSE_CMD ps
+    echo ""
+    echo "==> Seq UI: http://localhost:5341"
     ;;
   down)
     echo "==> Stopping dev services..."
@@ -23,6 +25,8 @@ case "${1:-up}" in
     $COMPOSE_CMD up -d --build
     echo "==> Done! Services are running:"
     $COMPOSE_CMD ps
+    echo ""
+    echo "==> Seq UI: http://localhost:5341"
     ;;
   logs)
     $COMPOSE_CMD logs -f "${2:-}"
@@ -30,8 +34,11 @@ case "${1:-up}" in
   ps)
     $COMPOSE_CMD ps
     ;;
+  seq)
+    xdg-open "http://localhost:5341" 2>/dev/null || open "http://localhost:5341" 2>/dev/null || echo "==> Seq UI: http://localhost:5341"
+    ;;
   *)
-    echo "Usage: $0 [up|down|restart|logs [service]|ps]"
+    echo "Usage: $0 [up|down|restart|logs [service]|ps|seq]"
     exit 1
     ;;
 esac
