@@ -116,7 +116,7 @@ public class IdentityService(
 
     if (storedToken is null || storedToken.IsRevoked)
     {
-      // Token not found or already revoked → possible token theft
+      // Token not found or already revoked; possible token theft
       if (storedToken is not null)
       {
         logger.LogWarning(
@@ -289,7 +289,7 @@ public class IdentityService(
 
     if (!string.IsNullOrWhiteSpace(role))
       query = query.Where(u =>
-        u.UserRoles.Any(ur => ur.Role!.Name == role));
+        u.UserRoles.Any(ur => ur.Role.Name == role));
 
     if (isActive.HasValue)
       query = query.Where(u => u.IsActive == isActive.Value);
@@ -307,7 +307,7 @@ public class IdentityService(
       u.UserName!,
       u.FullName,
       u.Email,
-      u.UserRoles.Select(ur => ur.Role!.Name!).ToList(),
+      u.UserRoles.Select(ur => ur.Role.Name!).ToList(),
       u.IsActive,
       u.CreatedAt
     )).ToList();
@@ -406,7 +406,7 @@ public class IdentityService(
       user.UserName!,
       user.FullName,
       user.Email,
-      user.UserRoles.Select(ur => ur.Role!.Name!).ToList(),
+      user.UserRoles.Select(ur => ur.Role.Name!).ToList(),
       user.IsActive,
       user.CreatedAt));
   }

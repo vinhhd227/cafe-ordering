@@ -8,7 +8,7 @@ namespace Api.Infrastructure.Identity;
 /// Identity-only DbContext. Handles authentication data:
 /// Users, Roles, Claims, Tokens — separated from business data.
 /// </summary>
-public class AppIdentityDbContext : IdentityDbContext<
+public class AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> options) : IdentityDbContext<
   ApplicationUser,
   ApplicationRole,
   Guid,
@@ -16,12 +16,8 @@ public class AppIdentityDbContext : IdentityDbContext<
   ApplicationUserRole,
   IdentityUserLogin<Guid>,
   ApplicationRoleClaim,
-  IdentityUserToken<Guid>>
+  IdentityUserToken<Guid>>(options)
 {
-  public AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> options) : base(options)
-  {
-  }
-
   /// <summary>
   /// One row per user session. Simple revocable refresh tokens.
   /// </summary>
