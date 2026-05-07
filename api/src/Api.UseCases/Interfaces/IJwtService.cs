@@ -27,8 +27,12 @@ public interface IJwtService
   string GenerateRefreshToken();
 
   /// <summary>
-  /// Validate JWT token signature/issuer/audience (does NOT validate lifetime — used for refresh flow).
-  /// Returns null if token is invalid.
+  /// Extracts claims from a token without validating its lifetime.
+  /// <para>
+  /// ⚠️ ONLY use for the refresh-token flow — this method intentionally bypasses expiry validation.
+  /// Do NOT use for authenticating active requests (ASP.NET middleware handles that with lifetime checks).
+  /// </para>
+  /// Returns null if the token signature, issuer, or audience is invalid.
   /// </summary>
-  ClaimsPrincipal? ValidateToken(string token);
+  ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
 }

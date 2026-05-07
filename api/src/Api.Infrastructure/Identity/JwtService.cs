@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Api.UseCases.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Infrastructure.Identity;
@@ -15,18 +14,29 @@ namespace Api.Infrastructure.Identity;
 /// </summary>
 public class JwtService : IJwtService
 {
-  private readonly string _key;
+  private static readonly JwtSecurityTokenHandler TokenHandler = new();
+
+  private readonly ILogger<JwtService> _logger;
+  private readonly SymmetricSecurityKey _signingKey;
+  private readonly SigningCredentials _credentials;
   private readonly string _issuer;
   private readonly string _audience;
   private readonly int _expiryMinutes;
 
-  public JwtService(IConfiguration configuration)
+  public JwtService(IConfiguration configuration, ILogger<JwtService> logger)
   {
-    _key = configuration["Jwt:Key"]
+    _logger = logger;
+
+    var rawKey = configuration["Jwt:Key"]
       ?? throw new InvalidOperationException("JWT Key not configured (Jwt:Key)");
-    _issuer = configuration["Jwt:Issuer"]
-      ?? throw new InvalidOperationException("JWT Issuer not configured (Jwt:Issuer)");
-    _audience = configuration["Jwt:Audience"] ?? _issuer;
+
+    if (Encoding.UTF8.GetByteCount(rawKey) < 32)
+      throw new InvalidOperationException("Jwt:Key must be at least 256 bits (32 bytes).");
+
+    _signingKey  = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(rawKey));
+    _credentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
+    _issuer      = configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured (Jwt:Issuer)");
+    _audience    = configuration["Jwt:Audience"] ?? _issuer;
     _expiryMinutes = int.TryParse(configuration["Jwt:ExpiresMinutes"], out var m) ? m : 15;
   }
 
@@ -40,8 +50,11 @@ public class JwtService : IJwtService
     Guid? customerId = null,
     string? avatarUrl = null)
   {
+    var now = DateTime.UtcNow;
     var claims = new List<Claim>
     {
+      new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+      new(JwtRegisteredClaimNames.Iat, new DateTimeOffset(now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
       new(JwtRegisteredClaimNames.Sub, userId.ToString()),
       new(ClaimTypes.NameIdentifier, userId.ToString()),
       new("username", username),
@@ -63,17 +76,15 @@ public class JwtService : IJwtService
     if (!string.IsNullOrEmpty(avatarUrl))
       claims.Add(new Claim("avatarUrl", avatarUrl));
 
-    var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
-    var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-
     var token = new JwtSecurityToken(
       issuer: _issuer,
       audience: _audience,
       claims: claims,
-      expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
-      signingCredentials: credentials);
+      notBefore: now,
+      expires: now.AddMinutes(_expiryMinutes),
+      signingCredentials: _credentials);
 
-    return new JwtSecurityTokenHandler().WriteToken(token);
+    return TokenHandler.WriteToken(token);
   }
 
   public string GenerateRefreshToken()
@@ -84,29 +95,40 @@ public class JwtService : IJwtService
     return Convert.ToBase64String(randomBytes);
   }
 
-  public ClaimsPrincipal? ValidateToken(string token)
+  /// <summary>
+  /// Extracts claims from a token without validating its lifetime.
+  /// <para>
+  /// ⚠️ ONLY use for the refresh-token flow — this method intentionally bypasses expiry validation.
+  /// Do NOT use for authenticating active requests (ASP.NET middleware handles that with lifetime checks).
+  /// </para>
+  /// Returns null if the token signature, issuer, or audience is invalid.
+  /// </summary>
+  public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
   {
-    var tokenHandler = new JwtSecurityTokenHandler();
-    var signingKey = Encoding.UTF8.GetBytes(_key);
-
     try
     {
-      var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
+      var principal = TokenHandler.ValidateToken(token, new TokenValidationParameters
       {
         ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(signingKey),
+        IssuerSigningKey = _signingKey,
         ValidateIssuer = true,
         ValidIssuer = _issuer,
         ValidateAudience = true,
         ValidAudience = _audience,
-        ValidateLifetime = false // Don't validate expiry — used for refresh flow
+        ValidateLifetime = false // intentional — used for refresh flow only
       }, out _);
 
       return principal;
     }
-    catch
+    catch (SecurityTokenException ex)
     {
+      _logger.LogDebug(ex, "JWT validation failed: {Reason}", ex.Message);
+      return null;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogWarning(ex, "Unexpected error during JWT validation");
       return null;
     }
   }
