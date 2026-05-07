@@ -19,13 +19,14 @@ public class LoginClientEndpoint(IMediator mediator, IWebHostEnvironment env) : 
 
         if (result.Status == Ardalis.Result.ResultStatus.Forbidden)
         {
-            await Send.ResponseAsync(new LoginResponse { Success = false, Message = "Account does not have access to the customer site" }, 403, ct);
+            var errorCode = result.Errors.FirstOrDefault() ?? "access_denied";
+            await Send.ResponseAsync(new LoginResponse { Success = false, ErrorCode = errorCode }, 403, ct);
             return;
         }
 
         if (!result.IsSuccess)
         {
-            await Send.ResponseAsync(new LoginResponse { Success = false, Message = "Invalid credentials" }, 401, ct);
+            await Send.UnauthorizedAsync(ct);
             return;
         }
 

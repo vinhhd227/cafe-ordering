@@ -19,8 +19,10 @@ public sealed class LoginRequest
 
 public sealed class LoginResponse
 {
+  
   public bool Success { get; init; }
-  public string Message { get; init; } = string.Empty;
+  public string? Message { get; init; }
+  public string? ErrorCode { get; init; }
   public string? AccessToken { get; init; }
 
   /// <summary>UTC expiry time of the access token.</summary>

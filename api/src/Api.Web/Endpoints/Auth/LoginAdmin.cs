@@ -19,13 +19,13 @@ public class LoginAdminEndpoint(IMediator mediator, IWebHostEnvironment env) : E
 
         if (result.Status == Ardalis.Result.ResultStatus.Forbidden)
         {
-            await Send.ResponseAsync(new LoginResponse { Success = false, Message = "Account does not have access to the admin site" }, 403, ct);
+            await Send.ForbiddenAsync(ct);
             return;
         }
 
         if (!result.IsSuccess)
         {
-            await Send.ResponseAsync(new LoginResponse { Success = false, Message = "Invalid credentials" }, 401, ct);
+            await Send.UnauthorizedAsync(ct);
             return;
         }
 
@@ -36,6 +36,7 @@ public class LoginAdminEndpoint(IMediator mediator, IWebHostEnvironment env) : E
             SameSite = SameSiteMode.Strict,
             Path = "/api/auth"
         };
+        
         if (result.Value.RememberMe)
             cookieOptions.MaxAge = TimeSpan.FromDays(30);
 

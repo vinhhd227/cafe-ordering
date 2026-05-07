@@ -10,7 +10,7 @@ public class LoginAdminSummary : Summary<LoginAdminEndpoint>
                       "Issues a JWT access token and sets an HttpOnly refresh token cookie.";
         Response<LoginResponse>(200, "Login successful — access token returned, refresh token set as HttpOnly cookie");
         Response(400, "Username or password missing");
-        Response(401, "Invalid credentials or account deactivated/locked");
-        Response(403, "Account does not have access to the admin site");
+        Response(401, "Invalid credentials (username not found or wrong password)");
+        Response(403, "Account inactive (account_inactive), locked (account_locked), or lacks admin.access permission (access_denied)");
     }
 }
