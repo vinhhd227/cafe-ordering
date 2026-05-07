@@ -107,6 +107,7 @@ Thumbs.db
 docker-compose.dev.override.yml
 docker-compose.prod.override.yml
 api/src/Api.Web/uploads/
+api/src/Api.Web/logs/
 
 # Database backups
 backups/
