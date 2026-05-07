@@ -1,21 +1,10 @@
 namespace Api.Web.Endpoints.Health;
 
-/// <summary>
-/// Response returned by the health check endpoint.
-/// </summary>
-public sealed class HealthCheckResponse
-{
-  /// <summary>
-  /// Overall health status of the API.
-  /// Always <c>"Healthy"</c> when this endpoint returns HTTP 200.
-  /// </summary>
-  public string Status { get; set; } = "Healthy";
+public sealed record HealthCheckResponse(
+  string Status,
+  DateTime Timestamp);
 
-  /// <summary>UTC timestamp of when the health check was evaluated.</summary>
-  public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-}
-
-public class HealthCheck : Ep.NoReq.Res<HealthCheckResponse>
+public sealed class HealthEndpoint : Ep.NoReq.Res<HealthCheckResponse>
 {
   public override void Configure()
   {
@@ -25,8 +14,8 @@ public class HealthCheck : Ep.NoReq.Res<HealthCheckResponse>
     Description(b => b.WithTags("System"));
   }
 
-  public override async Task HandleAsync(CancellationToken ct)
+  public override Task HandleAsync(CancellationToken ct)
   {
-    await Send.OkAsync(new HealthCheckResponse(), ct);
+    return Send.OkAsync(new HealthCheckResponse("Healthy", DateTime.UtcNow), ct);
   }
 }
