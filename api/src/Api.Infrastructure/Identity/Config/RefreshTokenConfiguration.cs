@@ -12,7 +12,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
     builder.HasKey(t => t.Id);
 
     builder.Property(t => t.Token)
-      .HasMaxLength(256)
+      .HasMaxLength(64)
       .IsRequired();
 
     // Look up by token value (used on every refresh)

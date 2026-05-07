@@ -11,7 +11,7 @@ public class RefreshToken
   /// <summary>FK to AspNetUsers (identity.Users)</summary>
   public Guid UserId { get; set; }
 
-  /// <summary>The refresh token value (random 64-byte Base64 string)</summary>
+  /// <summary>SHA-256 hash of the raw token sent to the client. Never store plaintext.</summary>
   public string Token { get; set; } = string.Empty;
 
   public DateTime ExpiresAt { get; set; }

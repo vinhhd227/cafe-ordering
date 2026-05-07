@@ -1,11 +1,9 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using Api.UseCases.Auth.Login;
 using Api.UseCases.Interfaces;
 using Ardalis.Result;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Api.Infrastructure.Identity;
 
@@ -13,33 +11,17 @@ namespace Api.Infrastructure.Identity;
 /// Implementation of IIdentityService using ASP.NET Core Identity.
 /// Identity DB is separate from business DB — no cross-DB FK.
 /// </summary>
-public class IdentityService : IIdentityService
+public class IdentityService(
+  UserManager<ApplicationUser> userManager,
+  SignInManager<ApplicationUser> signInManager,
+  RoleManager<ApplicationRole> roleManager,
+  IJwtService jwtService,
+  AppIdentityDbContext identityDb,
+  ILogger<IdentityService> logger)
+  : IIdentityService
 {
   private static readonly TimeSpan ShortSession = TimeSpan.FromDays(1);
   private static readonly TimeSpan LongSession  = TimeSpan.FromDays(30);
-
-  private readonly UserManager<ApplicationUser> _userManager;
-  private readonly SignInManager<ApplicationUser> _signInManager;
-  private readonly RoleManager<ApplicationRole> _roleManager;
-  private readonly IJwtService _jwtService;
-  private readonly AppIdentityDbContext _identityDb;
-  private readonly ILogger<IdentityService> _logger;
-
-  public IdentityService(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
-    RoleManager<ApplicationRole> roleManager,
-    IJwtService jwtService,
-    AppIdentityDbContext identityDb,
-    ILogger<IdentityService> logger)
-  {
-    _userManager = userManager;
-    _signInManager = signInManager;
-    _roleManager = roleManager;
-    _jwtService = jwtService;
-    _identityDb = identityDb;
-    _logger = logger;
-  }
 
   /// <summary>
   /// Creates a new application user and assigns a role.
@@ -50,8 +32,11 @@ public class IdentityService : IIdentityService
     string? email,
     string password,
     string fullName,
-    string role)
+    string role,
+    CancellationToken ct = default)
   {
+    await using var tx = await identityDb.Database.BeginTransactionAsync(ct);
+
     var user = new ApplicationUser
     {
       UserName = username,
@@ -62,43 +47,51 @@ public class IdentityService : IIdentityService
       UpdatedAt = DateTime.UtcNow
     };
 
-    var result = await _userManager.CreateAsync(user, password);
+    var result = await userManager.CreateAsync(user, password);
     if (!result.Succeeded)
     {
       var errorMsg = string.Join("; ", result.Errors.Select(e => e.Description));
       return Result<string>.Error(errorMsg);
     }
 
-    await _userManager.AddToRoleAsync(user, role);
+    var roleResult = await userManager.AddToRoleAsync(user, role);
+    if (!roleResult.Succeeded)
+    {
+      return Result<string>.Error(string.Join("; ", roleResult.Errors.Select(e => e.Description)));
+    }
 
-    _logger.LogInformation("Identity user created: {Username} with role {Role}", username, role);
+    await tx.CommitAsync(ct);
+    logger.LogInformation("Identity user created: {Username} with role {Role}", username, role);
 
     return Result<string>.Success(user.Id.ToString());
   }
 
-  public async Task<Result<AuthResponseDto>> LoginAsync(string username, string password, AppType app, bool rememberMe)
+  public async Task<Result<AuthResponseDto>> LoginAsync(string username, string password, AppType app, bool rememberMe, CancellationToken ct = default)
   {
-    var user = await _userManager.FindByNameAsync(username);
-    if (user is null || !user.IsActive)
+    username = username.Trim();
+    var user = await userManager.FindByNameAsync(username);
+    if (user is null)
       return Result<AuthResponseDto>.Unauthorized();
 
-    // Check lockout before attempting sign-in
-    if (await _userManager.IsLockedOutAsync(user))
-      return Result<AuthResponseDto>.Unauthorized();
+    if (!user.IsActive)
+      return Result<AuthResponseDto>.Forbidden("account_inactive");
 
-    var signInResult = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
+    if (await userManager.IsLockedOutAsync(user))
+      return Result<AuthResponseDto>.Forbidden("account_locked");
+
+    var signInResult = await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
     if (!signInResult.Succeeded)
       return Result<AuthResponseDto>.Unauthorized();
 
-    var roles = await _userManager.GetRolesAsync(user);
-    var permissions = await GetUserPermissionsAsync(roles);
+    var roles = await userManager.GetRolesAsync(user);
+    var permissions = await GetUserPermissionsAsync(roles, ct);
 
     // App-level access check
     var requiredPermission = app == AppType.Admin ? "admin.access" : "customer.access";
     if (!permissions.Contains(requiredPermission))
-      return Result<AuthResponseDto>.Forbidden();
+      return Result<AuthResponseDto>.Forbidden("access_denied");
 
-    var accessToken = _jwtService.GenerateAccessToken(
+    var accessToken = jwtService.GenerateAccessToken(
       userId: user.Id,
       username: user.UserName!,
       fullName: user.FullName,
@@ -108,30 +101,28 @@ public class IdentityService : IIdentityService
       customerId: user.CustomerId,
       avatarUrl: user.AvatarUrl);
 
-    var refreshToken = await IssueRefreshTokenAsync(user.Id, rememberMe);
-
-    user.UpdatedAt = DateTime.UtcNow;
-    await _userManager.UpdateAsync(user);
+    var rawRefreshToken = await IssueRefreshTokenAsync(user.Id, rememberMe, ct);
 
     var expiresAt = DateTime.UtcNow.Add(rememberMe ? LongSession : ShortSession);
 
-    return Result<AuthResponseDto>.Success(new AuthResponseDto(accessToken, refreshToken.Token, expiresAt, rememberMe));
+    return Result<AuthResponseDto>.Success(new AuthResponseDto(accessToken, rawRefreshToken, expiresAt, rememberMe));
   }
 
-  public async Task<Result<AuthResponseDto>> RefreshTokenAsync(string refreshToken)
+  public async Task<Result<AuthResponseDto>> RefreshTokenAsync(string refreshToken, CancellationToken ct = default)
   {
-    var storedToken = await _identityDb.RefreshTokens
-      .FirstOrDefaultAsync(t => t.Token == refreshToken);
+    var tokenHash = HashToken(refreshToken);
+    var storedToken = await identityDb.RefreshTokens
+      .FirstOrDefaultAsync(t => t.Token == tokenHash, ct);
 
     if (storedToken is null || storedToken.IsRevoked)
     {
       // Token not found or already revoked → possible token theft
       if (storedToken is not null)
       {
-        _logger.LogWarning(
+        logger.LogWarning(
           "Suspicious refresh attempt for user {UserId}: token already revoked. Revoking all tokens.",
           storedToken.UserId);
-        await RevokeAllUserTokensAsync(storedToken.UserId);
+        await RevokeAllUserTokensAsync(storedToken.UserId, ct);
       }
       return Result<AuthResponseDto>.Unauthorized();
     }
@@ -139,18 +130,18 @@ public class IdentityService : IIdentityService
     if (storedToken.ExpiresAt <= DateTime.UtcNow)
       return Result<AuthResponseDto>.Unauthorized();
 
-    var user = await _userManager.FindByIdAsync(storedToken.UserId.ToString());
+    var user = await userManager.FindByIdAsync(storedToken.UserId.ToString());
     if (user is null || !user.IsActive)
       return Result<AuthResponseDto>.Unauthorized();
 
     // Token rotation: revoke old, issue new
     storedToken.Revoke();
-    await _identityDb.SaveChangesAsync();
+    await identityDb.SaveChangesAsync(ct);
 
-    var roles = await _userManager.GetRolesAsync(user);
-    var permissions = await GetUserPermissionsAsync(roles);
+    var roles = await userManager.GetRolesAsync(user);
+    var permissions = await GetUserPermissionsAsync(roles, ct);
 
-    var newAccessToken = _jwtService.GenerateAccessToken(
+    var newAccessToken = jwtService.GenerateAccessToken(
       userId: user.Id,
       username: user.UserName!,
       fullName: user.FullName,
@@ -161,26 +152,26 @@ public class IdentityService : IIdentityService
       avatarUrl: user.AvatarUrl);
 
     var rememberMe = storedToken.RememberMe;
-    var newRefreshToken = await IssueRefreshTokenAsync(user.Id, rememberMe);
-
-    user.UpdatedAt = DateTime.UtcNow;
-    await _userManager.UpdateAsync(user);
+    var rawRefreshToken = await IssueRefreshTokenAsync(user.Id, rememberMe, ct);
 
     var expiresAt = DateTime.UtcNow.Add(rememberMe ? LongSession : ShortSession);
 
-    return Result<AuthResponseDto>.Success(new AuthResponseDto(newAccessToken, newRefreshToken.Token, expiresAt, rememberMe));
+    return Result<AuthResponseDto>.Success(new AuthResponseDto(newAccessToken, rawRefreshToken, expiresAt, rememberMe));
   }
 
   public async Task<Result<TemporaryPasswordDto>> CreateStaffAccountAsync(
     string username,
     string fullName,
-    string role)
+    string role,
+    CancellationToken ct = default)
   {
-    var existing = await _userManager.FindByNameAsync(username);
+    var existing = await userManager.FindByNameAsync(username);
     if (existing is not null)
       return Result<TemporaryPasswordDto>.Conflict($"Username '{username}' is already taken.");
 
     var tempPassword = GenerateTemporaryPassword();
+
+    await using var tx = await identityDb.Database.BeginTransactionAsync(ct);
 
     var user = new ApplicationUser
     {
@@ -191,50 +182,52 @@ public class IdentityService : IIdentityService
       UpdatedAt = DateTime.UtcNow
     };
 
-    var result = await _userManager.CreateAsync(user, tempPassword);
+    var result = await userManager.CreateAsync(user, tempPassword);
     if (!result.Succeeded)
     {
       var errorMsg = string.Join("; ", result.Errors.Select(e => e.Description));
       return Result<TemporaryPasswordDto>.Error(errorMsg);
     }
 
-    await _userManager.AddToRoleAsync(user, role);
+    var roleResult = await userManager.AddToRoleAsync(user, role);
+    if (!roleResult.Succeeded)
+    {
+      return Result<TemporaryPasswordDto>.Error(string.Join("; ", roleResult.Errors.Select(e => e.Description)));
+    }
 
-    _logger.LogInformation("Staff account created: {Username} with role {Role}", username, role);
+    await tx.CommitAsync(ct);
+    logger.LogInformation("Staff account created: {Username} with role {Role}", username, role);
 
     return Result<TemporaryPasswordDto>.Success(new TemporaryPasswordDto(username, tempPassword));
   }
 
-  public async Task<Result<TemporaryPasswordDto>> ResetUserPasswordAsync(Guid userId)
+  public async Task<Result<TemporaryPasswordDto>> ResetUserPasswordAsync(Guid userId, CancellationToken ct = default)
   {
-    var user = await _userManager.FindByIdAsync(userId.ToString());
+    var user = await userManager.FindByIdAsync(userId.ToString());
     if (user is null)
       return Result<TemporaryPasswordDto>.NotFound();
 
     var tempPassword = GenerateTemporaryPassword();
 
-    var removeResult = await _userManager.RemovePasswordAsync(user);
-    if (!removeResult.Succeeded)
-      return Result<TemporaryPasswordDto>.Error(string.Join("; ", removeResult.Errors.Select(e => e.Description)));
+    var token = await userManager.GeneratePasswordResetTokenAsync(user);
+    var resetResult = await userManager.ResetPasswordAsync(user, token, tempPassword);
+    if (!resetResult.Succeeded)
+      return Result<TemporaryPasswordDto>.Error(string.Join("; ", resetResult.Errors.Select(e => e.Description)));
 
-    var addResult = await _userManager.AddPasswordAsync(user, tempPassword);
-    if (!addResult.Succeeded)
-      return Result<TemporaryPasswordDto>.Error(string.Join("; ", addResult.Errors.Select(e => e.Description)));
+    await RevokeAllUserTokensAsync(userId, ct);
 
-    await RevokeAllUserTokensAsync(userId);
-
-    _logger.LogInformation("Password reset for user {UserId}", userId);
+    logger.LogInformation("Password reset for user {UserId}", userId);
 
     return Result<TemporaryPasswordDto>.Success(new TemporaryPasswordDto(user.UserName!, tempPassword));
   }
 
-  public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
+  public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken ct = default)
   {
-    var user = await _userManager.FindByIdAsync(userId.ToString());
+    var user = await userManager.FindByIdAsync(userId.ToString());
     if (user is null)
       return Result.NotFound();
 
-    var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+    var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
     if (!result.Succeeded)
     {
       var errors = result.Errors
@@ -244,33 +237,33 @@ public class IdentityService : IIdentityService
     }
 
     // Security best practice: revoke all sessions after password change
-    await RevokeAllUserTokensAsync(userId);
+    await RevokeAllUserTokensAsync(userId, ct);
 
-    _logger.LogInformation("Password changed for user {UserId}", userId);
+    logger.LogInformation("Password changed for user {UserId}", userId);
 
     return Result.Success();
   }
 
-  public async Task<bool> IsUsernameAvailableAsync(string username)
+  public async Task<bool> IsUsernameAvailableAsync(string username, CancellationToken ct = default)
   {
-    var user = await _userManager.FindByNameAsync(username);
+    var user = await userManager.FindByNameAsync(username);
     return user is null;
   }
 
-  public async Task<Result> DeactivateUserAsync(Guid userId)
+  public async Task<Result> DeactivateUserAsync(Guid userId, CancellationToken ct = default)
   {
-    var user = await _userManager.FindByIdAsync(userId.ToString());
+    var user = await userManager.FindByIdAsync(userId.ToString());
     if (user is null)
       return Result.NotFound();
 
     user.Deactivate();
     user.UpdatedAt = DateTime.UtcNow;
-    await _userManager.UpdateAsync(user);
+    await userManager.UpdateAsync(user);
 
     // Kick all devices when deactivating
-    await RevokeAllUserTokensAsync(userId);
+    await RevokeAllUserTokensAsync(userId, ct);
 
-    _logger.LogInformation("User {UserId} deactivated", userId);
+    logger.LogInformation("User {UserId} deactivated", userId);
 
     return Result.Success();
   }
@@ -280,9 +273,11 @@ public class IdentityService : IIdentityService
     int pageSize,
     string? search,
     string? role,
-    bool? isActive)
+    bool? isActive,
+    CancellationToken ct = default)
   {
-    var query = _userManager.Users
+    var query = userManager.Users
+      .AsNoTracking()
       .Include(u => u.UserRoles)
         .ThenInclude(ur => ur.Role)
       .AsQueryable();
@@ -299,13 +294,13 @@ public class IdentityService : IIdentityService
     if (isActive.HasValue)
       query = query.Where(u => u.IsActive == isActive.Value);
 
-    var total = await query.CountAsync();
+    var total = await query.CountAsync(ct);
 
     var users = await query
       .OrderByDescending(u => u.CreatedAt)
       .Skip((page - 1) * pageSize)
       .Take(pageSize)
-      .ToListAsync();
+      .ToListAsync(ct);
 
     var items = users.Select(u => new UserDto(
       u.Id,
@@ -320,9 +315,9 @@ public class IdentityService : IIdentityService
     return Result<PagedUsersDto>.Success(new PagedUsersDto(items, total, page, pageSize));
   }
 
-  public async Task<Result> UpdateUserAsync(Guid userId, string fullName, string? email)
+  public async Task<Result> UpdateUserAsync(Guid userId, string fullName, string? email, CancellationToken ct = default)
   {
-    var user = await _userManager.FindByIdAsync(userId.ToString());
+    var user = await userManager.FindByIdAsync(userId.ToString());
     if (user is null)
       return Result.NotFound();
 
@@ -330,68 +325,78 @@ public class IdentityService : IIdentityService
     user.Email = email;
     user.UpdatedAt = DateTime.UtcNow;
 
-    var result = await _userManager.UpdateAsync(user);
+    var result = await userManager.UpdateAsync(user);
     if (!result.Succeeded)
       return Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-    _logger.LogInformation("User {UserId} profile updated", userId);
+    logger.LogInformation("User {UserId} profile updated", userId);
     return Result.Success();
   }
 
-  public async Task<Result<string>> UpdateAvatarAsync(Guid userId, string avatarUrl)
+  public async Task<Result<string>> UpdateAvatarAsync(Guid userId, string avatarUrl, CancellationToken ct = default)
   {
-    var user = await _userManager.FindByIdAsync(userId.ToString());
+    var user = await userManager.FindByIdAsync(userId.ToString());
     if (user is null)
       return Result<string>.NotFound();
 
     user.AvatarUrl = avatarUrl;
     user.UpdatedAt = DateTime.UtcNow;
 
-    var result = await _userManager.UpdateAsync(user);
+    var result = await userManager.UpdateAsync(user);
     if (!result.Succeeded)
       return Result<string>.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-    _logger.LogInformation("Avatar updated for user {UserId}", userId);
+    logger.LogInformation("Avatar updated for user {UserId}", userId);
     return Result<string>.Success(avatarUrl);
   }
 
-  public async Task<Result> ActivateUserAsync(Guid userId)
+  public async Task<Result> ActivateUserAsync(Guid userId, CancellationToken ct = default)
   {
-    var user = await _userManager.FindByIdAsync(userId.ToString());
+    var user = await userManager.FindByIdAsync(userId.ToString());
     if (user is null)
       return Result.NotFound();
 
     user.Activate();
     user.UpdatedAt = DateTime.UtcNow;
-    await _userManager.UpdateAsync(user);
+    await userManager.UpdateAsync(user);
 
-    _logger.LogInformation("User {UserId} activated", userId);
+    logger.LogInformation("User {UserId} activated", userId);
     return Result.Success();
   }
 
-  public async Task<Result> ChangeUserRoleAsync(Guid userId, string newRole)
+  public async Task<Result> ChangeUserRoleAsync(Guid userId, string newRole, CancellationToken ct = default)
   {
-    var user = await _userManager.FindByIdAsync(userId.ToString());
+    var user = await userManager.FindByIdAsync(userId.ToString());
     if (user is null)
       return Result.NotFound();
 
-    var currentRoles = await _userManager.GetRolesAsync(user);
-    await _userManager.RemoveFromRolesAsync(user, currentRoles);
+    await using var tx = await identityDb.Database.BeginTransactionAsync(ct);
 
-    var addResult = await _userManager.AddToRoleAsync(user, newRole);
+    var currentRoles = await userManager.GetRolesAsync(user);
+    var removeResult = await userManager.RemoveFromRolesAsync(user, currentRoles);
+    if (!removeResult.Succeeded)
+    {
+      return Result.Error(string.Join("; ", removeResult.Errors.Select(e => e.Description)));
+    }
+
+    var addResult = await userManager.AddToRoleAsync(user, newRole);
     if (!addResult.Succeeded)
+    {
       return Result.Error(string.Join("; ", addResult.Errors.Select(e => e.Description)));
+    }
 
-    _logger.LogInformation("User {UserId} role changed to {Role}", userId, newRole);
+    await tx.CommitAsync(ct);
+    logger.LogInformation("User {UserId} role changed to {Role}", userId, newRole);
     return Result.Success();
   }
 
-  public async Task<Result<UserDto>> GetUserByIdAsync(Guid userId)
+  public async Task<Result<UserDto>> GetUserByIdAsync(Guid userId, CancellationToken ct = default)
   {
-    var user = await _userManager.Users
+    var user = await userManager.Users
+      .AsNoTracking()
       .Include(u => u.UserRoles)
         .ThenInclude(ur => ur.Role)
-      .FirstOrDefaultAsync(u => u.Id == userId);
+      .FirstOrDefaultAsync(u => u.Id == userId, ct);
 
     if (user is null)
       return Result<UserDto>.NotFound();
@@ -408,9 +413,10 @@ public class IdentityService : IIdentityService
 
   // ===== Role Management =====
 
-  public async Task<Result<PagedRolesDto>> GetRolesAsync(int page, int pageSize, string? search)
+  public async Task<Result<PagedRolesDto>> GetRolesAsync(int page, int pageSize, string? search, CancellationToken ct = default)
   {
-    var query = _roleManager.Roles
+    var query = roleManager.Roles
+      .AsNoTracking()
       .Include(r => r.UserRoles)
       .AsQueryable();
 
@@ -419,13 +425,13 @@ public class IdentityService : IIdentityService
         r.Name!.Contains(search) ||
         (r.Description != null && r.Description.Contains(search)));
 
-    var total = await query.CountAsync();
+    var total = await query.CountAsync(ct);
 
     var roles = await query
       .OrderBy(r => r.Name)
       .Skip((page - 1) * pageSize)
       .Take(pageSize)
-      .ToListAsync();
+      .ToListAsync(ct);
 
     var items = roles.Select(r => new RoleDto(
       r.Id,
@@ -439,11 +445,12 @@ public class IdentityService : IIdentityService
     return Result<PagedRolesDto>.Success(new PagedRolesDto(items, total, page, pageSize));
   }
 
-  public async Task<Result<RoleDto>> GetRoleByIdAsync(Guid roleId)
+  public async Task<Result<RoleDto>> GetRoleByIdAsync(Guid roleId, CancellationToken ct = default)
   {
-    var role = await _roleManager.Roles
+    var role = await roleManager.Roles
+      .AsNoTracking()
       .Include(r => r.UserRoles)
-      .FirstOrDefaultAsync(r => r.Id == roleId);
+      .FirstOrDefaultAsync(r => r.Id == roleId, ct);
 
     if (role is null)
       return Result<RoleDto>.NotFound();
@@ -452,30 +459,30 @@ public class IdentityService : IIdentityService
       role.Id, role.Name!, role.Description, role.IsActive, role.UserRoles.Count, role.CreatedAt));
   }
 
-  public async Task<Result> CreateRoleAsync(string name, string? description)
+  public async Task<Result> CreateRoleAsync(string name, string? description, CancellationToken ct = default)
   {
-    var existing = await _roleManager.FindByNameAsync(name);
+    var existing = await roleManager.FindByNameAsync(name);
     if (existing is not null)
       return Result.Conflict($"Role '{name}' already exists.");
 
     var role = ApplicationRole.Create(name, description);
-    var result = await _roleManager.CreateAsync(role);
+    var result = await roleManager.CreateAsync(role);
     if (!result.Succeeded)
       return Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-    _logger.LogInformation("Role created: {RoleName}", name);
+    logger.LogInformation("Role created: {RoleName}", name);
     return Result.Success();
   }
 
-  public async Task<Result> UpdateRoleAsync(Guid roleId, string name, string? description)
+  public async Task<Result> UpdateRoleAsync(Guid roleId, string name, string? description, CancellationToken ct = default)
   {
-    var role = await _roleManager.FindByIdAsync(roleId.ToString());
+    var role = await roleManager.FindByIdAsync(roleId.ToString());
     if (role is null)
       return Result.NotFound();
 
     if (!string.Equals(role.Name, name, StringComparison.OrdinalIgnoreCase))
     {
-      var existing = await _roleManager.FindByNameAsync(name);
+      var existing = await roleManager.FindByNameAsync(name);
       if (existing is not null)
         return Result.Conflict($"Role '{name}' already exists.");
     }
@@ -484,19 +491,19 @@ public class IdentityService : IIdentityService
     role.NormalizedName = name.ToUpperInvariant();
     role.UpdateDescription(description);
 
-    var result = await _roleManager.UpdateAsync(role);
+    var result = await roleManager.UpdateAsync(role);
     if (!result.Succeeded)
       return Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-    _logger.LogInformation("Role updated: {RoleId} → {RoleName}", roleId, name);
+    logger.LogInformation("Role updated: {RoleId} → {RoleName}", roleId, name);
     return Result.Success();
   }
 
-  public async Task<Result> DeleteRoleAsync(Guid roleId)
+  public async Task<Result> DeleteRoleAsync(Guid roleId, CancellationToken ct = default)
   {
-    var role = await _roleManager.Roles
+    var role = await roleManager.Roles
       .Include(r => r.UserRoles)
-      .FirstOrDefaultAsync(r => r.Id == roleId);
+      .FirstOrDefaultAsync(r => r.Id == roleId, ct);
 
     if (role is null)
       return Result.NotFound();
@@ -505,26 +512,26 @@ public class IdentityService : IIdentityService
       return Result.Conflict(
         $"Cannot delete role '{role.Name}': {role.UserRoles.Count} user(s) are still assigned to it.");
 
-    var result = await _roleManager.DeleteAsync(role);
+    var result = await roleManager.DeleteAsync(role);
     if (!result.Succeeded)
       return Result.Error(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-    _logger.LogInformation("Role deleted: {RoleName}", role.Name);
+    logger.LogInformation("Role deleted: {RoleName}", role.Name);
     return Result.Success();
   }
 
   // ===== Role Permissions =====
 
-  public async Task<Result<List<RolePermissionDto>>> GetRolePermissionsAsync(Guid roleId)
+  public async Task<Result<List<RolePermissionDto>>> GetRolePermissionsAsync(Guid roleId, CancellationToken ct = default)
   {
-    var role = await _roleManager.FindByIdAsync(roleId.ToString());
+    var role = await roleManager.FindByIdAsync(roleId.ToString());
     if (role is null)
       return Result<List<RolePermissionDto>>.NotFound();
 
-    var assigned = await _identityDb.RoleClaims
+    var assigned = await identityDb.RoleClaims
       .Where(rc => rc.RoleId == roleId && rc.ClaimType == "permission")
       .Select(rc => rc.ClaimValue!)
-      .ToHashSetAsync();
+      .ToHashSetAsync(ct);
 
     var result = PermissionRegistry.All
       .Select(kv => new RolePermissionDto(kv.Key, kv.Value, assigned.Contains(kv.Key)))
@@ -534,9 +541,9 @@ public class IdentityService : IIdentityService
     return Result<List<RolePermissionDto>>.Success(result);
   }
 
-  public async Task<Result> SetRolePermissionsAsync(Guid roleId, IList<string> permissions)
+  public async Task<Result> SetRolePermissionsAsync(Guid roleId, IList<string> permissions, CancellationToken ct = default)
   {
-    var role = await _roleManager.FindByIdAsync(roleId.ToString());
+    var role = await roleManager.FindByIdAsync(roleId.ToString());
     if (role is null)
       return Result.NotFound();
 
@@ -545,16 +552,18 @@ public class IdentityService : IIdentityService
       return Result.Invalid(new ValidationError("permissions",
         $"Unknown permissions: {string.Join(", ", unknown)}"));
 
+    await using var tx = await identityDb.Database.BeginTransactionAsync(ct);
+
     // Remove all existing permission claims
-    var existing = await _identityDb.RoleClaims
+    var existing = await identityDb.RoleClaims
       .Where(rc => rc.RoleId == roleId && rc.ClaimType == "permission")
-      .ToListAsync();
-    _identityDb.RoleClaims.RemoveRange(existing);
+      .ToListAsync(ct);
+    identityDb.RoleClaims.RemoveRange(existing);
 
     // Add new permission claims with description from registry
     foreach (var perm in permissions.Distinct())
     {
-      _identityDb.RoleClaims.Add(new ApplicationRoleClaim
+      identityDb.RoleClaims.Add(new ApplicationRoleClaim
       {
         RoleId      = roleId,
         ClaimType   = "permission",
@@ -563,8 +572,10 @@ public class IdentityService : IIdentityService
       });
     }
 
-    await _identityDb.SaveChangesAsync();
-    _logger.LogInformation("Permissions updated for role {RoleId}: [{Permissions}]",
+    await identityDb.SaveChangesAsync(ct);
+    await tx.CommitAsync(ct);
+
+    logger.LogInformation("Permissions updated for role {RoleId}: [{Permissions}]",
       roleId, string.Join(", ", permissions));
 
     return Result.Success();
@@ -572,102 +583,107 @@ public class IdentityService : IIdentityService
 
   // ===== Private Helpers =====
 
-  private async Task<RefreshToken> IssueRefreshTokenAsync(Guid userId, bool rememberMe)
+  private async Task<string> IssueRefreshTokenAsync(Guid userId, bool rememberMe, CancellationToken ct)
   {
-    // Clean up expired tokens for this user
-    var expiredTokens = await _identityDb.RefreshTokens
+    var expiredTokens = await identityDb.RefreshTokens
       .Where(t => t.UserId == userId && t.ExpiresAt <= DateTime.UtcNow)
-      .ToListAsync();
-    _identityDb.RefreshTokens.RemoveRange(expiredTokens);
+      .ToListAsync(ct);
+    identityDb.RefreshTokens.RemoveRange(expiredTokens);
 
-    var token = new RefreshToken
+    var rawToken = jwtService.GenerateRefreshToken();
+    identityDb.RefreshTokens.Add(new RefreshToken
     {
       Id = Guid.NewGuid(),
       UserId = userId,
-      Token = _jwtService.GenerateRefreshToken(),
+      Token = HashToken(rawToken),
       CreatedAt = DateTime.UtcNow,
       ExpiresAt = DateTime.UtcNow.Add(rememberMe ? LongSession : ShortSession),
       IsRevoked = false,
       RememberMe = rememberMe
-    };
+    });
 
-    _identityDb.RefreshTokens.Add(token);
-    await _identityDb.SaveChangesAsync();
-
-    return token;
+    await identityDb.SaveChangesAsync(ct);
+    return rawToken;
   }
 
-  public async Task<Result> RevokeTokenAsync(string refreshToken)
+  public async Task<Result> RevokeTokenAsync(string refreshToken, CancellationToken ct = default)
   {
-    var storedToken = await _identityDb.RefreshTokens
-      .FirstOrDefaultAsync(t => t.Token == refreshToken);
+    var storedToken = await identityDb.RefreshTokens
+      .FirstOrDefaultAsync(t => t.Token == HashToken(refreshToken), ct);
 
     if (storedToken is null)
       return Result.NotFound();
 
     storedToken.Revoke();
-    await _identityDb.SaveChangesAsync();
+    await identityDb.SaveChangesAsync(ct);
 
     return Result.Success();
   }
 
-  private async Task RevokeAllUserTokensAsync(Guid userId)
+  private async Task RevokeAllUserTokensAsync(Guid userId, CancellationToken ct)
   {
-    var activeTokens = await _identityDb.RefreshTokens
+    var activeTokens = await identityDb.RefreshTokens
       .Where(t => t.UserId == userId && !t.IsRevoked)
-      .ToListAsync();
+      .ToListAsync(ct);
 
     foreach (var token in activeTokens)
       token.Revoke();
 
-    await _identityDb.SaveChangesAsync();
+    await identityDb.SaveChangesAsync(ct);
 
-    _logger.LogInformation("Revoked {Count} refresh tokens for user {UserId}", activeTokens.Count, userId);
+    logger.LogInformation("Revoked {Count} refresh tokens for user {UserId}", activeTokens.Count, userId);
   }
 
-  private async Task<IList<string>> GetUserPermissionsAsync(IList<string> roles)
+  private async Task<IList<string>> GetUserPermissionsAsync(IList<string> roles, CancellationToken ct)
   {
-    var permissions = new List<string>();
+    if (roles.Count == 0) return [];
 
-    foreach (var roleName in roles)
-    {
-      var role = await _roleManager.FindByNameAsync(roleName);
-      if (role is null) continue;
+    var normalizedNames = roles.Select(r => r.ToUpperInvariant()).ToList();
 
-      var claims = await _roleManager.GetClaimsAsync(role);
-      permissions.AddRange(
-        claims
-          .Where(c => c.Type == "permission")
-          .Select(c => c.Value));
-    }
+    var roleIds = await identityDb.Roles
+      .Where(r => normalizedNames.Contains(r.NormalizedName!))
+      .Select(r => r.Id)
+      .ToListAsync(ct);
 
-    return permissions.Distinct().ToList();
+    return await identityDb.RoleClaims
+      .Where(rc => rc.ClaimType == "permission" && roleIds.Contains(rc.RoleId))
+      .Select(rc => rc.ClaimValue!)
+      .Distinct()
+      .ToListAsync(ct);
   }
 
-  private static string GenerateTemporaryPassword()
+  private static string HashToken(string token)
   {
-    const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const string lower = "abcdefghijklmnopqrstuvwxyz";
-    const string digits = "0123456789";
+    var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+    return Convert.ToHexString(bytes);
+  }
+
+  private static string GenerateTemporaryPassword(int length = 8)
+  {
+    const string upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const string lower = "abcdefghijkmnopqrstuvwxyz";
+    const string digits = "23456789";
     const string all = upper + lower + digits;
 
-    var bytes = new byte[8];
-    using var rng = RandomNumberGenerator.Create();
-    rng.GetBytes(bytes);
+    if (length < 3)
+      throw new ArgumentException("Password length must be at least 3.");
 
-    // Ensure at least one uppercase, one lowercase, one digit
-    var result = new StringBuilder();
-    result.Append(upper[bytes[0] % upper.Length]);
-    result.Append(lower[bytes[1] % lower.Length]);
-    result.Append(digits[bytes[2] % digits.Length]);
+    var chars = new char[length];
 
-    for (int i = 3; i < 8; i++)
-      result.Append(all[bytes[i] % all.Length]);
+    chars[0] = upper[RandomNumberGenerator.GetInt32(upper.Length)];
+    chars[1] = lower[RandomNumberGenerator.GetInt32(lower.Length)];
+    chars[2] = digits[RandomNumberGenerator.GetInt32(digits.Length)];
 
-    // Shuffle
-    var chars = result.ToString().ToCharArray();
-    var shuffleBytes = new byte[chars.Length];
-    rng.GetBytes(shuffleBytes);
-    return new string(chars.OrderBy(_ => shuffleBytes[Array.IndexOf(chars, _)]).ToArray());
+    for (int i = 3; i < length; i++)
+      chars[i] = all[RandomNumberGenerator.GetInt32(all.Length)];
+
+    // Fisher-Yates shuffle
+    for (int i = chars.Length - 1; i > 0; i--)
+    {
+      int j = RandomNumberGenerator.GetInt32(i + 1);
+      (chars[i], chars[j]) = (chars[j], chars[i]);
+    }
+
+    return new string(chars);
   }
 }
