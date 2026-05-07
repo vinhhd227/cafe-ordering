@@ -24,6 +24,10 @@
     "paymentQr": "QR thanh toán",
     "printers": "Máy in",
     "notificationConfigs": "Cài đặt thông báo",
+    "profile": "Hồ sơ",
+    "more": "Thêm",
+    "notifications": "Thông báo",
+    "newOrder": "Đơn mới",
     "groups": {
       "overview": "Tổng quan",
       "operations": "Vận hành",

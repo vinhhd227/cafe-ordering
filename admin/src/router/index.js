@@ -25,7 +25,7 @@ const routes = [
   /* ================= ADMIN ================= */
   {
     path: "/",
-    component: () => import("@/layout/Layout.vue"),
+    component: () => import("@/layout/LayoutShell.vue"),
     children: [
       {
         path: "",
@@ -281,6 +281,12 @@ const routes = [
         path: "profile",
         name: "profile",
         component: () => import("@/views/Profile.vue"),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "mobile-profile",
+        name: "mobileProfile",
+        component: () => import("@/views/MobileProfile.vue"),
         meta: { requiresAuth: true },
       },
     ],

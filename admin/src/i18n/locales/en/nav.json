@@ -24,6 +24,10 @@
     "paymentQr": "Payment QR",
     "printers": "Printers",
     "notificationConfigs": "Notification Settings",
+    "profile": "Profile",
+    "more": "More",
+    "notifications": "Alerts",
+    "newOrder": "New Order",
     "groups": {
       "overview": "Overview",
       "operations": "Operations",
