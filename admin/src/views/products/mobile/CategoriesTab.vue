@@ -60,26 +60,35 @@ const displayCategories = computed(() => {
   return list
 })
 
+const preventScroll = (e) => e.preventDefault()
+
 const onHandlePointerDown = (e, index) => {
   if (props.search) return
   e.preventDefault()
-  listRef.value?.setPointerCapture(e.pointerId)  // capture on stable container
+  document.addEventListener('touchmove', preventScroll, { passive: false })
+  e.currentTarget.setPointerCapture(e.pointerId)
   dragId.value = filteredCategories.value[index].id
   dropIndex.value = index
 }
 
+let rafId = null
 const onHandlePointerMove = (e) => {
   if (dragId.value === null || !listRef.value) return
-  const rows = listRef.value.querySelectorAll('[data-drag-row]')
-  let newDrop = rows.length - 1
-  for (let i = 0; i < rows.length; i++) {
-    const rect = rows[i].getBoundingClientRect()
-    if (e.clientY < rect.top + rect.height / 2) {
-      newDrop = i
-      break
+  if (rafId !== null) return  // throttle to one update per animation frame
+  rafId = requestAnimationFrame(() => {
+    rafId = null
+    if (dragId.value === null || !listRef.value) return
+    const rows = listRef.value.querySelectorAll('[data-drag-row]')
+    let newDrop = rows.length - 1
+    for (let i = 0; i < rows.length; i++) {
+      const rect = rows[i].getBoundingClientRect()
+      if (e.clientY < rect.top + rect.height / 2) {
+        newDrop = i
+        break
+      }
     }
-  }
-  dropIndex.value = newDrop
+    dropIndex.value = newDrop
+  })
 }
 
 const suppressClick = ref(false)
@@ -87,7 +96,8 @@ const suppressClick = ref(false)
 const onHandlePointerUp = async () => {
   if (dragId.value === null) return
 
-  suppressClick.value = true  // pointerup on handle always bubbles to row click
+  document.removeEventListener('touchmove', preventScroll)
+  suppressClick.value = true
 
   const newList = displayCategories.value
   const changed = allCategories.value.some((c, i) => c.id !== newList[i]?.id)
@@ -109,6 +119,8 @@ const onHandlePointerUp = async () => {
 }
 
 const onHandlePointerCancel = () => {
+  document.removeEventListener('touchmove', preventScroll)
+  if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null }
   dragId.value = null
   dropIndex.value = -1
 }
@@ -212,9 +224,6 @@ const submitCreate = async () => {
       <div
         ref="listRef"
         class="tw:space-y-1 tw:px-3 tw:pt-2"
-        @pointermove="onHandlePointerMove"
-        @pointerup="onHandlePointerUp"
-        @pointercancel="onHandlePointerCancel"
       >
         <div
           v-for="(cat, index) in displayCategories"
@@ -232,6 +241,9 @@ const submitCreate = async () => {
               ? 'tw:text-slate-200 tw:dark:text-white/10 tw:cursor-default'
               : 'tw:text-slate-300 tw:dark:text-white/20 tw:cursor-grab tw:active:cursor-grabbing'"
             @pointerdown.stop="onHandlePointerDown($event, index)"
+            @pointermove="onHandlePointerMove"
+            @pointerup="onHandlePointerUp"
+            @pointercancel="onHandlePointerCancel"
           >
             <iconify icon="ph:arrows-out-cardinal-bold" />
           </div>
