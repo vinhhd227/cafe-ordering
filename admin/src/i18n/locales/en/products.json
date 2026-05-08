@@ -60,6 +60,36 @@
       "estimatedPrepMinutes": "Est. prep time (min)",
       "estimatedPrepMinutesPlaceholder": "Leave blank if unknown"
     },
+    "mobile": {
+      "searchPlaceholder": "Search name, SKU, ...",
+      "categorySearchPlaceholder": "Search category name",
+      "allCategories": "All",
+      "loadMore": "Load more",
+      "empty": "No products found",
+      "createCategory": "Create category",
+      "productCount": "Products",
+      "categoryNameLabel": "Category name",
+      "categoryNamePlaceholder": "Enter category name",
+      "createSubmit": "Create",
+      "categoryDescriptionLabel": "Description",
+      "categoryDescriptionPlaceholder": "Enter category description",
+      "editCategory": "Edit category",
+      "saveChanges": "Save changes",
+      "reorderError": "Failed to save new order",
+      "addProduct": "Add product",
+      "deleteProduct": "Delete product",
+      "deleteCategoryTitle": "Delete category",
+      "deleteCategoryMessage": "The category will be permanently deleted. Products in this category will not be affected.",
+      "deleteProductTitle": "Delete product",
+      "deleteProductMessage": "The product will be deactivated from the menu.",
+      "searchProductsPlaceholder": "Search products...",
+      "tabs": {
+        "products": "Products",
+        "inventory": "Inventory",
+        "addons": "Add-ons",
+        "categories": "Categories"
+      }
+    },
     "list": {
       "title": "Catalog overview",
       "subtitle": "Track pricing, stock, and status across the menu.",

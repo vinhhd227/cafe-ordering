@@ -165,6 +165,13 @@ const routes = [
             path: "",
             name: "products",
             component: () => import("@/views/products/List.vue"),
+            meta: { hideBottomNav: true },
+          },
+          {
+            path: "categories/:id",
+            name: "categoryProducts",
+            component: () => import("@/views/products/CategoryProducts.vue"),
+            meta: { hideBottomNav: true },
           },
           {
             path: "create",

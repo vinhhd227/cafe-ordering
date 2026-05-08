@@ -60,6 +60,36 @@
       "estimatedPrepMinutes": "Thời gian pha ước tính (phút)",
       "estimatedPrepMinutesPlaceholder": "Để trống nếu không xác định"
     },
+    "mobile": {
+      "searchPlaceholder": "Tìm tên, mã SKU, ...",
+      "categorySearchPlaceholder": "Tìm tên danh mục",
+      "allCategories": "Tất cả",
+      "loadMore": "Tải thêm",
+      "empty": "Không có sản phẩm nào",
+      "createCategory": "Tạo danh mục",
+      "productCount": "Sản phẩm",
+      "categoryNameLabel": "Tên danh mục",
+      "categoryNamePlaceholder": "Nhập tên danh mục",
+      "createSubmit": "Tạo",
+      "categoryDescriptionLabel": "Mô tả",
+      "categoryDescriptionPlaceholder": "Nhập mô tả danh mục",
+      "editCategory": "Chỉnh sửa danh mục",
+      "saveChanges": "Lưu thay đổi",
+      "reorderError": "Không thể lưu thứ tự mới",
+      "addProduct": "Thêm sản phẩm",
+      "deleteProduct": "Xóa sản phẩm",
+      "deleteCategoryTitle": "Xóa danh mục",
+      "deleteCategoryMessage": "Danh mục sẽ bị xóa vĩnh viễn. Sản phẩm trong danh mục sẽ không bị ảnh hưởng.",
+      "deleteProductTitle": "Xóa sản phẩm",
+      "deleteProductMessage": "Sản phẩm sẽ bị tắt khỏi menu.",
+      "searchProductsPlaceholder": "Tìm sản phẩm...",
+      "tabs": {
+        "products": "Sản phẩm",
+        "inventory": "Tồn kho",
+        "addons": "Bán kèm",
+        "categories": "Danh mục"
+      }
+    },
     "list": {
       "title": "Tổng quan sản phẩm",
       "subtitle": "Theo dõi giá, tồn kho và trạng thái trên thực đơn.",
