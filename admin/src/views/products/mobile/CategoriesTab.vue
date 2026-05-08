@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
+import { VueDraggable } from 'vue-draggable-plus'
 import { getCategory, createCategory, reorderCategories } from '@/services/category.service'
 import { uploadImage } from '@/services/upload.service'
 
@@ -45,92 +46,13 @@ const loadCategories = async () => {
 onMounted(loadCategories)
 
 // ── Drag-to-reorder ───────────────────────────────────────────────────
-const listRef = ref(null)
-const dragId = ref(null)
-const dropIndex = ref(-1)
-
-// Live preview: splice dragged item into dropIndex position
-const displayCategories = computed(() => {
-  if (dragId.value === null) return filteredCategories.value
-  const list = [...filteredCategories.value]
-  const from = list.findIndex(c => c.id === dragId.value)
-  if (from === -1 || from === dropIndex.value) return list
-  const [moved] = list.splice(from, 1)
-  list.splice(dropIndex.value, 0, moved)
-  return list
-})
-
-const preventScroll = (e) => e.preventDefault()
-
-const onHandlePointerDown = (e, index) => {
-  if (props.search) return
-  e.preventDefault()
-  document.addEventListener('touchmove', preventScroll, { passive: false })
-  e.currentTarget.setPointerCapture(e.pointerId)
-  dragId.value = filteredCategories.value[index].id
-  dropIndex.value = index
-}
-
-let rafId = null
-const onHandlePointerMove = (e) => {
-  if (dragId.value === null || !listRef.value) return
-  if (rafId !== null) return  // throttle to one update per animation frame
-  rafId = requestAnimationFrame(() => {
-    rafId = null
-    if (dragId.value === null || !listRef.value) return
-    const rows = listRef.value.querySelectorAll('[data-drag-row]')
-    let newDrop = rows.length - 1
-    for (let i = 0; i < rows.length; i++) {
-      const rect = rows[i].getBoundingClientRect()
-      if (e.clientY < rect.top + rect.height / 2) {
-        newDrop = i
-        break
-      }
-    }
-    dropIndex.value = newDrop
-  })
-}
-
-const suppressClick = ref(false)
-
-const onHandlePointerUp = async () => {
-  if (dragId.value === null) return
-
-  document.removeEventListener('touchmove', preventScroll)
-  suppressClick.value = true
-
-  const newList = displayCategories.value
-  const changed = allCategories.value.some((c, i) => c.id !== newList[i]?.id)
-
-  dragId.value = null
-  dropIndex.value = -1
-
-  if (!changed) return
-
-  const backup = [...allCategories.value]
-  allCategories.value = [...newList]
-
+const onDragEnd = async () => {
   try {
-    await reorderCategories(newList.map(c => c.id))
+    await reorderCategories(allCategories.value.map(c => c.id))
   } catch {
-    allCategories.value = backup
     toast.add({ severity: 'error', summary: t('products.mobile.reorderError'), life: 3000 })
+    await loadCategories()
   }
-}
-
-const onHandlePointerCancel = () => {
-  document.removeEventListener('touchmove', preventScroll)
-  if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null }
-  dragId.value = null
-  dropIndex.value = -1
-}
-
-const handleRowClick = (cat) => {
-  if (suppressClick.value) {
-    suppressClick.value = false
-    return
-  }
-  router.push({ name: 'categoryProducts', params: { id: cat.id } })
 }
 
 // ── Create drawer ─────────────────────────────────────────────────────
@@ -221,29 +143,28 @@ const submitCreate = async () => {
 
     <!-- ── Category list ─────────────────────────────────────────── -->
     <template v-else>
-      <div
-        ref="listRef"
+      <VueDraggable
+        v-model="allCategories"
+        handle=".drag-handle"
+        :animation="150"
+        :disabled="!!props.search"
         class="tw:space-y-1 tw:px-3 tw:pt-2"
+        @end="onDragEnd"
       >
         <div
-          v-for="(cat, index) in displayCategories"
+          v-for="cat in allCategories"
+          v-show="!props.search || cat.name.toLowerCase().includes(props.search.trim().toLowerCase())"
           :key="cat.id"
-          data-drag-row
-          class="tw:flex tw:items-center tw:gap-3 tw:px-3 tw:py-3 tw:bg-white tw:dark:bg-neutral-900 tw:rounded-xl tw:relative tw:select-none tw:cursor-pointer tw:active:bg-slate-50 tw:dark:active:bg-white/5 tw:transition-shadow"
-          :class="dragId === cat.id ? 'tw:shadow-lg tw:ring-2 tw:ring-emerald-400/50 tw:ring-inset tw:z-10' : ''"
-          @click="handleRowClick(cat)"
+          class="tw:flex tw:items-center tw:gap-3 tw:px-3 tw:py-3 tw:bg-white tw:dark:bg-neutral-900 tw:rounded-xl tw:select-none tw:cursor-pointer tw:active:bg-slate-50 tw:dark:active:bg-white/5"
+          @click="router.push({ name: 'categoryProducts', params: { id: cat.id } })"
         >
-
           <!-- Drag handle -->
           <div
-            class="tw:shrink-0 tw:touch-none tw:text-xl"
+            class="drag-handle tw:shrink-0 tw:touch-none tw:text-xl"
             :class="props.search
               ? 'tw:text-slate-200 tw:dark:text-white/10 tw:cursor-default'
               : 'tw:text-slate-300 tw:dark:text-white/20 tw:cursor-grab tw:active:cursor-grabbing'"
-            @pointerdown.stop="onHandlePointerDown($event, index)"
-            @pointermove="onHandlePointerMove"
-            @pointerup="onHandlePointerUp"
-            @pointercancel="onHandlePointerCancel"
+            @click.stop
           >
             <iconify icon="ph:arrows-out-cardinal-bold" />
           </div>
@@ -282,11 +203,11 @@ const submitCreate = async () => {
             <iconify icon="ph:pencil-bold" class="tw:text-lg tw:text-slate-500 tw:dark:text-slate-400" />
           </button>
         </div>
-      </div>
+      </VueDraggable>
 
       <!-- Empty -->
       <div
-        v-if="displayCategories.length === 0"
+        v-if="filteredCategories.length === 0"
         class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:py-20 tw:gap-3"
       >
         <iconify icon="ph:tag-bold" class="tw:text-5xl tw:text-slate-300 tw:dark:text-white/20" />
