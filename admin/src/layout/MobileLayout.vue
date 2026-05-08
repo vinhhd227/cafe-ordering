@@ -87,7 +87,7 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
     </svg>
 
     <!-- Bottom nav wrapper (FAB lives here, outside the clipped nav) -->
-    <div class="tw:fixed tw:bottom-0 tw:inset-x-0 tw:z-20">
+    <div v-if="!route.meta.hideBottomNav" class="tw:fixed tw:bottom-0 tw:inset-x-0 tw:z-20">
 
       <!-- FAB: outside the clipped nav so it's not cut -->
       <router-link

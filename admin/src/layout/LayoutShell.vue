@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, provide, ref } from 'vue'
 import Layout from '@/layout/Layout.vue'
 import MobileLayout from '@/layout/MobileLayout.vue'
 
@@ -9,6 +9,8 @@ const isMobile = ref(typeof window !== 'undefined' && window.innerWidth < LG)
 const onResize = () => { isMobile.value = window.innerWidth < LG }
 onMounted(() => window.addEventListener('resize', onResize))
 onUnmounted(() => window.removeEventListener('resize', onResize))
+
+provide('isMobile', isMobile)
 </script>
 
 <template>
