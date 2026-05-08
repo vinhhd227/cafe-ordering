@@ -10,6 +10,9 @@ namespace Api.Infrastructure.Identity.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Clear existing tokens so ALTER won't fail on values longer than 64 chars
+            migrationBuilder.Sql(@"DELETE FROM identity.""RefreshTokens"";");
+
             migrationBuilder.AlterColumn<string>(
                 name: "Token",
                 schema: "identity",
