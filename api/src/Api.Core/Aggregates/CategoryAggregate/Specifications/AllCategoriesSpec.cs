@@ -9,6 +9,6 @@ public class AllCategoriesSpec : Specification<Category>
   {
     Query
       .Where(c => !c.IsDeleted)
-      .OrderBy(c => c.Name);
+      .OrderBy(c => c.SortOrder);
   }
 }

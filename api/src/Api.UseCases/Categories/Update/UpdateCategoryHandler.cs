@@ -27,7 +27,7 @@ public class UpdateCategoryHandler(IRepositoryBase<Category> repository)
       return Result.Conflict($"Category \'{request.Name}\' đã tồn tại");
     }
 
-    category.Update(request.Name, request.Description);
+    category.Update(request.Name, request.Description, request.ImageUrl);
 
     if (request.IsActive && !category.IsActive)
       category.Activate();

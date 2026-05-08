@@ -18,11 +18,20 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
       .HasMaxLength(500)
       .IsRequired(false);
 
+    builder.Property(c => c.ImageUrl)
+      .HasMaxLength(2048)
+      .IsRequired(false);
+
+    builder.Property(c => c.SortOrder)
+      .IsRequired()
+      .HasDefaultValue(0);
+
     // Unique name chỉ cho records chưa bị xóa (PostgreSQL syntax)
     builder.HasIndex(c => c.Name)
       .IsUnique()
       .HasFilter(@"""IsDeleted"" = false");
 
+    builder.HasIndex(c => c.SortOrder);
     builder.HasIndex(c => c.IsActive);
 
     // Concurrency token

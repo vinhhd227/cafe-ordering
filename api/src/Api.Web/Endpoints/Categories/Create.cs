@@ -13,6 +13,9 @@ public sealed class CreateCategoryRequest
 
   /// <summary>Optional description for the category.</summary>
   public string? Description { get; set; }
+
+  /// <summary>Optional URL of the category's thumbnail image.</summary>
+  public string? ImageUrl { get; set; }
 }
 
 public class Create : Endpoint<CreateCategoryRequest>
@@ -35,7 +38,7 @@ public class Create : Endpoint<CreateCategoryRequest>
   public override async Task HandleAsync(CreateCategoryRequest req, CancellationToken ct)
   {
     var result = await _mediator.Send(
-      new CreateCategoryCommand(req.Name, req.Description), ct);
+      new CreateCategoryCommand(req.Name, req.Description, req.ImageUrl), ct);
 
     await this.SendResultAsync(result, ct);
   }

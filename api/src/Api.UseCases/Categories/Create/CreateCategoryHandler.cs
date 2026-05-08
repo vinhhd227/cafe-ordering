@@ -20,7 +20,12 @@ public class CreateCategoryHandler(IRepositoryBase<Category> repository)
       return Result.Conflict($"Category \'{request.Name}\' đã tồn tại");
     }
 
-    var category = Category.Create(request.Name, request.Description);
+    // Gán SortOrder = max hiện tại + 1
+    var maxSpec = new MaxCategorySortOrderSpec();
+    var last = await repository.FirstOrDefaultAsync(maxSpec, ct);
+    var sortOrder = (last?.SortOrder ?? 0) + 1;
+
+    var category = Category.Create(request.Name, request.Description, request.ImageUrl, sortOrder);
 
     await repository.AddAsync(category, ct);
 

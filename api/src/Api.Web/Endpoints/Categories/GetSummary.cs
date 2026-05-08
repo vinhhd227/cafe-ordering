@@ -18,6 +18,8 @@ public class GetSummary : Summary<Get>
       Id: 1,
       Name: "Coffee",
       Description: "Espresso-based and filter coffee drinks",
+      ImageUrl: null,
+      SortOrder: 1,
       IsActive: true,
       CreatedAt: new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
       UpdatedAt: null);

@@ -9,6 +9,6 @@ public class ActiveCategoriesSpec : Specification<Category>
   {
     Query
       .Where(c => c.IsActive && !c.IsDeleted)
-      .OrderBy(c => c.Name);
+      .OrderBy(c => c.SortOrder);
   }
 }

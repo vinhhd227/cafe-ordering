@@ -7,6 +7,8 @@ public record CategoryDto(
   int Id,
   string Name,
   string? Description,
+  string? ImageUrl,
+  int SortOrder,
   bool IsActive,
   DateTime CreatedAt,
   DateTime? UpdatedAt

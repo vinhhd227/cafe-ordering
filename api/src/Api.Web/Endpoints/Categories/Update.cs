@@ -20,6 +20,9 @@ public sealed class UpdateCategoryRequest
   /// <summary>Optional description for the category.</summary>
   public string? Description { get; set; }
 
+  /// <summary>Optional URL of the category's thumbnail image.</summary>
+  public string? ImageUrl { get; set; }
+
   /// <summary>Whether the category is active (visible on the menu).</summary>
   public bool IsActive { get; set; } = true;
 }
@@ -44,7 +47,7 @@ public class Update : Endpoint<UpdateCategoryRequest>
   public override async Task HandleAsync(UpdateCategoryRequest req, CancellationToken ct)
   {
     var result = await _mediator.Send(
-      new UpdateCategoryCommand(req.CategoryId, req.Name, req.Description, req.IsActive), ct);
+      new UpdateCategoryCommand(req.CategoryId, req.Name, req.Description, req.ImageUrl, req.IsActive), ct);
 
     await this.SendResultAsync(result, ct);
   }

@@ -21,6 +21,8 @@ public class ListCategoriesHandler(IReadRepositoryBase<Category> repository)
         c.Id,
         c.Name,
         c.Description,
+        c.ImageUrl,
+        c.SortOrder,
         c.IsActive,
         c.CreatedAt,
         c.UpdatedAt))

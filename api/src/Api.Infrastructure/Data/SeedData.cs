@@ -18,12 +18,12 @@ public static class SeedData
     await SeedRecipesAsync(context, logger);
     if (!context.Categories.Any())
     {
-      var traHoaQua     = Category.Create("Trà Hoa Quả");
-      var caPhe         = Category.Create("Cà Phê");
-      var traMatOng     = Category.Create("Trà Mật Ong - Thảo Mộc");
-      var traThai       = Category.Create("Trà Thái");
-      var doUongKhac    = Category.Create("Đồ Uống Khác");
-      var doAnKem       = Category.Create("Đồ Ăn Kèm");
+      var traHoaQua     = Category.Create("Trà Hoa Quả",  null, null, 1);
+      var caPhe         = Category.Create("Cà Phê",        null, null, 2);
+      var traMatOng     = Category.Create("Trà Mật Ong - Thảo Mộc", null, null, 3);
+      var traThai       = Category.Create("Trà Thái",      null, null, 4);
+      var doUongKhac    = Category.Create("Đồ Uống Khác",  null, null, 5);
+      var doAnKem       = Category.Create("Đồ Ăn Kèm",    null, null, 6);
 
       var categories = new[] { traHoaQua, caPhe, traMatOng, traThai, doUongKhac, doAnKem };
       context.Categories.AddRange(categories);
