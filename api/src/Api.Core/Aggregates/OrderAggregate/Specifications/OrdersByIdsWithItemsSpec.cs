@@ -6,6 +6,7 @@ public class OrdersByIdsWithItemsSpec : Specification<Order>
   {
     Query
       .Where(o => ids.Contains(o.Id))
-      .Include(o => o.Items);
+      .Include(o => o.Items)
+        .ThenInclude(i => i.SelectedOptions);
   }
 }

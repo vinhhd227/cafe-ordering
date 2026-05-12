@@ -3,6 +3,7 @@ using System;
 using Api.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260512035044_AddProductOptionGroups")]
+    partial class AddProductOptionGroups
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1700,19 +1703,11 @@ namespace Api.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroupMapping", b =>
                 {
-                    b.HasOne("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Api.Core.Aggregates.ProductAggregate.Product", null)
                         .WithMany("OptionGroupMappings")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionValue", b =>

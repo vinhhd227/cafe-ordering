@@ -36,43 +36,43 @@ public static class SeedData
         var products = new[]
         {
           // Trà Hoa Quả
-          Product.Create(traHoaQua.Id, "Trà Chanh",              25000, "Trà chanh tươi mát",            hasIceLevelOption: true, hasSugarLevelOption: true),
-          Product.Create(traHoaQua.Id, "Trà Tắc",                25000, "Trà tắc thanh mát",             hasIceLevelOption: true, hasSugarLevelOption: true),
-          Product.Create(traHoaQua.Id, "Trà Dứa Chanh Dây",      29000, "Trà dứa chanh dây nhiệt đới",  hasIceLevelOption: true, hasSugarLevelOption: true),
-          Product.Create(traHoaQua.Id, "Trà Hoa Quả Nhiệt Đới",  29000, "Trà hoa quả nhiệt đới tổng hợp", hasIceLevelOption: true, hasSugarLevelOption: true),
-          Product.Create(traHoaQua.Id, "Trà Xoài Chanh Dây",     29000, "Trà trái cây nhiệt đới",       hasIceLevelOption: true, hasSugarLevelOption: true),
-          Product.Create(traHoaQua.Id, "Trà Mãng Cầu",           35000, "Trà mãng cầu chua ngọt",       hasIceLevelOption: true, hasSugarLevelOption: true),
-          Product.Create(traHoaQua.Id, "Trà Đào Cam Sả",         35000, "Trà đào cam sả thanh mát",     hasIceLevelOption: true, hasSugarLevelOption: true),
+          Product.Create("Trà Chanh", 25000, traHoaQua.Id, "Trà chanh tươi mát"),
+          Product.Create("Trà Tắc", 25000, traHoaQua.Id, "Trà tắc thanh mát"),
+          Product.Create("Trà Dứa Chanh Dây", 29000, traHoaQua.Id, "Trà dứa chanh dây nhiệt đới"),
+          Product.Create("Trà Hoa Quả Nhiệt Đới", 29000, traHoaQua.Id, "Trà hoa quả nhiệt đới tổng hợp"),
+          Product.Create("Trà Xoài Chanh Dây", 29000, traHoaQua.Id, "Trà trái cây nhiệt đới"),
+          Product.Create("Trà Mãng Cầu", 35000, traHoaQua.Id, "Trà mãng cầu chua ngọt"),
+          Product.Create("Trà Đào Cam Sả", 35000, traHoaQua.Id, "Trà đào cam sả thanh mát"),
 
           // Cà Phê
-          Product.Create(caPhe.Id, "Cà Phê Đen",   25000, "Cà phê truyền thống",  hasTemperatureOption: true, hasIceLevelOption: true),
-          Product.Create(caPhe.Id, "Cà Phê Nâu",   25000, "Cà phê sữa",           hasTemperatureOption: true, hasIceLevelOption: true),
-          Product.Create(caPhe.Id, "Bạc Xỉu",      35000, "Sữa nhiều cà phê ít",  hasTemperatureOption: true, hasIceLevelOption: true),
-          Product.Create(caPhe.Id, "Cà Phê Muối",  35000, "Cà phê đậm vị phủ kem muối béo nhẹ",  hasIceLevelOption: true),
-          Product.Create(caPhe.Id, "Cà Phê Trứng", 40000, "Cà phê truyền thống phủ kem trứng béo mịn"),
+          Product.Create("Cà Phê Đen", 25000, caPhe.Id, "Cà phê truyền thống"),
+          Product.Create("Cà Phê Nâu", 25000, caPhe.Id, "Cà phê sữa"),
+          Product.Create("Bạc Xỉu", 35000, caPhe.Id, "Sữa nhiều cà phê ít"),
+          Product.Create("Cà Phê Muối", 35000, caPhe.Id, "Cà phê đậm vị phủ kem muối béo nhẹ"),
+          Product.Create("Cà Phê Trứng", 40000, caPhe.Id, "Cà phê truyền thống phủ kem trứng béo mịn"),
 
           // Trà Mật Ong - Thảo Mộc
-          Product.Create(traMatOng.Id, "Trà Gừng Mật Ong",           29000, "Trà gừng ấm nóng"),
-          Product.Create(traMatOng.Id, "Trà Hoa Cúc Mật Ong",        29000, "Trà hoa cúc dịu nhẹ"),
-          Product.Create(traMatOng.Id, "Trà Đào Cam Quế Mật Ong",    35000, "Trà trái cây thảo mộc"),
-          Product.Create(traMatOng.Id, "Trà Cúc Đường Phèn",         35000, "Trà cúc thanh mát"),
-          Product.Create(traMatOng.Id, "Trà Mạn",    35000, "Trà xanh nguyên lá pha ấm, hương thơm tự nhiên, vị chát dịu"),
+          Product.Create("Trà Gừng Mật Ong", 29000, traMatOng.Id, "Trà gừng ấm nóng"),
+          Product.Create("Trà Hoa Cúc Mật Ong", 29000, traMatOng.Id, "Trà hoa cúc dịu nhẹ"),
+          Product.Create("Trà Đào Cam Quế Mật Ong", 35000, traMatOng.Id, "Trà trái cây thảo mộc"),
+          Product.Create("Trà Cúc Đường Phèn", 35000, traMatOng.Id, "Trà cúc thanh mát"),
+          Product.Create("Trà Mạn", 35000, traMatOng.Id, "Trà xanh nguyên lá pha ấm, hương thơm tự nhiên, vị chát dịu"),
 
           // Trà Thái
-          Product.Create(traThai.Id, "Trà Thái Xanh", 25000, "Trà sữa Thái xanh", hasIceLevelOption: true, hasSugarLevelOption: true),
-          Product.Create(traThai.Id, "Trà Thái Đỏ",   25000, "Trà sữa Thái đỏ",   hasIceLevelOption: true, hasSugarLevelOption: true),
+          Product.Create("Trà Thái Xanh", 25000, traThai.Id, "Trà sữa Thái xanh"),
+          Product.Create("Trà Thái Đỏ", 25000, traThai.Id, "Trà sữa Thái đỏ"),
 
           // Đồ Uống Khác
-          Product.Create(doUongKhac.Id, "Cacao",              29000, "Cacao nóng lạnh truyền thống", hasTemperatureOption: true, hasIceLevelOption: true, hasSugarLevelOption: true),
-          Product.Create(doUongKhac.Id, "Cacao Muối",         29000, "Cacao kem muối",               hasTemperatureOption: true, hasIceLevelOption: true),
-          Product.Create(doUongKhac.Id, "Phindi Choco",       35000, "Phindi Choco đặc biệt",        hasIceLevelOption: true, hasSugarLevelOption: true),
-          Product.Create(doUongKhac.Id, "Phindi Choco Muối",  35000, "Phindi Choco kem muối",        hasIceLevelOption: true),
-          Product.Create(doUongKhac.Id, "Matcha Latte",  35000, "Matcha nguyên chất hòa quyện cùng sữa tươi thơm béo", hasIceLevelOption: true, hasSugarLevelOption: true),
+          Product.Create("Cacao", 29000, doUongKhac.Id, "Cacao nóng lạnh truyền thống"),
+          Product.Create("Cacao Muối", 29000, doUongKhac.Id, "Cacao kem muối"),
+          Product.Create("Phindi Choco", 35000, doUongKhac.Id, "Phindi Choco đặc biệt"),
+          Product.Create("Phindi Choco Muối", 35000, doUongKhac.Id, "Phindi Choco kem muối"),
+          Product.Create("Matcha Latte", 35000, doUongKhac.Id, "Matcha nguyên chất hòa quyện cùng sữa tươi thơm béo"),
           
           // Đồ Ăn Kèm
-          Product.Create(doAnKem.Id, "Hạt Hướng Dương", 15000, "Hạt hướng dương rang"),
-          Product.Create(doAnKem.Id, "Hạt Bí",          15000, "Hạt bí rang"),
-          Product.Create(doAnKem.Id, "Hạt Dưa",         15000, "Hạt dưa rang"),
+          Product.Create("Hạt Hướng Dương", 15000, doAnKem.Id, "Hạt hướng dương rang"),
+          Product.Create("Hạt Bí", 15000, doAnKem.Id, "Hạt bí rang"),
+          Product.Create("Hạt Dưa", 15000, doAnKem.Id, "Hạt dưa rang"),
         };
 
         context.Products.AddRange(products);

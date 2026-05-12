@@ -1,4 +1,4 @@
-using Api.Core.Aggregates.CategoryAggregate;
+﻿using Api.Core.Aggregates.CategoryAggregate;
 using Api.Core.Aggregates.RecipeAggregate;
 using Api.Core.Aggregates.CustomerAggregate;
 using Api.Core.Aggregates.ExpenseAggregate;
@@ -6,6 +6,7 @@ using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.NotificationAggregate;
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.ProductAggregate;
+using Api.Core.Aggregates.ProductOptionGroupAggregate;
 using Api.Core.Aggregates.PromotionAggregate;
 using Api.Core.Aggregates.PushSubscriptionAggregate;
 using Api.Core.Aggregates.TableAggregate;
@@ -31,6 +32,11 @@ public class AppDbContext : DbContext
   }
 
   public DbSet<Product> Products => Set<Product>();
+  public DbSet<ProductAttributeGroup> ProductAttributeGroups => Set<ProductAttributeGroup>();
+  public DbSet<ProductAttributeValue> ProductAttributeValues => Set<ProductAttributeValue>();
+  public DbSet<ProductOptionGroup> ProductOptionGroups => Set<ProductOptionGroup>();
+  public DbSet<ProductOptionValue> ProductOptionValues => Set<ProductOptionValue>();
+  public DbSet<ProductOptionGroupMapping> ProductOptionGroupMappings => Set<ProductOptionGroupMapping>();
   public DbSet<Category> Categories => Set<Category>();
   public DbSet<Customer> Customers => Set<Customer>();
   public DbSet<Table> Tables => Set<Table>();

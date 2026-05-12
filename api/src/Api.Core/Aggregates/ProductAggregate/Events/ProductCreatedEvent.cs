@@ -14,5 +14,5 @@ public class ProductCreatedEvent : DomainEventBase
 
   public int ProductId { get; }
   public string ProductName { get; }
-  public int CategoryId { get; }
+  public int? CategoryId { get; }
 }

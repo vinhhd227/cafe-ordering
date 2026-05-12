@@ -1,10 +1,13 @@
-// Core/Aggregates/OrderAggregate/Order.cs
-
 using Api.Core.Aggregates.OrderAggregate.Events;
-using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Exceptions;
 
 namespace Api.Core.Aggregates.OrderAggregate;
+
+public record OrderItemOptionData(
+  int OptionValueId,
+  string GroupName,
+  string Label,
+  decimal PriceAdjustment);
 
 /// <summary>
 ///   Order Aggregate Root - sử dụng int Id
@@ -69,19 +72,30 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   /// </summary>
   public void NotifyCreated() => RegisterDomainEvent(new OrderCreatedEvent(this));
 
-  public void AddItem(int productId, string productName, decimal unitPrice, int quantity,
-    DrinkTemperature? temperature = null, IceLevel? iceLevel = null, SugarLevel? sugarLevel = null,
-    bool isTakeaway = false, bool isFreeGift = false, string? note = null)
+  public OrderItem AddItem(
+    int productId,
+    string productName,
+    decimal unitPrice,
+    int quantity,
+    IReadOnlyList<OrderItemOptionData>? options = null,
+    bool isTakeaway = false,
+    bool isFreeGift = false,
+    string? note = null)
   {
     if (Status == OrderStatus.Completed)
-    {
       throw new InvalidOperationException("Cannot add items to completed order");
-    }
 
-    var item = OrderItem.Create(Id, productId, productName, unitPrice, quantity, temperature, iceLevel, sugarLevel, isTakeaway, isFreeGift, note);
+    var item = OrderItem.Create(Id, productId, productName, unitPrice, quantity, isTakeaway, isFreeGift, note);
+
+    if (options is not null)
+      foreach (var opt in options)
+        item.AddOption(opt.OptionValueId, opt.GroupName, opt.Label, opt.PriceAdjustment);
+
     _items.Add(item);
 
     RegisterDomainEvent(new OrderItemAddedEvent(this, productId, quantity));
+
+    return item;
   }
 
   public void Process()
@@ -260,12 +274,22 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   /// <summary>
   ///   Admin manual add item — bypass status guard. Chỉ dùng cho manual admin edit.
   /// </summary>
-  public void AddItemManual(int productId, string productName, decimal unitPrice, int quantity,
-    DrinkTemperature? temperature = null, IceLevel? iceLevel = null, SugarLevel? sugarLevel = null,
-    bool isTakeaway = false, string? note = null)
+  public void AddItemManual(
+    int productId,
+    string productName,
+    decimal unitPrice,
+    int quantity,
+    IReadOnlyList<OrderItemOptionData>? options = null,
+    bool isTakeaway = false,
+    string? note = null)
   {
-    _items.Add(OrderItem.Create(Id, productId, productName, unitPrice, quantity,
-      temperature, iceLevel, sugarLevel, isTakeaway, false, note));
+    var item = OrderItem.Create(Id, productId, productName, unitPrice, quantity, isTakeaway, false, note);
+
+    if (options is not null)
+      foreach (var opt in options)
+        item.AddOption(opt.OptionValueId, opt.GroupName, opt.Label, opt.PriceAdjustment);
+
+    _items.Add(item);
   }
 
   /// <summary>

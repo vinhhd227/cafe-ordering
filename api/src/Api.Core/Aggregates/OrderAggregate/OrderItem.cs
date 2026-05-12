@@ -9,8 +9,11 @@ namespace Api.Core.Aggregates.OrderAggregate;
 /// </summary>
 public class OrderItem : BaseEntity
 {
-  // Private constructor
+  private readonly List<OrderItemOption> _selectedOptions = new();
+  private readonly List<OrderItemSelectedOption> _selectedOptionValues = new();
+
   private OrderItem() { }
+
   public int OrderId { get; private set; }
   public int ProductId { get; private set; }
   public string ProductName { get; private set; } = string.Empty;
@@ -18,24 +21,34 @@ public class OrderItem : BaseEntity
   public int Quantity { get; private set; }
   public decimal Discount { get; private set; }
 
-  // Customization options
-  public DrinkTemperature? Temperature { get; private set; }
-  public IceLevel? IceLevel { get; private set; }
-  public SugarLevel? SugarLevel { get; private set; }
+  /// <summary>Tổng price adjustment từ các attribute option đã chọn (snapshot).</summary>
+  public decimal OptionAdjustment { get; private set; }
+
+  /// <summary>Tổng giá topping (option values) per item — denormalized để tính nhanh.</summary>
+  public decimal OptionValueTotal { get; private set; }
+
   public bool IsTakeaway { get; private set; }
   public bool IsFreeGift { get; private set; }
   public string? Note { get; private set; }
 
-  // Calculated property
-  public decimal TotalPrice => (UnitPrice - Discount) * Quantity;
+  public IReadOnlyCollection<OrderItemOption> SelectedOptions => _selectedOptions.AsReadOnly();
+  public IReadOnlyCollection<OrderItemSelectedOption> SelectedOptionValues => _selectedOptionValues.AsReadOnly();
 
   /// <summary>
-  ///   Factory method - chỉ được gọi từ Order aggregate
+  ///   TotalPrice = (UnitPrice + OptionAdjustment - Discount + OptionValueTotal) × Quantity
+  ///   OptionValueTotal là tổng giá topping per 1 item instance.
   /// </summary>
-  internal static OrderItem Create(int orderId, int productId,
-    string productName, decimal unitPrice, int quantity,
-    DrinkTemperature? temperature = null, IceLevel? iceLevel = null, SugarLevel? sugarLevel = null,
-    bool isTakeaway = false, bool isFreeGift = false, string? note = null)
+  public decimal TotalPrice => (UnitPrice + OptionAdjustment - Discount + OptionValueTotal) * Quantity;
+
+  internal static OrderItem Create(
+    int orderId,
+    int productId,
+    string productName,
+    decimal unitPrice,
+    int quantity,
+    bool isTakeaway = false,
+    bool isFreeGift = false,
+    string? note = null)
   {
     return new OrderItem
     {
@@ -45,18 +58,24 @@ public class OrderItem : BaseEntity
       UnitPrice = Guard.Against.Negative(unitPrice),
       Quantity = Guard.Against.NegativeOrZero(quantity),
       Discount = 0,
-      Temperature = temperature,
-      IceLevel = iceLevel,
-      SugarLevel = sugarLevel,
       IsTakeaway = isTakeaway,
       IsFreeGift = isFreeGift,
       Note = note,
     };
   }
 
-  /// <summary>
-  ///   Internal methods - chỉ được gọi từ Order aggregate
-  /// </summary>
+  internal void AddOption(int optionValueId, string groupName, string label, decimal priceAdjustment)
+  {
+    _selectedOptions.Add(OrderItemOption.Create(optionValueId, groupName, label, priceAdjustment));
+    OptionAdjustment += priceAdjustment;
+  }
+
+  public void AddSelectedOptionValue(int optionValueId, string groupName, string valueName, decimal unitPrice, int quantity)
+  {
+    _selectedOptionValues.Add(OrderItemSelectedOption.Create(optionValueId, groupName, valueName, unitPrice, quantity));
+    OptionValueTotal += unitPrice * quantity;
+  }
+
   internal void UpdateQuantity(int newQuantity)
   {
     if (IsFreeGift)
@@ -68,9 +87,7 @@ public class OrderItem : BaseEntity
   {
     Discount = Guard.Against.Negative(discount);
 
-    if (Discount > UnitPrice)
-    {
+    if (Discount > UnitPrice + OptionAdjustment)
       throw new DomainException("Discount cannot exceed unit price");
-    }
   }
 }

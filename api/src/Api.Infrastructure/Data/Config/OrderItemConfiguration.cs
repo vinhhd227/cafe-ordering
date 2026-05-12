@@ -8,25 +8,30 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
   {
     builder.ToTable("OrderItems");
 
-    builder.Property(i => i.Temperature)
-      .HasMaxLength(10)
-      .HasConversion(
-        v => v == null ? null : v.Name.ToUpperInvariant(),
-        v => v == null ? null : DrinkTemperature.FromName(v, true));
-
-    builder.Property(i => i.IceLevel)
-      .HasMaxLength(10)
-      .HasConversion(
-        v => v == null ? null : v.Name.ToUpperInvariant(),
-        v => v == null ? null : IceLevel.FromName(v, true));
-
-    builder.Property(i => i.SugarLevel)
-      .HasMaxLength(10)
-      .HasConversion(
-        v => v == null ? null : v.Name.ToUpperInvariant(),
-        v => v == null ? null : SugarLevel.FromName(v, true));
-
     builder.Property(i => i.Note)
       .HasMaxLength(200);
+
+    builder.Property(i => i.UnitPrice)
+      .HasPrecision(18, 2);
+
+    builder.Property(i => i.Discount)
+      .HasPrecision(18, 2);
+
+    builder.Property(i => i.OptionAdjustment)
+      .HasPrecision(18, 2);
+
+    builder.Property(i => i.OptionValueTotal)
+      .HasPrecision(18, 2)
+      .HasDefaultValue(0);
+
+    builder.HasMany(i => i.SelectedOptions)
+      .WithOne()
+      .HasForeignKey(o => o.OrderItemId)
+      .OnDelete(DeleteBehavior.Cascade);
+
+    builder.HasMany(i => i.SelectedOptionValues)
+      .WithOne()
+      .HasForeignKey(o => o.OrderItemId)
+      .OnDelete(DeleteBehavior.Cascade);
   }
 }

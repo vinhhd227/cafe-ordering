@@ -20,20 +20,43 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
     builder.Property(p => p.Price)
       .HasPrecision(18, 2);
 
+    builder.Property(p => p.CostPrice)
+      .HasPrecision(18, 2);
+
+    builder.Property(p => p.DiscountPrice)
+      .HasPrecision(18, 2);
+
+    builder.Property(p => p.Sku)
+      .HasMaxLength(100);
+
+    builder.Property(p => p.Barcode)
+      .HasMaxLength(100);
+
     builder.Property(p => p.ImageUrl)
       .HasMaxLength(500);
 
-    // Relationship: Product → Category
+    // Relationship: Product → Category (nullable — product can exist without category)
     builder.HasOne(p => p.Category)
       .WithMany()
       .HasForeignKey(p => p.CategoryId)
-      .OnDelete(DeleteBehavior.Restrict);
+      .OnDelete(DeleteBehavior.Restrict)
+      .IsRequired(false);
 
     builder.Property(p => p.IsAccompaniment)
       .IsRequired()
       .HasDefaultValue(false);
 
     builder.Property(p => p.EstimatedPrepMinutes);
+
+    builder.HasMany(p => p.AttributeGroups)
+      .WithOne()
+      .HasForeignKey(g => g.ProductId)
+      .OnDelete(DeleteBehavior.Cascade);
+
+    builder.HasMany(p => p.OptionGroupMappings)
+      .WithOne()
+      .HasForeignKey(m => m.ProductId)
+      .OnDelete(DeleteBehavior.Cascade);
 
     // Indexes
     builder.HasIndex(p => p.CategoryId);
