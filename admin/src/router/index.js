@@ -69,7 +69,7 @@ const routes = [
             path: "create",
             name: "ordersCreate",
             component: () => import("@/views/orders/Create.vue"),
-            meta: { pageTitle: "orders.create.title" },
+            meta: { pageTitle: "orders.create.title", hideBottomNav: true },
           },
           {
             path: ":id",
@@ -177,11 +177,13 @@ const routes = [
             path: "create",
             name: "productsCreate",
             component: () => import("@/views/products/Create.vue"),
+            meta: { hideBottomNav: true },
           },
           {
             path: ":id",
             name: "productsDetail",
             component: () => import("@/views/products/Detail.vue"),
+            meta: { hideBottomNav: true },
           },
         ],
       },
@@ -203,6 +205,27 @@ const routes = [
             path: ":id",
             name: "categoriesDetail",
             component: () => import("@/views/categories/Detail.vue"),
+          },
+        ],
+      },
+      {
+        path: "product-option-groups",
+        meta: { requiresAuth: true, requiredClaim: "product.read", section: "nav.groups.operations" },
+        children: [
+          {
+            path: "",
+            name: "productOptionGroups",
+            component: () => import("@/views/product-option-groups/List.vue"),
+          },
+          {
+            path: "create",
+            name: "productOptionGroupsCreate",
+            component: () => import("@/views/product-option-groups/Create.vue"),
+          },
+          {
+            path: ":id",
+            name: "productOptionGroupsDetail",
+            component: () => import("@/views/product-option-groups/Detail.vue"),
           },
         ],
       },

@@ -1,0 +1,88 @@
+{
+  "productOptionGroups": {
+    "breadcrumb": "Option Groups",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "widgets": {
+      "total": { "label": "Total groups" },
+      "active": { "label": "Active" },
+      "inactive": { "label": "Inactive" }
+    },
+    "list": {
+      "title": "Option Groups",
+      "subtitle": "Manage topping / add-on groups that can be assigned to products.",
+      "addGroup": "Add group",
+      "searchPlaceholder": "Search by name…",
+      "filtersTooltip": "Filters",
+      "filterTitle": "Filter",
+      "allStatuses": "All statuses",
+      "clearFilters": "Clear filters",
+      "col": {
+        "id": "ID",
+        "name": "Group name",
+        "values": "Options",
+        "flags": "Flags",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "flags": {
+        "required": "Required",
+        "allowMultiple": "Multi-select",
+        "allowQuantity": "Qty"
+      },
+      "tooltip": {
+        "deactivate": "Deactivate",
+        "activate": "Activate",
+        "edit": "Edit",
+        "delete": "Delete group"
+      },
+      "deleteConfirm": "Delete group \"{name}\"? This action cannot be undone.",
+      "error": "Failed to load option groups."
+    },
+    "form": {
+      "name": "Group name",
+      "namePlaceholder": "e.g. Toppings, Size…",
+      "isRequired": "Required selection",
+      "isRequiredHint": "Customer must choose at least one option",
+      "allowMultiple": "Allow multiple selections",
+      "allowMultipleHint": "Customer can select multiple options at once",
+      "allowQuantity": "Allow quantity input",
+      "allowQuantityHint": "Customer can specify quantity for each option",
+      "values": "Options list",
+      "addValue": "Add option",
+      "valueName": "Name",
+      "valueNamePlaceholder": "e.g. Tapioca, Jelly…",
+      "valuePrice": "Price",
+      "valueCostPrice": "Cost price",
+      "removeValue": "Remove"
+    },
+    "create": {
+      "title": "Add option group",
+      "subtitle": "Create a new group with options and their prices.",
+      "backToList": "Back to list",
+      "submit": "Create group",
+      "error": "Failed to create option group."
+    },
+    "detail": {
+      "backToList": "Back to list",
+      "id": "Group #{id}",
+      "created": "Created",
+      "updated": "Updated",
+      "editTitle": "Edit group",
+      "reset": "Reset",
+      "saveChanges": "Save changes",
+      "updateSuccess": "Option group updated successfully.",
+      "notFound": "Option group not found.",
+      "activeOption": {
+        "label": "Active",
+        "hint": "Allow this group to appear during ordering"
+      },
+      "error": {
+        "loadFailed": "Failed to load option group.",
+        "updateFailed": "Failed to update option group."
+      }
+    }
+  }
+}

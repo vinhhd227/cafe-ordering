@@ -75,6 +75,12 @@ export const navGroups = [
         requiredClaim: "category.read",
       },
       {
+        labelKey: "nav.productOptionGroups",
+        icon: "ph:stack-bold",
+        to: { name: "productOptionGroups" },
+        requiredClaim: "product.read",
+      },
+      {
         labelKey: "nav.promotions",
         icon: "ph:percent-bold",
         to: { name: "promotions" },

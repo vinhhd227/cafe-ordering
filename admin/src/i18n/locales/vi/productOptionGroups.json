@@ -1,0 +1,88 @@
+{
+  "productOptionGroups": {
+    "breadcrumb": "Nhóm bán kèm",
+    "status": {
+      "active": "Đang dùng",
+      "inactive": "Tạm dừng"
+    },
+    "widgets": {
+      "total": { "label": "Tổng nhóm" },
+      "active": { "label": "Đang dùng" },
+      "inactive": { "label": "Tạm dừng" }
+    },
+    "list": {
+      "title": "Nhóm bán kèm",
+      "subtitle": "Quản lý các nhóm topping / bán kèm có thể gán cho sản phẩm.",
+      "addGroup": "Thêm nhóm",
+      "searchPlaceholder": "Tìm theo tên…",
+      "filtersTooltip": "Bộ lọc",
+      "filterTitle": "Lọc",
+      "allStatuses": "Tất cả trạng thái",
+      "clearFilters": "Xoá bộ lọc",
+      "col": {
+        "id": "ID",
+        "name": "Tên nhóm",
+        "values": "Số lựa chọn",
+        "flags": "Tuỳ chọn",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "flags": {
+        "required": "Bắt buộc",
+        "allowMultiple": "Chọn nhiều",
+        "allowQuantity": "Có SL"
+      },
+      "tooltip": {
+        "deactivate": "Tạm dừng",
+        "activate": "Kích hoạt",
+        "edit": "Chỉnh sửa",
+        "delete": "Xoá nhóm"
+      },
+      "deleteConfirm": "Xoá nhóm \"{name}\"? Hành động này không thể hoàn tác.",
+      "error": "Không thể tải danh sách nhóm bán kèm."
+    },
+    "form": {
+      "name": "Tên nhóm",
+      "namePlaceholder": "VD: Topping, Kích cỡ…",
+      "isRequired": "Bắt buộc chọn",
+      "isRequiredHint": "Khách phải chọn ít nhất 1 lựa chọn",
+      "allowMultiple": "Cho phép chọn nhiều",
+      "allowMultipleHint": "Khách có thể chọn nhiều lựa chọn cùng lúc",
+      "allowQuantity": "Cho phép nhập số lượng",
+      "allowQuantityHint": "Khách có thể nhập số lượng cho mỗi lựa chọn",
+      "values": "Danh sách lựa chọn",
+      "addValue": "Thêm lựa chọn",
+      "valueName": "Tên",
+      "valueNamePlaceholder": "VD: Trân châu, Thạch…",
+      "valuePrice": "Giá",
+      "valueCostPrice": "Giá vốn",
+      "removeValue": "Xoá"
+    },
+    "create": {
+      "title": "Thêm nhóm bán kèm",
+      "subtitle": "Tạo nhóm mới với các lựa chọn và giá tương ứng.",
+      "backToList": "Quay lại",
+      "submit": "Tạo nhóm",
+      "error": "Không thể tạo nhóm bán kèm."
+    },
+    "detail": {
+      "backToList": "Quay lại",
+      "id": "Nhóm #{id}",
+      "created": "Tạo lúc",
+      "updated": "Cập nhật lúc",
+      "editTitle": "Chỉnh sửa nhóm",
+      "reset": "Đặt lại",
+      "saveChanges": "Lưu thay đổi",
+      "updateSuccess": "Đã cập nhật nhóm bán kèm.",
+      "notFound": "Không tìm thấy nhóm bán kèm.",
+      "activeOption": {
+        "label": "Kích hoạt",
+        "hint": "Cho phép nhóm này hiển thị khi đặt hàng"
+      },
+      "error": {
+        "loadFailed": "Không thể tải nhóm bán kèm.",
+        "updateFailed": "Không thể cập nhật nhóm bán kèm."
+      }
+    }
+  }
+}
