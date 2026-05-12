@@ -73,7 +73,11 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
     <div class="app-background tw:fixed tw:inset-0 tw:z-0" />
 
     <!-- Main content -->
-    <main class="tw:flex-1 tw:z-10 tw:px-4 tw:py-5 tw:pb-28">
+    <main
+      :class="route.meta.hideBottomNav
+        ? 'tw:h-dvh tw:z-10 tw:overflow-hidden tw:flex tw:flex-col'
+        : 'tw:flex-1 tw:z-10 tw:px-4 tw:py-5 tw:pb-28'"
+    >
       <router-view />
     </main>
 
