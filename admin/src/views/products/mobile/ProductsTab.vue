@@ -34,7 +34,6 @@ let dragState = null
 const onPillsPointerDown = (e) => {
   if (e.button !== 0) return
   dragState = { startX: e.clientX, scrollLeft: pillsRef.value.scrollLeft, moved: false }
-  pillsRef.value.setPointerCapture(e.pointerId)
 }
 const onPillsPointerMove = (e) => {
   if (!dragState) return
@@ -123,7 +122,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
   <div class="tw:flex tw:flex-col">
 
     <!-- ── Category pills ─────────────────────────────────────────── -->
-    <div class="tw:flex tw:items-center tw:gap-2 tw:px-3 tw:py-2.5 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-100 tw:dark:border-white/5">
+    <div class="tw:flex tw:items-center tw:gap-2 tw:px-5 tw:py-2.5 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-100 tw:dark:border-white/5">
       <div
         ref="pillsRef"
         class="tw:flex tw:gap-2 tw:overflow-x-auto tw:flex-1 tw:select-none tw:cursor-grab"
@@ -134,35 +133,32 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
         @pointercancel="onPillsPointerUp"
         @click.capture="onPillsClick"
       >
-        <button
-          type="button"
-          class="tw:shrink-0 tw:rounded-full tw:border tw:px-4 tw:py-1.5 tw:font-medium tw:transition-colors tw:cursor-pointer tw:bg-transparent tw:whitespace-nowrap"
-          :class="categoryFilter === null
-            ? 'tw:border-blue-500 tw:text-blue-600 tw:dark:text-blue-400'
-            : 'tw:border-slate-300 tw:dark:border-white/20 tw:text-slate-600 tw:dark:text-slate-400'"
+        <prime-button
+          size="small"
+          rounded
+          outlined
+          :severity="categoryFilter === null ? 'info' : 'secondary'"
+          class="tw:shrink-0 tw:whitespace-nowrap"
           @click="categoryFilter = null"
         >
           {{ t('products.mobile.allCategories') }}
-        </button>
-        <button
+        </prime-button>
+        <prime-button
           v-for="cat in categories"
           :key="cat.id"
-          type="button"
-          class="tw:shrink-0 tw:rounded-full tw:border tw:px-4 tw:py-1.5 tw:font-medium tw:transition-colors tw:cursor-pointer tw:bg-transparent tw:whitespace-nowrap"
-          :class="categoryFilter === cat.id
-            ? 'tw:border-blue-500 tw:text-blue-600 tw:dark:text-blue-400'
-            : 'tw:border-slate-300 tw:dark:border-white/20 tw:text-slate-600 tw:dark:text-slate-400'"
+          size="small"
+          rounded
+          outlined
+          :severity="categoryFilter === cat.id ? 'success' : 'secondary'"
+          class="tw:shrink-0 tw:whitespace-nowrap"
           @click="categoryFilter = cat.id"
         >
           {{ cat.name }}
-        </button>
+        </prime-button>
       </div>
-      <button
-        type="button"
-        class="tw:shrink-0 tw:w-8 tw:h-8 tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-transparent tw:border-0 tw:cursor-pointer tw:active:bg-black/5 tw:dark:active:bg-white/5"
-      >
-        <iconify icon="ph:grid-four-bold" class="tw:text-lg tw:text-blue-500" />
-      </button>
+      <prime-button severity="secondary" text :class="btnIcon">
+        <iconify icon="ph:grid-four-bold" class="tw:text-blue-500" />
+      </prime-button>
     </div>
 
     <!-- ── Error ──────────────────────────────────────────────────── -->
@@ -171,7 +167,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
       severity="error"
       variant="accent"
       closable
-      class="tw:mx-3 tw:mt-2"
+      class="tw:mx-5 tw:mt-2"
       @close="errorMessage = ''"
     >
       {{ errorMessage }}
@@ -185,7 +181,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
         <div
           v-for="n in 6"
           :key="n"
-          class="tw:flex tw:items-center tw:gap-3 tw:px-3 tw:py-3 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-100 tw:dark:border-white/5"
+          class="tw:flex tw:items-center tw:gap-3 tw:px-5 tw:py-3 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-100 tw:dark:border-white/5"
         >
           <prime-skeleton width="3.5rem" height="3.5rem" border-radius="12px" class="tw:shrink-0" />
           <div class="tw:flex-1 tw:space-y-2">
@@ -202,7 +198,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
         <div
           v-for="product in products"
           :key="product.id"
-          class="tw:flex tw:items-center tw:gap-3 tw:px-3 tw:py-3 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-100 tw:dark:border-white/5"
+          class="tw:flex tw:items-center tw:gap-3 tw:px-5 tw:py-3 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-100 tw:dark:border-white/5"
         >
           <div class="tw:shrink-0 tw:w-14 tw:h-14 tw:rounded-xl tw:overflow-hidden tw:bg-slate-100 tw:dark:bg-white/10">
             <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="tw:w-full tw:h-full tw:object-cover" />
@@ -215,13 +211,14 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
             <p class="tw:text-xs tw:text-slate-500 tw:dark:text-slate-400 tw:mt-0.5">{{ product.category }}</p>
             <p class="tw:text-sm tw:font-semibold tw:text-amber-500 tw:mt-1">{{ formatVnd(product.price) }}</p>
           </div>
-          <button
-            type="button"
-            class="tw:shrink-0 tw:w-10 tw:h-10 tw:rounded-xl tw:border tw:border-blue-500 tw:bg-transparent tw:flex tw:items-center tw:justify-center tw:cursor-pointer tw:transition-colors tw:active:bg-blue-50 tw:dark:active:bg-blue-500/10"
+          <prime-button
+            severity="info"
+            outlined
+            :class="btnIcon"
             @click="router.push({ name: 'productsDetail', params: { id: product.id } })"
           >
-            <iconify icon="ph:arrow-square-out-bold" class="tw:text-lg tw:text-blue-500" />
-          </button>
+            <iconify icon="ph:arrow-square-out-bold" />
+          </prime-button>
         </div>
 
         <div v-if="hasMore" class="tw:flex tw:justify-center tw:py-5 tw:bg-white tw:dark:bg-neutral-900">

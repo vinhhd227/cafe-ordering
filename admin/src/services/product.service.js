@@ -15,5 +15,8 @@ export const updateProduct = (id, payload) => api.put(`/products/${id}`, payload
 // PATCH /api/products/:id/toggle-active  → 204 No Content
 export const toggleProductActive = (id) => api.patch(`/products/${id}/toggle-active`, {})
 
+// PUT /api/products/:id/option-groups  → 204 No Content
+export const replaceAttributeGroups = (id, payload) => api.put(`/products/${id}/option-groups`, payload)
+
 // GET /api/admin/products/tree  → List<ProductTreeCategoryDto>
 export const getProductTree = () => api.get('/admin/products/tree')

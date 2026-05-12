@@ -43,7 +43,7 @@ const search = ref('')
 const searchPlaceholders = computed(() => ({
   products:   t('products.mobile.searchPlaceholder'),
   inventory:  t('products.mobile.searchPlaceholder'),
-  addons:     t('products.mobile.searchPlaceholder'),
+  addons:     t('products.mobile.addonsSearchPlaceholder'),
   categories: t('products.mobile.categorySearchPlaceholder'),
 }))
 
@@ -52,13 +52,13 @@ const viewMode = ref('list')
 </script>
 
 <template>
-  <section class="tw:flex tw:flex-col tw:-mx-4 tw:-mt-5 tw:min-h-[calc(100dvh-3.5rem)]">
+  <section class="tw:flex tw:flex-col tw:h-full">
 
     <!-- ── Sticky top bar ────────────────────────────────────────── -->
-    <div class="tw:sticky tw:top-0 tw:z-10 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-200 tw:dark:border-white/10">
+    <div class="tw:shrink-0 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-200 tw:dark:border-white/10">
 
       <!-- Row 1: back + search + sort + view -->
-      <div class="tw:flex tw:items-center tw:gap-2 tw:px-3 tw:pt-3 tw:pb-2">
+      <div class="tw:flex tw:items-center tw:gap-2 tw:px-4 tw:pt-3 tw:pb-2">
         <button
           type="button"
           class="tw:shrink-0 tw:w-8 tw:h-8 tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-muted tw:active:bg-black/5 tw:dark:active:bg-white/5"
@@ -79,15 +79,14 @@ const viewMode = ref('list')
             :class="activeTab !== 'categories' ? 'tw:pr-9!' : ''"
           />
           <button
-            v-if="activeTab !== 'categories'"
+            v-if="activeTab === 'products' || activeTab === 'inventory'"
             type="button"
             class="tw:absolute tw:right-1 tw:top-1/2 tw:-translate-y-1/2 tw:w-7 tw:h-7 tw:flex tw:items-center tw:justify-center tw:rounded tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-muted"
           >
             <iconify icon="ph:barcode-bold" class="tw:text-base" />
           </button>
-          <!-- Eye icon chỉ hiện cho tab categories -->
           <button
-            v-else
+            v-else-if="activeTab === 'categories'"
             type="button"
             class="tw:absolute tw:right-1 tw:top-1/2 tw:-translate-y-1/2 tw:w-7 tw:h-7 tw:flex tw:items-center tw:justify-center tw:rounded tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-muted"
           >
@@ -95,7 +94,7 @@ const viewMode = ref('list')
           </button>
         </div>
 
-        <template v-if="activeTab !== 'categories'">
+        <template v-if="activeTab === 'products' || activeTab === 'inventory'">
           <button
             type="button"
             class="tw:shrink-0 tw:w-8 tw:h-8 tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-muted tw:active:bg-black/5 tw:dark:active:bg-white/5"
@@ -118,7 +117,7 @@ const viewMode = ref('list')
           v-for="tab in tabs"
           :key="tab.key"
           type="button"
-          class="tw:py-2 tw:text-sm tw:font-medium tw:bg-transparent tw:border-0 tw:cursor-pointer tw:transition-colors tw:whitespace-nowrap tw:text-center"
+          class="tw:py-2 tw:text-lg tw:font-medium tw:bg-transparent tw:border-0 tw:cursor-pointer tw:transition-colors tw:whitespace-nowrap tw:text-center"
           :style="activeTab === tab.key
             ? 'border-bottom: 2px solid rgb(16,185,129); color: rgb(5,150,105);'
             : 'border-bottom: 2px solid transparent; color: rgb(100,116,139);'"
@@ -134,7 +133,7 @@ const viewMode = ref('list')
       :is="currentTab"
       :search="search"
       :view-mode="viewMode"
-      class="tw:flex-1"
+      class="tw:flex-1 tw:overflow-y-auto"
     />
 
     <!-- ── FAB ───────────────────────────────────────────────────── -->
