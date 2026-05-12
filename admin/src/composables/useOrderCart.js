@@ -6,7 +6,7 @@ export function useOrderCart(menuCategories) {
   const selectedProduct = ref(null)
 
   const cartTotal = computed(() =>
-    cart.value.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
+    cart.value.reduce((sum, i) => sum + (i.unitPrice + (i.optionAdjustment ?? 0)) * i.quantity, 0),
   )
 
   const cartItemCount = computed(() =>
@@ -36,15 +36,8 @@ export function useOrderCart(menuCategories) {
       maximumFractionDigits: 0,
     }).format(val ?? 0)
 
-  const optionsLabel = (item) => {
-    const parts = []
-    if (item.temperature) parts.push(t(`orders.temperature.${item.temperature}`))
-    if (item.iceLevel && item.iceLevel !== ICE_LEVEL.NORMAL)
-      parts.push(t(`orders.iceLevel.${item.iceLevel}`))
-    if (item.sugarLevel && item.sugarLevel !== SUGAR_LEVEL.NORMAL)
-      parts.push(t(`orders.sugarLevel.${item.sugarLevel}`))
-    return parts.join(' · ')
-  }
+  const optionsLabel = (item) =>
+    item.selectedValueLabels?.join(' · ') ?? ''
 
   const cartQuantity = (productId) =>
     cart.value

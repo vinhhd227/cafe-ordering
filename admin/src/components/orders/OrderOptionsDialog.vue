@@ -9,53 +9,33 @@ const emit = defineEmits(['update:visible', 'confirm'])
 const { t } = useI18n()
 
 const pendingQuantity = ref(1)
-const pendingOptions = ref({
-  temperature: null,
-  iceLevel: null,
-  sugarLevel: null,
-  isTakeaway: false,
-})
+const pendingSelections = ref({}) // { [groupId]: valueId (Single) | valueId[] (Multiple) }
+const isTakeaway = ref(false)
 
 watch(
   () => props.product,
   (product) => {
     if (!product) return
     pendingQuantity.value = 1
-    pendingOptions.value = {
-      temperature: product.hasTemperatureOption ? DRINK_TEMPERATURE.COLD : null,
-      iceLevel: product.hasIceLevelOption ? ICE_LEVEL.NORMAL : null,
-      sugarLevel: product.hasSugarLevelOption ? SUGAR_LEVEL.NORMAL : null,
-      isTakeaway: false,
+    isTakeaway.value = false
+    const selections = {}
+    for (const group of product.optionGroups ?? []) {
+      const defaultVal = group.values?.find((v) => v.isDefault)
+      if (group.selectionType === 'Single') {
+        selections[group.id] = defaultVal?.id ?? null
+      } else {
+        selections[group.id] = defaultVal ? [defaultVal.id] : []
+      }
     }
+    pendingSelections.value = selections
   },
   { immediate: true },
 )
 
-const temperatureOptions = computed(() =>
-  DRINK_TEMPERATURE_OPTIONS.map((opt) => ({
-    ...opt,
-    label: t(`orders.temperature.${opt.value}`),
-  })),
-)
-
-const iceLevelOptions = computed(() =>
-  ICE_LEVEL_OPTIONS.map((opt) => ({
-    ...opt,
-    label: t(`orders.iceLevel.${opt.value}`),
-  })),
-)
-
-const sugarLevelOptions = computed(() =>
-  SUGAR_LEVEL_OPTIONS.map((opt) => ({
-    ...opt,
-    label: t(`orders.sugarLevel.${opt.value}`),
-  })),
-)
-
-const servingOptions = computed(() => [
-  { ...SERVING_TYPE_OPTIONS[0], label: t('orders.serving.dineIn') },
-  { ...SERVING_TYPE_OPTIONS[1], label: t('orders.serving.takeaway') },
-])
+const servingOptions = [
+  { value: false, label: () => t('orders.serving.dineIn'), icon: 'ph:coffee-bold' },
+  { value: true, label: () => t('orders.serving.takeaway'), icon: 'ph:bag-bold' },
+]
 
 const formatVnd = (val) =>
   new Intl.NumberFormat('vi-VN', {
@@ -64,34 +44,67 @@ const formatVnd = (val) =>
     maximumFractionDigits: 0,
   }).format(val ?? 0)
 
-const makeCartKey = (productId, opts) => {
-  const { temperature = '', iceLevel = '', sugarLevel = '', isTakeaway = false } = opts ?? {}
-  return `${productId}|${temperature}|${iceLevel}|${sugarLevel}|${isTakeaway}`
-}
-
-const setTemperature = (opt) => {
-  pendingOptions.value.temperature = opt
-  if (opt === DRINK_TEMPERATURE.HOT) {
-    if (props.product?.hasIceLevelOption) pendingOptions.value.iceLevel = ICE_LEVEL.LESS
-    if (props.product?.hasSugarLevelOption) pendingOptions.value.sugarLevel = SUGAR_LEVEL.NORMAL
-  } else if (opt === DRINK_TEMPERATURE.COLD) {
-    if (props.product?.hasIceLevelOption && pendingOptions.value.iceLevel === ICE_LEVEL.LESS)
-      pendingOptions.value.iceLevel = ICE_LEVEL.NORMAL
+const toggleValue = (group, valueId) => {
+  if (group.selectionType === 'Single') {
+    pendingSelections.value[group.id] = valueId
+  } else {
+    const current = pendingSelections.value[group.id] ?? []
+    const idx = current.indexOf(valueId)
+    if (idx >= 0) {
+      pendingSelections.value[group.id] = current.filter((id) => id !== valueId)
+    } else {
+      pendingSelections.value[group.id] = [...current, valueId]
+    }
   }
 }
 
+const isSelected = (group, valueId) => {
+  const sel = pendingSelections.value[group.id]
+  if (group.selectionType === 'Single') return sel === valueId
+  return Array.isArray(sel) && sel.includes(valueId)
+}
+
+const canConfirm = computed(() => {
+  if (!props.product) return false
+  for (const group of props.product.optionGroups ?? []) {
+    if (!group.isRequired) continue
+    const sel = pendingSelections.value[group.id]
+    if (group.selectionType === 'Single' && !sel) return false
+    if (group.selectionType !== 'Single' && (!sel || sel.length === 0)) return false
+  }
+  return true
+})
+
 const handleConfirm = () => {
-  const key = makeCartKey(props.product.id, pendingOptions.value)
+  const selectedIds = []
+  const selectedLabels = []
+  let optionAdjustment = 0
+
+  for (const group of props.product.optionGroups ?? []) {
+    const sel = pendingSelections.value[group.id]
+    const ids = group.selectionType === 'Single' ? (sel ? [sel] : []) : (sel ?? [])
+    for (const id of ids) {
+      const val = group.values?.find((v) => v.id === id)
+      if (!val) continue
+      selectedIds.push(id)
+      selectedLabels.push(val.label)
+      optionAdjustment += val.priceAdjustment ?? 0
+    }
+  }
+
+  const key = `${props.product.id}|${[...selectedIds].sort().join(',')}|${isTakeaway.value ? '1' : '0'}`
+
   emit('confirm', {
     _key: key,
     productId: props.product.id,
     productName: props.product.name,
     unitPrice: props.product.price,
+    optionAdjustment,
+    selectedOptionValueIds: selectedIds,
+    selectedValueLabels: selectedLabels,
     quantity: pendingQuantity.value,
-    temperature: pendingOptions.value.temperature,
-    iceLevel: pendingOptions.value.iceLevel,
-    sugarLevel: pendingOptions.value.sugarLevel,
-    isTakeaway: pendingOptions.value.isTakeaway,
+    isTakeaway: isTakeaway.value,
+    isFreeGift: false,
     isAccompaniment: props.product.isAccompaniment ?? false,
   })
   emit('update:visible', false)
@@ -153,7 +166,7 @@ const handleConfirm = () => {
 
       <!-- RIGHT: Options + actions -->
       <div class="tw:flex tw:flex-1 tw:flex-col tw:p-5">
-        <div class="tw:flex-1 tw:space-y-5">
+        <div class="tw:flex-1 tw:space-y-5 tw:overflow-y-auto">
           <!-- Quantity -->
           <div>
             <p class="tw:mb-2 tw:text-sm tw:font-semibold">
@@ -180,70 +193,32 @@ const handleConfirm = () => {
             </div>
           </div>
 
-          <!-- Temperature -->
-          <div v-if="product?.hasTemperatureOption">
+          <!-- Dynamic option groups -->
+          <div v-for="group in product?.optionGroups ?? []" :key="group.id">
             <p class="tw:mb-2 tw:text-sm tw:font-semibold">
-              {{ t('orders.create.optionsDialog.temperature') }}
-            </p>
-            <div class="tw:flex tw:gap-2">
-              <prime-button
-                v-for="opt in temperatureOptions"
-                :key="opt.value"
-                variant="outlined"
-                class="tw:w-full"
-                :severity="pendingOptions.temperature === opt.value ? 'primary' : 'secondary'"
-                @click="setTemperature(opt.value)"
-              >
-                <iconify :icon="opt.icon" />
-                <span>{{ opt.label }}</span>
-              </prime-button>
-            </div>
-          </div>
-
-          <!-- Ice level — only when not Hot -->
-          <div
-            v-if="
-              product?.hasIceLevelOption && pendingOptions.temperature !== DRINK_TEMPERATURE.HOT
-            "
-          >
-            <p class="tw:mb-2 tw:text-sm tw:font-semibold">
-              {{ t('orders.create.optionsDialog.iceLevel') }}
+              {{ group.name }}
+              <span v-if="group.isRequired" class="tw:text-red-400 tw:text-xs tw:ml-1">*</span>
             </p>
             <div class="tw:grid tw:grid-cols-2 tw:gap-2">
               <prime-button
-                v-for="opt in iceLevelOptions"
-                :key="opt.value"
+                v-for="val in group.values"
+                :key="val.id"
                 variant="outlined"
-                class="tw:w-full"
-                :severity="pendingOptions.iceLevel === opt.value ? 'primary' : 'secondary'"
-                @click="pendingOptions.iceLevel = opt.value"
+                class="tw:w-full tw:justify-start"
+                :severity="isSelected(group, val.id) ? 'primary' : 'secondary'"
+                @click="toggleValue(group, val.id)"
               >
-                <iconify :icon="opt.icon" />
-                <span>{{ opt.label }}</span>
-              </prime-button>
-            </div>
-          </div>
-
-          <!-- Sugar level — only when not Hot -->
-          <div
-            v-if="
-              product?.hasSugarLevelOption && pendingOptions.temperature !== DRINK_TEMPERATURE.HOT
-            "
-          >
-            <p class="tw:mb-2 tw:text-sm tw:font-semibold">
-              {{ t('orders.create.optionsDialog.sugarLevel') }}
-            </p>
-            <div class="tw:grid tw:grid-cols-2 tw:gap-2">
-              <prime-button
-                v-for="opt in sugarLevelOptions"
-                :key="opt.value"
-                variant="outlined"
-                class="tw:w-full"
-                :severity="pendingOptions.sugarLevel === opt.value ? 'primary' : 'secondary'"
-                @click="pendingOptions.sugarLevel = opt.value"
-              >
-                <iconify v-if="opt.icon" :icon="opt.icon" />
-                <span>{{ opt.label }}</span>
+                <iconify
+                  :icon="isSelected(group, val.id) ? 'ph:check-circle-fill' : 'ph:circle'"
+                  class="tw:shrink-0"
+                />
+                <span class="tw:flex-1 tw:truncate">{{ val.label }}</span>
+                <span
+                  v-if="val.priceAdjustment && val.priceAdjustment !== 0"
+                  class="tw:text-xs tw:opacity-70 tw:shrink-0"
+                >
+                  +{{ formatVnd(val.priceAdjustment) }}
+                </span>
               </prime-button>
             </div>
           </div>
@@ -255,17 +230,15 @@ const handleConfirm = () => {
             </p>
             <div class="tw:flex tw:gap-2">
               <prime-button
-                v-for="servingType in servingOptions"
-                :key="String(servingType.value)"
+                v-for="opt in servingOptions"
+                :key="String(opt.value)"
                 variant="outlined"
                 class="tw:w-full"
-                :severity="
-                  pendingOptions.isTakeaway === servingType.value ? 'primary' : 'secondary'
-                "
-                @click="pendingOptions.isTakeaway = servingType.value"
+                :severity="isTakeaway === opt.value ? 'primary' : 'secondary'"
+                @click="isTakeaway = opt.value"
               >
-                <iconify :icon="servingType.icon" />
-                <span>{{ servingType.label }}</span>
+                <iconify :icon="opt.icon" />
+                <span>{{ opt.label() }}</span>
               </prime-button>
             </div>
           </div>
@@ -279,7 +252,7 @@ const handleConfirm = () => {
           <prime-button severity="secondary" text @click="$emit('update:visible', false)">
             <span>{{ t('orders.cancel') }}</span>
           </prime-button>
-          <prime-button @click="handleConfirm">
+          <prime-button :disabled="!canConfirm" @click="handleConfirm">
             <iconify icon="prime:shopping-cart" />
             <span class="tw:ml-2">{{ t('orders.create.optionsDialog.addToCart') }}</span>
           </prime-button>

@@ -53,6 +53,66 @@ const pendingOptions = ref({
   note: "",
 });
 
+// Option group selections: Map<groupId, { valueIds: int[], quantities: Map<valueId, int> }>
+// We track as a plain object keyed by groupId
+const pendingOptionSelections = ref({});
+
+const toggleOptionValue = (groupId, valueId, allowMultiple) => {
+  const sel = pendingOptionSelections.value[groupId] ?? { valueIds: [], quantities: {} };
+  const idx = sel.valueIds.indexOf(valueId);
+  if (idx >= 0) {
+    sel.valueIds.splice(idx, 1);
+    delete sel.quantities[valueId];
+  } else {
+    if (!allowMultiple) {
+      sel.valueIds = [valueId];
+      sel.quantities = { [valueId]: 1 };
+    } else {
+      sel.valueIds.push(valueId);
+      sel.quantities[valueId] = sel.quantities[valueId] ?? 1;
+    }
+  }
+  pendingOptionSelections.value = { ...pendingOptionSelections.value, [groupId]: { ...sel } };
+};
+
+const setOptionValueQuantity = (groupId, valueId, qty) => {
+  const sel = pendingOptionSelections.value[groupId];
+  if (!sel) return;
+  sel.quantities[valueId] = Math.max(1, qty);
+  pendingOptionSelections.value = { ...pendingOptionSelections.value, [groupId]: { ...sel } };
+};
+
+const isValueSelected = (groupId, valueId) =>
+  (pendingOptionSelections.value[groupId]?.valueIds ?? []).includes(valueId);
+
+const getValueQuantity = (groupId, valueId) =>
+  pendingOptionSelections.value[groupId]?.quantities[valueId] ?? 1;
+
+// Collect all selected option values as flat array for cart + order
+const collectSelectedOptionValues = () => {
+  const result = [];
+  for (const [, sel] of Object.entries(pendingOptionSelections.value)) {
+    for (const valueId of sel.valueIds ?? []) {
+      result.push({ optionValueId: valueId, quantity: sel.quantities[valueId] ?? 1 });
+    }
+  }
+  return result;
+};
+
+// Extra cost from option values
+const optionValueExtraCost = computed(() => {
+  if (!selectedProduct.value?.optionGroups) return 0;
+  let total = 0;
+  for (const group of selectedProduct.value.optionGroups) {
+    for (const value of group.values) {
+      if (isValueSelected(group.id, value.id)) {
+        total += value.price * getValueQuantity(group.id, value.id);
+      }
+    }
+  }
+  return total;
+});
+
 /* ─── Mobile cart sheet ─────────────────────────────────── */
 const showMobileCart = ref(false);
 
@@ -338,6 +398,9 @@ const fetchProducts = async () => {
                   p.hasIceLevelOption ?? p.HasIceLevelOption ?? false,
                 hasSugarLevelOption:
                   p.hasSugarLevelOption ?? p.HasSugarLevelOption ?? false,
+                optionGroups: Array.isArray(p.optionGroups ?? p.OptionGroups)
+                  ? (p.optionGroups ?? p.OptionGroups)
+                  : [],
               }))
             : [];
           return {
@@ -366,13 +429,22 @@ const handleAddToCart = (product) => {
     note: "",
   };
   pendingQuantity.value = 1;
+
+  // Reset option group selections, pre-fill defaults where isRequired + single-select
+  const initialSel = {};
+  for (const group of product.optionGroups ?? []) {
+    initialSel[group.id] = { valueIds: [], quantities: {} };
+  }
+  pendingOptionSelections.value = initialSel;
+
   showOptionsDialog.value = true;
 };
 
 const confirmAddToCart = () => {
+  const selectedOptionValues = collectSelectedOptionValues();
   cartStore.addItem(
     selectedProduct.value,
-    { ...pendingOptions.value },
+    { ...pendingOptions.value, selectedOptionValues },
     pendingQuantity.value,
   );
   showOptionsDialog.value = false;
@@ -399,6 +471,9 @@ const submitOrder = async () => {
         sugarLevel: item.options?.sugarLevel ?? null,
         isTakeaway: item.options?.isTakeaway ?? false,
         note: item.options?.note?.trim() || null,
+        selectedOptionValues: item.options?.selectedOptionValues?.length
+          ? item.options.selectedOptionValues
+          : null,
       })),
     };
     const result = await placeOrderApi(payload);
@@ -1118,6 +1193,40 @@ onMounted(async () => {
             </div>
           </div>
 
+          <!-- Option Groups (Toppings) -->
+          <template v-if="selectedProduct?.optionGroups?.length">
+            <div
+              v-for="group in selectedProduct.optionGroups"
+              :key="group.id"
+            >
+              <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+                {{ group.name }}
+                <span v-if="group.isRequired" class="tw:ml-1 tw:text-xs tw:text-rose-400">*</span>
+              </p>
+              <div class="tw:flex tw:flex-wrap tw:gap-2">
+                <button
+                  v-for="val in group.values"
+                  :key="val.id"
+                  class="tw:rounded-xl tw:border tw:px-3 tw:py-1.5 tw:text-sm tw:transition tw:flex tw:items-center tw:gap-1.5"
+                  :class="isValueSelected(group.id, val.id)
+                    ? 'tw:border-emerald-400 tw:bg-emerald-500/15 tw:text-emerald-300'
+                    : 'tw:border-white/15 tw:bg-white/5 tw:text-muted tw:hover:border-white/30'"
+                  @click="toggleOptionValue(group.id, val.id, group.allowMultiple)"
+                >
+                  <span>{{ val.name }}</span>
+                  <span v-if="val.price > 0" class="tw:text-xs tw:opacity-70">+{{ formatPrice(val.price) }}</span>
+                  <!-- Quantity input if allowQuantity and selected -->
+                  <template v-if="group.allowQuantity && isValueSelected(group.id, val.id)">
+                    <span class="tw:mx-1 tw:text-white/20">|</span>
+                    <button class="tw:px-0.5" @click.stop="setOptionValueQuantity(group.id, val.id, getValueQuantity(group.id, val.id) - 1)">−</button>
+                    <span class="tw:min-w-4 tw:text-center">{{ getValueQuantity(group.id, val.id) }}</span>
+                    <button class="tw:px-0.5" @click.stop="setOptionValueQuantity(group.id, val.id, getValueQuantity(group.id, val.id) + 1)">+</button>
+                  </template>
+                </button>
+              </div>
+            </div>
+          </template>
+
           <!-- Note -->
           <div>
             <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t('product.optionsDialog.note') }}</p>
@@ -1148,10 +1257,15 @@ onMounted(async () => {
                 <iconify icon="ph:plus-bold" class="tw:h-4 tw:w-4" />
               </button>
             </div>
-            <prime-button @click="confirmAddToCart">
-              <iconify icon="prime:shopping-cart" />
-              <span class="tw:ml-2">{{ t('product.optionsDialog.addToCart') }}</span>
-            </prime-button>
+            <div class="tw:flex tw:flex-col tw:items-end tw:gap-1">
+              <span v-if="optionValueExtraCost > 0" class="tw:text-xs tw:text-emerald-400">
+                +{{ formatPrice(optionValueExtraCost) }} topping
+              </span>
+              <prime-button @click="confirmAddToCart">
+                <iconify icon="prime:shopping-cart" />
+                <span class="tw:ml-2">{{ t('product.optionsDialog.addToCart') }}</span>
+              </prime-button>
+            </div>
             </div>
           </div>
         </div>

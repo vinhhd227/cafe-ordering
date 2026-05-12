@@ -146,6 +146,7 @@
       "apply": "Apply",
       "submit": "Create order",
       "tableHint": "Select a table ( use BAR for orders at the bar )",
+      "allCategories": "All",
       "guestCountPlaceholder": "Guests",
       "promoDialog": {
         "title": "Find promotions",
