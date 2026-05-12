@@ -22,3 +22,4 @@ Format: `YYYY-MM-DD | [action] | mô tả`
 2026-04-08 | UPDATE | auth-flow.md — fix login path, expiresAt semantics, app-level permission check, JWT claims, Secure flag, dedup mechanism
 2026-04-08 | UPDATE | domain-model.md — fix DrinkTemperature (no Warm), IceLevel (no None), PaymentMethod (Cash/BankTransfer only); thêm OrderDate/CompletedAt/PaidAt; thêm admin behaviors
 2026-04-08 | UPDATE | order-flow.md — fix PaymentMethod values; thêm endpoints: DELETE /{id}, PUT /{id}/items, PATCH /{id}/order-date, GET /stream
+2026-05-11 | UPDATE | domain-model.md — rename ProductOptionGroup/Value → ProductAttributeGroup/Value; CategoryId nullable; thêm CostPrice, DiscountPrice, Sku, Barcode vào Product; cập nhật behaviors và API examples

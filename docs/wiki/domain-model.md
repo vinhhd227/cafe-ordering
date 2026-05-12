@@ -1,7 +1,7 @@
 ---
 title: Domain Model
 tags: [domain, aggregates, entities, ddd]
-updated: 2026-04-07
+updated: 2026-05-11
 ---
 
 # Domain Model
@@ -161,20 +161,40 @@ Xem thêm: [[order-flow]], [[promotions]]
 **File:** `OrderAggregate/OrderItem.cs`
 Không phải aggregate root — thuộc Order aggregate.
 
+| Property | Type | Mô tả |
+|----------|------|-------|
+| `ProductId` | int | FK đến Product |
+| `ProductName` | string | Snapshot tên sản phẩm tại thời điểm đặt |
+| `UnitPrice` | decimal | Snapshot giá gốc sản phẩm |
+| `OptionAdjustment` | decimal | Tổng price adjustment của tất cả options đã chọn (denormalized) |
+| `Quantity` | int | Số lượng |
+| `IsTakeaway` | bool | Mang về |
+| `IsFreeGift` | bool | Từ promotion BUY_X_GET_Y |
+| `Note` | string? | Ghi chú riêng |
+| `Discount` | decimal | Item-level discount (từ promotion) |
+| `TotalPrice` | decimal | `(UnitPrice + OptionAdjustment - Discount) * Quantity` |
+| `SelectedOptions` | `IReadOnlyCollection<OrderItemOption>` | Các option đã chọn (snapshot) |
+
+**`OrderItemOption`** — snapshot attribute tại thời điểm đặt hàng:
+
 | Property | Mô tả |
 |----------|-------|
-| `ProductId` | FK đến Product |
-| `ProductName` | Snapshot tên sản phẩm tại thời điểm đặt |
-| `UnitPrice` | Snapshot giá |
-| `Quantity` | Số lượng |
-| `Temperature` | `DrinkTemperature?` (`Hot` / `Cold`) |
-| `IceLevel` | `IceLevel?` (`Less` / `Normal` / `More`) |
-| `SugarLevel` | `SugarLevel?` (`Less` / `Normal` / `More`) |
-| `IsTakeaway` | bool |
-| `IsFreeGift` | bool (từ promotion BUY_X_GET_Y) |
-| `Note` | string? |
-| `DiscountAmount` | decimal (item-level discount) |
-| `TotalPrice` | UnitPrice * Quantity - DiscountAmount |
+| `OptionValueId` | ID của `ProductAttributeValue` gốc (tham chiếu, không FK cứng) |
+| `GroupName` | Snapshot tên nhóm (ví dụ: "Nhiệt độ") |
+| `Label` | Snapshot tên giá trị (ví dụ: "Nóng") |
+| `PriceAdjustment` | Snapshot giá điều chỉnh tại thời điểm đặt |
+
+> **Lý do snapshot:** Thay đổi attribute sau này không ảnh hưởng đơn hàng cũ. `OptionAdjustment` trên `OrderItem` được cộng dồn mỗi khi `AddOption()` được gọi — tránh lazy-load khi tính `TotalPrice`.
+
+**Behaviors:**
+```csharp
+OrderItem.Create(productId, productName, unitPrice, quantity, isTakeaway, isFreeGift, note)
+item.AddOption(optionValueId, groupName, label, priceAdjustment)  // cộng vào OptionAdjustment
+item.ApplyDiscount(amount)
+item.UpdateQuantity(qty)
+item.UpdateNote(note)
+item.UpdateTakeaway(isTakeaway)
+```
 
 ---
 
@@ -183,17 +203,95 @@ Không phải aggregate root — thuộc Order aggregate.
 **File:** `ProductAggregate/Product.cs`
 **Base:** `SoftDeletableEntity<int>`, `IAggregateRoot`
 
-| Property | Mô tả |
-|----------|-------|
-| `Name` | Tên sản phẩm |
-| `Description` | Mô tả |
-| `Price` | Giá bán |
-| `ImageUrl` | URL ảnh |
-| `CategoryId` | FK đến Category |
-| `IsActive` | Đang bán hay không |
-| `HasTemperatureOption` | bool — cho chọn nhiệt độ |
-| `HasIceOption` | bool — cho chọn đá |
-| `HasSugarOption` | bool — cho chọn đường |
+| Property | Type | Mô tả |
+|----------|------|-------|
+| `Name` | string | Tên sản phẩm |
+| `Description` | string? | Mô tả |
+| `Price` | decimal | Giá bán gốc (cho phép = 0) |
+| `CostPrice` | decimal? | Giá vốn |
+| `DiscountPrice` | decimal? | Giá khuyến mãi |
+| `Sku` | string? | Mã SKU nội bộ |
+| `Barcode` | string? | Barcode sản phẩm |
+| `ImageUrl` | string? | URL ảnh |
+| `CategoryId` | int? | FK đến Category (nullable — sản phẩm có thể không thuộc danh mục) |
+| `IsActive` | bool | Đang bán hay không |
+| `IsAccompaniment` | bool | Món đi kèm (không tính vào doanh thu chính) |
+| `EstimatedPrepMinutes` | int? | Thời gian pha chế ước tính |
+| `AttributeGroups` | `IReadOnlyCollection<ProductAttributeGroup>` | Các nhóm attribute của sản phẩm |
+
+**Behaviors:**
+```csharp
+Product.Create(name, price, categoryId?, description?, imageUrl?, isAccompaniment?, costPrice?, discountPrice?, sku?, barcode?)
+product.UpdateDetails(name, price, description?, imageUrl?)
+product.SetCostPrice(value?) / SetDiscountPrice(value?)
+product.SetSku(value?) / SetBarcode(value?)
+product.SetEstimatedPrepTime(minutes?)
+product.UpdateAccompaniment(value)
+product.ChangeCategory(categoryId?)
+product.Activate() / Deactivate()
+product.Delete() / Restore()
+product.ReplaceAttributeGroups(groups)  // clear + recreate toàn bộ attribute groups
+```
+
+**Events:** `ProductCreatedEvent`, `ProductUpdatedEvent`, `ProductActivatedEvent`, `ProductDeactivatedEvent`
+→ Mọi sự kiện đều invalidate public menu cache qua `InvalidateMenuCacheHandler`.
+
+### ProductAttributeGroup
+
+Nhóm attribute của sản phẩm (ví dụ: "Nhiệt độ", "Size", "Mức đường").
+
+**DB table:** `business.ProductAttributeGroups`
+
+| Property | Type | Mô tả |
+|----------|------|-------|
+| `ProductId` | int | FK đến Product |
+| `Name` | string | Tên nhóm |
+| `IsRequired` | bool | Bắt buộc chọn |
+| `SelectionType` | `OptionSelectionType` | `Single` (chọn 1) / `Multiple` (chọn nhiều) |
+| `DisplayOrder` | int | Thứ tự hiển thị |
+| `Values` | `IReadOnlyCollection<ProductAttributeValue>` | Các giá trị trong nhóm |
+
+### ProductAttributeValue
+
+Một giá trị cụ thể trong nhóm attribute (ví dụ: "Nóng", "Size L").
+
+**DB table:** `business.ProductAttributeValues`
+
+| Property | Type | Mô tả |
+|----------|------|-------|
+| `GroupId` | int | FK đến ProductAttributeGroup |
+| `Label` | string | Tên hiển thị |
+| `PriceAdjustment` | decimal | Thay đổi giá so với giá gốc (0 = không thêm) |
+| `IsDefault` | bool | Giá trị mặc định |
+| `DisplayOrder` | int | Thứ tự hiển thị |
+
+**API cấu hình attribute groups:** `PUT /api/products/{id}/option-groups` — thay toàn bộ attribute groups (clear + recreate).
+
+```json
+{
+  "groups": [
+    {
+      "name": "Nhiệt độ", "isRequired": true, "selectionType": "Single",
+      "values": [
+        { "label": "Nóng", "priceAdjustment": 0, "isDefault": true },
+        { "label": "Lạnh", "priceAdjustment": 0, "isDefault": false }
+      ]
+    },
+    {
+      "name": "Size", "isRequired": false, "selectionType": "Single",
+      "values": [
+        { "label": "M", "priceAdjustment": 0,    "isDefault": true },
+        { "label": "L", "priceAdjustment": 5000, "isDefault": false }
+      ]
+    }
+  ]
+}
+```
+
+**Luồng khi khách đặt món:**
+1. Client gửi `selectedOptionValueIds: [1, 3]` (ID của `ProductAttributeValue`)
+2. Handler validate: mỗi ID phải thuộc attribute group của sản phẩm đó
+3. `Order.AddItem(...)` nhận `List<OrderItemOptionData>` — mỗi item gọi `item.AddOption(...)` để ghi snapshot + cộng `OptionAdjustment`
 
 ---
 
