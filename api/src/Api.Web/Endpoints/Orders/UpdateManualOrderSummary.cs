@@ -18,7 +18,7 @@ public class UpdateManualOrderSummary : Summary<UpdateManualOrder>
       Id = 42,
       Items =
       [
-        new ManualOrderItemRequest { ProductId = 1, Quantity = 2, Temperature = "HOT", SugarLevel = "LESS" },
+        new ManualOrderItemRequest { ProductId = 1, Quantity = 2, SelectedOptionValueIds = [1, 3], IsTakeaway = false },
         new ManualOrderItemRequest { ProductId = 3, Quantity = 1, IsTakeaway = true }
       ],
       OrderedAt = null,

@@ -30,31 +30,6 @@ public class RemovePromotionHandler(
 
     await orderRepo.UpdateAsync(order, ct);
 
-    return Result.Success(new OrderDto(
-      order.Id,
-      order.OrderNumber,
-      order.Status.Name.ToUpperInvariant(),
-      order.PaymentStatus.Name.ToUpperInvariant(),
-      order.PaymentMethod.Name.ToUpperInvariant(),
-      order.AmountReceived,
-      order.TipAmount,
-      order.TotalAmount,
-      order.TotalDiscount,
-      order.FinalAmount,
-      order.OrderDate,
-      order.SessionId,
-      null,
-      order.GuestCount,
-      order.CompletedAt,
-      order.PaidAt,
-      order.Items.Select(i => new OrderItemDto(
-        i.Id, i.ProductId, i.ProductName, i.UnitPrice, i.Quantity, i.Discount, i.TotalPrice,
-        i.Temperature?.Name.ToUpperInvariant(),
-        i.IceLevel?.Name.ToUpperInvariant(),
-        i.SugarLevel?.Name.ToUpperInvariant(),
-        i.IsTakeaway, i.IsFreeGift, i.Note)).ToList(),
-      order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList(),
-      false
-    ));
+    return Result.Success(order.ToOrderDto(null, false));
   }
 }

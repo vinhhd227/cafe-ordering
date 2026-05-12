@@ -3,52 +3,21 @@ using Api.Web.Extensions;
 
 namespace Api.Web.Endpoints.Products;
 
-/// <summary>
-/// Request payload for updating a product's basic details.
-/// </summary>
 public sealed class UpdateProductRequest
 {
-  /// <summary>
-  /// ID of the product to update. Provided as a route parameter
-  /// (<c>/api/products/{ProductId}</c>), not in the request body.
-  /// </summary>
   public int ProductId { get; set; }
-
-  /// <summary>Category the product belongs to.</summary>
-  public int CategoryId { get; set; }
-
-  /// <summary>New display name for the product.</summary>
+  public int? CategoryId { get; set; }
   public string Name { get; set; } = string.Empty;
-
-  /// <summary>New base selling price in VND. Must be greater than zero.</summary>
   public decimal Price { get; set; }
-
-  /// <summary>Updated short description shown on the menu card. Pass <c>null</c> to clear.</summary>
   public string? Description { get; set; }
-
-  /// <summary>Updated image URL. Pass <c>null</c> to clear.</summary>
   public string? ImageUrl { get; set; }
-
-  /// <summary>Whether the product is active (visible on menu).</summary>
   public bool IsActive { get; set; } = true;
-
-  /// <summary>Allow customers to choose temperature (hot/cold).</summary>
-  public bool HasTemperatureOption { get; set; }
-
-  /// <summary>Allow customers to choose ice level.</summary>
-  public bool HasIceLevelOption { get; set; }
-
-  /// <summary>Allow customers to choose sugar level.</summary>
-  public bool HasSugarLevelOption { get; set; }
-
-  /// <summary>
-  /// When <c>true</c>, this product is an accompaniment (e.g. food side, add-on)
-  /// and will not be counted toward the default guest count when creating an order.
-  /// </summary>
   public bool IsAccompaniment { get; set; }
-
-  /// <summary>Estimated preparation time in minutes. Pass <c>null</c> to clear.</summary>
   public int? EstimatedPrepMinutes { get; set; }
+  public decimal? CostPrice { get; set; }
+  public decimal? DiscountPrice { get; set; }
+  public string? Sku { get; set; }
+  public string? Barcode { get; set; }
 }
 
 public class Update : Endpoint<UpdateProductRequest>
@@ -73,17 +42,18 @@ public class Update : Endpoint<UpdateProductRequest>
     var result = await _mediator.Send(
       new UpdateProductCommand(
         req.ProductId,
-        req.CategoryId,
         req.Name,
         req.Price,
         req.IsActive,
-        req.HasTemperatureOption,
-        req.HasIceLevelOption,
-        req.HasSugarLevelOption,
+        req.CategoryId,
         req.IsAccompaniment,
         req.Description,
         req.ImageUrl,
-        req.EstimatedPrepMinutes), ct);
+        req.EstimatedPrepMinutes,
+        req.CostPrice,
+        req.DiscountPrice,
+        req.Sku,
+        req.Barcode), ct);
 
     await this.SendResultAsync(result, ct);
   }

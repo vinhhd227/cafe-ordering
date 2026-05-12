@@ -1,16 +1,31 @@
 namespace Api.UseCases.Orders.DTOs;
 
+public record OrderItemOptionDto(
+  int OptionValueId,
+  string GroupName,
+  string Label,
+  decimal PriceAdjustment);
+
+public record OrderItemSelectedOptionDto(
+  int OptionValueId,
+  string GroupName,
+  string ValueName,
+  decimal UnitPrice,
+  int Quantity,
+  decimal Subtotal);
+
 public record OrderItemDto(
   int Id,
   int ProductId,
   string ProductName,
   decimal UnitPrice,
+  decimal OptionAdjustment,
+  decimal OptionValueTotal,
   int Quantity,
   decimal Discount,
   decimal TotalPrice,
-  string? Temperature,
-  string? IceLevel,
-  string? SugarLevel,
+  List<OrderItemOptionDto> SelectedOptions,
+  List<OrderItemSelectedOptionDto> SelectedOptionValues,
   bool IsTakeaway,
   bool IsFreeGift,
   string? Note

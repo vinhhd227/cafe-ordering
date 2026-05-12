@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Api.UseCases.Orders.Create;
 using Api.UseCases.Orders.DTOs;
 using Api.Web.Extensions;
@@ -13,25 +12,20 @@ public sealed class CreateOrderRequest
   public string? PromoCode { get; set; }
 }
 
+public sealed class CreateOrderItemOptionValueRequest
+{
+  public int OptionValueId { get; set; }
+  public int Quantity { get; set; } = 1;
+}
+
 public sealed class CreateOrderItemRequest
 {
   public int ProductId { get; set; }
   public string ProductName { get; set; } = string.Empty;
   public decimal UnitPrice { get; set; }
   public int Quantity { get; set; }
-
-  /// <summary>Accepts string name ("HOT"/"COLD"), integer value ("1"/"2"), or null.</summary>
-  [JsonConverter(typeof(NumberOrStringConverter))]
-  public string? Temperature { get; set; }
-
-  /// <summary>Accepts string name ("LESS"/"NORMAL"/"MORE"), integer value, or null.</summary>
-  [JsonConverter(typeof(NumberOrStringConverter))]
-  public string? IceLevel { get; set; }
-
-  /// <summary>Accepts string name ("LESS"/"NORMAL"/"MORE"), integer value, or null.</summary>
-  [JsonConverter(typeof(NumberOrStringConverter))]
-  public string? SugarLevel { get; set; }
-
+  public List<int>? SelectedOptionValueIds { get; set; }
+  public List<CreateOrderItemOptionValueRequest>? SelectedOptionValues { get; set; }
   public bool IsTakeaway { get; set; }
   public bool IsFreeGift { get; set; }
   public string? Note { get; set; }
@@ -53,7 +47,9 @@ public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrde
     var items = req.Items
       .Select(i => new PlaceOrderItemDto(
         i.ProductId, i.ProductName, i.UnitPrice, i.Quantity,
-        i.Temperature, i.IceLevel, i.SugarLevel, i.IsTakeaway, i.IsFreeGift, i.Note))
+        i.SelectedOptionValueIds,
+        i.SelectedOptionValues?.Select(v => new PlaceOrderOptionValueInput(v.OptionValueId, v.Quantity)).ToList(),
+        i.IsTakeaway, i.IsFreeGift, i.Note))
       .ToList();
 
     var bypassCooldown = User.HasClaim("permission", "admin.access");

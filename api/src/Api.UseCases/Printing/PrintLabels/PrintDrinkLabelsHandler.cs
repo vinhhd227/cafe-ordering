@@ -21,7 +21,6 @@ public class PrintDrinkLabelsHandler(
 {
   public async ValueTask<Result<PrintLabelsResultDto>> Handle(PrintDrinkLabelsCommand cmd, CancellationToken ct)
   {
-    // Load order with items
     var order = await orderRepo.FirstOrDefaultAsync(new OrderByIdWithItemsSpec(cmd.OrderId), ct);
     if (order is null)
       return Result.NotFound($"Order {cmd.OrderId} not found.");
@@ -34,7 +33,6 @@ public class PrintDrinkLabelsHandler(
     if (itemList.Count == 0)
       return Result.Invalid(new ValidationError("ItemIds", "No items to print."));
 
-    // Load table code via session
     string? tableCode = null;
     var session = await sessionRepo.FirstOrDefaultAsync(new SessionByIdSpec(order.SessionId), ct);
     if (session?.TableId is { } tableId)
@@ -43,7 +41,6 @@ public class PrintDrinkLabelsHandler(
       tableCode = table?.Code;
     }
 
-    // Resolve printer
     PrinterConfig? printerConfig = null;
     if (cmd.PrinterId.HasValue)
     {
@@ -67,9 +64,7 @@ public class PrintDrinkLabelsHandler(
       i.ProductName,
       i.Quantity,
       i.UnitPrice,
-      i.Temperature?.Name,
-      i.IceLevel?.Name,
-      i.SugarLevel?.Name,
+      i.SelectedOptions.Select(o => o.Label).ToList(),
       i.Note,
       i.IsTakeaway)).ToList();
 

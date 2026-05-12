@@ -44,13 +44,11 @@ public record BillItemInfo(
 );
 
 public record DrinkLabelItemInfo(
-  int     ItemId,
-  string  ProductName,
-  int     Quantity,
-  decimal UnitPrice,
-  string? Temperature,
-  string? IceLevel,
-  string? SugarLevel,
-  string? Note,
-  bool    IsTakeaway
+  int                   ItemId,
+  string                ProductName,
+  int                   Quantity,
+  decimal               UnitPrice,
+  IReadOnlyList<string> Options,
+  string?               Note,
+  bool                  IsTakeaway
 );

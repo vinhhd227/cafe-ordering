@@ -100,41 +100,7 @@ public class ListOrdersHandler(
       var isManual = sessionSource.TryGetValue(o.SessionId, out var src)
         && src == GuestSessionSource.Manual;
 
-      return new OrderDto(
-        o.Id,
-        o.OrderNumber,
-        o.Status.Name.ToUpperInvariant(),
-        o.PaymentStatus.Name.ToUpperInvariant(),
-        o.PaymentMethod.Name.ToUpperInvariant(),
-        o.AmountReceived,
-        o.TipAmount,
-        o.TotalAmount,
-        o.TotalDiscount,
-        o.FinalAmount,
-        o.OrderDate,
-        o.SessionId,
-        tableCode,
-        o.GuestCount,
-        o.CompletedAt,
-        o.PaidAt,
-        o.Items.Select(i => new OrderItemDto(
-          i.Id,
-          i.ProductId,
-          i.ProductName,
-          i.UnitPrice,
-          i.Quantity,
-          i.Discount,
-          i.TotalPrice,
-          i.Temperature?.Name.ToUpperInvariant(),
-          i.IceLevel?.Name.ToUpperInvariant(),
-          i.SugarLevel?.Name.ToUpperInvariant(),
-          i.IsTakeaway,
-          i.IsFreeGift,
-          i.Note
-        )).ToList(),
-        o.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList(),
-        isManual
-      );
+      return o.ToOrderDto(tableCode, isManual);
     }).ToList();
 
     var cashTotal         = cashAmounts.Sum();

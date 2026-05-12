@@ -74,13 +74,10 @@ public class TsplPrintFormatter : IPrintFormatter
     y += 2;
 
     // Options — Font "1"
-    var opts = new List<string>();
-    if (data.Temperature != null) opts.Add(FormatTemperature(data.Temperature));
-    if (data.IceLevel    != null) opts.Add($"Da: {FormatLevel(data.IceLevel)}");
-    if (data.SugarLevel  != null) opts.Add($"Duong: {FormatLevel(data.SugarLevel)}");
-    if (opts.Count > 0)
+    if (data.Options.Count > 0)
     {
-      Line(sb, $"TEXT {cx},{y},\"1\",0,1,1,\"{Esc(string.Join(" | ", opts))}\"");
+      var optStr = string.Join(" | ", data.Options.Select(o => StripDiacritics(o)));
+      Line(sb, $"TEXT {cx},{y},\"1\",0,1,1,\"{Esc(optStr)}\"");
       y += Font1H + 4;
     }
 

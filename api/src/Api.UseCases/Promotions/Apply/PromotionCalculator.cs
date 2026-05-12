@@ -36,7 +36,7 @@ public static class PromotionCalculator
   public static DiscountResult Calculate(
     Promotion promo,
     IReadOnlyCollection<OrderItem> items,
-    Dictionary<int, int>? productCategoryMap = null,
+    Dictionary<int, int?>? productCategoryMap = null,
     IReadOnlyList<Product>? externalFreeProducts = null)
   {
     var scopedItems = GetScopedItems(promo, items, productCategoryMap);
@@ -61,7 +61,7 @@ public static class PromotionCalculator
   private static List<OrderItem> GetScopedItems(
     Promotion promo,
     IReadOnlyCollection<OrderItem> items,
-    Dictionary<int, int>? productCategoryMap)
+    Dictionary<int, int?>? productCategoryMap)
   {
     if (promo.Scope == PromotionScope.Product)
       return items.Where(i => promo.ApplicableProductIds.Contains(i.ProductId)).ToList();
@@ -70,7 +70,7 @@ public static class PromotionCalculator
       return items.Where(i =>
         productCategoryMap != null &&
         productCategoryMap.TryGetValue(i.ProductId, out var catId) &&
-        promo.ApplicableCategoryIds.Contains(catId)).ToList();
+        catId.HasValue && promo.ApplicableCategoryIds.Contains(catId.Value)).ToList();
 
     // ORDER scope — all items
     return items.ToList();
@@ -120,7 +120,7 @@ public static class PromotionCalculator
     Promotion promo,
     List<OrderItem> scopedItems,
     IReadOnlyCollection<OrderItem> allItems,
-    Dictionary<int, int>? productCategoryMap,
+    Dictionary<int, int?>? productCategoryMap,
     IReadOnlyList<Product>? externalFreeProducts)
   {
     if (promo.BuyQuantity == null || promo.GetQuantity == null)
@@ -158,7 +158,7 @@ public static class PromotionCalculator
     {
       freePool = allItems
         .Where(i => productCategoryMap.TryGetValue(i.ProductId, out var catId)
-                 && promo.GetFromCategoryIds.Contains(catId))
+                 && catId.HasValue && promo.GetFromCategoryIds.Contains(catId.Value))
         .ToList();
     }
     else

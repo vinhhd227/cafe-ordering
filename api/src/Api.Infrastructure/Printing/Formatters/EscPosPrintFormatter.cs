@@ -39,11 +39,8 @@ public class EscPosPrintFormatter : IPrintFormatter
 
     // Options
     parts.Add(E.LeftAlign());
-    var opts = new List<string>();
-    if (data.Temperature != null) opts.Add(FormatTemperature(data.Temperature));
-    if (data.IceLevel    != null) opts.Add($"Da: {FormatLevel(data.IceLevel)}");
-    if (data.SugarLevel  != null) opts.Add($"Duong: {FormatLevel(data.SugarLevel)}");
-    if (opts.Count > 0) parts.Add(E.PrintLine(string.Join(" | ", opts)));
+    if (data.Options.Count > 0)
+      parts.Add(E.PrintLine(string.Join(" | ", data.Options.Select(StripDiacritics))));
 
     // Note
     if (!string.IsNullOrWhiteSpace(data.Note))

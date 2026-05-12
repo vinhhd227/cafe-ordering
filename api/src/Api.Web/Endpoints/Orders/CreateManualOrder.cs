@@ -21,9 +21,7 @@ public sealed class ManualOrderItemRequest
 {
   public int ProductId { get; set; }
   public int Quantity { get; set; }
-  public string? Temperature { get; set; }
-  public string? IceLevel { get; set; }
-  public string? SugarLevel { get; set; }
+  public List<int>? SelectedOptionValueIds { get; set; }
   public bool IsTakeaway { get; set; }
   public string? Note { get; set; }
 }
@@ -44,7 +42,7 @@ public class CreateManualOrder(IMediator mediator) : Endpoint<CreateManualOrderR
       req.TableId,
       req.Items.Select(i => new ManualOrderItemDto(
         i.ProductId, i.Quantity,
-        i.Temperature, i.IceLevel, i.SugarLevel,
+        i.SelectedOptionValueIds,
         i.IsTakeaway, i.Note)).ToList(),
       req.OrderedAt,
       req.GuestCount,

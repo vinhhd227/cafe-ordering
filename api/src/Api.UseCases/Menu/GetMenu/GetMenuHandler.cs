@@ -7,11 +7,6 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.UseCases.Menu.GetMenu;
 
-/// <summary>
-///   Lấy menu public: chỉ active categories + active products.
-///   Kết quả được cache trong IMemoryCache; tự động vô hiệu hoá khi
-///   có domain event thay đổi category/product.
-/// </summary>
 public class GetMenuHandler(
   IReadRepositoryBase<Category> categoryRepository,
   IReadRepositoryBase<Product> productRepository,
@@ -20,13 +15,9 @@ public class GetMenuHandler(
 {
   public async ValueTask<Result<List<MenuCategoryDto>>> Handle(GetMenuQuery request, CancellationToken ct)
   {
-    // ── Cache hit ────────────────────────────────────────────────
     if (cache.TryGetValue(MenuCacheKeys.PublicMenu, out List<MenuCategoryDto>? cached) && cached is not null)
-    {
       return Result.Success(cached);
-    }
 
-    // ── Cache miss → query DB ────────────────────────────────────
     var categories = await categoryRepository.ListAsync(new ActiveCategoriesSpec(), ct);
     var products   = await productRepository.ListAsync(new ActiveProductsSpec(), ct);
 
@@ -43,16 +34,40 @@ public class GetMenuHandler(
             p.Description,
             p.Price,
             p.ImageUrl,
-            p.HasTemperatureOption,
-            p.HasIceLevelOption,
-            p.HasSugarLevelOption,
             p.IsAccompaniment,
-            p.EstimatedPrepMinutes))
+            p.EstimatedPrepMinutes,
+            p.AttributeGroups
+              .OrderBy(g => g.DisplayOrder)
+              .Select(g => new MenuAttributeGroupDto(
+                g.Id,
+                g.Name,
+                g.IsRequired,
+                g.SelectionType.ToString(),
+                g.Values
+                  .OrderBy(v => v.DisplayOrder)
+                  .Select(v => new MenuAttributeValueDto(v.Id, v.Label, v.PriceAdjustment, v.IsDefault))
+                  .ToList()))
+              .ToList(),
+            p.OptionGroupMappings
+              .Where(m => m.Group is { IsActive: true, IsDeleted: false })
+              .OrderBy(m => m.DisplayOrder)
+              .Select(m => new MenuOptionGroupDto(
+                m.Group!.Id,
+                m.Group.Name,
+                m.Group.IsRequired,
+                m.Group.AllowMultiple,
+                m.Group.AllowQuantity,
+                m.DisplayOrder,
+                m.Group.Values
+                  .Where(v => v.IsInStock)
+                  .OrderBy(v => v.DisplayOrder)
+                  .Select(v => new MenuOptionValueDto(v.Id, v.Name, v.Price))
+                  .ToList()))
+              .ToList()))
           .ToList()))
       .Where(c => c.Products.Count > 0)
-      .ToList(); 
+      .ToList();
 
-    // ── Store in cache (1h fallback expiry) ──────────────────────
     cache.Set(MenuCacheKeys.PublicMenu, result,
       new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(1)));
 

@@ -62,35 +62,86 @@ public class PlaceOrderHandler(
     if (request.Items is null || request.Items.Count == 0)
       return Result.Invalid(new ValidationError("Items", "Order must contain at least one item."));
 
-    // 4. Tạo order — chưa có items, save để EF sinh Id
+    // 4. Load products kèm option groups/values để validate và build snapshots
+    var productIds = request.Items.Select(i => i.ProductId).Distinct().ToList();
+    var products = await productRepository.ListAsync(new ProductsByIdsWithAttributesSpec(productIds), ct);
+    var productMap = products.ToDictionary(p => p.Id);
+
+    // 5. Tạo order — chưa có items, save để EF sinh Id
     var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}";
     var order = Order.Create(request.SessionId, orderNumber, guestCount: request.GuestCount);
 
-    await orderRepository.AddAsync(order, ct); // EF sinh order.Id sau bước này
+    await orderRepository.AddAsync(order, ct);
 
-    // 5. Thêm items (dùng order.Id đã được sinh)
+    // 6. Thêm items với option snapshots
     foreach (var item in request.Items)
     {
-      DrinkTemperature? temp = item.Temperature is not null
-        ? DrinkTemperature.FromName(NormalizeTemperature(item.Temperature), true) : null;
-      IceLevel? iceLevel = item.IceLevel is not null
-        ? IceLevel.FromName(NormalizeIceLevel(item.IceLevel), true) : null;
-      SugarLevel? sugarLevel = item.SugarLevel is not null
-        ? SugarLevel.FromName(NormalizeSugarLevel(item.SugarLevel), true) : null;
+      if (!productMap.TryGetValue(item.ProductId, out var product))
+        return Result.NotFound($"Product {item.ProductId} not found.");
 
-      order.AddItem(item.ProductId, item.ProductName, item.UnitPrice, item.Quantity,
-        temp, iceLevel, sugarLevel, item.IsTakeaway, item.IsFreeGift, item.Note);
+      var optionData = BuildOptionData(product, item.SelectedOptionValueIds);
+      if (optionData is null)
+        return Result.Invalid(new ValidationError("SelectedOptionValueIds",
+          $"Invalid option value IDs for product '{product.Name}'."));
+
+      var orderItem = order.AddItem(item.ProductId, item.ProductName, item.UnitPrice, item.Quantity,
+        optionData, item.IsTakeaway, item.IsFreeGift, item.Note);
+
+      // Add ProductOptionGroup value selections (topping-style)
+      if (item.SelectedOptionValues is { Count: > 0 })
+      {
+        foreach (var sel in item.SelectedOptionValues)
+        {
+          var mapping = product.OptionGroupMappings
+            .FirstOrDefault(m => m.Group is not null && m.Group.Values.Any(v => v.Id == sel.OptionValueId));
+          if (mapping?.Group is null) continue;
+
+          var optValue = mapping.Group.Values.First(v => v.Id == sel.OptionValueId);
+          orderItem.AddSelectedOptionValue(
+            optValue.Id,
+            mapping.Group.Name,
+            optValue.Name,
+            optValue.Price,
+            sel.Quantity > 0 ? sel.Quantity : 1);
+        }
+      }
     }
 
-    // 6. Đăng ký OrderCreatedEvent sau khi items đã được thêm → SSE có đầy đủ data
+    // 7. Đăng ký OrderCreatedEvent sau khi items đã được thêm
     order.NotifyCreated();
-    await orderRepository.UpdateAsync(order, ct); // Lưu items + dispatch event
+    await orderRepository.UpdateAsync(order, ct);
 
-    // 7. Áp dụng promo nếu có (best-effort — không fail order nếu promo lỗi)
+    // 8. Áp dụng promo nếu có (best-effort)
     if (!string.IsNullOrWhiteSpace(request.PromoCode))
       await TryApplyPromoAsync(order, request.PromoCode, ct);
 
     return Result.Success(new PlaceOrderResponseDto(order.Id, order.OrderNumber, order.TotalAmount));
+  }
+
+  /// <summary>
+  ///   Dựng danh sách OrderItemOptionData từ selectedValueIds.
+  ///   Trả null nếu có value ID không thuộc product này.
+  /// </summary>
+  private static IReadOnlyList<OrderItemOptionData>? BuildOptionData(
+    Product product, List<int>? selectedValueIds)
+  {
+    if (selectedValueIds is null || selectedValueIds.Count == 0)
+      return [];
+
+    var result = new List<OrderItemOptionData>();
+
+    foreach (var valueId in selectedValueIds)
+    {
+      var group = product.AttributeGroups
+        .FirstOrDefault(g => g.Values.Any(v => v.Id == valueId));
+
+      if (group is null) return null; // value ID không thuộc product này
+
+      var value = group.Values.First(v => v.Id == valueId);
+      result.Add(new OrderItemOptionData(value.Id, group.Name, value.Label, value.PriceAdjustment));
+    }
+
+    return result;
   }
 
   private async Task TryApplyPromoAsync(Order order, string code, CancellationToken ct)
@@ -101,7 +152,7 @@ public class PlaceOrderHandler(
       if (promo is null || !promo.IsValidAt(DateTime.UtcNow) || !promo.HasUsageLeft()) return;
       if (!promo.IsApplicableTo(order.TotalAmount)) return;
 
-      Dictionary<int, int>? productCategoryMap = null;
+      Dictionary<int, int?>? productCategoryMap = null;
       var needsCategoryMap = (promo.Scope == PromotionScope.Category && promo.ApplicableCategoryIds.Any())
                           || (promo.GetFromCategoryIds is { Count: > 0 });
       if (needsCategoryMap)
@@ -136,29 +187,4 @@ public class PlaceOrderHandler(
       // Promo lỗi không được fail order — bỏ qua
     }
   }
-
-  // Normalize legacy/alternative representations to canonical SmartEnum names.
-  // Handles: integer strings ("1","2"), Vietnamese strings, already-correct names.
-  private static string NormalizeTemperature(string raw) => raw.Trim() switch
-  {
-    "1" or "HOT"  or "Nóng"  or "nóng"  => "HOT",
-    "2" or "COLD" or "Lạnh"  or "lạnh"  => "COLD",
-    var s                                 => s.ToUpperInvariant()
-  };
-
-  private static string NormalizeIceLevel(string raw) => raw.Trim() switch
-  {
-    "1" or "LESS"   or "Ít đá"       or "ít đá"       => "LESS",
-    "2" or "NORMAL" or "Bình thường"  or "bình thường" => "NORMAL",
-    "3" or "MORE"   or "Nhiều đá"     or "nhiều đá"    => "MORE",
-    var s                                                => s.ToUpperInvariant()
-  };
-
-  private static string NormalizeSugarLevel(string raw) => raw.Trim() switch
-  {
-    "1" or "LESS"   or "Ít đường"    or "ít đường"    => "LESS",
-    "2" or "NORMAL" or "Bình thường" or "bình thường" => "NORMAL",
-    "3" or "MORE"   or "Nhiều đường" or "nhiều đường" => "MORE",
-    var s                                               => s.ToUpperInvariant()
-  };
 }

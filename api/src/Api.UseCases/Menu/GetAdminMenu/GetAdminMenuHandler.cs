@@ -6,11 +6,6 @@ using Api.UseCases.Menu.DTOs;
 
 namespace Api.UseCases.Menu.GetAdminMenu;
 
-/// <summary>
-///   Lấy toàn bộ menu cho admin: tất cả categories (kể cả inactive)
-///   cùng tất cả products (kể cả inactive) của từng category.
-///   Không cache — admin cần dữ liệu real-time.
-/// </summary>
 public class GetAdminMenuHandler(
   IReadRepositoryBase<Category> categoryRepository,
   IReadRepositoryBase<Product> productRepository)
@@ -38,11 +33,20 @@ public class GetAdminMenuHandler(
             p.Price,
             p.ImageUrl,
             p.IsActive,
-            p.HasTemperatureOption,
-            p.HasIceLevelOption,
-            p.HasSugarLevelOption,
             p.IsAccompaniment,
-            p.EstimatedPrepMinutes))
+            p.EstimatedPrepMinutes,
+            p.AttributeGroups
+              .OrderBy(g => g.DisplayOrder)
+              .Select(g => new MenuAttributeGroupDto(
+                g.Id,
+                g.Name,
+                g.IsRequired,
+                g.SelectionType.ToString(),
+                g.Values
+                  .OrderBy(v => v.DisplayOrder)
+                  .Select(v => new MenuAttributeValueDto(v.Id, v.Label, v.PriceAdjustment, v.IsDefault))
+                  .ToList()))
+              .ToList()))
           .ToList()))
       .ToList();
 

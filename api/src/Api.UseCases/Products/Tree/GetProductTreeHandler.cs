@@ -13,7 +13,8 @@ public class GetProductTreeHandler(IReadRepositoryBase<Product> repository)
     var products = await repository.ListAsync(new ActiveProductsWithCategorySpec(), ct);
 
     var tree = products
-      .GroupBy(p => new { p.CategoryId, CategoryName = p.Category!.Name })
+      .Where(p => p.CategoryId.HasValue)
+      .GroupBy(p => new { CategoryId = p.CategoryId!.Value, CategoryName = p.Category!.Name })
       .OrderBy(g => g.Key.CategoryName)
       .Select(g => new ProductTreeCategoryDto(
         g.Key.CategoryId,

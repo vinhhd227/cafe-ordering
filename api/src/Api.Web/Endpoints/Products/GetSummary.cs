@@ -1,4 +1,4 @@
-using Api.UseCases.Products.DTOs;
+﻿using Api.UseCases.Products.DTOs;
 
 namespace Api.Web.Endpoints.Products;
 
@@ -20,13 +20,28 @@ public class GetSummary : Summary<Get>
       Name: "Caramel Macchiato",
       Description: "Espresso layered with vanilla-flavoured syrup, steamed milk, and a caramel drizzle.",
       Price: 65000,
+      CostPrice: null,
+      DiscountPrice: null,
+      Sku: null,
+      Barcode: null,
       IsActive: true,
       ImageUrl: "https://example.com/images/caramel-macchiato.jpg",
-      HasTemperatureOption: true,
-      HasIceLevelOption: true,
-      HasSugarLevelOption: true,
       IsAccompaniment: false,
       EstimatedPrepMinutes: 5,
+      AttributeGroups:
+      [
+        new ProductAttributeGroupDto(1, "Nhiệt độ", true, "Single", 1,
+        [
+          new ProductAttributeValueDto(1, "Nóng", 0, true, 1),
+          new ProductAttributeValueDto(2, "Lạnh", 0, false, 2),
+        ]),
+        new ProductAttributeGroupDto(2, "Size", false, "Single", 2,
+        [
+          new ProductAttributeValueDto(3, "M", 0, true, 1),
+          new ProductAttributeValueDto(4, "L", 5000, false, 2),
+        ]),
+      ],
+      AssignedOptionGroupIds: [1, 2],
       CreatedAt: new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
       UpdatedAt: null);
 

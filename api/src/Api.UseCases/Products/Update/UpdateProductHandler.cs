@@ -1,10 +1,7 @@
-﻿using Api.Core.Aggregates.ProductAggregate;
+using Api.Core.Aggregates.ProductAggregate;
 
 namespace Api.UseCases.Products.Update;
 
-/// <summary>
-///   Handler cập nhật Product details
-/// </summary>
 public class UpdateProductHandler : ICommandHandler<UpdateProductCommand, Result>
 {
   private readonly IRepositoryBase<Product> _repository;
@@ -19,9 +16,7 @@ public class UpdateProductHandler : ICommandHandler<UpdateProductCommand, Result
     var product = await _repository.GetByIdAsync(request.ProductId, ct);
 
     if (product is null)
-    {
       return Result.NotFound($"Product {request.ProductId} not found");
-    }
 
     product.ChangeCategory(request.CategoryId);
 
@@ -31,13 +26,12 @@ public class UpdateProductHandler : ICommandHandler<UpdateProductCommand, Result
       request.Description,
       request.ImageUrl);
 
-    product.UpdateOptions(
-      request.HasTemperatureOption,
-      request.HasIceLevelOption,
-      request.HasSugarLevelOption);
-
     product.UpdateAccompaniment(request.IsAccompaniment);
     product.SetEstimatedPrepTime(request.EstimatedPrepMinutes);
+    product.SetCostPrice(request.CostPrice);
+    product.SetDiscountPrice(request.DiscountPrice);
+    product.SetSku(request.Sku);
+    product.SetBarcode(request.Barcode);
 
     if (request.IsActive)
       product.Activate();

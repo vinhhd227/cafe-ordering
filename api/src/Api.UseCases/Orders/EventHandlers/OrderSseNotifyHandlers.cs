@@ -11,10 +11,7 @@ using Mediator;
 
 namespace Api.UseCases.Orders.EventHandlers;
 
-/// <summary>
-///   Helper dùng chung: map Order entity → OrderDto (cần resolve TableCode từ session).
-/// </summary>
-file static class OrderDtoMapper
+file static class OrderSseMapper
 {
   private static readonly JsonSerializerOptions JsonOpts = new()
   {
@@ -35,47 +32,10 @@ file static class OrderDtoMapper
       tableCode = table?.Code;
     }
 
-    var dto = new OrderDto(
-      order.Id,
-      order.OrderNumber,
-      order.Status.Name.ToUpperInvariant(),
-      order.PaymentStatus.Name.ToUpperInvariant(),
-      order.PaymentMethod.Name.ToUpperInvariant(),
-      order.AmountReceived,
-      order.TipAmount,
-      order.TotalAmount,
-      order.TotalDiscount,
-      order.FinalAmount,
-      order.OrderDate,
-      order.SessionId,
-      tableCode,
-      order.GuestCount,
-      order.CompletedAt,
-      order.PaidAt,
-      order.Items.Select(i => new OrderItemDto(
-        i.Id,
-        i.ProductId,
-        i.ProductName,
-        i.UnitPrice,
-        i.Quantity,
-        i.Discount,
-        i.TotalPrice,
-        i.Temperature?.Name.ToUpperInvariant(),
-        i.IceLevel?.Name.ToUpperInvariant(),
-        i.SugarLevel?.Name.ToUpperInvariant(),
-        i.IsTakeaway,
-        i.IsFreeGift,
-        i.Note
-      )).ToList(),
-      order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList(),
-      false
-    );
-
+    var dto = order.ToOrderDto(tableCode, isManual: false);
     return JsonSerializer.Serialize(dto, JsonOpts);
   }
 }
-
-// ── OrderCreatedEvent ─────────────────────────────────────────────
 
 public class NotifyOnOrderCreated(
   IOrderSseNotifier notifier,
@@ -85,12 +45,10 @@ public class NotifyOnOrderCreated(
 {
   public async ValueTask Handle(OrderCreatedEvent notification, CancellationToken ct)
   {
-    var json = await OrderDtoMapper.ToJsonAsync(notification.Order, sessionRepo, tableRepo, ct);
+    var json = await OrderSseMapper.ToJsonAsync(notification.Order, sessionRepo, tableRepo, ct);
     await notifier.BroadcastAsync("order_created", json, ct);
   }
 }
-
-// ── OrderStatusChangedEvent ───────────────────────────────────────
 
 public class NotifyOnOrderStatusChanged(
   IOrderSseNotifier notifier,
@@ -100,12 +58,10 @@ public class NotifyOnOrderStatusChanged(
 {
   public async ValueTask Handle(OrderStatusChangedEvent notification, CancellationToken ct)
   {
-    var json = await OrderDtoMapper.ToJsonAsync(notification.Order, sessionRepo, tableRepo, ct);
+    var json = await OrderSseMapper.ToJsonAsync(notification.Order, sessionRepo, tableRepo, ct);
     await notifier.BroadcastAsync("order_updated", json, ct);
   }
 }
-
-// ── OrderPaymentUpdatedEvent ──────────────────────────────────────
 
 public class NotifyOnOrderPaymentUpdated(
   IOrderSseNotifier notifier,
@@ -115,7 +71,7 @@ public class NotifyOnOrderPaymentUpdated(
 {
   public async ValueTask Handle(OrderPaymentUpdatedEvent notification, CancellationToken ct)
   {
-    var json = await OrderDtoMapper.ToJsonAsync(notification.Order, sessionRepo, tableRepo, ct);
+    var json = await OrderSseMapper.ToJsonAsync(notification.Order, sessionRepo, tableRepo, ct);
     await notifier.BroadcastAsync("order_updated", json, ct);
   }
 }

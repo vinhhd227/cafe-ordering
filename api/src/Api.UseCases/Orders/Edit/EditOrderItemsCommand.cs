@@ -3,10 +3,8 @@ namespace Api.UseCases.Orders.Edit;
 public record EditOrderItemDto(
   int ProductId,
   int Quantity,
-  string? Temperature,
-  string? IceLevel,
-  string? SugarLevel,
-  bool IsTakeaway,
+  List<int>? SelectedOptionValueIds = null,
+  bool IsTakeaway = false,
   string? Note = null);
 
 public record EditOrderItemsCommand(

@@ -33,7 +33,7 @@ public class UpdateManualOrder(IMediator mediator) : Endpoint<UpdateManualOrderR
       req.Id,
       req.Items.Select(i => new ManualOrderItemDto(
         i.ProductId, i.Quantity,
-        i.Temperature, i.IceLevel, i.SugarLevel,
+        i.SelectedOptionValueIds,
         i.IsTakeaway, i.Note)).ToList(),
       req.OrderedAt,
       req.GuestCount,

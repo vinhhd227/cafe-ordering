@@ -1,54 +1,39 @@
+using Api.Core.Aggregates.ProductAggregate;
 using Api.UseCases.Products.Create;
+using Api.UseCases.Products.OptionGroups;
 using Api.Web.Extensions;
 
 namespace Api.Web.Endpoints.Products;
 
-/// <summary>
-/// Request payload for creating a new product.
-/// </summary>
+public sealed class CreateAttributeValueRequest
+{
+  public string Label { get; set; } = string.Empty;
+  public decimal PriceAdjustment { get; set; }
+  public bool IsDefault { get; set; }
+}
+
+public sealed class CreateAttributeGroupRequest
+{
+  public string Name { get; set; } = string.Empty;
+  public bool IsRequired { get; set; }
+  public string SelectionType { get; set; } = "Single";
+  public List<CreateAttributeValueRequest> Values { get; set; } = [];
+}
+
 public sealed class CreateProductRequest
 {
-  /// <summary>ID of the category this product belongs to.</summary>
-  public int CategoryId { get; set; }
-
-  /// <summary>Display name of the product (e.g. "Caramel Macchiato").</summary>
   public string Name { get; set; } = string.Empty;
-
-  /// <summary>Base selling price in VND. Must be greater than zero.</summary>
   public decimal Price { get; set; }
-
-  /// <summary>Optional short description shown on the menu card.</summary>
+  public int? CategoryId { get; set; }
   public string? Description { get; set; }
-
-  /// <summary>Optional publicly accessible URL of the product thumbnail image.</summary>
   public string? ImageUrl { get; set; }
-
-  /// <summary>
-  /// When <c>true</c>, customers can choose a temperature option
-  /// (Hot / Iced / Blended). Typically enabled for beverages.
-  /// </summary>
-  public bool HasTemperatureOption { get; set; }
-
-  /// <summary>
-  /// When <c>true</c>, customers can select their preferred ice level
-  /// (No Ice / Less Ice / Normal / Extra Ice).
-  /// </summary>
-  public bool HasIceLevelOption { get; set; }
-
-  /// <summary>
-  /// When <c>true</c>, customers can select their preferred sugar level
-  /// (0 % / 25 % / 50 % / 75 % / 100 %).
-  /// </summary>
-  public bool HasSugarLevelOption { get; set; }
-
-  /// <summary>
-  /// When <c>true</c>, this product is an accompaniment (e.g. food side, add-on)
-  /// and will not be counted toward the default guest count when creating an order.
-  /// </summary>
   public bool IsAccompaniment { get; set; }
-
-  /// <summary>Estimated preparation time in minutes. Used to show customers expected wait time.</summary>
   public int? EstimatedPrepMinutes { get; set; }
+  public decimal? CostPrice { get; set; }
+  public decimal? DiscountPrice { get; set; }
+  public string? Sku { get; set; }
+  public string? Barcode { get; set; }
+  public List<CreateAttributeGroupRequest>? AttributeGroups { get; set; }
 }
 
 public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
@@ -63,17 +48,37 @@ public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
 
   public override async Task HandleAsync(CreateProductRequest req, CancellationToken ct)
   {
+    IReadOnlyList<AttributeGroupInput>? attributeGroups = null;
+    if (req.AttributeGroups is { Count: > 0 })
+    {
+      var parsed = new List<AttributeGroupInput>();
+      foreach (var g in req.AttributeGroups)
+      {
+        if (!Enum.TryParse<OptionSelectionType>(g.SelectionType, true, out var selectionType))
+          selectionType = OptionSelectionType.Single;
+
+        parsed.Add(new AttributeGroupInput(
+          g.Name,
+          g.IsRequired,
+          selectionType,
+          g.Values.Select(v => new AttributeValueInput(v.Label, v.PriceAdjustment, v.IsDefault)).ToList()));
+      }
+      attributeGroups = parsed;
+    }
+
     var command = new CreateProductCommand(
-      req.CategoryId,
       req.Name,
       req.Price,
+      req.CategoryId,
       req.Description,
       req.ImageUrl,
-      req.HasTemperatureOption,
-      req.HasIceLevelOption,
-      req.HasSugarLevelOption,
       req.IsAccompaniment,
-      req.EstimatedPrepMinutes);
+      req.EstimatedPrepMinutes,
+      req.CostPrice,
+      req.DiscountPrice,
+      req.Sku,
+      req.Barcode,
+      attributeGroups);
 
     var result = await mediator.Send(command, ct);
 

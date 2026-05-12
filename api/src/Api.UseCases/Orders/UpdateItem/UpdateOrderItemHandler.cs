@@ -19,7 +19,6 @@ public class UpdateOrderItemHandler(
     if (order is null)
       return Result.NotFound($"Order {request.OrderId} not found.");
 
-    // Session ownership check (customer-facing requests supply SessionId)
     if (request.SessionId.HasValue && order.SessionId != request.SessionId.Value)
       return Result.Forbidden();
 
@@ -29,7 +28,6 @@ public class UpdateOrderItemHandler(
     if (order.PaymentStatus != PaymentStatus.Unpaid)
       return Result.Invalid(new ValidationError("PaymentStatus", "Cannot edit an already paid order."));
 
-    // For non-zero quantity: look up product to get authoritative name + price
     string productName = string.Empty;
     decimal unitPrice  = 0m;
 
@@ -39,13 +37,11 @@ public class UpdateOrderItemHandler(
 
       if (existing is not null)
       {
-        // Reuse stored name/price for existing items
         productName = existing.ProductName;
         unitPrice   = existing.UnitPrice;
       }
       else
       {
-        // New product — fetch from DB
         var product = await productRepository.FirstOrDefaultAsync(
           new ProductByIdSpec(request.ProductId), ct);
 
@@ -61,11 +57,9 @@ public class UpdateOrderItemHandler(
     {
       order.SetItemQuantity(request.ProductId, productName, unitPrice, request.Quantity);
 
-      // Removing a regular item invalidates any free gift — clean them up automatically.
       if (request.Quantity == 0)
       {
         order.RemoveFreeGiftItems();
-        // Auto-cancel when the order has no items left.
         if (!order.Items.Any())
           order.Cancel();
       }
@@ -77,42 +71,6 @@ public class UpdateOrderItemHandler(
 
     await repository.UpdateAsync(order, ct);
 
-    var dto = new OrderDto(
-      order.Id,
-      order.OrderNumber,
-      order.Status.Name.ToUpperInvariant(),
-      order.PaymentStatus.Name.ToUpperInvariant(),
-      order.PaymentMethod.Name.ToUpperInvariant(),
-      order.AmountReceived,
-      order.TipAmount,
-      order.TotalAmount,
-      order.TotalDiscount,
-      order.FinalAmount,
-      order.OrderDate,
-      order.SessionId,
-      null, // tableCode — not needed for item edit response
-      order.GuestCount,
-      order.CompletedAt,
-      order.PaidAt,
-      order.Items.Select(i => new OrderItemDto(
-        i.Id,
-        i.ProductId,
-        i.ProductName,
-        i.UnitPrice,
-        i.Quantity,
-        i.Discount,
-        i.TotalPrice,
-        i.Temperature?.Name.ToUpperInvariant(),
-        i.IceLevel?.Name.ToUpperInvariant(),
-        i.SugarLevel?.Name.ToUpperInvariant(),
-        i.IsTakeaway,
-        i.IsFreeGift,
-        i.Note
-      )).ToList(),
-      order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList(),
-      false
-    );
-
-    return Result.Success(dto);
+    return Result.Success(order.ToOrderDto(null, false));
   }
 }
