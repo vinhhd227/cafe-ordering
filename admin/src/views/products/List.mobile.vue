@@ -31,11 +31,9 @@ const tabComponents = {
 
 const currentTab = computed(() => tabComponents[activeTab.value])
 
-const switchTab = (key) => {
-  if (key === activeTab.value) return
+watch(activeTab, () => {
   search.value = ''
-  activeTab.value = key
-}
+})
 
 // ── Search (shared, owned by shell, passed to active tab) ─────────────
 const search = ref('')
@@ -112,20 +110,19 @@ const viewMode = ref('list')
       </div>
 
       <!-- Row 2: Tabs -->
-      <div class="tw:grid tw:grid-cols-4">
-        <button
-          v-for="tab in tabs"
-          :key="tab.key"
-          type="button"
-          class="tw:py-2 tw:text-lg tw:font-medium tw:bg-transparent tw:border-0 tw:cursor-pointer tw:transition-colors tw:whitespace-nowrap tw:text-center"
-          :style="activeTab === tab.key
-            ? 'border-bottom: 2px solid rgb(16,185,129); color: rgb(5,150,105);'
-            : 'border-bottom: 2px solid transparent; color: rgb(100,116,139);'"
-          @click="switchTab(tab.key)"
-        >
-          {{ t(tab.labelKey) }}
-        </button>
-      </div>
+      <prime-tabs v-model:value="activeTab">
+        <prime-tab-list>
+          <prime-tab
+            v-for="tab in tabs"
+            :key="tab.key"
+            :value="tab.key"
+            class="tw:flex-1 tw:text-lg!"
+            :pt="{ root: { class: 'tw:py-2! tw:leading-7!' } }"
+          >
+            {{ t(tab.labelKey) }}
+          </prime-tab>
+        </prime-tab-list>
+      </prime-tabs>
     </div>
 
     <!-- ── Tab content ───────────────────────────────────────────── -->
@@ -142,7 +139,7 @@ const viewMode = ref('list')
       :to="{ name: 'productsCreate' }"
       class="tw:fixed tw:bottom-6 tw:right-4 tw:z-20 tw:no-underline"
     >
-      <div class="tw:w-14 tw:h-14 tw:rounded-full tw:bg-emerald-500 tw:flex tw:items-center tw:justify-center tw:shadow-xl tw:shadow-emerald-500/40 tw:transition-transform tw:active:scale-95">
+      <div class="tw:w-14 tw:h-14 tw:rounded-full tw:bg-primary-500 tw:flex tw:items-center tw:justify-center tw:shadow-xl tw:shadow-primary-500/40 tw:transition-transform tw:active:scale-95">
         <iconify icon="ph:plus-bold" class="tw:text-2xl tw:text-white" />
       </div>
     </router-link>
