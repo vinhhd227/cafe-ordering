@@ -157,7 +157,7 @@ function typeIcon(type) {
     <!-- Header -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('notifications.list.breadcrumb') }}</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">{{ t('notifications.list.breadcrumb') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('notifications.list.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('notifications.list.subtitle') }}</p>
       </div>
@@ -223,14 +223,14 @@ function typeIcon(type) {
               class="tw:rounded-xl tw:flex tw:items-start tw:gap-4 tw:p-4 tw:cursor-pointer tw:transition-colors tw:hover:bg-white/5!"
               @click="openNotification(noti)"
             >
-              <div class="tw:mt-0.5 tw:flex tw:h-9 tw:w-9 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-xl" :class="noti.isRead ? 'tw:bg-white/5' : 'tw:bg-emerald-500/15'">
-                <iconify :icon="typeIcon(noti.type)" class="tw:text-base" :class="noti.isRead ? 'tw:text-muted' : 'tw:text-emerald-400'" />
+              <div class="tw:mt-0.5 tw:flex tw:h-9 tw:w-9 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-xl" :class="noti.isRead ? 'tw:bg-white/5' : 'tw:bg-primary-500/15'">
+                <iconify :icon="typeIcon(noti.type)" class="tw:text-base" :class="noti.isRead ? 'tw:text-muted' : 'tw:text-primary-400'" />
               </div>
               <div class="tw:flex-1 tw:min-w-0">
                 <div class="tw:flex tw:items-center tw:justify-between tw:gap-2">
                   <p class="tw:text-sm tw:font-semibold" :class="noti.isRead ? 'tw:text-muted' : ''">{{ noti.title }}</p>
                   <div class="tw:flex tw:items-center tw:gap-1.5 tw:shrink-0">
-                    <span v-if="!noti.isRead" class="tw:block tw:h-2 tw:w-2 tw:rounded-full tw:bg-emerald-400" />
+                    <span v-if="!noti.isRead" class="tw:block tw:h-2 tw:w-2 tw:rounded-full tw:bg-primary-400" />
                     <span class="tw:text-xs tw:text-muted tw:tabular-nums">{{ formatTime(noti.createdAt) }}</span>
                   </div>
                 </div>
@@ -270,14 +270,14 @@ function typeIcon(type) {
             class="tw:rounded-xl tw:flex tw:items-start tw:gap-4 tw:p-4 tw:cursor-pointer tw:transition-colors tw:hover:bg-white/5!"
             @click="openNotification(noti)"
           >
-            <div class="tw:mt-0.5 tw:flex tw:h-9 tw:w-9 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-xl tw:bg-emerald-500/15">
-              <iconify :icon="typeIcon(noti.type)" class="tw:text-base tw:text-emerald-400" />
+            <div class="tw:mt-0.5 tw:flex tw:h-9 tw:w-9 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-xl tw:bg-primary-500/15">
+              <iconify :icon="typeIcon(noti.type)" class="tw:text-base tw:text-primary-400" />
             </div>
             <div class="tw:flex-1 tw:min-w-0">
               <div class="tw:flex tw:items-center tw:justify-between tw:gap-2">
                 <p class="tw:text-sm tw:font-semibold">{{ noti.title }}</p>
                 <div class="tw:flex tw:items-center tw:gap-1.5 tw:shrink-0">
-                  <span class="tw:block tw:h-2 tw:w-2 tw:rounded-full tw:bg-emerald-400" />
+                  <span class="tw:block tw:h-2 tw:w-2 tw:rounded-full tw:bg-primary-400" />
                   <span class="tw:text-xs tw:text-muted tw:tabular-nums">{{ formatTime(noti.createdAt) }}</span>
                 </div>
               </div>

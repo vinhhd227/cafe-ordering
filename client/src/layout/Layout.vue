@@ -111,12 +111,12 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
         style="border-color: var(--app-border)"
       >
         <template v-if="!isCollapsed">
-          <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-[0.4em] tw:text-emerald-400">
+          <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-[0.4em] tw:text-primary-400">
             {{ t('layout.brand') }}
           </p>
           <h1 class="tw:mt-1 tw:text-base tw:font-semibold">{{ t('layout.menuPanel') }}</h1>
         </template>
-        <iconify v-else icon="ph:coffee-bold" class="tw:text-xl tw:text-emerald-400" />
+        <iconify v-else icon="ph:coffee-bold" class="tw:text-xl tw:text-primary-400" />
       </div>
 
       <!-- Nav -->
@@ -133,7 +133,7 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
             :class="[
               isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
               isActive(item.to)
-                ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
+                ? 'tw:bg-primary-500/10 tw:text-primary-400'
                 : 'tw:text-muted tw:hover:bg-white/5 tw:hover:text-white'
             ]"
             :title="isCollapsed ? t(item.labelKey) : undefined"
@@ -158,7 +158,7 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
             type="button"
             class="tw:flex-1 tw:rounded-lg tw:py-1 tw:text-xs tw:font-semibold tw:transition-all tw:duration-150"
             :class="locale === l.code
-              ? 'tw:bg-emerald-500/15 tw:text-emerald-400'
+              ? 'tw:bg-primary-500/15 tw:text-primary-400'
               : 'app-text-subtle tw:hover:bg-white/5 tw:hover:text-white'"
             @click="setLocale(l.code)"
           >
@@ -197,7 +197,7 @@ const toggleProfileMenu = (event) => profileMenu.value?.toggle(event)
             :label="avatarLabel"
             shape="circle"
             size="normal"
-            class="tw:shrink-0 tw:bg-emerald-500/20 tw:text-emerald-300"
+            class="tw:shrink-0 tw:bg-primary-500/20 tw:text-primary-300"
           />
           <template v-if="!isCollapsed">
             <div class="tw:min-w-0 tw:flex-1 tw:text-left">

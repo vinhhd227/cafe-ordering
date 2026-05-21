@@ -50,7 +50,7 @@ const selectTable = (table) => {
 }
 
 const statusColor = (status) => {
-  if (status === 'Available') return 'tw:text-emerald-400'
+  if (status === 'Available') return 'tw:text-primary-400'
   if (status === 'Occupied') return 'tw:text-amber-400'
   return 'app-text-subtle'
 }
@@ -104,9 +104,9 @@ onMounted(fetchTables)
         <div v-if="hasZones" class="tw:mb-3 tw:flex tw:items-center tw:gap-3">
           <iconify
             icon="ph:map-pin-bold"
-            class="tw:text-base tw:text-emerald-400 tw:shrink-0"
+            class="tw:text-base tw:text-primary-400 tw:shrink-0"
           />
-          <span class="tw:text-sm tw:font-semibold tw:uppercase tw:tracking-widest tw:text-emerald-300">
+          <span class="tw:text-sm tw:font-semibold tw:uppercase tw:tracking-widest tw:text-primary-300">
             {{ group.zoneName ?? t('table.noZone') }}
           </span>
           <div class="tw:flex-1 tw:border-t tw:border-white/10" />
@@ -120,7 +120,7 @@ onMounted(fetchTables)
             class="app-panel tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-2 tw:rounded-2xl tw:border tw:p-6 tw:text-center tw:transition-all tw:duration-150"
             :class="
               table.status === 'Available'
-                ? 'tw:border-emerald-500/30 tw:hover:border-emerald-400 tw:hover:bg-emerald-500/10 tw:cursor-pointer'
+                ? 'tw:border-primary-500/30 tw:hover:border-primary-400 tw:hover:bg-primary-500/10 tw:cursor-pointer'
                 : table.status === 'Occupied'
                 ? 'tw:border-amber-500/20 tw:hover:border-amber-400 tw:hover:bg-amber-500/10 tw:cursor-pointer'
                 : 'tw:border-white/10 tw:opacity-40 tw:cursor-not-allowed'

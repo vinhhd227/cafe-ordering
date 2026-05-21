@@ -36,7 +36,7 @@ const resolvedTitle = computed(() => {
     <div>
       <p
         v-if="resolvedSection"
-        class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+        class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-primary-300"
       >
         {{ resolvedSection }}
       </p>

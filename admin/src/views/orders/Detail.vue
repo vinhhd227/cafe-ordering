@@ -478,7 +478,7 @@ const confirmSplit = async () => {
       <div class="tw:flex tw:items-center tw:gap-3 tw:w-full">
         <iconify
           icon="ph:scissors-bold"
-          class="tw:text-lg tw:shrink-0 tw:text-emerald-400"
+          class="tw:text-lg tw:shrink-0 tw:text-primary-400"
         />
         <div class="tw:flex-1 tw:min-w-0">
           <p class="tw:text-sm tw:font-semibold">{{ message.summary }}</p>
@@ -535,7 +535,7 @@ const confirmSplit = async () => {
           class="tw:flex tw:items-start tw:gap-3 tw:rounded-xl tw:border tw:px-4 tw:py-3 tw:cursor-pointer tw:transition-colors app-card"
           :class="
             mergeSelected.includes(o.id)
-              ? 'tw:border-emerald-500/50 tw:bg-emerald-500/10'
+              ? 'tw:border-primary-500/50 tw:bg-primary-500/10'
               : ''
           "
         >
@@ -724,7 +724,7 @@ const confirmSplit = async () => {
           class="tw:flex tw:items-center tw:justify-between tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:cursor-pointer tw:transition-colors app-card"
           :class="
             addItemSelected?.id === p.id
-              ? 'tw:border-emerald-500/50 tw:bg-emerald-500/10'
+              ? 'tw:border-primary-500/50 tw:bg-primary-500/10'
               : 'tw:hover:bg-white/5'
           "
           @click="addItemSelected = p"
@@ -736,7 +736,7 @@ const confirmSplit = async () => {
           <iconify
             v-if="addItemSelected?.id === p.id"
             icon="ph:check-circle-fill"
-            class="tw:text-emerald-400 tw:text-lg"
+            class="tw:text-primary-400 tw:text-lg"
           />
         </div>
         <p
@@ -787,7 +787,7 @@ const confirmSplit = async () => {
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
         <p
-          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300"
         >
           {{ t('orders.breadcrumb') }}
         </p>
@@ -1008,10 +1008,10 @@ const confirmSplit = async () => {
                 <prime-divider />
                 <div v-if="order.totalDiscount > 0" class="tw:flex tw:justify-between tw:text-xs tw:mb-1">
                   <span class="tw:flex tw:items-center tw:gap-1 tw:text-muted">
-                    <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
+                    <iconify icon="ph:tag-bold" class="tw:text-primary-400" />
                     {{ t('orders.detail.info.discount') }}
                   </span>
-                  <span class="tw:text-emerald-400">-{{ formatVnd(order.totalDiscount) }}</span>
+                  <span class="tw:text-primary-400">-{{ formatVnd(order.totalDiscount) }}</span>
                 </div>
                 <div class="tw:flex tw:justify-between tw:text-sm">
                   <span class="tw:font-medium">{{ t('orders.detail.info.total') }}</span>
@@ -1020,7 +1020,7 @@ const confirmSplit = async () => {
                       v-if="order.totalDiscount > 0"
                       class="tw:text-muted tw:line-through tw:text-xs tw:mr-1"
                     >{{ formatVnd(order.totalAmount) }}</span>
-                    <span class="tw:font-semibold tw:text-base" :class="order.totalDiscount > 0 ? 'tw:text-emerald-400' : ''">
+                    <span class="tw:font-semibold tw:text-base" :class="order.totalDiscount > 0 ? 'tw:text-primary-400' : ''">
                       {{ formatVnd(order.finalAmount) }}
                     </span>
                   </div>
@@ -1293,10 +1293,10 @@ const confirmSplit = async () => {
                   class="tw:flex tw:justify-between tw:items-center tw:text-xs"
                 >
                   <span class="tw:flex tw:items-center tw:gap-1 tw:text-muted">
-                    <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
+                    <iconify icon="ph:tag-bold" class="tw:text-primary-400" />
                     {{ promo.promoCode }}
                   </span>
-                  <span class="tw:text-emerald-400 tw:font-medium">-{{ formatVnd(promo.discountAmount) }}</span>
+                  <span class="tw:text-primary-400 tw:font-medium">-{{ formatVnd(promo.discountAmount) }}</span>
                 </div>
               </div>
               <!-- Total row -->
@@ -1307,7 +1307,7 @@ const confirmSplit = async () => {
                     v-if="order.totalDiscount > 0"
                     class="tw:text-muted tw:line-through tw:text-xs tw:mr-1"
                   >{{ formatVnd(order.totalAmount) }}</span>
-                  <span class="tw:font-semibold tw:text-base" :class="order.totalDiscount > 0 ? 'tw:text-emerald-400' : ''">
+                  <span class="tw:font-semibold tw:text-base" :class="order.totalDiscount > 0 ? 'tw:text-primary-400' : ''">
                     {{ formatVnd(order.finalAmount) }}
                   </span>
                 </div>
@@ -1354,17 +1354,17 @@ const confirmSplit = async () => {
                     class="tw:flex tw:justify-between tw:text-sm"
                   >
                     <span class="tw:text-muted">{{ t('orders.pay.tip') }}</span>
-                    <span class="tw:font-medium tw:text-emerald-400">{{
+                    <span class="tw:font-medium tw:text-primary-400">{{
                       formatVnd(order.tipAmount)
                     }}</span>
                   </div>
                   <prime-divider />
                   <div v-if="order.totalDiscount > 0" class="tw:flex tw:justify-between tw:text-xs tw:mb-1">
                     <span class="tw:flex tw:items-center tw:gap-1 tw:text-muted">
-                      <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
+                      <iconify icon="ph:tag-bold" class="tw:text-primary-400" />
                       {{ t('orders.detail.info.discount') }}
                     </span>
-                    <span class="tw:text-emerald-400">-{{ formatVnd(order.totalDiscount) }}</span>
+                    <span class="tw:text-primary-400">-{{ formatVnd(order.totalDiscount) }}</span>
                   </div>
                   <div class="tw:flex tw:justify-between tw:text-sm">
                     <span class="tw:font-medium">{{ t('orders.pay.order') }}</span>
@@ -1451,7 +1451,7 @@ const confirmSplit = async () => {
                           :class="
                             payReturn === 0
                               ? 'tw:text-muted'
-                              : 'tw:text-emerald-400 tw:font-semibold'
+                              : 'tw:text-primary-400 tw:font-semibold'
                           "
                         >
                           {{ payReturn === 0 ? "—" : formatVnd(payReturn) }}

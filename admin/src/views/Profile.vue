@@ -4,7 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "@/stores/auth";
-import { useThemeStore } from "@/stores/theme";
+import { useThemeStore, PRIMARY_COLORS } from "@/stores/theme";
 import { updateUser, uploadAvatar } from "@/services/user.service";
 import { changePassword } from "@/services/auth.service";
 
@@ -201,7 +201,7 @@ const savePassword = async () => {
 <template>
   <section class="tw:space-y-6">
     <div>
-      <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+      <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">
         Profile
       </p>
       <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Account</h1>
@@ -228,7 +228,7 @@ const savePassword = async () => {
                   v-else
                   :label="userInitials"
                   shape="circle"
-                  :pt="{ root: { class: 'tw:rounded-full! tw:overflow-hidden! tw:w-20! tw:h-20! tw:text-2xl! tw:bg-emerald-500/20! tw:text-emerald-200!' } }"
+                  :pt="{ root: { class: 'tw:rounded-full! tw:overflow-hidden! tw:w-20! tw:h-20! tw:text-2xl! tw:bg-primary-500/20! tw:text-primary-200!' } }"
                 />
                 <!-- Upload overlay -->
                 <div
@@ -320,6 +320,28 @@ const savePassword = async () => {
                 :modelValue="isDark"
                 @update:modelValue="handleThemeToggle"
               />
+            </div>
+
+            <prime-divider class="tw:my-6" />
+
+            <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-4">
+              <div>
+                <p class="tw:text-base tw:font-semibold">Accent color</p>
+                <p class="tw:text-sm tw:text-muted">Choose the primary color for the interface.</p>
+              </div>
+              <div class="tw:flex tw:flex-wrap tw:gap-2">
+                <button
+                  v-for="color in PRIMARY_COLORS"
+                  :key="color.name"
+                  :style="{ backgroundColor: color.hex }"
+                  v-tooltip.top="color.label"
+                  class="tw:w-7 tw:h-7 tw:rounded-full tw:border-2 tw:cursor-pointer tw:transition-all tw:outline-none tw:p-0"
+                  :class="themeStore.primaryColor === color.name
+                    ? 'tw:border-white tw:scale-110 tw:shadow-lg tw:shadow-black/30'
+                    : 'tw:border-transparent tw:opacity-50 tw:hover:opacity-80'"
+                  @click="themeStore.applyPrimaryColor(color.name)"
+                />
+              </div>
             </div>
 
             <prime-divider class="tw:my-6" />

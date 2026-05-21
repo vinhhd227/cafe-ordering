@@ -732,7 +732,7 @@ onMounted(load)
 
             <prime-column field="cashRevenue" :header="t('report.table.cash')" :sortable="true">
               <template #body="{ data: row }">
-                <span class="tw:text-emerald-400">{{ fmt(row.cashRevenue) }}</span>
+                <span class="tw:text-primary-400">{{ fmt(row.cashRevenue) }}</span>
               </template>
             </prime-column>
 

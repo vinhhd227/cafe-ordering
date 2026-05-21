@@ -44,7 +44,7 @@ const { t } = useI18n()
         class="tw:rounded-xl tw:border tw:p-3 tw:transition-colors"
         :class="
           isPromoAvailable(promo)
-            ? 'tw:cursor-pointer tw:hover:border-emerald-500/50 tw:hover:bg-emerald-500/5'
+            ? 'tw:cursor-pointer tw:hover:border-primary-500/50 tw:hover:bg-primary-500/5'
             : 'tw:opacity-40 tw:cursor-not-allowed'
         "
         style="border-color: var(--app-border)"
@@ -81,7 +81,7 @@ const { t } = useI18n()
               </span>
             </div>
           </div>
-          <span class="tw:shrink-0 tw:text-emerald-400 tw:font-semibold tw:text-sm">
+          <span class="tw:shrink-0 tw:text-primary-400 tw:font-semibold tw:text-sm">
             {{ formatPromotionValue(promo) }}
           </span>
         </div>

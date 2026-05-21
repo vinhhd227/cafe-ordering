@@ -96,7 +96,7 @@ onMounted(load)
           <iconify icon="ph:arrow-left-bold" />
           {{ t('recipes.detail.backToList') }}
         </button>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('nav.groups.operations') }}</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">{{ t('nav.groups.operations') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ recipe?.name ?? '...' }}</h1>
 
         <!-- Type + Category tags -->
@@ -150,7 +150,7 @@ onMounted(load)
 
         <!-- Yield -->
         <div v-if="recipe.yield" :class="appCard" class="tw:rounded-xl tw:px-4 tw:py-3 tw:flex tw:items-center tw:gap-3">
-          <iconify icon="ph:beaker-bold" class="tw:text-lg tw:text-emerald-400 tw:shrink-0" />
+          <iconify icon="ph:beaker-bold" class="tw:text-lg tw:text-primary-400 tw:shrink-0" />
           <div>
             <p class="tw:text-[11px] tw:uppercase tw:tracking-widest app-text-subtle">{{ t('recipes.form.yield') }}</p>
             <p class="tw:text-sm tw:font-medium tw:mt-0.5">{{ recipe.yield }}</p>

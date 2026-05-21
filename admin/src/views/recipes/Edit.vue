@@ -249,7 +249,7 @@ onBeforeUnmount(() => clearTimeout(_typingTimer))
           <iconify icon="ph:arrow-left-bold" />
           {{ isNew ? t('recipes.detail.backToList') : t('recipes.edit.backToDetail') }}
         </button>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('nav.groups.operations') }}</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">{{ t('nav.groups.operations') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">
           {{ isNew ? t('recipes.detail.newRecipe') : t('recipes.edit.title') }}
         </h1>

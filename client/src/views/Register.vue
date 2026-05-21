@@ -116,7 +116,7 @@ onBeforeUnmount(() => {
         class="auth-card app-panel tw:w-full tw:rounded-3xl tw:border tw:p-10 tw:shadow-2xl tw:backdrop-blur tw:text-center"
       >
         <div class="tw:flex tw:flex-col tw:items-center tw:gap-4">
-          <iconify icon="ph:check-circle-bold" class="tw:text-6xl tw:text-emerald-400" />
+          <iconify icon="ph:check-circle-bold" class="tw:text-6xl tw:text-primary-400" />
           <div class="tw:space-y-1">
             <h2 class="tw:text-3xl tw:font-semibold">{{ t('register.success.title') }}</h2>
             <p class="tw:text-sm tw:text-muted">
@@ -136,7 +136,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
         <div class="tw:mt-8">
-          <router-link :to="{ name: 'login' }" class="tw:text-sm tw:text-emerald-400 tw:hover:text-emerald-300">
+          <router-link :to="{ name: 'login' }" class="tw:text-sm tw:text-primary-400 tw:hover:text-primary-300">
             {{ t('register.success.signInNow') }}
           </router-link>
         </div>
@@ -147,14 +147,14 @@ onBeforeUnmount(() => {
         <!-- Header -->
         <div class="tw:space-y-3">
           <div class="tw:flex tw:items-center tw:justify-between">
-            <span class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-emerald-400">Cafe Ordering</span>
+            <span class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-primary-400">Cafe Ordering</span>
             <div class="tw:flex tw:items-center tw:gap-1">
               <button
                 v-for="l in locales"
                 :key="l.code"
                 type="button"
                 class="tw:rounded-md tw:px-2 tw:py-1 tw:text-xs tw:font-semibold tw:transition-all"
-                :class="locale === l.code ? 'tw:bg-emerald-500/15 tw:text-emerald-400' : 'app-text-subtle tw:hover:bg-white/5'"
+                :class="locale === l.code ? 'tw:bg-primary-500/15 tw:text-primary-400' : 'app-text-subtle tw:hover:bg-white/5'"
                 @click="setLocale(l.code)"
               >
                 {{ l.label }}
@@ -226,7 +226,7 @@ onBeforeUnmount(() => {
                     strength.score === 1 && 'tw:w-1/4 tw:bg-rose-500',
                     strength.score === 2 && 'tw:w-1/2 tw:bg-amber-400',
                     strength.score === 3 && 'tw:w-3/4 tw:bg-orange-400',
-                    strength.score === 4 && 'tw:w-full tw:bg-emerald-500',
+                    strength.score === 4 && 'tw:w-full tw:bg-primary-500',
                   ]"
                 />
               </div>
@@ -261,7 +261,7 @@ onBeforeUnmount(() => {
             />
             <label for="agree" class="tw:text-sm tw:text-muted">
               {{ t('register.agreePrefix') }}
-              <router-link class="tw:text-emerald-400 tw:hover:text-emerald-300" to="/policy">{{ t('register.agreePolicy') }}</router-link>
+              <router-link class="tw:text-primary-400 tw:hover:text-primary-300" to="/policy">{{ t('register.agreePolicy') }}</router-link>
             </label>
           </div>
           <prime-message v-if="errors.agree" severity="error" size="small" variant="simple" :closable="false" class="tw:mt-2">
@@ -275,7 +275,7 @@ onBeforeUnmount(() => {
           <prime-button
             type="submit"
             class="tw:mt-6 tw:w-full tw:rounded-xl tw:border-0!"
-            :class="canSubmit && !isSubmitting ? 'tw:shadow-lg tw:shadow-emerald-500/20' : 'tw:cursor-not-allowed!'"
+            :class="canSubmit && !isSubmitting ? 'tw:shadow-lg tw:shadow-primary-500/20' : 'tw:cursor-not-allowed!'"
             :disabled="isSubmitting || !canSubmit"
             :loading="isSubmitting"
           >
@@ -284,7 +284,7 @@ onBeforeUnmount(() => {
 
           <div class="tw:mt-5 tw:flex tw:items-center tw:justify-between tw:text-sm">
             <span class="app-text-subtle">{{ t('register.alreadyHave') }}</span>
-            <router-link class="tw:text-emerald-400 tw:hover:text-emerald-300" :to="{ name: 'login' }">
+            <router-link class="tw:text-primary-400 tw:hover:text-primary-300" :to="{ name: 'login' }">
               {{ t('register.signIn') }}
             </router-link>
           </div>

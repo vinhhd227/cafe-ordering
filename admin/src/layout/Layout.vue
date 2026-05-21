@@ -13,7 +13,7 @@ watch(() => route.path, () => close());
 <template>
   <div class="app-shell tw:min-h-screen">
     <prime-toast position="top-right" />
-    <div class="app-background tw:fixed tw:inset-0 tw:z-0" />
+    <div class="app-bg tw:fixed tw:inset-0 tw:z-0" />
     <!-- Mobile overlay: click to close sidebar -->
     <transition
       enter-active-class="tw:transition-opacity tw:duration-300"

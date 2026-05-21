@@ -24,7 +24,7 @@ onMounted(() => {
       class="tw:fixed tw:inset-0 tw:z-50 tw:flex tw:items-center tw:justify-center tw:bg-black/10 tw:backdrop-blur-sm"
     >
       <div class="app-card tw:flex tw:items-center tw:gap-3 tw:rounded-2xl tw:border tw:px-4 tw:py-3">
-        <span class="tw:h-5 tw:w-5 tw:animate-spin tw:rounded-full tw:border-2 tw:border-emerald-300 tw:border-t-transparent"></span>
+        <span class="tw:h-5 tw:w-5 tw:animate-spin tw:rounded-full tw:border-2 tw:border-primary-300 tw:border-t-transparent"></span>
         <span class="tw:text-sm tw:text-muted">Loading...</span>
       </div>
     </div>

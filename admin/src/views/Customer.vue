@@ -1,7 +1,7 @@
 <template>
   <section class="tw:space-y-6">
     <div>
-      <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+      <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">
         Customers
       </p>
       <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Customer insights</h1>

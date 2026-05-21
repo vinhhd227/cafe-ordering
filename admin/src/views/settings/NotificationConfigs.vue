@@ -122,7 +122,7 @@ onMounted(loadConfigs)
   <section class="tw:space-y-8">
     <!-- Header -->
     <div>
-      <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('notificationConfigs.breadcrumb') }}</p>
+      <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">{{ t('notificationConfigs.breadcrumb') }}</p>
       <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('notificationConfigs.title') }}</h1>
       <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('notificationConfigs.subtitle') }}</p>
     </div>
@@ -213,12 +213,12 @@ onMounted(loadConfigs)
           <div class="tw:flex tw:items-center tw:gap-3 tw:min-w-52">
             <div
               class="tw:flex tw:h-9 tw:w-9 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-lg"
-              :class="cfg.isEnabled ? 'tw:bg-emerald-500/15' : 'tw:bg-white/5'"
+              :class="cfg.isEnabled ? 'tw:bg-primary-500/15' : 'tw:bg-white/5'"
             >
               <iconify
                 :icon="typeMeta(cfg.type).icon"
                 class="tw:text-base"
-                :class="cfg.isEnabled ? 'tw:text-emerald-400' : 'tw:text-muted'"
+                :class="cfg.isEnabled ? 'tw:text-primary-400' : 'tw:text-muted'"
               />
             </div>
             <div>

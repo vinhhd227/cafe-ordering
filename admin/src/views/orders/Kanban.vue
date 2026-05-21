@@ -157,9 +157,9 @@ const STATUSES = [
   {
     key: ORDER_STATUS.COMPLETED,
     icon: "ph:check-circle-bold",
-    color: "tw:text-emerald-400",
-    bg: "tw:bg-emerald-400/10 tw:border-emerald-400/20",
-    dot: "tw:bg-emerald-400",
+    color: "tw:text-primary-400",
+    bg: "tw:bg-primary-400/10 tw:border-primary-400/20",
+    dot: "tw:bg-primary-400",
   },
   {
     key: ORDER_STATUS.CANCELLED,
@@ -507,7 +507,7 @@ onUnmounted(() => {
               :class="
                 payReturn === 0
                   ? 'tw:text-muted'
-                  : 'tw:text-emerald-400 tw:font-semibold'
+                  : 'tw:text-primary-400 tw:font-semibold'
               "
             >
               {{ payReturn === 0 ? "—" : formatVnd(payReturn) }}
@@ -586,7 +586,7 @@ onUnmounted(() => {
             class="tw:inline-block tw:h-2 tw:w-2 tw:rounded-full tw:shrink-0 tw:transition-colors"
             :class="
               sseConnected
-                ? 'tw:bg-emerald-400'
+                ? 'tw:bg-primary-400'
                 : 'tw:bg-amber-400 tw:animate-pulse'
             "
           />
@@ -641,7 +641,7 @@ onUnmounted(() => {
       <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
         <span v-if="summary.pending > 0"    class="tw:text-amber-400  tw:text-xs tw:font-medium">{{ summary.pending }}  {{ t('orders.status.PENDING').toLowerCase() }}</span>
         <span v-if="summary.processing > 0" class="tw:text-blue-400   tw:text-xs tw:font-medium">{{ summary.processing }} {{ t('orders.status.PROCESSING').toLowerCase() }}</span>
-        <span v-if="summary.completed > 0"  class="tw:text-emerald-400 tw:text-xs tw:font-medium">{{ summary.completed }} {{ t('orders.status.COMPLETED').toLowerCase() }}</span>
+        <span v-if="summary.completed > 0"  class="tw:text-primary-400 tw:text-xs tw:font-medium">{{ summary.completed }} {{ t('orders.status.COMPLETED').toLowerCase() }}</span>
         <span v-if="summary.cancelled > 0"  class="tw:text-red-400    tw:text-xs tw:font-medium">{{ summary.cancelled }} {{ t('orders.status.CANCELLED').toLowerCase() }}</span>
       </div>
       <span class="tw:ml-auto tw:font-semibold tw:text-sm tw:shrink-0">{{ formatVnd(summary.revenue) }}</span>

@@ -206,7 +206,7 @@ const doResetPassword = async () => {
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
         <p
-          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300"
         >
           Users
         </p>
@@ -295,7 +295,7 @@ const doResetPassword = async () => {
             <!-- Avatar -->
             <div class="tw:flex tw:flex-col tw:items-center tw:gap-3 tw:mb-6">
               <div
-                class="tw:h-20 tw:w-20 tw:rounded-full tw:flex tw:items-center tw:justify-center tw:bg-emerald-500/20 tw:text-emerald-300 tw:text-2xl tw:font-bold"
+                class="tw:h-20 tw:w-20 tw:rounded-full tw:flex tw:items-center tw:justify-center tw:bg-primary-500/20 tw:text-primary-300 tw:text-2xl tw:font-bold"
               >
                 {{ initials(user.fullName) }}
               </div>
@@ -581,7 +581,7 @@ const doResetPassword = async () => {
             </p>
             <div class="tw:flex tw:items-center tw:gap-2">
               <p
-                class="tw:font-mono tw:font-bold tw:text-xl tw:tracking-widest tw:text-emerald-300"
+                class="tw:font-mono tw:font-bold tw:text-xl tw:tracking-widest tw:text-primary-300"
               >
                 {{ resetPasswordData.temporaryPassword }}
               </p>

@@ -84,7 +84,7 @@ const DEFAULT_ICONS = {
 }
 
 const ICON_COLOR = {
-  success:   'tw:text-emerald-400',
+  success:   'tw:text-primary-400',
   info:      'tw:text-sky-400',
   warning:   'tw:text-amber-400',
   error:     'tw:text-red-400',
@@ -92,7 +92,7 @@ const ICON_COLOR = {
 }
 
 const TITLE_COLOR = {
-  success:   'tw:text-emerald-300',
+  success:   'tw:text-primary-300',
   info:      'tw:text-sky-300',
   warning:   'tw:text-amber-300',
   error:     'tw:text-red-300',
@@ -102,7 +102,7 @@ const TITLE_COLOR = {
 // Background classes per variant × severity
 const BG = {
   simple: {
-    success:   'tw:bg-emerald-500/10',
+    success:   'tw:bg-primary-500/10',
     info:      'tw:bg-sky-500/10',
     warning:   'tw:bg-amber-500/10',
     error:     'tw:bg-red-500/10',
@@ -116,14 +116,14 @@ const BG = {
     secondary: '',
   },
   accent: {
-    success:   'tw:bg-emerald-500/8',
+    success:   'tw:bg-primary-500/8',
     info:      'tw:bg-sky-500/8',
     warning:   'tw:bg-amber-500/8',
     error:     'tw:bg-red-500/8',
     secondary: 'tw:bg-white/4',
   },
   filled: {
-    success:   'tw:bg-emerald-500/20',
+    success:   'tw:bg-primary-500/20',
     info:      'tw:bg-sky-500/20',
     warning:   'tw:bg-amber-500/20',
     error:     'tw:bg-red-500/20',
@@ -134,14 +134,14 @@ const BG = {
 // Border classes per variant × severity
 const BORDER = {
   simple: {
-    success:   'tw:border tw:border-emerald-500/30',
+    success:   'tw:border tw:border-primary-500/30',
     info:      'tw:border tw:border-sky-500/30',
     warning:   'tw:border tw:border-amber-500/30',
     error:     'tw:border tw:border-red-500/30',
     secondary: 'tw:border tw:border-white/15',
   },
   outlined: {
-    success:   'tw:border tw:border-emerald-500/50',
+    success:   'tw:border tw:border-primary-500/50',
     info:      'tw:border tw:border-sky-500/50',
     warning:   'tw:border tw:border-amber-500/50',
     error:     'tw:border tw:border-red-500/50',
@@ -156,7 +156,7 @@ const BORDER = {
     secondary: '',
   },
   filled: {
-    success:   'tw:border tw:border-emerald-500/20',
+    success:   'tw:border tw:border-primary-500/20',
     info:      'tw:border tw:border-sky-500/20',
     warning:   'tw:border tw:border-amber-500/20',
     error:     'tw:border tw:border-red-500/20',
@@ -166,7 +166,7 @@ const BORDER = {
 
 // Left accent bar color (for variant="accent")
 const ACCENT_BAR = {
-  success:   'tw:bg-emerald-400',
+  success:   'tw:bg-primary-400',
   info:      'tw:bg-sky-400',
   warning:   'tw:bg-amber-400',
   error:     'tw:bg-red-400',

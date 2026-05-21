@@ -129,7 +129,7 @@ function collapse(id) {
       <iconify
         :icon="store.unreadCount > 0 ? 'ph:bell-ringing-bold' : 'ph:bell-bold'"
         class="tw:text-lg"
-        :class="store.unreadCount > 0 ? 'tw:text-emerald-400' : 'tw:text-muted'"
+        :class="store.unreadCount > 0 ? 'tw:text-primary-400' : 'tw:text-muted'"
       />
       <!-- Badge -->
       <span
@@ -150,7 +150,7 @@ function collapse(id) {
             <!-- Connection indicator -->
             <span
               class="tw:h-1.5 tw:w-1.5 tw:rounded-full tw:shrink-0"
-              :class="sseConnected ? 'tw:bg-emerald-400' : 'tw:bg-amber-400'"
+              :class="sseConnected ? 'tw:bg-primary-400' : 'tw:bg-amber-400'"
               :title="sseConnected ? 'Live' : 'Reconnecting...'"
             />
           </div>
@@ -160,7 +160,7 @@ function collapse(id) {
               v-if="pushSupported"
               type="button"
               class="tw:flex tw:h-7 tw:w-7 tw:items-center tw:justify-center tw:rounded-lg tw:transition-colors tw:hover:bg-black/5"
-              :class="isSubscribed ? 'tw:text-emerald-400' : 'tw:text-muted'"
+              :class="isSubscribed ? 'tw:text-primary-400' : 'tw:text-muted'"
               :title="isSubscribed ? t('notifications.pushDisable') : t('notifications.pushEnable')"
               :disabled="pushLoading"
               @click="handlePushToggle"
@@ -217,7 +217,7 @@ function collapse(id) {
             :key="noti.id"
             class="tw:flex tw:items-start tw:gap-3 tw:rounded-xl tw:p-2.5 tw:mb-1 tw:cursor-pointer tw:transition-colors tw:border"
             :class="!noti.isRead
-              ? 'tw:bg-emerald-50 tw:border tw:border-emerald-200 tw:hover:bg-emerald-100 tw:dark:bg-emerald-500/10 tw:dark:border-emerald-500/25 tw:dark:hover:bg-emerald-500/15'
+              ? 'tw:bg-primary-50 tw:border tw:border-primary-200 tw:hover:bg-primary-100 tw:dark:bg-primary-500/10 tw:dark:border-primary-500/25 tw:dark:hover:bg-primary-500/15'
               : 'tw:bg-slate-50 tw:hover:bg-slate-100 tw:dark:bg-white/3 tw:dark:hover:bg-white/6 tw:border-slate-200 tw:dark:border-white/10'"
             @click="openNotification(noti)"
             @pointerdown="onPointerDown(noti)"
@@ -228,19 +228,19 @@ function collapse(id) {
             <!-- Icon -->
             <div
               class="tw:mt-0.5 tw:flex tw:h-7 tw:w-7 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-lg"
-              :class="noti.isRead ? 'tw:bg-white/5' : 'tw:bg-emerald-500/15'"
+              :class="noti.isRead ? 'tw:bg-white/5' : 'tw:bg-primary-500/15'"
             >
               <iconify
                 :icon="typeIcon(noti.type)"
                 class="tw:text-sm"
-                :class="noti.isRead ? 'tw:text-muted' : 'tw:text-emerald-400'"
+                :class="noti.isRead ? 'tw:text-muted' : 'tw:text-primary-400'"
               />
             </div>
             <!-- Text -->
             <div class="tw:min-w-0 tw:flex-1">
               <p
                 class="tw:text-xs tw:font-semibold"
-                :class="[noti.isRead ? 'tw:text-muted' : 'tw:text-emerald-400', expandedIds.has(noti.id) ? '' : 'tw:truncate']"
+                :class="[noti.isRead ? 'tw:text-muted' : 'tw:text-primary-400', expandedIds.has(noti.id) ? '' : 'tw:truncate']"
               >
                 {{ noti.title }}
               </p>

@@ -862,7 +862,7 @@ const handleDelete = (promo) => {
     <!-- Header -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+        <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">
           {{ t('promotions.breadcrumb') }}
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('promotions.title') }}</h1>

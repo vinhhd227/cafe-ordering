@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
         <!-- Header -->
         <div class="tw:space-y-3">
           <div class="tw:flex tw:items-center tw:justify-between">
-            <span class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-emerald-400">
+            <span class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-primary-400">
               Cafe Ordering
             </span>
             <div class="tw:flex tw:items-center tw:gap-1">
@@ -95,7 +95,7 @@ onBeforeUnmount(() => {
                 :key="l.code"
                 type="button"
                 class="tw:rounded-md tw:px-2 tw:py-1 tw:text-xs tw:font-semibold tw:transition-all"
-                :class="locale === l.code ? 'tw:bg-emerald-500/15 tw:text-emerald-400' : 'app-text-subtle tw:hover:bg-white/5'"
+                :class="locale === l.code ? 'tw:bg-primary-500/15 tw:text-primary-400' : 'app-text-subtle tw:hover:bg-white/5'"
                 @click="setLocale(l.code)"
               >
                 {{ l.label }}
@@ -166,7 +166,7 @@ onBeforeUnmount(() => {
           <prime-button
             type="submit"
             class="tw:mt-6 tw:w-full tw:rounded-xl tw:border-0!"
-            :class="canSubmit && !isSubmitting ? 'tw:shadow-lg tw:shadow-emerald-500/20' : 'tw:cursor-not-allowed!'"
+            :class="canSubmit && !isSubmitting ? 'tw:shadow-lg tw:shadow-primary-500/20' : 'tw:cursor-not-allowed!'"
             :disabled="isSubmitting || !canSubmit"
             :loading="isSubmitting"
           >
@@ -175,7 +175,7 @@ onBeforeUnmount(() => {
 
           <div class="tw:mt-5 tw:flex tw:items-center tw:justify-between tw:text-sm">
             <span class="app-text-subtle">{{ t('login.newUser') }}</span>
-            <router-link class="tw:text-emerald-400 tw:hover:text-emerald-300" :to="{ name: 'register' }">
+            <router-link class="tw:text-primary-400 tw:hover:text-primary-300" :to="{ name: 'register' }">
               {{ t('login.register') }}
             </router-link>
           </div>

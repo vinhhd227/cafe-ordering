@@ -245,7 +245,7 @@ const confirmAndDeactivate = async () => {
 const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('users', [
     { id: 'total',  label: t('users.widgets.totalUsers.label'), preview: '24', description: t('users.widgets.totalUsers.description') },
-    { id: 'active', label: t('users.widgets.active.label'),     preview: '20', description: t('users.widgets.active.description'),     labelClass: 'tw:text-emerald-400' },
+    { id: 'active', label: t('users.widgets.active.label'),     preview: '20', description: t('users.widgets.active.description'),     labelClass: 'tw:text-primary-400' },
     { id: 'admins', label: t('users.widgets.admins.label'),     preview: '3',  description: t('users.widgets.admins.description'),     labelClass: 'tw:text-red-400' },
     { id: 'staff',  label: t('users.widgets.staff.label'),      preview: '17', description: t('users.widgets.staff.description'),      labelClass: 'tw:text-blue-400' },
   ], { defaultCols: 4 })
@@ -273,7 +273,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
     <!-- ── Page Header ───────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('users.breadcrumb') }}</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">{{ t('users.breadcrumb') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('users.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm tw:text-muted">
           {{ t('users.subtitle') }}
@@ -302,7 +302,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
     <!-- ── Summary Stats ─────────────────────────────────────────── -->
     <div :class="['tw:grid tw:gap-3', wColsClass]">
       <widget-stat v-if="wVisible('total')"  :label="t('users.widgets.totalUsers.label')" :value="stats.total" />
-      <widget-stat v-if="wVisible('active')" :label="t('users.widgets.active.label')"     :value="stats.active" label-class="tw:text-emerald-400" />
+      <widget-stat v-if="wVisible('active')" :label="t('users.widgets.active.label')"     :value="stats.active" label-class="tw:text-primary-400" />
       <widget-stat v-if="wVisible('admins')" :label="t('users.widgets.admins.label')"     :value="stats.admins" label-class="tw:text-red-400" />
       <widget-stat v-if="wVisible('staff')"  :label="t('users.widgets.staff.label')"      :value="stats.staff"  label-class="tw:text-blue-400" />
     </div>
@@ -331,7 +331,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
         <div class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:bg-white tw:dark:bg-white/5 tw:p-3 tw:flex tw:flex-col tw:gap-2">
           <div class="tw:flex tw:items-start tw:justify-between tw:gap-1">
             <div class="tw:flex tw:items-center tw:gap-3">
-              <div class="tw:h-8 tw:w-8 tw:rounded-full tw:flex tw:items-center tw:justify-center tw:bg-emerald-500/20 tw:text-emerald-300 tw:text-xs tw:font-bold tw:flex-shrink-0">
+              <div class="tw:h-8 tw:w-8 tw:rounded-full tw:flex tw:items-center tw:justify-center tw:bg-primary-500/20 tw:text-primary-300 tw:text-xs tw:font-bold tw:flex-shrink-0">
                 {{ initials(data.fullName) }}
               </div>
               <div>
@@ -432,7 +432,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
         <div class="tw:flex tw:items-center tw:gap-3">
           <div
             class="tw:h-9 tw:w-9 tw:rounded-full tw:flex tw:items-center tw:justify-center
-                   tw:bg-emerald-500/20 tw:text-emerald-300 tw:text-xs tw:font-bold tw:flex-shrink-0"
+                   tw:bg-primary-500/20 tw:text-primary-300 tw:text-xs tw:font-bold tw:flex-shrink-0"
           >
             {{ initials(data.fullName) }}
           </div>
@@ -621,7 +621,7 @@ const openDrawer = (row) => { drawerUser.value = row; drawerVisible.value = true
           <div class="tw:space-y-0.5">
             <p class="tw:text-[10px] tw:uppercase tw:tracking-widest app-text-subtle">{{ t('users.tempPasswordDialog.tempPassword') }}</p>
             <div class="tw:flex tw:items-center tw:gap-2">
-              <p class="tw:font-mono tw:font-bold tw:text-xl tw:tracking-widest tw:text-emerald-300">
+              <p class="tw:font-mono tw:font-bold tw:text-xl tw:tracking-widest tw:text-primary-300">
                 {{ tempPasswordData.temporaryPassword }}
               </p>
               <prime-button

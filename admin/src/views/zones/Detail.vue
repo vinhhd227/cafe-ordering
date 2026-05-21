@@ -123,7 +123,7 @@ const toggleActive = async () => {
 
 // ── Status helpers ────────────────────────────────────────────────
 const tableStatusColor = (status) => {
-  if (status === 'Available') return 'tw:text-emerald-400'
+  if (status === 'Available') return 'tw:text-primary-400'
   if (status === 'Occupied') return 'tw:text-amber-400'
   return 'app-text-subtle'
 }
@@ -162,7 +162,7 @@ onMounted(load)
         <iconify icon="ph:arrow-left-bold" />
       </prime-button>
       <div class="tw:flex-1 tw:min-w-0">
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">Operations / Zones</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">Operations / Zones</p>
         <div class="tw:mt-1 tw:flex tw:items-center tw:gap-3">
           <h1 v-if="zone" class="tw:text-2xl tw:font-semibold tw:truncate">{{ zone.name }}</h1>
           <div v-else-if="loading" class="tw:h-7 tw:w-40 tw:animate-pulse tw:rounded tw:bg-white/10" />

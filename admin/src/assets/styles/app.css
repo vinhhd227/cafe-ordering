@@ -42,7 +42,6 @@ input, textarea, [contenteditable] {
     --app-border: rgba(15, 23, 42, 0.12);
     --app-glow-emerald: rgba(16, 185, 129, 0.15);
     --app-glow-amber: rgba(251, 146, 60, 0.18);
-    --app-background-glow: rgba(16, 185, 129, 0.12);
 }
 
 .app-dark {
@@ -59,7 +58,6 @@ input, textarea, [contenteditable] {
     --app-border: rgba(255, 255, 255, 0.12);
     --app-glow-emerald: rgba(16, 185, 129, 0.25);
     --app-glow-amber: rgba(251, 146, 60, 0.2);
-    --app-background-glow: rgba(16, 185, 129, 0.25);
 }
 
 /* ─── Layout ─── */
@@ -88,7 +86,8 @@ input, textarea, [contenteditable] {
     border-color: var(--app-border);
 }
 
-.app-background {
+
+.app-bg {
     background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--app-background-glow), transparent 70%), var(--app-bg);
 }
 

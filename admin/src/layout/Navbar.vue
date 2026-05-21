@@ -85,12 +85,12 @@ watch(route, () => {
       style="border-color: var(--app-border)"
     >
       <template v-if="!isCollapsed">
-        <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-[0.4em] tw:text-emerald-400">
+        <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-[0.4em] tw:text-primary-400">
           {{ t('sidebar.brand') }}
         </p>
         <h1 class="tw:mt-1 tw:text-base tw:font-semibold">{{ t('sidebar.title') }}</h1>
       </template>
-      <iconify v-else icon="ph:coffee-bold" class="tw:text-xl tw:text-emerald-400" />
+      <iconify v-else icon="ph:coffee-bold" class="tw:text-xl tw:text-primary-400" />
     </div>
 
     <!-- Navigation groups -->
@@ -122,7 +122,7 @@ watch(route, () => {
                 :class="[
                   isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
                   isParentActive(item)
-                    ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
+                    ? 'tw:bg-primary-500/10 tw:text-primary-400'
                     : 'tw:text-muted tw:hover:bg-black/5 tw:dark:hover:bg-white/5 tw:hover:text-gray-900 tw:dark:hover:text-white'
                 ]"
                 :title="isCollapsed ? t(item.labelKey) : undefined"
@@ -145,7 +145,7 @@ watch(route, () => {
                   :to="child.to"
                   class="tw:flex tw:items-center tw:rounded-lg tw:py-2 tw:px-3 tw:text-sm tw:font-medium tw:transition-all tw:duration-150 tw:no-underline tw:gap-3"
                   :class="isActive(child.to)
-                    ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
+                    ? 'tw:bg-primary-500/10 tw:text-primary-400'
                     : 'tw:text-muted! tw:hover:bg-black/5 tw:dark:hover:bg-white/5 tw:hover:text-gray-900 tw:dark:hover:text-white'"
                   @click="close"
                 >
@@ -163,7 +163,7 @@ watch(route, () => {
               :class="[
                 isCollapsed ? 'tw:justify-center tw:px-0' : 'tw:gap-3 tw:px-3',
                 isActive(item.to)
-                  ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
+                  ? 'tw:bg-primary-500/10 tw:text-primary-400'
                   : 'tw:text-muted tw:hover:bg-black/5 tw:dark:hover:bg-white/5 tw:hover:text-gray-900 tw:dark:hover:text-white'
               ]"
               :title="isCollapsed ? t(item.labelKey) : undefined"

@@ -703,7 +703,7 @@ const exportItems = computed(() => [
         <div class="tw:flex tw:items-center tw:gap-3">
           <p class="tw:text-sm tw:font-semibold">{{ t('report.daily.ordersTable.title') }}</p>
           <span class="tw:flex tw:items-center tw:gap-1 tw:text-[11px] tw:text-muted">
-            <span class="tw:w-2 tw:h-2 tw:rounded-full tw:bg-emerald-500 tw:shrink-0" />
+            <span class="tw:w-2 tw:h-2 tw:rounded-full tw:bg-primary-500 tw:shrink-0" />
             {{ t('report.daily.payment.cash') }}
           </span>
           <span class="tw:flex tw:items-center tw:gap-1 tw:text-[11px] tw:text-muted">
@@ -792,7 +792,7 @@ const exportItems = computed(() => [
             <p
               class="tw:text-right tw:tabular-nums tw:font-medium"
               :class="{
-                'tw:text-emerald-500': data.paymentMethod === 'cash',
+                'tw:text-primary-500': data.paymentMethod === 'cash',
                 'tw:text-blue-400': data.paymentMethod === 'transfer',
               }"
             >{{ fmt(data.totalAmount) }}</p>
@@ -893,7 +893,7 @@ const exportItems = computed(() => [
           <p
             class="tw:font-semibold tw:text-base tw:tabular-nums"
             :class="{
-              'tw:text-emerald-500': drawerOrder.paymentMethod === 'cash',
+              'tw:text-primary-500': drawerOrder.paymentMethod === 'cash',
               'tw:text-blue-400': drawerOrder.paymentMethod === 'transfer',
             }"
           >{{ fmt(drawerOrder.totalAmount) }}</p>

@@ -116,7 +116,7 @@ const toggleProduct = async (product) => {
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
         <p
-          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300"
         >
           Menu
         </p>
@@ -158,7 +158,7 @@ const toggleProduct = async (product) => {
       <!-- Card 2: Sản phẩm + progress bar -->
       <prime-card :pt="{ root: { class: [appCard, 'tw:rounded-xl!'] } }">
         <template #content>
-          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-emerald-400">
+          <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.25em] tw:text-primary-400">
             {{ t('menu.stats.products') }}
           </p>
           <p class="tw:mt-2 tw:text-2xl tw:font-semibold">
@@ -167,7 +167,7 @@ const toggleProduct = async (product) => {
           </p>
           <div class="tw:mt-2 tw:h-1.5 tw:rounded-full tw:bg-white/10 tw:overflow-hidden">
             <div
-              class="tw:h-full tw:rounded-full tw:bg-emerald-400 tw:transition-all"
+              class="tw:h-full tw:rounded-full tw:bg-primary-400 tw:transition-all"
               :style="{ width: stats.totalProducts ? `${Math.round(stats.activeProducts / stats.totalProducts * 100)}%` : '0%' }"
             />
           </div>

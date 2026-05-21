@@ -115,7 +115,7 @@ onBeforeUnmount(() => {
     <!-- ── Header ───────────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">
           Products
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">Catalog overview</h1>

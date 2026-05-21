@@ -353,12 +353,12 @@ onMounted(async () => {
           <iconify icon="ph:arrow-left-bold" />
         </prime-button>
         <div>
-          <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+          <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">
             {{ t("orders.breadcrumb") }}
           </p>
           <h1 class="tw:text-2xl tw:font-semibold">
             {{ t("orders.edit.title") }}
-            <span v-if="order" class="tw:text-emerald-400 tw:font-mono tw:text-xl">
+            <span v-if="order" class="tw:text-primary-400 tw:font-mono tw:text-xl">
               #{{ order.orderNumber }}
             </span>
           </h1>
@@ -458,7 +458,7 @@ onMounted(async () => {
             <article
               v-for="product in category.filteredProducts"
               :key="product.id"
-              class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all tw:hover:-translate-y-0.5 tw:hover:border-emerald-500/50"
+              class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all tw:hover:-translate-y-0.5 tw:hover:border-primary-500/50"
               style="border-color: var(--app-border); background: var(--app-bg-subtle)"
               @click="handleAddToCart(product)"
             >
@@ -480,7 +480,7 @@ onMounted(async () => {
                 <!-- Cart badge -->
                 <div
                   v-if="cartQuantity(product.id) > 0"
-                  class="tw:absolute tw:top-2 tw:right-2 tw:h-6 tw:w-6 tw:rounded-full tw:bg-emerald-500 tw:text-white tw:text-xs tw:font-bold tw:flex tw:items-center tw:justify-center tw:shadow"
+                  class="tw:absolute tw:top-2 tw:right-2 tw:h-6 tw:w-6 tw:rounded-full tw:bg-primary-500 tw:text-white tw:text-xs tw:font-bold tw:flex tw:items-center tw:justify-center tw:shadow"
                 >
                   {{ cartQuantity(product.id) }}
                 </div>
@@ -490,7 +490,7 @@ onMounted(async () => {
                 <p v-if="product.description" class="tw:text-xs tw:text-muted tw:leading-snug tw:line-clamp-2">
                   {{ product.description }}
                 </p>
-                <p class="tw:mt-auto tw:pt-1 tw:text-sm tw:font-bold tw:text-emerald-400">
+                <p class="tw:mt-auto tw:pt-1 tw:text-sm tw:font-bold tw:text-primary-400">
                   {{ formatVnd(product.price) }}
                 </p>
               </div>
@@ -531,7 +531,7 @@ onMounted(async () => {
               <div class="tw:flex tw:items-start tw:gap-2">
                 <div class="tw:flex-1 tw:min-w-0">
                   <p class="tw:text-sm tw:font-medium tw:leading-snug">{{ item.productName }}</p>
-                  <p class="tw:text-xs tw:mt-0.5 tw:text-emerald-400">{{ formatVnd(item.unitPrice) }}</p>
+                  <p class="tw:text-xs tw:mt-0.5 tw:text-primary-400">{{ formatVnd(item.unitPrice) }}</p>
                   <p v-if="optionsLabel(item)" class="tw:text-xs tw:text-amber-400 tw:mt-0.5 tw:leading-snug">
                     {{ optionsLabel(item) }}
                   </p>
@@ -560,7 +560,7 @@ onMounted(async () => {
                 </div>
               </div>
               <div class="tw:flex tw:justify-end tw:mt-1.5">
-                <span class="tw:text-sm tw:font-semibold tw:text-emerald-400">
+                <span class="tw:text-sm tw:font-semibold tw:text-primary-400">
                   {{ formatVnd(item.unitPrice * item.quantity) }}
                 </span>
               </div>
@@ -579,7 +579,7 @@ onMounted(async () => {
               <div class="tw:border-t tw:pt-2" style="border-color: var(--app-border)">
                 <div class="tw:flex tw:items-center tw:justify-between tw:font-bold">
                   <span>{{ t("orders.create.total") }}</span>
-                  <span class="tw:text-emerald-400 tw:text-base">{{ formatVnd(cartTotal) }}</span>
+                  <span class="tw:text-primary-400 tw:text-base">{{ formatVnd(cartTotal) }}</span>
                 </div>
               </div>
             </div>
@@ -590,15 +590,15 @@ onMounted(async () => {
             <!-- Applied -->
             <div
               v-if="promoInfo"
-              class="tw:flex tw:items-center tw:justify-between tw:rounded-xl tw:border tw:border-emerald-500/30 tw:bg-emerald-500/10 tw:px-3 tw:py-2"
+              class="tw:flex tw:items-center tw:justify-between tw:rounded-xl tw:border tw:border-primary-500/30 tw:bg-primary-500/10 tw:px-3 tw:py-2"
             >
               <div class="tw:flex tw:items-center tw:gap-2 tw:min-w-0">
-                <iconify icon="ph:tag-bold" class="tw:text-emerald-400 tw:shrink-0" />
-                <span class="tw:font-medium tw:text-sm tw:text-emerald-300">{{ promoInfo.code }}</span>
+                <iconify icon="ph:tag-bold" class="tw:text-primary-400 tw:shrink-0" />
+                <span class="tw:font-medium tw:text-sm tw:text-primary-300">{{ promoInfo.code }}</span>
                 <span class="tw:text-xs tw:text-muted tw:truncate">{{ promoInfo.name }}</span>
               </div>
               <div class="tw:flex tw:items-center tw:gap-2 tw:shrink-0">
-                <span v-if="promoInfo.estimatedDiscount" class="tw:text-emerald-400 tw:text-sm tw:font-medium">
+                <span v-if="promoInfo.estimatedDiscount" class="tw:text-primary-400 tw:text-sm tw:font-medium">
                   -{{ new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(promoInfo.estimatedDiscount) }}
                 </span>
                 <prime-button size="small" text severity="secondary" :class="btnIcon" @click="clearPromo">
@@ -662,7 +662,7 @@ onMounted(async () => {
         <p class="tw:mb-2 tw:text-sm tw:font-semibold">{{ t("orders.create.optionsDialog.quantity") }}</p>
         <div class="tw:flex tw:items-center tw:gap-3">
           <button
-            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition tw:hover:border-emerald-400 tw:text-muted"
+            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition tw:hover:border-primary-400 tw:text-muted"
             style="border-color: var(--app-border)"
             @click="pendingQuantity = Math.max(1, pendingQuantity - 1)"
           >
@@ -670,7 +670,7 @@ onMounted(async () => {
           </button>
           <span class="tw:min-w-10 tw:text-center tw:text-xl tw:font-bold">{{ pendingQuantity }}</span>
           <button
-            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition tw:hover:border-emerald-400 tw:text-muted"
+            class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition tw:hover:border-primary-400 tw:text-muted"
             style="border-color: var(--app-border)"
             @click="pendingQuantity++"
           >

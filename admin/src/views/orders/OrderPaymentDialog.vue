@@ -138,7 +138,7 @@ const confirmPayment = async () => {
           </div>
           <div class="tw:flex tw:items-center tw:justify-between tw:text-sm">
             <span class="tw:text-muted">{{ t('orders.pay.returnToCustomer') }}</span>
-            <span :class="payReturn === 0 ? 'tw:text-muted' : 'tw:text-emerald-400 tw:font-semibold'">
+            <span :class="payReturn === 0 ? 'tw:text-muted' : 'tw:text-primary-400 tw:font-semibold'">
               {{ payReturn === 0 ? '—' : formatVnd(payReturn) }}
             </span>
           </div>

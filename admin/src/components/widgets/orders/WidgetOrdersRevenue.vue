@@ -49,7 +49,7 @@ const fmt = (value) =>
       <p class="tw:text-2xl tw:font-semibold tw:shrink-0">{{ fmt(total) }}</p>
     </template>
     <template #content>
-      <div class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:text-emerald-400 tw:min-w-0">
+      <div class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:text-primary-400 tw:min-w-0">
         <span class="tw:flex tw:min-w-0 tw:flex-1 tw:items-center tw:gap-1 tw:text-[10px] tw:uppercase tw:tracking-[0.15em]">
           <iconify icon="ph:money-bold" class="tw:text-sm tw:opacity-70 tw:shrink-0" />
           <span class="tw:min-w-0 tw:truncate">{{ t('widget.revenue.cash') }}</span>
@@ -76,13 +76,13 @@ const fmt = (value) =>
           <span class="tw:flex tw:items-center tw:gap-1 tw:text-[10px] tw:uppercase tw:tracking-[0.15em] tw:text-muted">
             <iconify :icon="pctVsPrev !== null && pctVsPrev >= 0 ? 'ph:trend-up-bold' : 'ph:trend-down-bold'"
               class="tw:text-sm tw:shrink-0"
-              :class="pctVsPrev !== null && pctVsPrev >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'" />
+              :class="pctVsPrev !== null && pctVsPrev >= 0 ? 'tw:text-primary-400' : 'tw:text-red-400'" />
             <span>{{ periodLabel }}</span>
           </span>
           <div class="tw:text-right tw:shrink-0">
             <span class="tw:text-xs tw:font-medium">{{ fmt(prevPeriodRevenue) }}</span>
             <span v-if="pctVsPrev !== null" class="tw:text-[10px] tw:ml-1"
-              :class="pctVsPrev >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'"
+              :class="pctVsPrev >= 0 ? 'tw:text-primary-400' : 'tw:text-red-400'"
             >{{ fmtPct(pctVsPrev) }}</span>
           </div>
         </div>
@@ -90,13 +90,13 @@ const fmt = (value) =>
           <span class="tw:flex tw:items-center tw:gap-1 tw:text-[10px] tw:uppercase tw:tracking-[0.15em] tw:text-muted">
             <iconify :icon="pctVsAvg30 !== null && pctVsAvg30 >= 0 ? 'ph:trend-up-bold' : 'ph:trend-down-bold'"
               class="tw:text-sm tw:shrink-0"
-              :class="pctVsAvg30 !== null && pctVsAvg30 >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'" />
+              :class="pctVsAvg30 !== null && pctVsAvg30 >= 0 ? 'tw:text-primary-400' : 'tw:text-red-400'" />
             <span>{{ t('widget.revenue.vsAvg30Label') }}</span>
           </span>
           <div class="tw:text-right tw:shrink-0">
             <span class="tw:text-xs tw:font-medium">{{ fmt(avg30DayRevenue) }}</span>
             <span v-if="pctVsAvg30 !== null" class="tw:text-[10px] tw:ml-1"
-              :class="pctVsAvg30 >= 0 ? 'tw:text-emerald-400' : 'tw:text-red-400'"
+              :class="pctVsAvg30 >= 0 ? 'tw:text-primary-400' : 'tw:text-red-400'"
             >{{ fmtPct(pctVsAvg30) }}</span>
           </div>
         </div>

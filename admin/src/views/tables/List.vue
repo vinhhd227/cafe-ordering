@@ -637,7 +637,7 @@ const openDrawer = (row) => {
 const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('tables', [
     { id: 'total',     label: t('tables.widgets.total.label'),     preview: '20', description: t('tables.widgets.total.description') },
-    { id: 'available', label: t('tables.widgets.available.label'), preview: '12', description: t('tables.widgets.available.description'), labelClass: 'tw:text-emerald-400' },
+    { id: 'available', label: t('tables.widgets.available.label'), preview: '12', description: t('tables.widgets.available.description'), labelClass: 'tw:text-primary-400' },
     { id: 'occupied',  label: t('tables.widgets.occupied.label'),  preview: '6',  description: t('tables.widgets.occupied.description'),  labelClass: 'tw:text-blue-400' },
     { id: 'cleaning',  label: t('tables.widgets.cleaning.label'),  preview: '2',  description: t('tables.widgets.cleaning.description'),  labelClass: 'tw:text-yellow-400' },
   ], { defaultCols: 4 })
@@ -889,7 +889,7 @@ const columns = computed(() => [
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
         <p
-          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300"
         >
           {{ t('tables.groupLabel') }}
         </p>
@@ -941,7 +941,7 @@ const columns = computed(() => [
         <span class="tw:text-sm tw:font-bold">{{ summary.total }}</span>
       </div>
       <div class="tw:flex tw:flex-col tw:gap-0.5 tw:pb-3 tw:pl-4 tw:border-l tw:border-slate-200 tw:dark:border-white/10">
-        <span class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-emerald-500 tw:dark:text-emerald-400">{{ t('tables.widgets.available.label') }}</span>
+        <span class="tw:text-[11px] tw:uppercase tw:tracking-widest tw:text-primary-500 tw:dark:text-primary-400">{{ t('tables.widgets.available.label') }}</span>
         <span class="tw:text-sm tw:font-bold">{{ summary.available }}</span>
       </div>
       <div class="tw:flex tw:flex-col tw:gap-0.5 tw:pt-3 tw:pr-4 tw:border-t tw:border-slate-200 tw:dark:border-white/10">
@@ -957,7 +957,7 @@ const columns = computed(() => [
     <!-- ── Summary stats (desktop) ───────────────────────────────── -->
     <div :class="['tw:hidden tw:sm:grid tw:gap-3', wColsClass]">
       <widget-stat v-if="wVisible('total')"     :label="t('tables.widgets.total.label')"     :value="summary.total" />
-      <widget-stat v-if="wVisible('available')" :label="t('tables.widgets.available.label')" :value="summary.available" label-class="tw:text-emerald-400" />
+      <widget-stat v-if="wVisible('available')" :label="t('tables.widgets.available.label')" :value="summary.available" label-class="tw:text-primary-400" />
       <widget-stat v-if="wVisible('occupied')"  :label="t('tables.widgets.occupied.label')"  :value="summary.occupied"  label-class="tw:text-blue-400" />
       <widget-stat v-if="wVisible('cleaning')"  :label="t('tables.widgets.cleaning.label')"  :value="summary.cleaning"  label-class="tw:text-yellow-400" />
     </div>

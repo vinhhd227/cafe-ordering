@@ -273,7 +273,7 @@ const onPage = (e) => {
     <!-- Header -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('expenses.groupLabel') }}</p>
+        <p class="tw:text-[11px] tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">{{ t('expenses.groupLabel') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('expenses.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('expenses.subtitle') }}</p>
       </div>

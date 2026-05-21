@@ -321,7 +321,7 @@ onMounted(async () => {
           <iconify icon="ph:arrow-left-bold" />
         </prime-button>
         <div>
-          <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t("orders.breadcrumb") }}</p>
+          <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">{{ t("orders.breadcrumb") }}</p>
           <h1 class="tw:text-2xl tw:font-semibold tw:flex tw:items-center tw:gap-2">
             {{ t("orders.manual.title") }}
             <prime-tag :value="t('orders.manual.badge')" severity="secondary" />
@@ -355,11 +355,11 @@ onMounted(async () => {
               <button
                 v-for="product in cat.filteredProducts"
                 :key="product.id"
-                class="tw:text-left tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:p-3 tw:transition-colors tw:hover:bg-white/10 tw:hover:border-emerald-500/40"
+                class="tw:text-left tw:rounded-xl tw:border tw:border-white/10 tw:bg-white/5 tw:p-3 tw:transition-colors tw:hover:bg-white/10 tw:hover:border-primary-500/40"
                 @click="handleAddToCart(product)"
               >
                 <p class="tw:text-sm tw:font-medium tw:leading-tight">{{ product.name }}</p>
-                <p class="tw:text-xs tw:text-emerald-400 tw:mt-1">{{ formatVnd(product.price) }}</p>
+                <p class="tw:text-xs tw:text-primary-400 tw:mt-1">{{ formatVnd(product.price) }}</p>
               </button>
             </div>
           </div>
@@ -510,7 +510,7 @@ onMounted(async () => {
               <div class="tw:flex-1 tw:min-w-0">
                 <p class="tw:text-sm tw:font-medium tw:truncate">{{ item.productName }}</p>
                 <p v-if="optionsLabel(item)" class="tw:text-[11px] tw:text-muted tw:mt-0.5">{{ optionsLabel(item) }}</p>
-                <p class="tw:text-xs tw:text-emerald-400 tw:mt-0.5">{{ formatVnd(item.unitPrice) }}</p>
+                <p class="tw:text-xs tw:text-primary-400 tw:mt-0.5">{{ formatVnd(item.unitPrice) }}</p>
               </div>
               <div class="tw:flex tw:items-center tw:gap-1.5 tw:shrink-0">
                 <prime-button :class="btnIcon" severity="secondary" size="small" outlined @click="changeQty(item._key, -1)">

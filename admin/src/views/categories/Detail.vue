@@ -81,7 +81,7 @@ onMounted(loadCategory);
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
         <p
-          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300"
         >
           {{ t('categories.breadcrumb') }}
         </p>
@@ -169,11 +169,11 @@ onMounted(loadCategory);
             <!-- Icon placeholder -->
             <div class="tw:flex tw:justify-center tw:mb-5">
               <div
-                class="tw:h-24 tw:w-24 tw:rounded-2xl tw:bg-emerald-500/10 tw:flex tw:items-center tw:justify-center"
+                class="tw:h-24 tw:w-24 tw:rounded-2xl tw:bg-primary-500/10 tw:flex tw:items-center tw:justify-center"
               >
                 <iconify
                   icon="ph:tag-bold"
-                  class="tw:text-4xl tw:text-emerald-400"
+                  class="tw:text-4xl tw:text-primary-400"
                 />
               </div>
             </div>

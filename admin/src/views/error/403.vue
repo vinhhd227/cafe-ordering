@@ -8,7 +8,7 @@
       class="app-card tw:w-full tw:max-w-xl tw:rounded-3xl tw:border tw:p-10 tw:text-center tw:shadow-2xl tw:backdrop-blur"
     >
       <p
-        class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-emerald-300"
+        class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-primary-300"
       >
         Cafe Ordering
       </p>
@@ -19,7 +19,7 @@
       </p>
       <div class="tw:mt-8 tw:flex tw:flex-wrap tw:justify-center tw:gap-3">
         <router-link
-          class="tw:rounded-xl tw:bg-emerald-500 tw:px-4 tw:py-2 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-emerald-500/30 tw:transition tw:hover:bg-emerald-400"
+          class="tw:rounded-xl tw:bg-primary-500 tw:px-4 tw:py-2 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-primary-500/30 tw:transition tw:hover:bg-primary-400"
           :to="{ name: 'dashboard' }"
         >
           Back to home

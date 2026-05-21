@@ -105,7 +105,7 @@ onBeforeUnmount(() => {
   <section
     class="tw:relative tw:flex tw:min-h-screen tw:items-center tw:justify-center tw:overflow-hidden"
   >
-    <div class="app-background tw:absolute tw:inset-0 tw:z-0" />
+    <div class="app-bg tw:absolute tw:inset-0 tw:z-0" />
 
     <div class="tw:relative tw:z-10 tw:w-full tw:max-w-2xl tw:p-6 lg:tw:p-12">
       <prime-card

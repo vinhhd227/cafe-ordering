@@ -16,7 +16,7 @@
         class="auth-card app-card tw:w-full tw:rounded-3xl tw:border tw:p-8 tw:shadow-2xl tw:backdrop-blur"
       >
         <div class="tw:space-y-3">
-          <span class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-emerald-300"
+          <span class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-primary-300"
             >Cafe Ordering</span
           >
           <h2 class="tw:text-3xl tw:font-semibold">Forgot password</h2>
@@ -33,21 +33,21 @@
             <prime-input-text
               type="email"
               placeholder="you@cafe.com"
-              class="app-input tw:mt-3 tw:w-full tw:rounded-xl tw:border tw:px-4 tw:py-3 tw:text-sm tw:transition focus:tw:border-emerald-400 focus:tw:outline-none focus:tw:ring-2 focus:tw:ring-emerald-300/40"
+              class="app-input tw:mt-3 tw:w-full tw:rounded-xl tw:border tw:px-4 tw:py-3 tw:text-sm tw:transition focus:tw:border-primary-400 focus:tw:outline-none focus:tw:ring-2 focus:tw:ring-emerald-300/40"
             />
           </label>
         </div>
 
         <prime-button
           type="button"
-          class="tw:mt-8 tw:w-full tw:rounded-xl tw:bg-emerald-500 tw:px-4 tw:py-3 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-emerald-500/30 tw:transition tw:hover:bg-emerald-400"
+          class="tw:mt-8 tw:w-full tw:rounded-xl tw:bg-primary-500 tw:px-4 tw:py-3 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-primary-500/30 tw:transition tw:hover:bg-primary-400"
         >
           Send reset link
         </prime-button>
 
         <div class="tw:mt-6 tw:flex tw:items-center tw:justify-between tw:text-sm">
           <span class="app-text-subtle">Remembered your password?</span>
-          <router-link class="tw:text-emerald-300 tw:hover:text-emerald-200" to="/admin/login">
+          <router-link class="tw:text-primary-300 tw:hover:text-primary-200" to="/admin/login">
             Back to login
           </router-link>
         </div>

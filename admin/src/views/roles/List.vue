@@ -112,7 +112,7 @@ const roleColor = (name) => {
   if (n.includes("admin")) return "tw:text-red-400";
   if (n.includes("staff")) return "tw:text-blue-400";
   if (n.includes("manage")) return "tw:text-amber-400";
-  return "tw:text-emerald-400";
+  return "tw:text-primary-400";
 };
 
 const roleBg = (name) => {
@@ -120,7 +120,7 @@ const roleBg = (name) => {
   if (n.includes("admin")) return "tw:bg-red-500/15";
   if (n.includes("staff")) return "tw:bg-blue-500/15";
   if (n.includes("manage")) return "tw:bg-amber-500/15";
-  return "tw:bg-emerald-500/15";
+  return "tw:bg-primary-500/15";
 };
 
 const formatDate = (dateStr) =>
@@ -336,7 +336,7 @@ const savePermissions = async () => {
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
         <p
-          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300"
+          class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300"
         >
           {{ t('roles.breadcrumb') }}
         </p>
@@ -702,7 +702,7 @@ const savePermissions = async () => {
               <div class="tw:flex tw:items-center tw:gap-2">
                 <iconify
                   :icon="groupIcon(group.name)"
-                  :class="['tw:text-base tw:text-emerald-400']"
+                  :class="['tw:text-base tw:text-primary-400']"
                 />
                 <span class="tw:text-sm tw:font-semibold">{{
                   groupLabel(group.name)
@@ -731,7 +731,7 @@ const savePermissions = async () => {
                 :class="[
                   'tw:flex tw:items-start tw:gap-3 tw:rounded-lg tw:p-2.5 tw:cursor-pointer tw:transition-colors',
                   perm.assigned
-                    ? 'tw:bg-emerald-500/10 tw:border tw:border-emerald-500/30'
+                    ? 'tw:bg-primary-500/10 tw:border tw:border-primary-500/30'
                     : 'tw:bg-transparent tw:border tw:border-transparent tw:hover:bg-white/5',
                 ]"
                 @click="togglePermission(perm)"

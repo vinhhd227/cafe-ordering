@@ -97,7 +97,7 @@ const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDe
       label: t('orders.widgets.cashCollected'),
       description: t('orders.widgets.cashCollected'),
       previewComponent: WidgetStat,
-      previewProps: { label: 'Cash collected', value: '2,400,000 ₫', labelClass: 'tw:text-emerald-400' },
+      previewProps: { label: 'Cash collected', value: '2,400,000 ₫', labelClass: 'tw:text-primary-400' },
     },
     {
       id: 'bank',
@@ -344,7 +344,7 @@ const handleDeleteOrder = (order) => {
       <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
         <span v-if="summary.pending > 0"    class="tw:text-amber-400   tw:text-xs tw:font-medium">{{ summary.pending }} {{ t('orders.status.PENDING').toLowerCase() }}</span>
         <span v-if="summary.processing > 0" class="tw:text-blue-400    tw:text-xs tw:font-medium">{{ summary.processing }} {{ t('orders.status.PROCESSING').toLowerCase() }}</span>
-        <span v-if="summary.completed > 0"  class="tw:text-emerald-400 tw:text-xs tw:font-medium">{{ summary.completed }} {{ t('orders.status.COMPLETED').toLowerCase() }}</span>
+        <span v-if="summary.completed > 0"  class="tw:text-primary-400 tw:text-xs tw:font-medium">{{ summary.completed }} {{ t('orders.status.COMPLETED').toLowerCase() }}</span>
         <span v-if="summary.cancelled > 0"  class="tw:text-red-400     tw:text-xs tw:font-medium">{{ summary.cancelled }} {{ t('orders.status.CANCELLED').toLowerCase() }}</span>
       </div>
       <span class="tw:ml-auto tw:font-semibold tw:text-sm tw:shrink-0">{{ formatVnd(summary.revenue) }}</span>
@@ -370,11 +370,11 @@ const handleDeleteOrder = (order) => {
       <widget-stat
         v-if="wVisible('cash')"
         :label="t('orders.widgets.cashCollected')"
-        label-class="tw:text-emerald-400"
+        label-class="tw:text-primary-400"
         :value="formatVnd(summary.cash)"
       >
         <template #icon>
-          <iconify icon="ph:money-bold" class="tw:text-emerald-400 tw:opacity-60" />
+          <iconify icon="ph:money-bold" class="tw:text-primary-400 tw:opacity-60" />
         </template>
       </widget-stat>
       <widget-stat
@@ -539,7 +539,7 @@ const handleDeleteOrder = (order) => {
           <!-- Items summary -->
           <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
             <span v-for="(item, idx) in (data.items ?? []).slice(0, 3)" :key="idx" class="tw:text-[11px] tw:text-muted">
-              <span class="tw:text-emerald-400 tw:font-semibold">{{ item.quantity }}×</span>
+              <span class="tw:text-primary-400 tw:font-semibold">{{ item.quantity }}×</span>
               {{ item.productName }}
             </span>
             <span v-if="(data.items?.length ?? 0) > 3" class="tw:text-[10px] app-text-subtle tw:italic">
@@ -636,7 +636,7 @@ const handleDeleteOrder = (order) => {
             :key="idx"
             class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs"
           >
-            <span class="tw:shrink-0 tw:font-semibold tw:text-emerald-400 tw:w-4 tw:text-right">{{ item.quantity }}×</span>
+            <span class="tw:shrink-0 tw:font-semibold tw:text-primary-400 tw:w-4 tw:text-right">{{ item.quantity }}×</span>
             <span class="tw:truncate tw:text-muted" style="max-width: 9rem">{{ item.productName }}</span>
           </div>
           <span v-if="(data.items?.length ?? 0) > 3" class="tw:text-[10px] app-text-subtle tw:italic">
@@ -649,7 +649,7 @@ const handleDeleteOrder = (order) => {
         <div v-if="data.promotions?.length" class="tw:space-y-0.5">
           <div v-for="p in data.promotions" :key="p.promotionId" class="tw:flex tw:items-center tw:gap-1.5">
             <prime-tag :value="p.promoCode" severity="success" class="tw:text-[10px]! tw:shrink-0" />
-            <span class="tw:text-xs tw:text-emerald-400 tw:font-medium tw:shrink-0">
+            <span class="tw:text-xs tw:text-primary-400 tw:font-medium tw:shrink-0">
               –{{ formatVnd(p.discountAmount) }}
             </span>
           </div>

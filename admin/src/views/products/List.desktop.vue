@@ -242,7 +242,7 @@ const openDrawer = (row) => {
 const { isVisible: wVisible, toggle: wToggle, hiddenCount: wHidden, widgets: wDefs, colsPerRow: wCols, setColsPerRow: wSetCols } =
   useWidgetSettings('products', [
     { id: 'total',    label: t('products.widgets.total.label'),    preview: '48', description: t('products.widgets.total.description') },
-    { id: 'active',   label: t('products.widgets.active.label'),   preview: '36', description: t('products.widgets.active.description'),   labelClass: 'tw:text-emerald-400' },
+    { id: 'active',   label: t('products.widgets.active.label'),   preview: '36', description: t('products.widgets.active.description'),   labelClass: 'tw:text-primary-400' },
     { id: 'low',      label: t('products.widgets.low.label'),      preview: '4',  description: t('products.widgets.low.description') },
     { id: 'inactive', label: t('products.widgets.inactive.label'), preview: '8',  description: t('products.widgets.inactive.description'), labelClass: 'tw:text-red-400' },
   ], { defaultCols: 4 })
@@ -255,7 +255,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
     <!-- ── Header ───────────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">
           {{ t('products.breadcrumb') }}
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('products.list.title') }}</h1>
@@ -291,7 +291,7 @@ const wColsClass = computed(() => W_COLS_CLASS[wCols.value] ?? 'tw:grid-cols-2')
       <widget-stat
         v-if="wVisible('active')"
         :label="t('products.widgets.active.label')"
-        label-class="tw:text-emerald-400"
+        label-class="tw:text-primary-400"
         :value="summary.active"
       />
       <widget-stat

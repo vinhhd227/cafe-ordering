@@ -552,7 +552,7 @@ onMounted(async () => {
       class="app-panel tw:mb-4 tw:flex tw:items-center tw:justify-between tw:rounded-2xl tw:border tw:px-6 tw:py-3"
     >
       <div class="tw:flex tw:items-center tw:gap-3">
-        <iconify icon="ic:round-table-bar" class="tw:text-xl tw:text-emerald-600 tw:dark:text-emerald-400" />
+        <iconify icon="ic:round-table-bar" class="tw:text-xl tw:text-primary-600 tw:dark:text-primary-400" />
         <span class="tw:text-sm tw:font-medium">{{ tableCode || `Table ${tableId}` }}</span>
         <span
           v-if="session"
@@ -585,7 +585,7 @@ onMounted(async () => {
       class="tw:mb-4 tw:rounded-2xl tw:border tw:border-rose-500/30 tw:bg-rose-500/10 tw:px-6 tw:py-3 tw:text-sm tw:text-rose-400 tw:flex tw:items-center tw:justify-between tw:gap-4"
     >
       <span>{{ sessionError }}</span>
-      <button type="button" class="tw:shrink-0 tw:text-emerald-600 tw:dark:text-emerald-400 tw:underline tw:hover:text-emerald-700 tw:hover:dark:text-emerald-300 tw:text-xs" @click="router.push({ name: 'tableSelect' })">
+      <button type="button" class="tw:shrink-0 tw:text-primary-600 tw:dark:text-primary-400 tw:underline tw:hover:text-primary-700 tw:hover:dark:text-primary-300 tw:text-xs" @click="router.push({ name: 'tableSelect' })">
         {{ t('order.selectTable') }}
       </button>
     </div>
@@ -690,7 +690,7 @@ onMounted(async () => {
                     <p class="tw:mt-1 tw:hidden tw:text-sm tw:text-muted tw:lg:line-clamp-2 tw:lg:block">
                       {{ product.description || t('order.defaultDescription') }}
                     </p>
-                    <p class="tw:mt-0.5 tw:text-xs tw:font-bold tw:text-emerald-600 tw:dark:text-emerald-400 tw:lg:mt-1.5 tw:lg:text-sm">
+                    <p class="tw:mt-0.5 tw:text-xs tw:font-bold tw:text-primary-600 tw:dark:text-primary-400 tw:lg:mt-1.5 tw:lg:text-sm">
                       {{ formatPrice(product.price) }}
                     </p>
                     <div
@@ -699,7 +699,7 @@ onMounted(async () => {
                     >
                       <span
                         v-if="product.hasTemperatureOption"
-                        class="tw:rounded-md tw:bg-emerald-500/15 tw:px-1.5 tw:py-0.5 tw:text-[10px] tw:font-medium tw:text-emerald-600 tw:dark:text-emerald-400"
+                        class="tw:rounded-md tw:bg-primary-500/15 tw:px-1.5 tw:py-0.5 tw:text-[10px] tw:font-medium tw:text-primary-600 tw:dark:text-primary-400"
                         >{{ t('product.temperature.HOT') }}/{{ t('product.temperature.COLD') }}</span
                       >
                       <span
@@ -718,7 +718,7 @@ onMounted(async () => {
                   <!-- Mobile: round + button -->
                   <div class="tw:shrink-0 tw:lg:hidden">
                     <button
-                      class="tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-full tw:bg-emerald-500 tw:text-white tw:shadow-sm tw:transition active:tw:scale-95 tw:hover:bg-emerald-600"
+                      class="tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-full tw:bg-primary-500 tw:text-white tw:shadow-sm tw:transition active:tw:scale-95 tw:hover:bg-primary-600"
                       @click="handleAddToCart(product)"
                     >
                       <iconify icon="heroicons-outline:plus" class="tw:h-5 tw:w-5" />
@@ -758,7 +758,7 @@ onMounted(async () => {
         <div class="app-panel tw:rounded-2xl tw:border tw:border-white/10 tw:p-5">
           <div class="tw:flex tw:items-center tw:justify-between">
             <h2 class="tw:text-xl tw:font-semibold">{{ t('order.cart') }}</h2>
-            <span class="tw:rounded-full tw:bg-emerald-500/15 tw:px-3 tw:py-1 tw:text-xs tw:font-semibold tw:text-emerald-600 tw:dark:text-emerald-400">
+            <span class="tw:rounded-full tw:bg-primary-500/15 tw:px-3 tw:py-1 tw:text-xs tw:font-semibold tw:text-primary-600 tw:dark:text-primary-400">
               {{ t('order.cartItems', { count: cartStore.count }) }}
             </span>
           </div>
@@ -779,7 +779,7 @@ onMounted(async () => {
               <div class="tw:min-w-0 tw:flex-1">
                 <h3 class="tw:text-sm tw:font-semibold">{{ item.name }}</h3>
                 <p class="tw:text-xs tw:text-muted">{{ formatPrice(item.price) }} × {{ item.quantity }}</p>
-                <p v-if="optionsLabel(item.options)" class="tw:mt-0.5 tw:text-xs tw:text-emerald-600 tw:dark:text-emerald-400">
+                <p v-if="optionsLabel(item.options)" class="tw:mt-0.5 tw:text-xs tw:text-primary-600 tw:dark:text-primary-400">
                   {{ optionsLabel(item.options) }}
                 </p>
                 <p v-if="noteLabel(item.options)" class="tw:mt-0.5 tw:text-xs tw:text-muted tw:italic">
@@ -804,7 +804,7 @@ onMounted(async () => {
                 {{ t('cart.promo.findPromotions') }}
               </span>
               <button
-                class="tw:flex tw:items-center tw:gap-1 tw:rounded-lg tw:px-2 tw:py-1 tw:text-xs tw:text-muted tw:transition tw:hover:bg-white/5 tw:hover:text-emerald-600 tw:hover:dark:text-emerald-400"
+                class="tw:flex tw:items-center tw:gap-1 tw:rounded-lg tw:px-2 tw:py-1 tw:text-xs tw:text-muted tw:transition tw:hover:bg-white/5 tw:hover:text-primary-600 tw:hover:dark:text-primary-400"
                 @click="openFindPromosDialog"
               >
                 <iconify icon="ph:magnifying-glass-bold" />
@@ -838,11 +838,11 @@ onMounted(async () => {
                     v-model="promoCode"
                     type="text"
                     :placeholder="t('cart.promo.placeholder')"
-                    class="app-input tw:flex-1 tw:rounded-xl tw:border tw:px-3 tw:py-2 tw:text-sm tw:uppercase tw:outline-none focus:tw:border-emerald-400"
+                    class="app-input tw:flex-1 tw:rounded-xl tw:border tw:px-3 tw:py-2 tw:text-sm tw:uppercase tw:outline-none focus:tw:border-primary-400"
                     @keyup.enter="applyPromoCode"
                   />
                   <button
-                    class="tw:rounded-xl tw:bg-emerald-500 tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-emerald-600 disabled:tw:opacity-50"
+                    class="tw:rounded-xl tw:bg-primary-500 tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-primary-600 disabled:tw:opacity-50"
                     :disabled="promoApplying || !promoCode.trim()"
                     @click="applyPromoCode"
                   >
@@ -883,7 +883,7 @@ onMounted(async () => {
             </prime-button>
             <div v-if="!session && cartStore.count > 0" class="tw:text-center tw:text-xs tw:text-rose-400 tw:space-y-1">
               <p>{{ t('order.tableNotConnected') }}</p>
-              <button type="button" class="tw:text-emerald-600 tw:dark:text-emerald-400 tw:underline tw:hover:text-emerald-700 tw:hover:dark:text-emerald-300 tw:text-xs" @click="router.push({ name: 'tableSelect' })">
+              <button type="button" class="tw:text-primary-600 tw:dark:text-primary-400 tw:underline tw:hover:text-primary-700 tw:hover:dark:text-primary-300 tw:text-xs" @click="router.push({ name: 'tableSelect' })">
                 {{ t('order.selectTable') }}
               </button>
             </div>
@@ -902,7 +902,7 @@ onMounted(async () => {
       <div class="tw:relative tw:shrink-0">
         <iconify icon="heroicons-outline:shopping-cart" class="tw:h-6 tw:w-6 tw:text-white" />
         <span
-          class="tw:absolute tw:-right-2 tw:-top-2 tw:flex tw:h-4 tw:w-4 tw:items-center tw:justify-center tw:rounded-full tw:bg-emerald-500 tw:text-[10px] tw:font-bold tw:text-white"
+          class="tw:absolute tw:-right-2 tw:-top-2 tw:flex tw:h-4 tw:w-4 tw:items-center tw:justify-center tw:rounded-full tw:bg-primary-500 tw:text-[10px] tw:font-bold tw:text-white"
         >
           {{ cartStore.count }}
         </span>
@@ -935,7 +935,7 @@ onMounted(async () => {
         <div class="tw:min-w-0 tw:flex-1">
           <h3 class="tw:text-sm tw:font-semibold">{{ item.name }}</h3>
           <p class="tw:text-xs tw:text-muted">{{ formatPrice(item.price) }} × {{ item.quantity }}</p>
-          <p v-if="optionsLabel(item.options)" class="tw:mt-0.5 tw:text-xs tw:text-emerald-600 tw:dark:text-emerald-400">
+          <p v-if="optionsLabel(item.options)" class="tw:mt-0.5 tw:text-xs tw:text-primary-600 tw:dark:text-primary-400">
             {{ optionsLabel(item.options) }}
           </p>
           <p v-if="noteLabel(item.options)" class="tw:mt-0.5 tw:text-xs tw:text-muted tw:italic">
@@ -960,7 +960,7 @@ onMounted(async () => {
           {{ t('cart.promo.findPromotions') }}
         </span>
         <button
-          class="tw:flex tw:items-center tw:gap-1 tw:rounded-lg tw:px-2 tw:py-1 tw:text-xs tw:text-muted tw:transition tw:hover:bg-white/5 tw:hover:text-emerald-600 tw:hover:dark:text-emerald-400"
+          class="tw:flex tw:items-center tw:gap-1 tw:rounded-lg tw:px-2 tw:py-1 tw:text-xs tw:text-muted tw:transition tw:hover:bg-white/5 tw:hover:text-primary-600 tw:hover:dark:text-primary-400"
           @click="openFindPromosDialog"
         >
           <iconify icon="ph:magnifying-glass-bold" />
@@ -992,11 +992,11 @@ onMounted(async () => {
               v-model="promoCode"
               type="text"
               :placeholder="t('cart.promo.placeholder')"
-              class="app-input tw:flex-1 tw:rounded-xl tw:border tw:px-3 tw:py-2 tw:text-sm tw:uppercase tw:outline-none focus:tw:border-emerald-400"
+              class="app-input tw:flex-1 tw:rounded-xl tw:border tw:px-3 tw:py-2 tw:text-sm tw:uppercase tw:outline-none focus:tw:border-primary-400"
               @keyup.enter="applyPromoCode"
             />
             <button
-              class="tw:rounded-xl tw:bg-emerald-500 tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-emerald-600 disabled:tw:opacity-50"
+              class="tw:rounded-xl tw:bg-primary-500 tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-primary-600 disabled:tw:opacity-50"
               :disabled="promoApplying || !promoCode.trim()"
               @click="applyPromoCode"
             >
@@ -1025,13 +1025,13 @@ onMounted(async () => {
         </div>
         <div class="tw:mt-4 tw:flex tw:items-center tw:justify-between tw:text-lg tw:font-semibold">
           <span>{{ t('order.total') }}</span>
-          <span class="tw:text-emerald-600 tw:dark:text-emerald-400">{{ formatPrice(promoResult?.estimatedDiscount ? Math.max(0, cartStore.total - promoResult.estimatedDiscount) : cartStore.total) }}</span>
+          <span class="tw:text-primary-600 tw:dark:text-primary-400">{{ formatPrice(promoResult?.estimatedDiscount ? Math.max(0, cartStore.total - promoResult.estimatedDiscount) : cartStore.total) }}</span>
         </div>
       </div>
 
       <div v-if="!session" class="tw:text-center tw:text-xs tw:text-rose-400 tw:space-y-1">
         <p>{{ t('order.tableNotConnected') }}</p>
-        <button type="button" class="tw:text-emerald-600 tw:dark:text-emerald-400 tw:underline tw:hover:text-emerald-700 tw:hover:dark:text-emerald-300 tw:text-xs" @click="router.push({ name: 'tableSelect' })">
+        <button type="button" class="tw:text-primary-600 tw:dark:text-primary-400 tw:underline tw:hover:text-primary-700 tw:hover:dark:text-primary-300 tw:text-xs" @click="router.push({ name: 'tableSelect' })">
           {{ t('order.selectTable') }}
         </button>
       </div>
@@ -1078,7 +1078,7 @@ onMounted(async () => {
         <!-- Info 50% -->
         <div class="tw:flex tw:w-1/2 tw:flex-col tw:gap-2 tw:p-4 tw:bg-white/5">
           <h3 class="tw:text-lg tw:font-bold tw:leading-snug">{{ selectedProduct?.name }}</h3>
-          <p class="tw:text-xl tw:font-semibold tw:text-emerald-600 tw:dark:text-emerald-400">
+          <p class="tw:text-xl tw:font-semibold tw:text-primary-600 tw:dark:text-primary-400">
             {{ selectedProduct ? formatPrice(selectedProduct.price) : '' }}
           </p>
           <p v-if="selectedProduct?.description" class="tw:text-sm tw:leading-relaxed tw:text-muted">
@@ -1209,7 +1209,7 @@ onMounted(async () => {
                   :key="val.id"
                   class="tw:rounded-xl tw:border tw:px-3 tw:py-1.5 tw:text-sm tw:transition tw:flex tw:items-center tw:gap-1.5"
                   :class="isValueSelected(group.id, val.id)
-                    ? 'tw:border-emerald-400 tw:bg-emerald-500/15 tw:text-emerald-300'
+                    ? 'tw:border-primary-400 tw:bg-primary-500/15 tw:text-primary-300'
                     : 'tw:border-white/15 tw:bg-white/5 tw:text-muted tw:hover:border-white/30'"
                   @click="toggleOptionValue(group.id, val.id, group.allowMultiple)"
                 >
@@ -1234,7 +1234,7 @@ onMounted(async () => {
               v-model="pendingOptions.note"
               :placeholder="t('product.optionsDialog.notePlaceholder')"
               rows="2"
-              class="tw:w-full tw:rounded-xl tw:border tw:border-white/15 tw:bg-white/5 tw:px-3 tw:py-2 tw:text-sm tw:resize-none tw:outline-none focus:tw:border-emerald-400/50 placeholder:tw:text-white/30"
+              class="tw:w-full tw:rounded-xl tw:border tw:border-white/15 tw:bg-white/5 tw:px-3 tw:py-2 tw:text-sm tw:resize-none tw:outline-none focus:tw:border-primary-400/50 placeholder:tw:text-white/30"
             />
           </div>
 
@@ -1244,21 +1244,21 @@ onMounted(async () => {
             <div class="tw:flex tw:items-center tw:justify-between tw:gap-3">
             <div class="tw:flex tw:items-center tw:gap-3">
               <button
-                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-white/15 tw:text-muted tw:transition tw:hover:border-emerald-400/50"
+                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-white/15 tw:text-muted tw:transition tw:hover:border-primary-400/50"
                 @click="pendingQuantity = Math.max(1, pendingQuantity - 1)"
               >
                 <iconify icon="ph:minus-bold" class="tw:h-4 tw:w-4" />
               </button>
               <span class="tw:min-w-8 tw:text-center tw:text-xl tw:font-bold">{{ pendingQuantity }}</span>
               <button
-                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-white/15 tw:text-muted tw:transition tw:hover:border-emerald-400/50"
+                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:border-white/15 tw:text-muted tw:transition tw:hover:border-primary-400/50"
                 @click="pendingQuantity++"
               >
                 <iconify icon="ph:plus-bold" class="tw:h-4 tw:w-4" />
               </button>
             </div>
             <div class="tw:flex tw:flex-col tw:items-end tw:gap-1">
-              <span v-if="optionValueExtraCost > 0" class="tw:text-xs tw:text-emerald-400">
+              <span v-if="optionValueExtraCost > 0" class="tw:text-xs tw:text-primary-400">
                 +{{ formatPrice(optionValueExtraCost) }} topping
               </span>
               <prime-button @click="confirmAddToCart">
@@ -1300,7 +1300,7 @@ onMounted(async () => {
               <span class="tw:text-sm tw:font-semibold tw:shrink-0">{{ order.orderNumber ?? order.OrderNumber }}</span>
               <span v-if="(order.status ?? order.Status) === 'Pending'" class="tw:rounded-full tw:bg-amber-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-amber-400">{{ t('order.pending') }}</span>
               <span v-if="(order.status ?? order.Status) === 'Processing'" class="tw:rounded-full tw:bg-blue-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-blue-400">{{ t('order.processing') }}</span>
-              <span v-if="(order.status ?? order.Status) === 'Completed'" class="tw:rounded-full tw:bg-emerald-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-emerald-500">{{ t('order.completed') }}</span>
+              <span v-if="(order.status ?? order.Status) === 'Completed'" class="tw:rounded-full tw:bg-primary-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-primary-500">{{ t('order.completed') }}</span>
               <span v-if="(order.status ?? order.Status) === 'Cancelled'" class="tw:rounded-full tw:bg-red-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-red-400">{{ t('order.cancelledBadge') }}</span>
               <span v-if="(order.paymentStatus ?? order.PaymentStatus) === 'PAID'" class="tw:rounded-full tw:bg-green-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-green-600 tw:dark:text-green-400">{{ t('order.paid') }}</span>
             </div>
@@ -1319,13 +1319,13 @@ onMounted(async () => {
         </ul>
         <prime-divider class="tw:my-2!" />
         <div class="tw:flex tw:justify-end">
-          <span class="tw:text-sm tw:font-semibold tw:text-emerald-600 tw:dark:text-emerald-400">{{ formatPrice(order.totalAmount ?? order.TotalAmount) }}</span>
+          <span class="tw:text-sm tw:font-semibold tw:text-primary-600 tw:dark:text-primary-400">{{ formatPrice(order.totalAmount ?? order.TotalAmount) }}</span>
         </div>
       </div>
       <div class="tw:rounded-xl tw:bg-white/5 tw:p-4 tw:space-y-2">
         <div class="tw:flex tw:items-center tw:justify-between tw:text-lg tw:font-semibold">
           <span>{{ t('order.grandTotal') }}</span>
-          <span class="tw:text-emerald-600 tw:dark:text-emerald-400">{{ formatPrice(summary.grandTotal ?? summary.GrandTotal ?? 0) }}</span>
+          <span class="tw:text-primary-600 tw:dark:text-primary-400">{{ formatPrice(summary.grandTotal ?? summary.GrandTotal ?? 0) }}</span>
         </div>
         <template v-if="summaryPaidTotal > 0">
           <prime-divider class="tw:my-1!" />
@@ -1370,7 +1370,7 @@ onMounted(async () => {
               <span class="tw:text-sm tw:font-semibold tw:shrink-0">{{ order.orderNumber ?? order.OrderNumber }}</span>
               <span v-if="(order.status ?? order.Status) === 'Pending'" class="tw:rounded-full tw:bg-amber-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-amber-400">{{ t('order.pending') }}</span>
               <span v-if="(order.status ?? order.Status) === 'Processing'" class="tw:rounded-full tw:bg-blue-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-blue-400">{{ t('order.processing') }}</span>
-              <span v-if="(order.status ?? order.Status) === 'Completed'" class="tw:rounded-full tw:bg-emerald-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-emerald-500">{{ t('order.completed') }}</span>
+              <span v-if="(order.status ?? order.Status) === 'Completed'" class="tw:rounded-full tw:bg-primary-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-primary-500">{{ t('order.completed') }}</span>
               <span v-if="(order.status ?? order.Status) === 'Cancelled'" class="tw:rounded-full tw:bg-red-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-red-400">{{ t('order.cancelledBadge') }}</span>
               <span v-if="(order.paymentStatus ?? order.PaymentStatus) === 'PAID'" class="tw:rounded-full tw:bg-green-500/20 tw:px-2 tw:py-0.5 tw:text-xs tw:font-semibold tw:text-green-600 tw:dark:text-green-400">{{ t('order.paid') }}</span>
             </div>
@@ -1389,13 +1389,13 @@ onMounted(async () => {
         </ul>
         <prime-divider class="tw:my-2!" />
         <div class="tw:flex tw:justify-end">
-          <span class="tw:text-sm tw:font-semibold tw:text-emerald-600 tw:dark:text-emerald-400">{{ formatPrice(order.totalAmount ?? order.TotalAmount) }}</span>
+          <span class="tw:text-sm tw:font-semibold tw:text-primary-600 tw:dark:text-primary-400">{{ formatPrice(order.totalAmount ?? order.TotalAmount) }}</span>
         </div>
       </div>
       <div class="tw:rounded-xl tw:bg-white/5 tw:p-4 tw:space-y-2">
         <div class="tw:flex tw:items-center tw:justify-between tw:text-lg tw:font-semibold">
           <span>{{ t('order.grandTotal') }}</span>
-          <span class="tw:text-emerald-600 tw:dark:text-emerald-400">{{ formatPrice(summary.grandTotal ?? summary.GrandTotal ?? 0) }}</span>
+          <span class="tw:text-primary-600 tw:dark:text-primary-400">{{ formatPrice(summary.grandTotal ?? summary.GrandTotal ?? 0) }}</span>
         </div>
         <template v-if="summaryPaidTotal > 0">
           <prime-divider class="tw:my-1!" />

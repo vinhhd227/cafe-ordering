@@ -29,7 +29,7 @@ export default defineConfig({
                     pinia: ['useStore'],
                 },
                 {
-                    '@/layout/ui': ['btnIcon', 'inputCustom', 'labelCustom', 'passwordCustom', 'appCard', 'cardRing'],
+                    '@/layout/ui': ['btnIcon', 'inputCustom', 'labelCustom', 'passwordCustom', 'bgGlass', 'borderGlass', 'appCard', 'cardRing'],
                 },
                 {
                     'primevue/usetoast': ['useToast'],

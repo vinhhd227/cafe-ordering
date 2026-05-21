@@ -78,7 +78,7 @@ const metrics = computed(() => {
       key: 'revenue',
       label: t('report.monthly.metrics.revenue'),
       icon: 'ph:coins-bold',
-      iconColor: 'tw:text-emerald-400',
+      iconColor: 'tw:text-primary-400',
       current:  current.totalRevenue,
       previous: previous.totalRevenue,
       format:   fmt,
@@ -411,7 +411,7 @@ const takeawayChartOptions = {
             <div
               v-if="m.delta !== null"
               class="tw:flex tw:items-center tw:gap-1 tw:text-xs tw:font-semibold"
-              :class="m.delta >= 0 ? 'tw:text-emerald-400' : 'tw:text-rose-400'"
+              :class="m.delta >= 0 ? 'tw:text-primary-400' : 'tw:text-rose-400'"
             >
               <iconify :icon="m.delta >= 0 ? 'ph:trend-up-bold' : 'ph:trend-down-bold'" />
               <span>{{ m.delta >= 0 ? '+' : '' }}{{ m.delta.toFixed(1) }}%</span>
@@ -509,7 +509,7 @@ const takeawayChartOptions = {
 
             <prime-column :header="t('report.monthly.topProducts.revenue')" style="width:140px">
               <template #body="{ data: row }">
-                <span class="tw:font-medium tw:text-emerald-400">{{ fmt(row.revenue) }}</span>
+                <span class="tw:font-medium tw:text-primary-400">{{ fmt(row.revenue) }}</span>
               </template>
             </prime-column>
 
@@ -525,7 +525,7 @@ const takeawayChartOptions = {
                 <!-- Rank improved -->
                 <div
                   v-else-if="row.rankChange > 0"
-                  class="tw:flex tw:items-center tw:gap-1 tw:text-emerald-400 tw:text-xs tw:font-semibold"
+                  class="tw:flex tw:items-center tw:gap-1 tw:text-primary-400 tw:text-xs tw:font-semibold"
                 >
                   <iconify icon="ph:arrow-up-bold" />
                   <span>{{ row.rankChange }}</span>
@@ -577,7 +577,7 @@ const takeawayChartOptions = {
               </div>
               <div class="tw:flex tw:items-center tw:gap-3">
                 <span class="tw:text-xs tw:text-muted">{{ item.qty }} {{ t('report.topProducts.unit') }}</span>
-                <span class="tw:text-xs tw:font-medium tw:text-emerald-400">{{ fmt(item.revenue) }}</span>
+                <span class="tw:text-xs tw:font-medium tw:text-primary-400">{{ fmt(item.revenue) }}</span>
               </div>
             </div>
           </template>

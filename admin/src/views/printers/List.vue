@@ -330,7 +330,7 @@ const handleTest = async (p) => {
     <!-- ── Header ─────────────────────────────────────────────────── -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('printers.groupLabel') }}</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">{{ t('printers.groupLabel') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('printers.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('printers.subtitle') }}</p>
       </div>
@@ -373,7 +373,7 @@ const handleTest = async (p) => {
           <div v-for="p in group.items" :key="p.id"
             :class="['tw:rounded-xl tw:border tw:p-4 tw:space-y-3 tw:transition-all',
               p.isDefault
-                ? 'tw:border-emerald-400 tw:dark:border-emerald-500/60 tw:bg-emerald-50 tw:dark:bg-emerald-500/5'
+                ? 'tw:border-primary-400 tw:dark:border-primary-500/60 tw:bg-primary-50 tw:dark:bg-primary-500/5'
                 : 'tw:border-slate-200 tw:dark:border-white/10 tw:bg-white tw:dark:bg-white/3',
               !p.isActive && 'tw:opacity-60']">
 

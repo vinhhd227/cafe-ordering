@@ -249,7 +249,7 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
         <button
           type="button"
           class="tw:shrink-0 tw:w-8 tw:h-8 tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-transparent tw:border-0 tw:cursor-pointer tw:active:bg-black/5 tw:dark:active:bg-white/5"
-          :class="showSearch ? 'tw:text-emerald-500' : 'tw:text-slate-500 tw:dark:text-slate-400'"
+          :class="showSearch ? 'tw:text-primary-500' : 'tw:text-slate-500 tw:dark:text-slate-400'"
           @click="showSearch = !showSearch; if (!showSearch) search = ''"
         >
           <iconify icon="ph:magnifying-glass-bold" class="tw:text-lg" />
@@ -421,7 +421,7 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
       <!-- Thêm sản phẩm -->
       <button
         type="button"
-        class="tw:flex-1 tw:py-3.5 tw:rounded-2xl tw:bg-emerald-500 tw:text-white tw:text-sm tw:font-semibold tw:border-0 tw:cursor-pointer tw:active:bg-emerald-600"
+        class="tw:flex-1 tw:py-3.5 tw:rounded-2xl tw:bg-primary-500 tw:text-white tw:text-sm tw:font-semibold tw:border-0 tw:cursor-pointer tw:active:bg-primary-600"
         @click="router.push({ name: 'productsCreate', query: { categoryId } })"
       >
         {{ t('products.mobile.addProduct') }}
@@ -479,7 +479,7 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
           </div>
           <button
             type="button"
-            class="tw:absolute tw:-bottom-2 tw:-right-2 tw:w-9 tw:h-9 tw:rounded-full tw:bg-emerald-500 tw:flex tw:items-center tw:justify-center tw:border-2 tw:border-white tw:dark:border-neutral-900 tw:cursor-pointer tw:shadow-md"
+            class="tw:absolute tw:-bottom-2 tw:-right-2 tw:w-9 tw:h-9 tw:rounded-full tw:bg-primary-500 tw:flex tw:items-center tw:justify-center tw:border-2 tw:border-white tw:dark:border-neutral-900 tw:cursor-pointer tw:shadow-md"
             @click="editFileInputRef?.click()"
           >
             <iconify
@@ -505,7 +505,7 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
 
       <!-- Name input -->
       <div class="tw:mb-5">
-        <label class="tw:block tw:text-sm tw:font-semibold tw:text-emerald-600 tw:dark:text-emerald-400 tw:mb-2">
+        <label class="tw:block tw:text-sm tw:font-semibold tw:text-primary-600 tw:dark:text-primary-400 tw:mb-2">
           {{ t('products.mobile.categoryNameLabel') }}
           <span class="tw:text-red-500">*</span>
         </label>
@@ -514,7 +514,7 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
             v-model="editName"
             type="text"
             :placeholder="t('products.mobile.categoryNamePlaceholder')"
-            class="tw:w-full tw:bg-transparent tw:border-0 tw:border-b-2 tw:border-emerald-500 tw:py-2 tw:pr-6 tw:text-sm tw:outline-none tw:text-slate-800 tw:dark:text-white tw:placeholder-slate-400 tw:dark:placeholder-white/30"
+            class="tw:w-full tw:bg-transparent tw:border-0 tw:border-b-2 tw:border-primary-500 tw:py-2 tw:pr-6 tw:text-sm tw:outline-none tw:text-slate-800 tw:dark:text-white tw:placeholder-slate-400 tw:dark:placeholder-white/30"
             @keyup.enter="submitEdit"
           />
           <button
@@ -556,7 +556,7 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
         type="button"
         class="tw:w-full tw:rounded-2xl tw:py-4 tw:text-sm tw:font-semibold tw:transition-colors tw:border-0 tw:cursor-pointer"
         :class="editName.trim()
-          ? 'tw:bg-emerald-500 tw:text-white'
+          ? 'tw:bg-primary-500 tw:text-white'
           : 'tw:bg-slate-100 tw:dark:bg-white/5 tw:text-slate-400 tw:dark:text-white/30 tw:cursor-not-allowed'"
         :disabled="!editName.trim() || editLoading"
         @click="submitEdit"

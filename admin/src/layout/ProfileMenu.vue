@@ -20,7 +20,7 @@ const roleLabel = computed(() => {
 })
 const roleDotColor = computed(() => {
   const r = roleLabel.value.toLowerCase()
-  if (r === 'admin') return 'tw:bg-emerald-400'
+  if (r === 'admin') return 'tw:bg-primary-400'
   if (r === 'manager') return 'tw:bg-sky-400'
   return 'tw:bg-amber-400'
 })
@@ -54,7 +54,7 @@ const profileItems = computed(() => [
         v-else
         :label="avatarLabel"
         shape="circle"
-        class="tw:w-8! tw:h-8! tw:text-xs! tw:bg-emerald-500/20! tw:text-emerald-300!"
+        class="tw:w-8! tw:h-8! tw:text-xs! tw:bg-primary-500/20! tw:text-primary-300!"
       />
       <span
         class="tw:absolute tw:bottom-0 tw:right-0 tw:w-2.5 tw:h-2.5 tw:rounded-full tw:border-2 tw:border-[var(--app-header-bg,#0f172a)]"
@@ -75,7 +75,7 @@ const profileItems = computed(() => [
               v-else
               :label="avatarLabel"
               shape="circle"
-              class="tw:w-10! tw:h-10! tw:text-sm! tw:bg-emerald-500/20! tw:text-emerald-300!"
+              class="tw:w-10! tw:h-10! tw:text-sm! tw:bg-primary-500/20! tw:text-primary-300!"
             />
             <span
               class="tw:absolute tw:bottom-0 tw:right-0 tw:w-2 tw:h-2 tw:rounded-full"

@@ -70,7 +70,7 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
 <template>
   <div class="app-shell tw:flex tw:flex-col tw:min-h-screen">
     <prime-toast position="top-right" />
-    <div class="app-background tw:fixed tw:inset-0 tw:z-0" />
+    <div class="app-bg tw:fixed tw:inset-0 tw:z-0" />
 
     <!-- Main content -->
     <main
@@ -101,7 +101,7 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
         style="bottom: calc(40px + env(safe-area-inset-bottom, 0px));"
       >
         <div
-          class="tw:w-14 tw:h-14 tw:rounded-full tw:bg-emerald-500 tw:flex tw:items-center tw:justify-center tw:shadow-xl tw:shadow-emerald-500/40 tw:transition-transform tw:active:scale-95"
+          class="tw:w-14 tw:h-14 tw:rounded-full tw:bg-primary-500 tw:flex tw:items-center tw:justify-center tw:shadow-xl tw:shadow-primary-500/40 tw:transition-transform tw:active:scale-95"
         >
           <iconify :icon="ctaTab.icon" class="tw:text-2xl tw:text-white" />
         </div>
@@ -119,7 +119,7 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
             class="tw:flex-1 tw:flex tw:flex-col tw:items-center tw:justify-end tw:pb-2"
             style="padding-top: 40px;"
           >
-            <span class="tw:text-[10px] tw:font-medium tw:text-emerald-400">
+            <span class="tw:text-sm tw:font-medium tw:text-primary-400">
               {{ t(tab.labelKey) }}
             </span>
           </div>
@@ -129,11 +129,11 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
             v-else-if="tab.more"
             type="button"
             class="tw:flex-1 tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-1 tw:py-2.5 tw:transition-colors tw:min-h-14 tw:text-muted tw:bg-transparent tw:border-0 tw:cursor-pointer"
-            :class="moreVisible ? 'tw:text-emerald-400' : 'tw:text-muted'"
+            :class="moreVisible ? 'tw:text-primary-400' : 'tw:text-muted'"
             @click="moreVisible = true"
           >
             <iconify :icon="tab.icon" class="tw:text-[22px]" />
-            <span class="tw:text-[10px] tw:font-medium tw:leading-none">{{ t(tab.labelKey) }}</span>
+            <span class="tw:text-sm tw:font-medium tw:leading-none">{{ t(tab.labelKey) }}</span>
           </button>
 
           <!-- Notification bell tab -->
@@ -142,7 +142,7 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
             class="tw:flex-1 tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-1 tw:py-2.5 tw:min-h-14"
           >
             <notification-bell />
-            <span class="tw:text-[10px] tw:font-medium tw:leading-none tw:text-muted">{{ t(tab.labelKey) }}</span>
+            <span class="tw:text-sm tw:font-medium tw:leading-none tw:text-muted">{{ t(tab.labelKey) }}</span>
           </div>
 
           <!-- Regular tab -->
@@ -150,16 +150,16 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
             v-else
             :to="tab.to"
             class="tw:flex-1 tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-1 tw:py-2.5 tw:no-underline tw:transition-colors tw:min-h-14"
-            :class="isTabActive(tab) ? 'tw:text-emerald-400' : 'tw:text-muted'"
+            :class="isTabActive(tab) ? 'tw:text-primary-400' : 'tw:text-muted'"
           >
             <div class="tw:relative tw:flex tw:items-center tw:justify-center">
               <iconify :icon="tab.icon" class="tw:text-[22px]" />
               <span
                 v-if="isTabActive(tab) && tab.to?.name !== 'mobileProfile'"
-                class="tw:absolute tw:-bottom-1.5 tw:left-1/2 tw:-translate-x-1/2 tw:w-1 tw:h-1 tw:rounded-full tw:bg-emerald-400"
+                class="tw:absolute tw:-bottom-1.5 tw:left-1/2 tw:-translate-x-1/2 tw:w-1 tw:h-1 tw:rounded-full tw:bg-primary-400"
               />
             </div>
-            <span class="tw:text-[10px] tw:font-medium tw:leading-none tw:truncate tw:max-w-full tw:px-0.5">
+            <span class="tw:text-sm tw:font-medium tw:leading-none tw:truncate tw:max-w-full tw:px-0.5">
               {{ t(tab.labelKey) }}
             </span>
           </router-link>
@@ -187,7 +187,7 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
               v-else
               :label="avatarLabel"
               shape="circle"
-              class="tw:w-9! tw:h-9! tw:text-xs! tw:bg-emerald-500/20! tw:text-emerald-300!"
+              class="tw:w-9! tw:h-9! tw:text-xs! tw:bg-primary-500/20! tw:text-primary-300!"
             />
             <div>
               <p class="tw:text-sm tw:font-semibold">{{ fullName }}</p>
@@ -215,7 +215,7 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
               :to="item.to"
               class="tw:flex tw:flex-col tw:items-center tw:gap-1.5 tw:rounded-xl tw:p-3 tw:no-underline tw:transition-colors tw:active:scale-95"
               :class="isNavItemActive(item)
-                ? 'tw:bg-emerald-500/10 tw:text-emerald-400'
+                ? 'tw:bg-primary-500/10 tw:text-primary-400'
                 : 'tw:text-muted tw:active:bg-black/5 tw:dark:active:bg-white/5'"
               @click="moreVisible = false"
             >

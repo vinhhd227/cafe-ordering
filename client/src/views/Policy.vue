@@ -15,7 +15,7 @@ const goBack = () => {
     <div
       class="tw:w-full tw:max-w-3xl tw:rounded-3xl tw:border tw:border-white/10 tw:bg-slate-900/70 tw:p-10 tw:shadow-2xl tw:backdrop-blur"
     >
-      <p class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-emerald-300">
+      <p class="tw:text-xs tw:uppercase tw:tracking-[0.4em] tw:text-primary-300">
         Cafe Ordering
       </p>
       <h1 class="tw:mt-4 tw:text-3xl tw:font-semibold">Policy</h1>
@@ -42,7 +42,7 @@ const goBack = () => {
       <div class="tw:mt-8">
         <button
           type="button"
-          class="tw:rounded-xl tw:bg-emerald-500 tw:px-4 tw:py-2 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-emerald-500/30 tw:transition tw:hover:bg-emerald-400"
+          class="tw:rounded-xl tw:bg-primary-500 tw:px-4 tw:py-2 tw:text-sm tw:font-semibold tw:text-slate-950 tw:shadow-lg tw:shadow-primary-500/30 tw:transition tw:hover:bg-primary-400"
           @click="goBack"
         >
           Back

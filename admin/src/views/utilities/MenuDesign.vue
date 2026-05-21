@@ -331,7 +331,7 @@ const confirmDeleteMenu = (menu) => {
   <section class="tw:space-y-8">
     <!-- Header -->
     <div>
-      <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('nav.groups.utilities') }}</p>
+      <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">{{ t('nav.groups.utilities') }}</p>
       <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('utilities.menuDesign.title') }}</h1>
       <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('utilities.menuDesign.subtitle') }}</p>
     </div>
@@ -357,7 +357,7 @@ const confirmDeleteMenu = (menu) => {
                 text
                 class="tw:rounded-xl! tw:border-2! tw:p-3! tw:text-left! tw:transition-all! tw:h-auto! tw:w-full! tw:flex! tw:flex-col! tw:items-start! tw:justify-start!"
                 :class="menuTemplate === tpl.value
-                  ? 'tw:border-emerald-500! tw:bg-emerald-50! tw:dark:bg-emerald-900/20!'
+                  ? 'tw:border-primary-500! tw:bg-primary-50! tw:dark:bg-primary-900/20!'
                   : 'tw:border-slate-200! tw:dark:border-white/10! tw:hover:border-slate-300!'"
                 @click="menuTemplate = tpl.value"
               >

@@ -138,7 +138,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
     <!-- Header -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">{{ t('nav.groups.operations') }}</p>
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">{{ t('nav.groups.operations') }}</p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold">{{ t('recipes.title') }}</h1>
         <p class="tw:mt-2 tw:text-sm tw:text-muted">{{ t('recipes.subtitle') }}</p>
       </div>

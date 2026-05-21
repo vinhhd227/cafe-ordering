@@ -26,7 +26,7 @@ const fmtRevenue = (val) => {
           <p class="tw:text-sm tw:font-semibold">{{ title }}</p>
           <p v-if="subtitle" class="tw:text-xs tw:text-muted">{{ subtitle }}</p>
         </div>
-        <iconify icon="ph:ranking-bold" class="tw:text-emerald-400 tw:opacity-60 tw:text-lg" />
+        <iconify icon="ph:ranking-bold" class="tw:text-primary-400 tw:opacity-60 tw:text-lg" />
       </div>
 
       <div class="tw:space-y-3">
@@ -37,11 +37,11 @@ const fmtRevenue = (val) => {
               <span class="tw:text-sm tw:font-medium tw:truncate">{{ p.name }}</span>
               <span class="tw:text-[11px] tw:ml-2 tw:shrink-0 tw:flex tw:items-center tw:gap-1.5">
                 <span class="tw:text-muted">{{ p.qty }} {{ unit }}</span>
-                <span v-if="fmtRevenue(p.revenue)" class="tw:text-emerald-400/80">{{ fmtRevenue(p.revenue) }}</span>
+                <span v-if="fmtRevenue(p.revenue)" class="tw:text-primary-400/80">{{ fmtRevenue(p.revenue) }}</span>
               </span>
             </div>
             <div class="tw:h-2 tw:w-full tw:rounded-full tw:bg-white/8">
-              <div class="tw:h-full tw:rounded-full tw:bg-emerald-400/70" :style="{ width: p.pct + '%' }" />
+              <div class="tw:h-full tw:rounded-full tw:bg-primary-400/70" :style="{ width: p.pct + '%' }" />
             </div>
           </div>
         </div>
