@@ -26,6 +26,7 @@
     "pinia": "^3.0.4",
     "primevue": "^4.5.5",
     "qrcode": "^1.5.4",
+    "quill": "^2.0.3",
     "tailwindcss-primeui": "^0.6.1",
     "unplugin-auto-import": "^21.0.0",
     "vee-validate": "^4.15.1",
@@ -50,21 +51,5 @@
     "vite-plugin-vue-devtools": "^8.1.2",
     "vitest": "^4.1.5"
   },
-  "pnpm": {
-    "supportedArchitectures": {
-      "os": [
-        "linux",
-        "darwin",
-        "win32"
-      ],
-      "cpu": [
-        "x64",
-        "arm64"
-      ],
-      "libc": [
-        "musl",
-        "glibc"
-      ]
-    }
-  }
+  "packageManager": "pnpm@11.1.3"
 }
