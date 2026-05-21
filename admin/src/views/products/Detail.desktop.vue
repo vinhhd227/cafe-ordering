@@ -1,11 +1,11 @@
-<script setup>
-import { onMounted, ref } from "vue";
+﻿<script setup>
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getProduct, updateProduct } from "@/services/product.service";
+import { getProduct, replaceProductVariants, updateProduct } from "@/services/product.service";
 import { getCategory } from "@/services/category.service";
 import { uploadImage } from "@/services/upload.service";
 import { usePermission } from "@/composables/usePermission";
-import { getProductOptionGroups, assignOptionGroupsToProduct } from "@/services/product-option-group.service";
+import { getProductOptionGroups } from "@/services/product-option-group.service";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -13,7 +13,7 @@ const router = useRouter();
 const productId = Number(route.params.id);
 const { can } = usePermission();
 
-// ── State ──────────────────────────────────────────────────────────
+// â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const product = ref(null);
 const categories = ref([]);
 const allOptionGroups = ref([]);
@@ -23,6 +23,9 @@ const savingGroups = ref(false);
 const errorMessage = ref("");
 const saveSuccess = ref(false);
 const groupSaveSuccess = ref(false);
+const variants = ref([]);
+const savingVariants = ref(false);
+const variantSaveSuccess = ref(false);
 
 // Option groups assignment
 const selectedGroupIds = ref([]);
@@ -62,7 +65,7 @@ const handleFileSelect = async (event) => {
   }
 };
 
-// ── Helpers ────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const formatVnd = (v) =>
   new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -70,14 +73,94 @@ const formatVnd = (v) =>
     maximumFractionDigits: 0,
   }).format(v ?? 0);
 
-const formatDate = (d) => (d ? new Date(d).toLocaleString("vi-VN") : "—");
+const formatDate = (d) => (d ? new Date(d).toLocaleString("vi-VN") : "â€”");
 
 const extractError = (err) =>
   err?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join("; ") ||
   err?.response?.data?.message ||
   t('products.detail.error.updateFailed');
 
-// ── Data ───────────────────────────────────────────────────────────
+const activeVariantGroups = computed(() =>
+  (product.value?.variantGroups ?? []).filter((group) => (group.values ?? []).length > 0)
+);
+
+const variantValueLookup = computed(() => {
+  const lookup = new Map();
+  activeVariantGroups.value.forEach((group) => {
+    (group.values ?? []).forEach((value) => {
+      lookup.set(value.id, { groupName: group.name, label: value.label });
+    });
+  });
+  return lookup;
+});
+
+const variantKey = (ids) => [...ids].sort((a, b) => a - b).join(",");
+
+const buildVariantCombinations = (groups) =>
+  groups.reduce(
+    (sets, group) => sets.flatMap((set) => (group.values ?? []).map((value) => [...set, value])),
+    [[]]
+  );
+
+const normalizeVariant = (variant, displayOrder) => ({
+  id: variant.id ?? 0,
+  valueIds: variant.valueIds ?? [],
+  price: Number(variant.price ?? product.value?.price ?? 0),
+  costPrice: variant.costPrice ?? null,
+  sku: variant.sku ?? "",
+  barcode: variant.barcode ?? "",
+  isActive: variant.isActive ?? true,
+  displayOrder: variant.displayOrder ?? displayOrder,
+});
+
+const rebuildVariantMatrix = () => {
+  const combinations = buildVariantCombinations(activeVariantGroups.value);
+  const existing = new Map(variants.value.map((variant) => [variantKey(variant.valueIds), variant]));
+  variants.value = combinations.map((values, index) => {
+    const valueIds = values.map((value) => value.id);
+    return existing.get(variantKey(valueIds)) ?? normalizeVariant({
+      valueIds,
+      price: product.value?.price ?? form.value.price ?? 0,
+      isActive: true,
+    }, index + 1);
+  });
+};
+
+const copyBasePriceToVariants = () => {
+  variants.value = variants.value.map((variant) => ({
+    ...variant,
+    price: Number(form.value.price ?? product.value?.price ?? 0),
+  }));
+};
+
+const saveVariants = async () => {
+  savingVariants.value = true;
+  errorMessage.value = "";
+  variantSaveSuccess.value = false;
+  try {
+    const res = await replaceProductVariants(productId, {
+      variants: variants.value.map((variant) => ({
+        valueIds: variant.valueIds,
+        price: Number(variant.price) || 0,
+        costPrice: variant.costPrice === "" || variant.costPrice == null ? null : Number(variant.costPrice),
+        sku: variant.sku?.trim() || null,
+        barcode: variant.barcode?.trim() || null,
+        isActive: variant.isActive ?? true,
+      })),
+    });
+    const raw = res?.data;
+    const saved = Array.isArray(raw) ? raw : Array.isArray(raw?.value) ? raw.value : [];
+    variants.value = saved.map(normalizeVariant);
+    variantSaveSuccess.value = true;
+    setTimeout(() => (variantSaveSuccess.value = false), 3000);
+  } catch (err) {
+    errorMessage.value = extractError(err);
+  } finally {
+    savingVariants.value = false;
+  }
+};
+
+// â”€â”€ Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const loadCategories = async () => {
   try {
     const res = await getCategory();
@@ -114,6 +197,7 @@ const loadProduct = async () => {
   try {
     const res = await getProduct(productId);
     product.value = res?.data;
+    variants.value = (product.value.variants ?? []).map(normalizeVariant);
     selectedGroupIds.value = product.value.assignedOptionGroupIds ?? [];
     form.value = {
       categoryId: product.value.categoryId,
@@ -153,6 +237,7 @@ const save = async () => {
       hasSugarLevelOption: form.value.hasSugarLevelOption,
       isAccompaniment: form.value.isAccompaniment,
       estimatedPrepMinutes: form.value.estimatedPrepMinutes || null,
+      assignedOptionGroupIds: selectedGroupIds.value,
     });
     await loadProduct();
     saveSuccess.value = true;
@@ -169,7 +254,21 @@ const saveOptionGroups = async () => {
   errorMessage.value = "";
   groupSaveSuccess.value = false;
   try {
-    await assignOptionGroupsToProduct(productId, selectedGroupIds.value);
+    await updateProduct(productId, {
+      categoryId: form.value.categoryId,
+      name: form.value.name.trim(),
+      price: Number(form.value.price),
+      description: form.value.description.trim() || null,
+      imageUrl: form.value.imageUrl.trim() || null,
+      isActive: form.value.isActive,
+      hasTemperatureOption: form.value.hasTemperatureOption,
+      hasIceLevelOption: form.value.hasIceLevelOption,
+      hasSugarLevelOption: form.value.hasSugarLevelOption,
+      isAccompaniment: form.value.isAccompaniment,
+      estimatedPrepMinutes: form.value.estimatedPrepMinutes || null,
+      assignedOptionGroupIds: selectedGroupIds.value,
+    });
+    await loadProduct();
     groupSaveSuccess.value = true;
     setTimeout(() => (groupSaveSuccess.value = false), 3000);
   } catch (err) {
@@ -188,10 +287,10 @@ onMounted(() => {
 
 <template>
   <section class="tw:space-y-6">
-    <!-- ── Header ───────────────────────────────────────────────── -->
+    <!-- â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="tw:flex tw:flex-wrap tw:items-end tw:justify-between tw:gap-4">
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">
           {{ t('products.breadcrumb') }}
         </p>
         <h1 class="tw:mt-2 tw:text-3xl tw:font-semibold tw:flex tw:items-center tw:gap-3">
@@ -224,7 +323,7 @@ onMounted(() => {
       </prime-button>
     </div>
 
-    <!-- ── Loading skeleton ──────────────────────────────────────── -->
+    <!-- â”€â”€ Loading skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div
       v-if="loading"
       class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3"
@@ -249,7 +348,7 @@ onMounted(() => {
     </div>
 
     <template v-else-if="product">
-      <!-- ── Error ──────────────────────────────────────────────── -->
+      <!-- â”€â”€ Error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <prime-alert
         v-if="errorMessage"
         severity="error"
@@ -267,7 +366,7 @@ onMounted(() => {
         >{{ t('products.detail.updateSuccess') }}</prime-alert
       >
       <div class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3">
-        <!-- ── Left: readonly info ─────────────────────────────── -->
+        <!-- â”€â”€ Left: readonly info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-1">
           <template #content>
             <!-- Image -->
@@ -297,13 +396,13 @@ onMounted(() => {
                   {{
                     categories.find((c) => c.id === form.categoryId)?.name ||
                     product.categoryName ||
-                    "—"
+                    "â€”"
                   }}
                 </span>
               </div>
               <div class="tw:flex tw:justify-between tw:text-sm">
                 <span class="tw:text-muted">{{ t('products.detail.info.price') }}</span>
-                <span class="tw:font-semibold tw:text-emerald-300">{{
+                <span class="tw:font-semibold tw:text-primary-300">{{
                   formatVnd(product.price)
                 }}</span>
               </div>
@@ -370,7 +469,7 @@ onMounted(() => {
           </template>
         </prime-card>
 
-        <!-- ── Right: edit form ────────────────────────────────── -->
+        <!-- â”€â”€ Right: edit form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <prime-card class="app-card tw:rounded-2xl tw:border tw:lg:col-span-2">
           <template #content>
             <p class="tw:text-sm tw:font-semibold tw:mb-5">{{ t('products.detail.editTitle') }}</p>
@@ -562,7 +661,102 @@ onMounted(() => {
           </template>
         </prime-card>
       </div>
-      <!-- ── Option Groups Assignment ──────────────────────────── -->
+      <!-- â”€â”€ Option Groups Assignment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <prime-card class="app-card tw:rounded-2xl tw:border">
+        <template #content>
+          <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3 tw:mb-5">
+            <div>
+              <p class="tw:text-sm tw:font-semibold">Bảng giá biến thể</p>
+              <p class="tw:text-xs tw:text-muted">
+                Giá ở đây là giá bán cuối cùng cho từng tổ hợp, không cộng dồn từ từng giá trị.
+              </p>
+            </div>
+            <div v-if="can('product.update')" class="tw:flex tw:flex-wrap tw:gap-2">
+              <prime-button severity="secondary" outlined size="small" :disabled="activeVariantGroups.length === 0" @click="rebuildVariantMatrix">
+                <iconify icon="ph:grid-four-bold" />
+                <span>Sinh tổ hợp</span>
+              </prime-button>
+              <prime-button severity="secondary" outlined size="small" :disabled="variants.length === 0" @click="copyBasePriceToVariants">
+                <iconify icon="ph:copy-bold" />
+                <span>Copy giá gốc</span>
+              </prime-button>
+              <prime-button severity="success" size="small" :disabled="variants.length === 0" :loading="savingVariants" @click="saveVariants">
+                <iconify icon="ph:check-bold" class="tw:-ml-1" />
+                <span>Lưu bảng giá</span>
+              </prime-button>
+            </div>
+          </div>
+
+          <prime-message
+            v-if="variantSaveSuccess"
+            severity="success"
+            size="small"
+            variant="simple"
+            :closable="false"
+            class="tw:mb-4"
+          >Đã lưu bảng giá biến thể.</prime-message>
+
+          <div v-if="activeVariantGroups.length === 0" class="tw:py-8 tw:text-center tw:text-muted tw:text-sm">
+            <iconify icon="ph:git-branch-bold" class="tw:text-3xl tw:mb-2 tw:opacity-30" />
+            <p>Thêm nhóm biến thể trước, sau đó sinh tổ hợp giá.</p>
+          </div>
+
+          <div v-else-if="variants.length === 0" class="tw:py-8 tw:text-center tw:text-muted tw:text-sm">
+            <iconify icon="ph:grid-four-bold" class="tw:text-3xl tw:mb-2 tw:opacity-30" />
+            <p>Chưa có bảng giá. Bấm "Sinh tổ hợp" để tạo {{ buildVariantCombinations(activeVariantGroups).length }} dòng giá.</p>
+          </div>
+
+          <div v-else class="tw:overflow-x-auto">
+            <table class="tw:min-w-full tw:text-sm">
+              <thead>
+                <tr class="tw:border-b tw:border-slate-200 tw:dark:border-white/10">
+                  <th
+                    v-for="group in activeVariantGroups"
+                    :key="group.id"
+                    class="tw:px-3 tw:py-2 tw:text-left tw:font-medium tw:text-muted"
+                  >
+                    {{ group.name }}
+                  </th>
+                  <th class="tw:px-3 tw:py-2 tw:text-left tw:font-medium tw:text-muted tw:w-44">Giá bán</th>
+                  <th class="tw:px-3 tw:py-2 tw:text-left tw:font-medium tw:text-muted tw:w-44">Giá vốn</th>
+                  <th class="tw:px-3 tw:py-2 tw:text-left tw:font-medium tw:text-muted tw:w-28">Đang bán</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="variant in variants"
+                  :key="variantKey(variant.valueIds)"
+                  class="tw:border-b tw:border-slate-100 tw:dark:border-white/5"
+                >
+                  <td
+                    v-for="group in activeVariantGroups"
+                    :key="`${variantKey(variant.valueIds)}-${group.id}`"
+                    class="tw:px-3 tw:py-3"
+                  >
+                    <span class="tw:inline-flex tw:rounded-lg tw:border tw:px-2.5 tw:py-1 tw:text-xs">
+                      {{
+                        variantValueLookup.get(
+                          variant.valueIds.find((id) => (group.values ?? []).some((value) => value.id === id))
+                        )?.label ?? "-"
+                      }}
+                    </span>
+                  </td>
+                  <td class="tw:px-3 tw:py-3">
+                    <prime-input-number v-model="variant.price" :min="0" :use-grouping="true" class="app-input tw:w-full" />
+                  </td>
+                  <td class="tw:px-3 tw:py-3">
+                    <prime-input-number v-model="variant.costPrice" :min="0" :use-grouping="true" class="app-input tw:w-full" />
+                  </td>
+                  <td class="tw:px-3 tw:py-3">
+                    <prime-toggle-switch v-model="variant.isActive" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+      </prime-card>
+
       <prime-card class="app-card tw:rounded-2xl tw:border">
         <template #content>
           <div class="tw:flex tw:items-center tw:justify-between tw:mb-5">
@@ -611,7 +805,7 @@ onMounted(() => {
               :key="group.id"
               class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-3 tw:py-2 tw:cursor-pointer tw:transition-colors"
               :class="selectedGroupIds.includes(group.id)
-                ? 'tw:border-emerald-400 tw:bg-emerald-500/10'
+                ? 'tw:border-primary-400 tw:bg-primary-500/10'
                 : 'tw:border-slate-200 tw:dark:border-white/10 tw:hover:border-slate-400 tw:dark:hover:border-white/30'"
               @click="selectedGroupIds.includes(group.id)
                 ? selectedGroupIds.splice(selectedGroupIds.indexOf(group.id), 1)
@@ -620,7 +814,7 @@ onMounted(() => {
               <iconify
                 :icon="selectedGroupIds.includes(group.id) ? 'ph:check-circle-bold' : 'ph:circle'"
                 class="tw:text-lg"
-                :class="selectedGroupIds.includes(group.id) ? 'tw:text-emerald-400' : 'tw:text-muted'"
+                :class="selectedGroupIds.includes(group.id) ? 'tw:text-primary-400' : 'tw:text-muted'"
               />
               <div>
                 <p class="tw:text-sm tw:font-medium tw:leading-none">{{ group.name }}</p>
@@ -638,7 +832,7 @@ onMounted(() => {
       </prime-card>
     </template>
 
-    <!-- ── Not found ──────────────────────────────────────────────── -->
+    <!-- â”€â”€ Not found â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <prime-card v-else class="app-card tw:rounded-2xl tw:border">
       <template #content>
         <div class="tw:flex tw:flex-col tw:items-center tw:py-10 tw:text-muted">

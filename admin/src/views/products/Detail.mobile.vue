@@ -1,10 +1,11 @@
-<script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { getProduct, updateProduct, replaceAttributeGroups } from '@/services/product.service'
+﻿<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { getProduct, updateProduct } from '@/services/product.service'
 import { getCategory } from '@/services/category.service'
 import { uploadImage } from '@/services/upload.service'
-import { getProductOptionGroups, assignOptionGroupsToProduct } from '@/services/product-option-group.service'
+import { getProductOptionGroups } from '@/services/product-option-group.service'
 import CreateCategoryDrawer from '@/components/products/CreateCategoryDrawer.vue'
+import ProductVariantEditorMobile from '@/components/products/ProductVariantEditorMobile.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -30,8 +31,12 @@ const uploading = ref(false)
 const imageUrl = ref('')
 const imagePreview = ref('')
 const moreInfoOpen = ref(false)
+const product = ref(null)
+const attributes = ref([])
+const variants = ref([])
+const savingVariants = ref(false)
 
-// ── Option groups ─────────────────────────────────────────────────
+// â”€â”€ Option groups â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const allOptionGroups = ref([])
 const selectedGroupIds = ref([])
 const optionGroupDrawerVisible = ref(false)
@@ -63,54 +68,18 @@ const confirmOptionGroups = () => {
   optionGroupDrawerVisible.value = false
 }
 
-// ── Attribute drawer ───────────────────────────────────────────────
-const attrDrawerVisible = ref(false)
-const attrEditIndex = ref(-1)
-const attrName = ref('')
-const attrValues = ref([''])
-const attrNameInput = ref(null)
-const attributes = ref([])
-
-const openAttrDrawer = () => {
-  attrEditIndex.value = -1
-  attrName.value = ''
-  attrValues.value = ['']
-  attrDrawerVisible.value = true
-  nextTick(() => attrNameInput.value?.focus())
+const saveVariants = async () => {
+  if (savingVariants.value || variants.value.length === 0) return
+  savingVariants.value = true
+  try {
+    await save()
+    toast.add({ severity: 'success', summary: 'Đã lưu bảng giá biến thể', life: 2000 })
+  } finally {
+    savingVariants.value = false
+  }
 }
 
-const editAttr = (i) => {
-  attrEditIndex.value = i
-  attrName.value = attributes.value[i].name
-  attrValues.value = [...attributes.value[i].values, '']
-  attrDrawerVisible.value = true
-  nextTick(() => attrNameInput.value?.focus())
-}
-
-const onAttrValueInput = (i, val) => {
-  attrValues.value[i] = val
-  if (i === attrValues.value.length - 1 && val !== '') attrValues.value.push('')
-}
-
-const removeAttrValue = (i) => {
-  attrValues.value.splice(i, 1)
-  if (attrValues.value.length === 0 || attrValues.value[attrValues.value.length - 1] !== '')
-    attrValues.value.push('')
-}
-
-const isAttrValid = computed(() => attrName.value.trim().length > 0)
-
-const saveAttr = () => {
-  if (!isAttrValid.value) return
-  const entry = { name: attrName.value.trim(), values: attrValues.value.filter(v => v.trim() !== '') }
-  if (attrEditIndex.value >= 0) attributes.value[attrEditIndex.value] = entry
-  else attributes.value.push(entry)
-  attrDrawerVisible.value = false
-}
-
-const removeAttr = (i) => attributes.value.splice(i, 1)
-
-// ── Unit history ───────────────────────────────────────────────────
+// â”€â”€ Unit history â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const unitHistory = ref(JSON.parse(localStorage.getItem(UNIT_HISTORY_KEY) ?? '[]'))
 const saveUnitHistory = (unit) => {
   if (!unit?.trim()) return
@@ -119,7 +88,7 @@ const saveUnitHistory = (unit) => {
   localStorage.setItem(UNIT_HISTORY_KEY, JSON.stringify(updated))
 }
 
-// ── Categories ─────────────────────────────────────────────────────
+// â”€â”€ Categories â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const categories = ref([])
 const loadCategories = async () => {
   try {
@@ -167,7 +136,7 @@ const confirmCategory = () => {
   catDrawerVisible.value = false
 }
 
-// ── Image ──────────────────────────────────────────────────────────
+// â”€â”€ Image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const galleryInput = ref(null)
 const cameraInput = ref(null)
 
@@ -193,7 +162,25 @@ const clearImage = () => {
   imageUrl.value = ''
 }
 
-// ── Load product ───────────────────────────────────────────────────
+const resolveProductVariantLabels = (productData, valueIds) =>
+  (productData.variantGroups ?? []).map(group => {
+    const value = (group.values ?? []).find(item => valueIds.includes(item.id))
+    return value?.label ?? ''
+  }).filter(Boolean)
+
+const normalizeProductVariants = productData =>
+  (productData.variants ?? []).map((variant, index) => ({
+    id: variant.id ?? 0,
+    valueLabels: variant.valueLabels ?? resolveProductVariantLabels(productData, variant.valueIds ?? []),
+    price: Number(variant.price ?? productData.price ?? 0),
+    costPrice: variant.costPrice ?? null,
+    sku: variant.sku ?? '',
+    barcode: variant.barcode ?? '',
+    isActive: variant.isActive ?? true,
+    displayOrder: variant.displayOrder ?? index + 1,
+  }))
+
+// â”€â”€ Load product â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const loadProduct = async () => {
   loading.value = true
   errorMessage.value = ''
@@ -201,6 +188,7 @@ const loadProduct = async () => {
     const res = await getProduct(productId)
     const p = res?.data
     if (!p) { errorMessage.value = t('products.detail.notFound'); return }
+    product.value = p
     form.value = {
       name:              p.name ?? '',
       price:             p.price ?? '',
@@ -217,10 +205,12 @@ const loadProduct = async () => {
     }
     imageUrl.value = p.imageUrl ?? ''
     selectedGroupIds.value = p.assignedOptionGroupIds ?? []
-    attributes.value = (p.attributeGroups ?? []).map(g => ({
+    attributes.value = (p.variantGroups ?? []).map(g => ({
       name: g.name,
       values: (g.values ?? []).map(v => v.label),
+      defaultValue: g.values?.find(v => v.isDefault)?.label ?? null,
     }))
+    variants.value = normalizeProductVariants(p)
   } catch (err) {
     errorMessage.value = err?.response?.data?.message || t('products.detail.error.loadFailed')
   } finally {
@@ -255,17 +245,26 @@ const save = async () => {
       isAccompaniment:      form.value.isAccompaniment,
       estimatedPrepMinutes: form.value.estimatedPrepMinutes || null,
       imageUrl:             imageUrl.value || null,
-    })
-    await replaceAttributeGroups(productId, {
-      groups: attributes.value.map(a => ({
+      variantGroups: attributes.value.map(a => ({
         name: a.name,
         isRequired: false,
         selectionType: 'Single',
-        values: a.values.map(v => ({ label: v, priceAdjustment: 0, isDefault: false })),
+        values: a.values.map(v => ({ label: v, price: 0, isDefault: v === a.defaultValue })),
       })),
+      variants: attributes.value.length > 0 && variants.value.length > 0
+        ? variants.value.map(variant => ({
+            valueLabels: variant.valueLabels ?? [],
+            price: Number(variant.price) || 0,
+            costPrice: variant.costPrice === '' || variant.costPrice == null ? null : Number(variant.costPrice),
+            sku: variant.sku?.trim() || null,
+            barcode: variant.barcode?.trim() || null,
+            isActive: variant.isActive ?? true,
+          }))
+        : null,
+      assignedOptionGroupIds: selectedGroupIds.value,
     })
-    await assignOptionGroupsToProduct(productId, selectedGroupIds.value)
     saveUnitHistory(form.value.unit)
+    await loadProduct()
     toast.add({ severity: 'success', summary: t('products.detail.updateSuccess'), life: 2000 })
   } catch (err) {
     errorMessage.value = extractError(err)
@@ -284,7 +283,7 @@ onMounted(() => {
 <template>
   <div class="tw:flex tw:flex-col tw:flex-1 tw:min-h-0 tw:bg-white tw:dark:bg-neutral-900">
 
-    <!-- ── Top bar ──────────────────────────────────────────────── -->
+    <!-- â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="tw:flex tw:items-center tw:px-4 tw:py-3 tw:border-b tw:border-slate-100 tw:dark:border-white/5 tw:shrink-0">
       <prime-button severity="secondary" text :class="btnIcon" @click="router.back()">
         <iconify icon="ph:arrow-left-bold" />
@@ -295,7 +294,7 @@ onMounted(() => {
       <div class="tw:w-9 tw:shrink-0" />
     </div>
 
-    <!-- ── Loading skeleton ───────────────────────────────────── -->
+    <!-- â”€â”€ Loading skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div v-if="loading" class="tw:flex-1 tw:overflow-y-auto tw:pb-24">
       <div class="tw:bg-slate-50 tw:dark:bg-neutral-800 tw:px-4 tw:py-4">
         <prime-skeleton width="6rem" height="6rem" border-radius="12px" />
@@ -307,14 +306,14 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- ── Scrollable content ───────────────────────────────────── -->
+    <!-- â”€â”€ Scrollable content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div v-else class="tw:flex-1 tw:overflow-y-auto tw:pb-24">
 
       <!-- Hidden file inputs -->
       <input ref="galleryInput" type="file" accept="image/*" class="tw:hidden" @change="handleImage" />
       <input ref="cameraInput" type="file" accept="image/*" capture="environment" class="tw:hidden" @change="handleImage" />
 
-      <!-- ── Image section ──────────────────────────────────────── -->
+      <!-- â”€â”€ Image section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="tw:bg-slate-50 tw:dark:bg-neutral-800 tw:px-4 tw:py-4">
         <div v-if="imagePreview || imageUrl" class="tw:flex tw:items-center tw:gap-3">
           <div class="tw:relative tw:shrink-0">
@@ -356,12 +355,12 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- ── Error ──────────────────────────────────────────────── -->
+      <!-- â”€â”€ Error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <prime-alert v-if="errorMessage" severity="error" variant="accent" closable class="tw:mx-4 tw:mt-3" @close="errorMessage = ''">
         {{ errorMessage }}
       </prime-alert>
 
-      <!-- ── Form fields ─────────────────────────────────────────── -->
+      <!-- â”€â”€ Form fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="tw:px-4">
 
         <!-- Name -->
@@ -438,7 +437,7 @@ onMounted(() => {
           <iconify :icon="moreInfoOpen ? 'ph:caret-up-bold' : 'ph:caret-down-bold'" class="tw:ml-1" />
         </prime-button>
 
-        <!-- ── More info content ───────────────────────────────── -->
+        <!-- â”€â”€ More info content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <template v-if="moreInfoOpen">
 
           <!-- SKU + Barcode -->
@@ -507,7 +506,7 @@ onMounted(() => {
           >
             <div class="tw:flex-1">
               <p class="tw:text-base tw:text-slate-800 tw:dark:text-white">{{ t('products.detail.optionGroups.title') }}</p>
-              <p v-if="selectedGroupIds.length" class="tw:text-xs tw:text-emerald-500 tw:mt-0.5">
+              <p v-if="selectedGroupIds.length" class="tw:text-xs tw:text-primary-500 tw:mt-0.5">
                 {{ selectedGroupIds.length }} {{ t('products.detail.optionGroups.selected') }}
               </p>
               <p v-else class="tw:text-xs tw:text-slate-400 tw:mt-0.5">{{ t('products.detail.optionGroups.noneSelected') }}</p>
@@ -547,52 +546,20 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Attributes section -->
-          <template v-if="attributes.length">
-            <div class="tw:-mx-4 tw:mt-2">
-              <div class="tw:bg-slate-50 tw:dark:bg-neutral-800 tw:px-4 tw:py-3">
-                <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest tw:text-slate-500 tw:dark:text-slate-400">
-                  {{ t('products.create.mobile.attrSectionHeader') }}
-                </p>
-              </div>
-              <div v-for="(attr, i) in attributes" :key="i" class="tw:px-4 tw:pt-3 tw:pb-4">
-                <div class="tw:flex tw:items-center tw:mb-2">
-                  <span class="tw:flex-1 tw:text-sm tw:font-medium tw:text-slate-800 tw:dark:text-white">
-                    {{ attr.name }}
-                    <span class="tw:text-slate-400 tw:font-normal tw:ml-1">({{ attr.values.length }})</span>
-                  </span>
-                  <prime-button severity="info" text size="small" class="tw:p-0! tw:h-auto! tw:font-medium!" @click="editAttr(i)">
-                    {{ t('products.create.mobile.attrEdit') }}
-                  </prime-button>
-                </div>
-                <div class="tw:flex tw:flex-wrap tw:gap-2">
-                  <span
-                    v-for="val in attr.values"
-                    :key="val"
-                    class="tw:inline-flex tw:items-center tw:px-3 tw:py-1 tw:rounded-lg tw:border tw:border-slate-200 tw:dark:border-white/10 tw:text-sm tw:text-slate-700 tw:dark:text-white/80"
-                  >
-                    {{ val }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- Add attribute row -->
-          <div
-            class="tw:flex tw:items-center tw:gap-2 tw:py-4 tw:border-b tw:border-slate-100 tw:dark:border-white/5 tw:cursor-pointer tw:active:bg-slate-50 tw:dark:active:bg-white/3 tw:-mx-4 tw:px-4"
-            @click="openAttrDrawer"
-          >
-            <iconify icon="ph:plus-circle-bold" class="tw:text-lg tw:text-blue-500 tw:shrink-0" />
-            <span class="tw:text-blue-500 tw:font-medium tw:text-sm">{{ t('products.create.mobile.addAttribute') }}</span>
-            <span class="tw:text-sm tw:text-slate-400">{{ t('products.create.mobile.addAttributeHint') }}</span>
-          </div>
+          <ProductVariantEditorMobile
+            v-model:attributes="attributes"
+            v-model:variants="variants"
+            :product="product"
+            :base-price="form.price"
+            :saving="savingVariants"
+            @save-variants="saveVariants"
+          />
 
         </template>
 
       </div>
 
-      <!-- ── Display settings section ───────────────────────────── -->
+      <!-- â”€â”€ Display settings section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="tw:mx-4 tw:mt-4 tw:bg-slate-50 tw:dark:bg-neutral-800 tw:rounded-xl tw:p-4">
         <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-widest tw:text-slate-400 tw:dark:text-slate-500 tw:mb-3">
           {{ t('products.create.mobile.displaySettingsLabel') }}
@@ -605,7 +572,7 @@ onMounted(() => {
 
     </div>
 
-    <!-- ── Category picker drawer ───────────────────────────────── -->
+    <!-- â”€â”€ Category picker drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <prime-drawer
       v-model:visible="catDrawerVisible"
       position="bottom"
@@ -669,10 +636,10 @@ onMounted(() => {
       </template>
     </prime-drawer>
 
-    <!-- ── Create category drawer ───────────────────────────────── -->
+    <!-- â”€â”€ Create category drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <CreateCategoryDrawer v-model:visible="createCatVisible" @created="onCategoryCreated" />
 
-    <!-- ── Option group picker drawer ──────────────────────────── -->
+    <!-- â”€â”€ Option group picker drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <prime-drawer
       v-model:visible="optionGroupDrawerVisible"
       position="bottom"
@@ -694,14 +661,14 @@ onMounted(() => {
             :key="group.id"
             class="tw:flex tw:items-center tw:gap-3 tw:p-3 tw:rounded-xl tw:cursor-pointer tw:transition-colors"
             :class="draftGroupIds.includes(group.id)
-              ? 'tw:bg-emerald-500/10 tw:border tw:border-emerald-400'
+              ? 'tw:bg-primary-500/10 tw:border tw:border-primary-400'
               : 'tw:border tw:border-slate-200 tw:dark:border-white/10'"
             @click="toggleDraftGroup(group.id)"
           >
             <iconify
               :icon="draftGroupIds.includes(group.id) ? 'ph:check-circle-bold' : 'ph:circle'"
               class="tw:text-xl tw:shrink-0"
-              :class="draftGroupIds.includes(group.id) ? 'tw:text-emerald-400' : 'tw:text-slate-300 tw:dark:text-white/20'"
+              :class="draftGroupIds.includes(group.id) ? 'tw:text-primary-400' : 'tw:text-slate-300 tw:dark:text-white/20'"
             />
             <div class="tw:flex-1 tw:min-w-0">
               <p class="tw:text-sm tw:font-medium tw:leading-none">{{ group.name }}</p>
@@ -724,66 +691,7 @@ onMounted(() => {
       </template>
     </prime-drawer>
 
-    <!-- ── Add attribute drawer ──────────────────────────────────── -->
-    <prime-drawer
-      v-model:visible="attrDrawerVisible"
-      position="bottom"
-      :style="{ height: 'auto' }"
-      :pt="{ root: { class: 'tw:rounded-t-2xl' } }"
-    >
-      <template #header>
-        <span class="tw:font-semibold tw:text-base">{{ attrEditIndex >= 0 ? t('products.create.mobile.attrDrawerEditTitle') : t('products.create.mobile.attrDrawerTitle') }}</span>
-      </template>
-
-      <div class="tw:flex tw:flex-col tw:gap-0 tw:pb-4">
-        <div class="tw:pb-4 tw:border-b tw:border-slate-100 tw:dark:border-white/5">
-          <label class="tw:block tw:text-xs tw:text-slate-500 tw:dark:text-slate-400 tw:mb-2">
-            {{ t('products.create.mobile.attrNameLabel') }}<span class="tw:text-red-400 tw:ml-0.5">*</span>
-          </label>
-          <input
-            ref="attrNameInput"
-            v-model="attrName"
-            type="text"
-            class="tw:w-full tw:bg-transparent tw:border-0 tw:border-b-2 tw:outline-none tw:text-base tw:text-slate-800 tw:dark:text-white tw:placeholder-slate-300 tw:dark:placeholder-white/20 tw:pb-1 tw:transition-colors"
-            :class="attrName ? 'tw:border-emerald-500' : 'tw:border-slate-200 tw:dark:border-white/10'"
-            @keydown.enter.prevent
-          />
-        </div>
-
-        <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-widest tw:text-slate-400 tw:dark:text-slate-500 tw:mt-4 tw:mb-2">
-          {{ t('products.create.mobile.attrValuesHeader') }}
-        </p>
-
-        <div
-          v-for="(val, i) in attrValues"
-          :key="i"
-          class="tw:flex tw:items-center tw:gap-2 tw:py-3 tw:border-b tw:border-slate-100 tw:dark:border-white/5"
-        >
-          <input
-            :value="val"
-            type="text"
-            :placeholder="i === attrValues.length - 1 ? t('products.create.mobile.attrValuePlaceholder') : ''"
-            class="tw:flex-1 tw:bg-transparent tw:border-0 tw:outline-none tw:text-base tw:text-slate-800 tw:dark:text-white tw:placeholder-slate-300 tw:dark:placeholder-white/20"
-            @input="onAttrValueInput(i, $event.target.value)"
-          />
-          <prime-button v-if="val !== ''" severity="danger" text :class="btnIcon" @click="removeAttrValue(i)">
-            <iconify icon="ph:trash-bold" />
-          </prime-button>
-        </div>
-
-        <prime-button
-          :severity="isAttrValid ? 'success' : 'secondary'"
-          :disabled="!isAttrValid"
-          fluid
-          class="tw:mt-4"
-          @click="saveAttr"
-        >
-          {{ t('products.create.mobile.save') }}
-        </prime-button>
-      </div>
-    </prime-drawer>
-
-    <!-- ── Bottom action bar ────────────────────────────────────── -->
+    <!-- â”€â”€ Bottom action bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="tw:flex tw:gap-3 tw:px-4 tw:py-3 tw:border-t tw:border-slate-100 tw:dark:border-white/5 tw:bg-white tw:dark:bg-neutral-900 tw:shrink-0">
       <prime-button
         v-if="can('product.update')"

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { createProduct } from '@/services/product.service'
 import { getCategory } from '@/services/category.service'
@@ -32,12 +32,49 @@ const attrDrawerVisible = ref(false)
 const attrEditIndex = ref(-1)
 const attrName = ref('')
 const attrValues = ref([''])
+const attrDefaultValue = ref(null)
 const attrNameInput = ref(null)
+const variants = ref([])
+
+const variantKey = (labels) => labels.join('\u001f')
+
+const buildVariantCombinations = () =>
+  form.value.attributes.reduce(
+    (sets, attr) => sets.flatMap(set => attr.values.map(value => [...set, value])),
+    [[]],
+  )
+
+const rebuildVariantMatrix = () => {
+  if (form.value.attributes.length === 0) {
+    variants.value = []
+    return
+  }
+
+  const existing = new Map(variants.value.map(variant => [variantKey(variant.valueLabels), variant]))
+  variants.value = buildVariantCombinations().map(labels => (
+    existing.get(variantKey(labels)) ?? {
+      valueLabels: labels,
+      price: Number(form.value.price) || 0,
+      costPrice: null,
+      sku: '',
+      barcode: '',
+      isActive: true,
+    }
+  ))
+}
+
+const copyBasePriceToVariants = () => {
+  variants.value = variants.value.map(variant => ({
+    ...variant,
+    price: Number(form.value.price) || 0,
+  }))
+}
 
 const openAttrDrawer = () => {
   attrEditIndex.value = -1
   attrName.value = ''
   attrValues.value = ['']
+  attrDefaultValue.value = null
   attrDrawerVisible.value = true
   nextTick(() => attrNameInput.value?.focus())
 }
@@ -46,11 +83,14 @@ const editAttr = (i) => {
   attrEditIndex.value = i
   attrName.value = form.value.attributes[i].name
   attrValues.value = [...form.value.attributes[i].values, '']
+  attrDefaultValue.value = form.value.attributes[i].defaultValue ?? null
   attrDrawerVisible.value = true
   nextTick(() => attrNameInput.value?.focus())
 }
 
 const onAttrValueInput = (i, val) => {
+  const old = attrValues.value[i]
+  if (attrDefaultValue.value === old.trim()) attrDefaultValue.value = val.trim() || null
   attrValues.value[i] = val
   if (i === attrValues.value.length - 1 && val !== '') {
     attrValues.value.push('')
@@ -58,6 +98,8 @@ const onAttrValueInput = (i, val) => {
 }
 
 const removeAttrValue = (i) => {
+  const removed = attrValues.value[i]
+  if (attrDefaultValue.value === removed.trim()) attrDefaultValue.value = null
   attrValues.value.splice(i, 1)
   if (attrValues.value.length === 0 || attrValues.value[attrValues.value.length - 1] !== '') {
     attrValues.value.push('')
@@ -68,22 +110,35 @@ const isAttrValid = computed(() => attrName.value.trim().length > 0)
 
 const saveAttr = () => {
   if (!isAttrValid.value) return
-  const entry = { name: attrName.value.trim(), values: attrValues.value.filter(v => v.trim() !== '') }
+  const values = attrValues.value.map(v => v.trim()).filter(Boolean)
+  const entry = {
+    name: attrName.value.trim(),
+    values,
+    defaultValue: values.includes(attrDefaultValue.value) ? attrDefaultValue.value : null,
+  }
   if (attrEditIndex.value >= 0) {
     form.value.attributes[attrEditIndex.value] = entry
   } else {
     form.value.attributes.push(entry)
   }
+  rebuildVariantMatrix()
   attrDrawerVisible.value = false
 }
 
 const removeAttr = (i) => {
   form.value.attributes.splice(i, 1)
+  rebuildVariantMatrix()
+}
+
+const removeEditingAttr = () => {
+  if (attrEditIndex.value < 0) return
+  removeAttr(attrEditIndex.value)
+  attrDrawerVisible.value = false
 }
 
 const isValid = computed(() => form.value.name.trim().length > 0)
 
-// Unit history — localStorage
+// Unit history â€” localStorage
 const unitHistory = ref(JSON.parse(localStorage.getItem(UNIT_HISTORY_KEY) ?? '[]'))
 const saveUnitHistory = (unit) => {
   if (!unit?.trim()) return
@@ -230,12 +285,22 @@ const submit = async (addNew = false) => {
       discountPrice: Number(form.value.discountPrice) || null,
       categoryId: form.value.categoryId,
       imageUrl: imageUrl.value || null,
-      attributeGroups: form.value.attributes.length > 0
+      variantGroups: form.value.attributes.length > 0
         ? form.value.attributes.map(a => ({
             name: a.name,
             isRequired: false,
             selectionType: 'Single',
-            values: a.values.map(v => ({ label: v, priceAdjustment: 0, isDefault: false })),
+            values: a.values.map(v => ({ label: v, price: 0, isDefault: v === a.defaultValue })),
+          }))
+        : null,
+      variants: form.value.attributes.length > 0 && variants.value.length > 0
+        ? variants.value.map(variant => ({
+            valueLabels: variant.valueLabels,
+            price: Number(variant.price) || 0,
+            costPrice: variant.costPrice === '' || variant.costPrice == null ? null : Number(variant.costPrice),
+            sku: variant.sku?.trim() || null,
+            barcode: variant.barcode?.trim() || null,
+            isActive: variant.isActive ?? true,
           }))
         : null,
     })
@@ -250,6 +315,7 @@ const submit = async (addNew = false) => {
       imagePreview.value = ''
       errorMessage.value = ''
       selectedGroupIds.value = new Set()
+      variants.value = []
     } else {
       router.push(newId ? { name: 'productsDetail', params: { id: newId } } : { name: 'products' })
     }
@@ -266,7 +332,7 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
 <template>
   <div class="tw:flex tw:flex-col tw:flex-1 tw:min-h-0 tw:bg-white tw:dark:bg-neutral-900">
 
-    <!-- ── Top bar ──────────────────────────────────────────────── -->
+    <!-- â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="tw:flex tw:items-center tw:px-4 tw:py-3 tw:border-b tw:border-slate-100 tw:dark:border-white/5 tw:shrink-0">
       <prime-button severity="secondary" text :class="btnIcon" @click="router.back()">
         <iconify icon="ph:arrow-left-bold" />
@@ -277,14 +343,14 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
       <div class="tw:w-9 tw:shrink-0" />
     </div>
 
-    <!-- ── Scrollable content ───────────────────────────────────── -->
+    <!-- â”€â”€ Scrollable content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="tw:flex-1 tw:overflow-y-auto tw:pb-24">
 
       <!-- Hidden file inputs -->
       <input ref="galleryInput" type="file" accept="image/*" class="tw:hidden" @change="handleImage" />
       <input ref="cameraInput" type="file" accept="image/*" capture="environment" class="tw:hidden" @change="handleImage" />
 
-      <!-- ── Image section ──────────────────────────────────────── -->
+      <!-- â”€â”€ Image section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="tw:bg-slate-50 tw:dark:bg-neutral-800 tw:px-4 tw:py-4">
         <div v-if="imagePreview || imageUrl" class="tw:flex tw:items-center tw:gap-3">
           <div class="tw:relative tw:shrink-0">
@@ -326,12 +392,12 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
         </div>
       </div>
 
-      <!-- ── Error ──────────────────────────────────────────────── -->
+      <!-- â”€â”€ Error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <prime-alert v-if="errorMessage" severity="error" variant="accent" closable class="tw:mx-4 tw:mt-3" @close="errorMessage = ''">
         {{ errorMessage }}
       </prime-alert>
 
-      <!-- ── Form fields ─────────────────────────────────────────── -->
+      <!-- â”€â”€ Form fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="tw:px-4">
 
         <!-- Name -->
@@ -408,7 +474,7 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
           <iconify :icon="moreInfoOpen ? 'ph:caret-up-bold' : 'ph:caret-down-bold'" class="tw:ml-1" />
         </prime-button>
 
-        <!-- ── More info content ───────────────────────────────── -->
+        <!-- â”€â”€ More info content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <template v-if="moreInfoOpen">
 
           <!-- SKU + Barcode -->
@@ -485,7 +551,7 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
               :class="selectedGroupIds.size > 0 ? 'tw:text-slate-800 tw:dark:text-white' : 'tw:text-slate-400 tw:dark:text-slate-500'">
               {{ t('products.create.mobile.addonGroup') }}
             </span>
-            <span v-if="selectedGroupIds.size > 0" class="tw:text-sm tw:text-emerald-600 tw:dark:text-emerald-400 tw:font-medium tw:mr-2">
+            <span v-if="selectedGroupIds.size > 0" class="tw:text-sm tw:text-primary-600 tw:dark:text-primary-400 tw:font-medium tw:mr-2">
               {{ selectedGroupIds.size }}
             </span>
             <iconify icon="ph:caret-right-bold" class="tw:text-slate-400 tw:text-sm" />
@@ -545,22 +611,79 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
                     {{ attr.name }}
                     <span class="tw:text-slate-400 tw:font-normal tw:ml-1">({{ attr.values.length }})</span>
                   </span>
-                  <prime-button severity="info" text size="small" class="tw:p-0! tw:h-auto! tw:font-medium!" @click="editAttr(i)">
-                    {{ t('products.create.mobile.attrEdit') }}
-                  </prime-button>
+                  <div class="tw:flex tw:items-center tw:gap-2">
+                    <prime-button severity="info" text size="small" class="tw:p-0! tw:h-auto! tw:font-medium!" @click="editAttr(i)">
+                      {{ t('products.create.mobile.attrEdit') }}
+                    </prime-button>
+                    <prime-button severity="danger" text :class="btnIcon" @click="removeAttr(i)">
+                      <iconify icon="ph:trash-bold" />
+                    </prime-button>
+                  </div>
                 </div>
                 <div class="tw:flex tw:flex-wrap tw:gap-2">
                   <span
                     v-for="val in attr.values"
                     :key="val"
-                    class="tw:inline-flex tw:items-center tw:px-3 tw:py-1 tw:rounded-lg tw:border tw:border-slate-200 tw:dark:border-white/10 tw:text-sm tw:text-slate-700 tw:dark:text-white/80"
+                    class="tw:inline-flex tw:items-center tw:gap-1 tw:px-3 tw:py-1 tw:rounded-lg tw:border tw:border-slate-200 tw:dark:border-white/10 tw:text-sm tw:text-slate-700 tw:dark:text-white/80"
                   >
+                    <iconify v-if="val === attr.defaultValue" icon="ph:star-fill" class="tw:text-amber-400 tw:text-xs tw:shrink-0" />
                     {{ val }}
                   </span>
                 </div>
               </div>
             </div>
           </template>
+
+          <div v-if="form.attributes.length" class="tw:-mx-4 tw:mt-2">
+            <div class="tw:bg-slate-50 tw:dark:bg-neutral-800 tw:px-4 tw:py-3">
+              <div class="tw:flex tw:items-center tw:justify-between tw:gap-2">
+                <div class="tw:min-w-0">
+                  <p class="tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest tw:text-slate-500 tw:dark:text-slate-400">
+                    BẢNG GIÁ BIẾN THỂ
+                  </p>
+                  <p class="tw:text-xs tw:text-slate-400 tw:mt-1">
+                    Giá bán cuối cùng cho từng tổ hợp tuỳ chọn.
+                  </p>
+                </div>
+                <prime-button severity="secondary" text :class="btnIcon" @click="rebuildVariantMatrix">
+                  <iconify icon="ph:grid-four-bold" />
+                </prime-button>
+              </div>
+            </div>
+
+            <div class="tw:px-4 tw:py-3 tw:space-y-3">
+              <div class="tw:flex tw:gap-2">
+                <prime-button severity="secondary" outlined size="small" class="tw:flex-1" @click="copyBasePriceToVariants">
+                  Copy giá gốc
+                </prime-button>
+              </div>
+
+              <div
+                v-for="variant in variants"
+                :key="variantKey(variant.valueLabels)"
+                class="tw:rounded-xl tw:border tw:border-slate-200 tw:dark:border-white/10 tw:p-3 tw:space-y-3"
+              >
+                <div class="tw:flex tw:flex-wrap tw:gap-2">
+                  <span
+                    v-for="(label, index) in variant.valueLabels"
+                    :key="`${variantKey(variant.valueLabels)}-${index}`"
+                    class="tw:inline-flex tw:items-center tw:rounded-lg tw:bg-slate-100 tw:dark:bg-white/5 tw:px-2.5 tw:py-1 tw:text-xs tw:text-slate-700 tw:dark:text-white/80"
+                  >
+                    {{ form.attributes[index]?.name }}: {{ label }}
+                  </span>
+                </div>
+                <div class="tw:flex tw:items-center tw:gap-3">
+                  <input
+                    v-model="variant.price"
+                    type="number"
+                    inputmode="numeric"
+                    class="tw:flex-1 tw:min-w-0 tw:bg-transparent tw:border tw:border-slate-200 tw:dark:border-white/10 tw:rounded-lg tw:px-3 tw:py-2 tw:outline-none"
+                  />
+                  <prime-toggle-switch v-model="variant.isActive" />
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Add attribute row -->
           <div
@@ -575,7 +698,7 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
 
       </div>
 
-      <!-- ── Display settings section ───────────────────────────── -->
+      <!-- â”€â”€ Display settings section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="tw:mx-4 tw:mt-4 tw:bg-slate-50 tw:dark:bg-neutral-800 tw:rounded-xl tw:p-4">
         <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-widest tw:text-slate-400 tw:dark:text-slate-500 tw:mb-3">
           {{ t('products.create.mobile.displaySettingsLabel') }}
@@ -588,7 +711,7 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
 
     </div>
 
-    <!-- ── Category picker drawer ───────────────────────────────── -->
+    <!-- â”€â”€ Category picker drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <prime-drawer
       v-model:visible="catDrawerVisible"
       position="bottom"
@@ -662,10 +785,10 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
       </template>
     </prime-drawer>
 
-    <!-- ── Create category drawer ───────────────────────────────── -->
+    <!-- â”€â”€ Create category drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <CreateCategoryDrawer v-model:visible="createCatVisible" @created="onCategoryCreated" />
 
-    <!-- ── Addon groups drawer ──────────────────────────────────── -->
+    <!-- â”€â”€ Addon groups drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <prime-drawer
       v-model:visible="addonDrawerVisible"
       position="bottom"
@@ -699,7 +822,7 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
             <div
               class="tw:shrink-0 tw:w-5 tw:h-5 tw:rounded tw:border-2 tw:flex tw:items-center tw:justify-center tw:transition-colors"
               :class="addonDraftIds.has(group.id)
-                ? 'tw:bg-emerald-500 tw:border-emerald-500'
+                ? 'tw:bg-primary-500 tw:border-primary-500'
                 : 'tw:border-slate-300 tw:dark:border-white/30'"
             >
               <iconify v-if="addonDraftIds.has(group.id)" icon="ph:check-bold" class="tw:text-white tw:text-xs" />
@@ -733,7 +856,7 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
       </template>
     </prime-drawer>
 
-    <!-- ── Add attribute drawer ──────────────────────────────────── -->
+    <!-- â”€â”€ Add attribute drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <prime-drawer
       v-model:visible="attrDrawerVisible"
       position="bottom"
@@ -756,7 +879,7 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
             v-model="attrName"
             type="text"
             class="tw:w-full tw:bg-transparent tw:border-0 tw:border-b-2 tw:outline-none tw:text-base tw:text-slate-800 tw:dark:text-white tw:placeholder-slate-300 tw:dark:placeholder-white/20 tw:pb-1 tw:transition-colors"
-            :class="attrName ? 'tw:border-emerald-500' : 'tw:border-slate-200 tw:dark:border-white/10'"
+            :class="attrName ? 'tw:border-primary-500' : 'tw:border-slate-200 tw:dark:border-white/10'"
             @keydown.enter.prevent
           />
         </div>
@@ -779,15 +902,25 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
             class="tw:flex-1 tw:bg-transparent tw:border-0 tw:outline-none tw:text-base tw:text-slate-800 tw:dark:text-white tw:placeholder-slate-300 tw:dark:placeholder-white/20"
             @input="onAttrValueInput(i, $event.target.value)"
           />
-          <prime-button
-            v-if="val !== ''"
-            severity="danger"
-            text
-            :class="btnIcon"
-            @click="removeAttrValue(i)"
-          >
-            <iconify icon="ph:trash-bold" />
-          </prime-button>
+          <template v-if="val !== ''">
+            <prime-button
+              :severity="attrDefaultValue === val.trim() ? 'warning' : 'secondary'"
+              text
+              :class="btnIcon"
+              v-tooltip.top="t('products.create.mobile.attrSetDefault')"
+              @click="attrDefaultValue = attrDefaultValue === val.trim() ? null : val.trim()"
+            >
+              <iconify :icon="attrDefaultValue === val.trim() ? 'ph:star-fill' : 'ph:star'" />
+            </prime-button>
+            <prime-button
+              severity="danger"
+              text
+              :class="btnIcon"
+              @click="removeAttrValue(i)"
+            >
+              <iconify icon="ph:trash-bold" />
+            </prime-button>
+          </template>
         </div>
 
         <!-- Save button -->
@@ -801,10 +934,22 @@ onMounted(() => { loadCategories(); loadOptionGroups() })
           {{ t('products.create.mobile.save') }}
         </prime-button>
 
+        <prime-button
+          v-if="attrEditIndex >= 0"
+          severity="danger"
+          outlined
+          fluid
+          class="tw:mt-2"
+          @click="removeEditingAttr"
+        >
+          <iconify icon="ph:trash-bold" />
+          <span>Xóa biến thể</span>
+        </prime-button>
+
       </div>
     </prime-drawer>
 
-    <!-- ── Bottom action bar ────────────────────────────────────── -->
+    <!-- â”€â”€ Bottom action bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="tw:flex tw:gap-3 tw:px-4 tw:py-3 tw:border-t tw:border-slate-100 tw:dark:border-white/5 tw:bg-white tw:dark:bg-neutral-900 tw:shrink-0">
       <prime-button
         :severity="isValid ? 'success' : 'secondary'"

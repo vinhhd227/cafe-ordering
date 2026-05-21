@@ -21,6 +21,7 @@ declare module 'vue' {
     PaymentQrCustomizer: typeof import('./components/PaymentQrCustomizer.vue')['default']
     PrintBillDialog: typeof import('./components/printing/PrintBillDialog.vue')['default']
     PrintDrinkLabelsDialog: typeof import('./components/printing/PrintDrinkLabelsDialog.vue')['default']
+    ProductVariantEditorMobile: typeof import('./components/products/ProductVariantEditorMobile.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     WidgetOrdersRevenue: typeof import('./components/widgets/orders/WidgetOrdersRevenue.vue')['default']

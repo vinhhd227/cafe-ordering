@@ -427,16 +427,12 @@ const formatVnd = (value) =>
         v-else-if="filteredGroups.length === 0"
         class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-5 tw:py-24 tw:px-8 tw:text-center"
       >
-        <div class="tw:w-20 tw:h-20 tw:rounded-full tw:bg-emerald-50 tw:dark:bg-emerald-900/20 tw:flex tw:items-center tw:justify-center">
-          <iconify icon="ph:plus-square-bold" class="tw:text-4xl tw:text-emerald-400" />
+        <div class="tw:w-20 tw:h-20 tw:rounded-full tw:bg-primary-50 tw:dark:bg-primary-900/20 tw:flex tw:items-center tw:justify-center">
+          <iconify icon="ph:plus-square-bold" class="tw:text-4xl tw:text-primary-400" />
         </div>
         <div>
           <p class="tw:font-semibold tw:text-slate-700 tw:dark:text-white">{{ t('products.mobile.addons.empty') }}</p>
         </div>
-        <prime-button severity="success" @click="openCreate">
-          <iconify icon="ph:plus-bold" />
-          <span>{{ t('products.mobile.addons.createGroup') }}</span>
-        </prime-button>
       </div>
 
       <template v-else>
@@ -535,7 +531,7 @@ const formatVnd = (value) =>
         linear
         :pt="{ root: { class: 'tw:flex-1 tw:flex tw:flex-col tw:overflow-hidden tw:min-h-0' } }"
       >
-        <prime-step-list>
+        <prime-step-list class="tw:px-5!">
           <prime-step value="1">{{ t('products.mobile.addons.step1') }}</prime-step>
           <prime-step value="2">{{ t('products.mobile.addons.step2') }}</prime-step>
         </prime-step-list>
@@ -596,7 +592,7 @@ const formatVnd = (value) =>
                   </div>
                   <button
                     type="button"
-                    class="tw:w-full tw:flex tw:items-center tw:gap-2 tw:px-4 tw:py-3.5 tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-emerald-600 tw:dark:text-emerald-400 tw:text-sm tw:font-medium tw:active:bg-slate-50 tw:dark:active:bg-white/5"
+                    class="tw:w-full tw:flex tw:items-center tw:gap-2 tw:px-4 tw:py-3.5 tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-primary-600 tw:dark:text-primary-400 tw:text-sm tw:font-medium tw:active:bg-slate-50 tw:dark:active:bg-white/5"
                     @click="openAddOption()"
                   >
                     <iconify icon="ph:plus-circle-bold" class="tw:text-lg" />
@@ -715,7 +711,7 @@ const formatVnd = (value) =>
                   <div
                     class="tw:shrink-0 tw:w-5 tw:h-5 tw:rounded tw:border-2 tw:flex tw:items-center tw:justify-center tw:transition-colors"
                     :class="pickerSelected.has(product.id)
-                      ? 'tw:bg-emerald-500 tw:border-emerald-500'
+                      ? 'tw:bg-primary-500 tw:border-primary-500'
                       : 'tw:border-slate-300 tw:dark:border-white/30'"
                   >
                     <iconify v-if="pickerSelected.has(product.id)" icon="ph:check-bold" class="tw:text-white tw:text-xs" />
@@ -751,7 +747,7 @@ const formatVnd = (value) =>
                 </prime-button>
                 <prime-button severity="success" class="tw:flex-1" :loading="submitting" @click="confirmPicker">
                   {{ t('products.mobile.addons.pickProductsSubmit') }}
-                  <span v-if="pickerSelected.size > 0" class="tw:ml-1 tw:text-emerald-100">({{ pickerSelected.size }})</span>
+                  <span v-if="pickerSelected.size > 0" class="tw:ml-1 tw:text-primary-100">({{ pickerSelected.size }})</span>
                 </prime-button>
               </div>
 
@@ -793,7 +789,7 @@ const formatVnd = (value) =>
           type="button"
           class="tw:flex-1 tw:py-2.5 tw:text-lg tw:font-medium tw:border-0 tw:bg-transparent tw:cursor-pointer tw:transition-colors"
           :class="editTab === 'info'
-            ? 'tw:text-emerald-600 tw:dark:text-emerald-400 tw:border-b-2 tw:border-emerald-500'
+            ? 'tw:text-primary-600 tw:dark:text-primary-400 tw:border-b-2 tw:border-primary-500'
             : 'tw:text-slate-500 tw:dark:text-slate-400'"
           @click="editTab = 'info'"
         >
@@ -803,7 +799,7 @@ const formatVnd = (value) =>
           type="button"
           class="tw:flex-1 tw:py-2.5 tw:text-lg tw:font-medium tw:border-0 tw:bg-transparent tw:cursor-pointer tw:transition-colors"
           :class="editTab === 'links'
-            ? 'tw:text-emerald-600 tw:dark:text-emerald-400 tw:border-b-2 tw:border-emerald-500'
+            ? 'tw:text-primary-600 tw:dark:text-primary-400 tw:border-b-2 tw:border-primary-500'
             : 'tw:text-slate-500 tw:dark:text-slate-400'"
           @click="editTab = 'links'"
         >
@@ -857,7 +853,7 @@ const formatVnd = (value) =>
             </div>
             <button
               type="button"
-              class="tw:w-full tw:flex tw:items-center tw:gap-2 tw:px-4 tw:py-3.5 tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-emerald-600 tw:dark:text-emerald-400 tw:text-sm tw:font-medium tw:active:bg-slate-50 tw:dark:active:bg-white/5"
+              class="tw:w-full tw:flex tw:items-center tw:gap-2 tw:px-4 tw:py-3.5 tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-primary-600 tw:dark:text-primary-400 tw:text-sm tw:font-medium tw:active:bg-slate-50 tw:dark:active:bg-white/5"
               @click="openAddOption()"
             >
               <iconify icon="ph:plus-circle-bold" class="tw:text-lg" />
@@ -922,7 +918,7 @@ const formatVnd = (value) =>
           <div class="tw:px-4 tw:py-3">
             <button
               type="button"
-              class="tw:w-full tw:flex tw:items-center tw:justify-center tw:gap-2 tw:py-3 tw:rounded-xl tw:border tw:border-dashed tw:border-emerald-400 tw:dark:border-emerald-600 tw:bg-transparent tw:cursor-pointer tw:text-emerald-600 tw:dark:text-emerald-400 tw:text-sm tw:font-medium tw:active:bg-emerald-50 tw:dark:active:bg-emerald-900/20"
+              class="tw:w-full tw:flex tw:items-center tw:justify-center tw:gap-2 tw:py-3 tw:rounded-xl tw:border tw:border-dashed tw:border-primary-400 tw:dark:border-primary-600 tw:bg-transparent tw:cursor-pointer tw:text-primary-600 tw:dark:text-primary-400 tw:text-sm tw:font-medium tw:active:bg-primary-50 tw:dark:active:bg-primary-900/20"
               @click="openLinkPicker"
             >
               <iconify icon="ph:plus-bold" class="tw:text-base" />
@@ -1019,7 +1015,7 @@ const formatVnd = (value) =>
             >
               <div
                 class="tw:shrink-0 tw:w-5 tw:h-5 tw:rounded tw:border-2 tw:flex tw:items-center tw:justify-center tw:transition-colors"
-                :class="pickerSelected.has(product.id) ? 'tw:bg-emerald-500 tw:border-emerald-500' : 'tw:border-slate-300 tw:dark:border-white/30'"
+                :class="pickerSelected.has(product.id) ? 'tw:bg-primary-500 tw:border-primary-500' : 'tw:border-slate-300 tw:dark:border-white/30'"
               >
                 <iconify v-if="pickerSelected.has(product.id)" icon="ph:check-bold" class="tw:text-white tw:text-xs" />
               </div>
@@ -1054,7 +1050,7 @@ const formatVnd = (value) =>
             </prime-button>
             <prime-button severity="success" class="tw:flex-1" :loading="submitting" @click="confirmLinkPicker">
               {{ t('products.mobile.addons.pickProductsSubmit') }}
-              <span v-if="pickerSelected.size > 0" class="tw:ml-1 tw:text-emerald-100">({{ pickerSelected.size }})</span>
+              <span v-if="pickerSelected.size > 0" class="tw:ml-1 tw:text-primary-100">({{ pickerSelected.size }})</span>
             </prime-button>
           </div>
 

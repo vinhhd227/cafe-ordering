@@ -1,22 +1,26 @@
-import api from './axios'
+﻿import api from './axios'
 
-// GET /api/products  → PagedResult<List<ProductSummaryDto>>
+// GET /api/products  â†’ PagedResult<List<ProductSummaryDto>>
 export const getProducts = (params) => api.get('/products', { params })
 
-// GET /api/products/:id  → ProductDto
+// GET /api/products/:id  â†’ ProductDto
 export const getProduct = (id) => api.get(`/products/${id}`)
 
-// POST /api/products  → 201 { id }
+// POST /api/products  â†’ 201 { id }
 export const createProduct = (payload) => api.post('/products', payload)
 
-// PUT /api/products/:id  → 204 No Content
+// PUT /api/products/:id  â†’ 204 No Content
 export const updateProduct = (id, payload) => api.put(`/products/${id}`, payload)
 
-// PATCH /api/products/:id/toggle-active  → 204 No Content
+// PATCH /api/products/:id/toggle-active  â†’ 204 No Content
 export const toggleProductActive = (id) => api.patch(`/products/${id}/toggle-active`, {})
 
-// PUT /api/products/:id/option-groups  → 204 No Content
-export const replaceAttributeGroups = (id, payload) => api.put(`/products/${id}/option-groups`, payload)
+// PUT /api/products/:id/variant-groups  â†’ 204 No Content
+export const replaceVariantGroups = (id, payload) => api.put(`/products/${id}/variant-groups`, payload)
 
-// GET /api/admin/products/tree  → List<ProductTreeCategoryDto>
+// GET /api/admin/products/tree  â†’ List<ProductTreeCategoryDto>
 export const getProductTree = () => api.get('/admin/products/tree')
+
+export const getProductVariants = (id) => api.get(`/products/${id}/variants`)
+
+export const replaceProductVariants = (id, payload) => api.put(`/products/${id}/variants`, payload)
