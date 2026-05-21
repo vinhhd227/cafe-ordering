@@ -28,18 +28,23 @@ public class GetSummary : Summary<Get>
       ImageUrl: "https://example.com/images/caramel-macchiato.jpg",
       IsAccompaniment: false,
       EstimatedPrepMinutes: 5,
-      AttributeGroups:
+      VariantGroups:
       [
-        new ProductAttributeGroupDto(1, "Nhiệt độ", true, "Single", 1,
+        new ProductVariantGroupDto(1, "Nhiá»‡t Ä‘á»™", true, "Single", 1,
         [
-          new ProductAttributeValueDto(1, "Nóng", 0, true, 1),
-          new ProductAttributeValueDto(2, "Lạnh", 0, false, 2),
+          new ProductVariantValueDto(1, "NÃ³ng", 0, true, 1),
+          new ProductVariantValueDto(2, "Láº¡nh", 0, false, 2),
         ]),
-        new ProductAttributeGroupDto(2, "Size", false, "Single", 2,
+        new ProductVariantGroupDto(2, "Size", false, "Single", 2,
         [
-          new ProductAttributeValueDto(3, "M", 0, true, 1),
-          new ProductAttributeValueDto(4, "L", 5000, false, 2),
+          new ProductVariantValueDto(3, "M", 0, true, 1),
+          new ProductVariantValueDto(4, "L", 5000, false, 2),
         ]),
+      ],
+      Variants:
+      [
+        new ProductVariantDto(1, 65000, null, null, null, true, 1, [1, 3]),
+        new ProductVariantDto(2, 70000, null, null, null, true, 2, [1, 4]),
       ],
       AssignedOptionGroupIds: [1, 2],
       CreatedAt: new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),

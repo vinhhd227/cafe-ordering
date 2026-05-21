@@ -1,4 +1,5 @@
-using Api.UseCases.Products.OptionGroups;
+using Api.UseCases.Products.VariantGroups;
+using Api.UseCases.Products.Variants;
 
 namespace Api.UseCases.Products.Create;
 
@@ -14,5 +15,6 @@ public record CreateProductCommand(
   decimal? DiscountPrice = null,
   string? Sku = null,
   string? Barcode = null,
-  IReadOnlyList<AttributeGroupInput>? AttributeGroups = null
+  IReadOnlyList<VariantGroupInput>? VariantGroups = null,
+  IReadOnlyList<ProductVariantLabelInput>? Variants = null
 ) : ICommand<Result<int>>;

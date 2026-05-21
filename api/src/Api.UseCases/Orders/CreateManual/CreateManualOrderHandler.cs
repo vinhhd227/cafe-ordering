@@ -1,4 +1,4 @@
-using Api.Core.Aggregates.GuestSessionAggregate;
+﻿using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.ProductAggregate;
@@ -54,7 +54,7 @@ public class CreateManualOrderHandler(
     await orderRepository.AddAsync(order, ct);
 
     var productIds = request.Items.Select(i => i.ProductId).Distinct().ToList();
-    var products = await productRepository.ListAsync(new ProductsByIdsWithAttributesSpec(productIds), ct);
+    var products = await productRepository.ListAsync(new ProductsByIdsWithVariantGroupsSpec(productIds), ct);
 
     if (products.Count != productIds.Count)
     {
@@ -68,13 +68,13 @@ public class CreateManualOrderHandler(
     {
       var product = productMap[item.ProductId];
 
-      var optionData = BuildOptionData(product, item.SelectedOptionValueIds);
-      if (optionData is null)
-        return Result.Invalid(new ValidationError("SelectedOptionValueIds",
+      var pricing = ProductVariantPricingResolver.Resolve(product, item.SelectedVariantValueIds);
+      if (pricing is null)
+        return Result.Invalid(new ValidationError("SelectedVariantValueIds",
           $"Invalid option value IDs for product '{product.Name}'."));
 
-      order.AddItemManual(item.ProductId, product.Name, product.Price, item.Quantity,
-        optionData, item.IsTakeaway, item.Note);
+      order.AddItemManual(item.ProductId, product.Name, pricing.UnitPrice, item.Quantity,
+        pricing.Options, item.IsTakeaway, item.Note);
     }
 
     if (status != OrderStatus.Pending)
@@ -91,25 +91,4 @@ public class CreateManualOrderHandler(
     return Result.Success(order.ToOrderDto(table.Code, isManual: true));
   }
 
-  private static IReadOnlyList<OrderItemOptionData>? BuildOptionData(
-    Product product, List<int>? selectedValueIds)
-  {
-    if (selectedValueIds is null || selectedValueIds.Count == 0)
-      return [];
-
-    var result = new List<OrderItemOptionData>();
-
-    foreach (var valueId in selectedValueIds)
-    {
-      var group = product.AttributeGroups
-        .FirstOrDefault(g => g.Values.Any(v => v.Id == valueId));
-
-      if (group is null) return null;
-
-      var value = group.Values.First(v => v.Id == valueId);
-      result.Add(new OrderItemOptionData(value.Id, group.Name, value.Label, value.PriceAdjustment));
-    }
-
-    return result;
-  }
 }

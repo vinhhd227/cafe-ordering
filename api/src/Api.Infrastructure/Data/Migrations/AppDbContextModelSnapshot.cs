@@ -879,7 +879,51 @@ namespace Api.Infrastructure.Data.Migrations
                     b.ToTable("Products", "business");
                 });
 
-            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductAttributeGroup", b =>
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Barcode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<decimal?>("CostPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Sku")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductId", "DisplayOrder");
+
+                    b.ToTable("ProductVariants", "business");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantGroup", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -910,10 +954,36 @@ namespace Api.Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId", "DisplayOrder");
 
-                    b.ToTable("ProductAttributeGroups", "business");
+                    b.ToTable("ProductVariantGroups", "business");
                 });
 
-            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductAttributeValue", b =>
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantSelection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductVariantValueId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("ProductVariantValueId");
+
+                    b.HasIndex("ProductVariantId", "ProductVariantValueId")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariantSelections", "business");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantValue", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -935,7 +1005,7 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<decimal>("PriceAdjustment")
+                    b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
@@ -943,7 +1013,7 @@ namespace Api.Infrastructure.Data.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("ProductAttributeValues", "business");
+                    b.ToTable("ProductVariantValues", "business");
                 });
 
             modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroup", b =>
@@ -1680,18 +1750,46 @@ namespace Api.Infrastructure.Data.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductAttributeGroup", b =>
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariant", b =>
                 {
                     b.HasOne("Api.Core.Aggregates.ProductAggregate.Product", null)
-                        .WithMany("AttributeGroups")
+                        .WithMany("Variants")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductAttributeValue", b =>
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantGroup", b =>
                 {
-                    b.HasOne("Api.Core.Aggregates.ProductAggregate.ProductAttributeGroup", null)
+                    b.HasOne("Api.Core.Aggregates.ProductAggregate.Product", null)
+                        .WithMany("VariantGroups")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantSelection", b =>
+                {
+                    b.HasOne("Api.Core.Aggregates.ProductAggregate.ProductVariant", "ProductVariant")
+                        .WithMany("Values")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Api.Core.Aggregates.ProductAggregate.ProductVariantValue", "Value")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("Value");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantValue", b =>
+                {
+                    b.HasOne("Api.Core.Aggregates.ProductAggregate.ProductVariantGroup", null)
                         .WithMany("Values")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1701,7 +1799,7 @@ namespace Api.Infrastructure.Data.Migrations
             modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroupMapping", b =>
                 {
                     b.HasOne("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroup", "Group")
-                        .WithMany()
+                        .WithMany("Mappings")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1750,18 +1848,27 @@ namespace Api.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.Product", b =>
                 {
-                    b.Navigation("AttributeGroups");
-
                     b.Navigation("OptionGroupMappings");
+
+                    b.Navigation("VariantGroups");
+
+                    b.Navigation("Variants");
                 });
 
-            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductAttributeGroup", b =>
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariant", b =>
+                {
+                    b.Navigation("Values");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantGroup", b =>
                 {
                     b.Navigation("Values");
                 });
 
             modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroup", b =>
                 {
+                    b.Navigation("Mappings");
+
                     b.Navigation("Values");
                 });
 #pragma warning restore 612, 618

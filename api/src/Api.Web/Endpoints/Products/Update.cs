@@ -1,4 +1,7 @@
+using Api.Core.Aggregates.ProductAggregate;
 using Api.UseCases.Products.Update;
+using Api.UseCases.Products.VariantGroups;
+using Api.UseCases.Products.Variants;
 using Api.Web.Extensions;
 
 namespace Api.Web.Endpoints.Products;
@@ -18,6 +21,9 @@ public sealed class UpdateProductRequest
   public decimal? DiscountPrice { get; set; }
   public string? Sku { get; set; }
   public string? Barcode { get; set; }
+  public List<VariantGroupRequest>? VariantGroups { get; set; }
+  public List<ProductVariantByLabelRequest>? Variants { get; set; }
+  public List<int>? AssignedOptionGroupIds { get; set; }
 }
 
 public class Update : Endpoint<UpdateProductRequest>
@@ -39,6 +45,24 @@ public class Update : Endpoint<UpdateProductRequest>
 
   public override async Task HandleAsync(UpdateProductRequest req, CancellationToken ct)
   {
+    IReadOnlyList<VariantGroupInput>? variantGroups = null;
+    if (req.VariantGroups is not null)
+    {
+      variantGroups = req.VariantGroups
+        .Select(g =>
+        {
+          if (!Enum.TryParse<OptionSelectionType>(g.SelectionType, true, out var selectionType))
+            selectionType = OptionSelectionType.Single;
+
+          return new VariantGroupInput(
+            g.Name,
+            g.IsRequired,
+            selectionType,
+            g.Values.Select(v => new VariantValueInput(v.Label, v.Price, v.IsDefault)).ToList());
+        })
+        .ToList();
+    }
+
     var result = await _mediator.Send(
       new UpdateProductCommand(
         req.ProductId,
@@ -53,7 +77,18 @@ public class Update : Endpoint<UpdateProductRequest>
         req.CostPrice,
         req.DiscountPrice,
         req.Sku,
-        req.Barcode), ct);
+        req.Barcode,
+        variantGroups,
+        req.AssignedOptionGroupIds,
+        req.Variants?
+          .Select(v => new ProductVariantLabelInput(
+            v.ValueLabels,
+            v.Price,
+            v.CostPrice,
+            v.Sku,
+            v.Barcode,
+            v.IsActive))
+          .ToList()), ct);
 
     await this.SendResultAsync(result, ct);
   }

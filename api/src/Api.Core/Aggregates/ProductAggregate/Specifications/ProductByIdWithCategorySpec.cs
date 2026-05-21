@@ -1,7 +1,7 @@
-namespace Api.Core.Aggregates.ProductAggregate.Specifications;
+﻿namespace Api.Core.Aggregates.ProductAggregate.Specifications;
 
 /// <summary>
-///   Lấy Product theo Id kèm Category và OptionGroups (chưa bị xóa)
+///   Láº¥y Product theo Id kÃ¨m Category vÃ  OptionGroups (chÆ°a bá»‹ xÃ³a)
 /// </summary>
 public class ProductByIdWithCategorySpec : Specification<Product>
 {
@@ -10,8 +10,11 @@ public class ProductByIdWithCategorySpec : Specification<Product>
     Query
       .Where(p => p.Id == productId && !p.IsDeleted)
       .Include(p => p.Category)
-      .Include(p => p.AttributeGroups)
+      .Include(p => p.VariantGroups)
         .ThenInclude(g => g.Values)
+      .Include(p => p.Variants)
+        .ThenInclude(v => v.Values)
+          .ThenInclude(v => v.Value)
       .Include(p => p.OptionGroupMappings);
   }
 }

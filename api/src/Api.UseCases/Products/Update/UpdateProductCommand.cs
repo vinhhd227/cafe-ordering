@@ -1,3 +1,6 @@
+using Api.UseCases.Products.VariantGroups;
+using Api.UseCases.Products.Variants;
+
 namespace Api.UseCases.Products.Update;
 
 public record UpdateProductCommand(
@@ -13,5 +16,8 @@ public record UpdateProductCommand(
   decimal? CostPrice = null,
   decimal? DiscountPrice = null,
   string? Sku = null,
-  string? Barcode = null
+  string? Barcode = null,
+  IReadOnlyList<VariantGroupInput>? VariantGroups = null,
+  IReadOnlyList<int>? AssignedOptionGroupIds = null,
+  IReadOnlyList<ProductVariantLabelInput>? Variants = null
 ) : ICommand<Result>;

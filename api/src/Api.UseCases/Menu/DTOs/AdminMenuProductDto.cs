@@ -1,4 +1,4 @@
-namespace Api.UseCases.Menu.DTOs;
+﻿namespace Api.UseCases.Menu.DTOs;
 
 public record AdminMenuProductDto(
   int Id,
@@ -10,5 +10,7 @@ public record AdminMenuProductDto(
   bool IsActive,
   bool IsAccompaniment,
   int? EstimatedPrepMinutes,
-  List<MenuAttributeGroupDto> AttributeGroups
+  List<MenuVariantGroupDto> VariantGroups,
+  List<MenuProductVariantDto> Variants,
+  List<MenuOptionGroupDto> OptionGroups
 );

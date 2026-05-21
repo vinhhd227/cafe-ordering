@@ -1,12 +1,14 @@
-namespace Api.UseCases.Menu.DTOs;
+﻿namespace Api.UseCases.Menu.DTOs;
 
-public record MenuAttributeValueDto(int Id, string Label, decimal PriceAdjustment, bool IsDefault);
+public record MenuVariantValueDto(int Id, string Label, decimal Price, bool IsDefault);
 
-public record MenuAttributeGroupDto(int Id, string Name, bool IsRequired, string SelectionType, List<MenuAttributeValueDto> Values);
+public record MenuVariantGroupDto(int Id, string Name, bool IsRequired, string SelectionType, List<MenuVariantValueDto> Values);
 
 public record MenuOptionValueDto(int Id, string Name, decimal Price);
 
 public record MenuOptionGroupDto(int Id, string Name, bool IsRequired, bool AllowMultiple, bool AllowQuantity, int DisplayOrder, List<MenuOptionValueDto> Values);
+
+public record MenuProductVariantDto(int Id, decimal Price, bool IsActive, List<int> ValueIds);
 
 public record MenuProductDto(
   int Id,
@@ -16,6 +18,7 @@ public record MenuProductDto(
   string? ImageUrl,
   bool IsAccompaniment,
   int? EstimatedPrepMinutes,
-  List<MenuAttributeGroupDto> AttributeGroups,
+  List<MenuVariantGroupDto> VariantGroups,
+  List<MenuProductVariantDto> Variants,
   List<MenuOptionGroupDto> OptionGroups
 );

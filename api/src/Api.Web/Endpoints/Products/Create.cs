@@ -1,23 +1,34 @@
 using Api.Core.Aggregates.ProductAggregate;
 using Api.UseCases.Products.Create;
-using Api.UseCases.Products.OptionGroups;
+using Api.UseCases.Products.VariantGroups;
+using Api.UseCases.Products.Variants;
 using Api.Web.Extensions;
 
 namespace Api.Web.Endpoints.Products;
 
-public sealed class CreateAttributeValueRequest
+public sealed class CreateVariantValueRequest
 {
   public string Label { get; set; } = string.Empty;
-  public decimal PriceAdjustment { get; set; }
+  public decimal Price { get; set; }
   public bool IsDefault { get; set; }
 }
 
-public sealed class CreateAttributeGroupRequest
+public sealed class CreateVariantGroupRequest
 {
   public string Name { get; set; } = string.Empty;
   public bool IsRequired { get; set; }
   public string SelectionType { get; set; } = "Single";
-  public List<CreateAttributeValueRequest> Values { get; set; } = [];
+  public List<CreateVariantValueRequest> Values { get; set; } = [];
+}
+
+public sealed class ProductVariantByLabelRequest
+{
+  public List<string> ValueLabels { get; set; } = [];
+  public decimal Price { get; set; }
+  public decimal? CostPrice { get; set; }
+  public string? Sku { get; set; }
+  public string? Barcode { get; set; }
+  public bool IsActive { get; set; } = true;
 }
 
 public sealed class CreateProductRequest
@@ -33,7 +44,8 @@ public sealed class CreateProductRequest
   public decimal? DiscountPrice { get; set; }
   public string? Sku { get; set; }
   public string? Barcode { get; set; }
-  public List<CreateAttributeGroupRequest>? AttributeGroups { get; set; }
+  public List<CreateVariantGroupRequest>? VariantGroups { get; set; }
+  public List<ProductVariantByLabelRequest>? Variants { get; set; }
 }
 
 public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
@@ -48,22 +60,22 @@ public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
 
   public override async Task HandleAsync(CreateProductRequest req, CancellationToken ct)
   {
-    IReadOnlyList<AttributeGroupInput>? attributeGroups = null;
-    if (req.AttributeGroups is { Count: > 0 })
+    IReadOnlyList<VariantGroupInput>? variantGroups = null;
+    if (req.VariantGroups is { Count: > 0 })
     {
-      var parsed = new List<AttributeGroupInput>();
-      foreach (var g in req.AttributeGroups)
+      var parsed = new List<VariantGroupInput>();
+      foreach (var g in req.VariantGroups)
       {
         if (!Enum.TryParse<OptionSelectionType>(g.SelectionType, true, out var selectionType))
           selectionType = OptionSelectionType.Single;
 
-        parsed.Add(new AttributeGroupInput(
+        parsed.Add(new VariantGroupInput(
           g.Name,
           g.IsRequired,
           selectionType,
-          g.Values.Select(v => new AttributeValueInput(v.Label, v.PriceAdjustment, v.IsDefault)).ToList()));
+          g.Values.Select(v => new VariantValueInput(v.Label, v.Price, v.IsDefault)).ToList()));
       }
-      attributeGroups = parsed;
+      variantGroups = parsed;
     }
 
     var command = new CreateProductCommand(
@@ -78,7 +90,16 @@ public class Create(IMediator mediator) : Ep.Req<CreateProductRequest>.NoRes
       req.DiscountPrice,
       req.Sku,
       req.Barcode,
-      attributeGroups);
+      variantGroups,
+      req.Variants?
+        .Select(v => new ProductVariantLabelInput(
+          v.ValueLabels,
+          v.Price,
+          v.CostPrice,
+          v.Sku,
+          v.Barcode,
+          v.IsActive))
+        .ToList());
 
     var result = await mediator.Send(command, ct);
 

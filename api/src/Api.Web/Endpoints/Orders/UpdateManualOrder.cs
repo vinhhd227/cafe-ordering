@@ -1,4 +1,4 @@
-using Api.UseCases.Orders.DTOs;
+﻿using Api.UseCases.Orders.DTOs;
 using Api.UseCases.Orders.UpdateManual;
 using Api.Web.Extensions;
 
@@ -33,7 +33,7 @@ public class UpdateManualOrder(IMediator mediator) : Endpoint<UpdateManualOrderR
       req.Id,
       req.Items.Select(i => new ManualOrderItemDto(
         i.ProductId, i.Quantity,
-        i.SelectedOptionValueIds,
+        i.SelectedVariantValueIds,
         i.IsTakeaway, i.Note)).ToList(),
       req.OrderedAt,
       req.GuestCount,

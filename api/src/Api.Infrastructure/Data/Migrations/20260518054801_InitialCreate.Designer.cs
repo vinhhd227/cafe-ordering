@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260511084657_RenameOptionToAttributeTables")]
-    partial class RenameOptionToAttributeTables
+    [Migration("20260518054801_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -575,6 +575,12 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
+                    b.Property<decimal>("OptionValueTotal")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasDefaultValue(0m);
+
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
@@ -632,6 +638,44 @@ namespace Api.Infrastructure.Data.Migrations
                     b.HasIndex("OrderItemId");
 
                     b.ToTable("OrderItemOptions", "business");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.OrderAggregate.OrderItemSelectedOption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("GroupName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("OptionValueId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("OrderItemId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("ValueName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderItemId");
+
+                    b.ToTable("OrderItemSelectedOptions", "business");
                 });
 
             modelBuilder.Entity("Api.Core.Aggregates.OrderAggregate.OrderPromotion", b =>
@@ -754,8 +798,16 @@ namespace Api.Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CategoryId")
+                    b.Property<string>("Barcode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("integer");
+
+                    b.Property<decimal?>("CostPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -772,6 +824,10 @@ namespace Api.Infrastructure.Data.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
+
+                    b.Property<decimal?>("DiscountPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<int?>("EstimatedPrepMinutes")
                         .HasColumnType("integer");
@@ -805,6 +861,10 @@ namespace Api.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("bytea");
 
+                    b.Property<string>("Sku")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -822,7 +882,51 @@ namespace Api.Infrastructure.Data.Migrations
                     b.ToTable("Products", "business");
                 });
 
-            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductOptionGroup", b =>
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Barcode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<decimal?>("CostPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Sku")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductId", "DisplayOrder");
+
+                    b.ToTable("ProductVariants", "business");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantGroup", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -853,10 +957,36 @@ namespace Api.Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId", "DisplayOrder");
 
-                    b.ToTable("ProductOptionGroups", "business");
+                    b.ToTable("ProductVariantGroups", "business");
                 });
 
-            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductOptionValue", b =>
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantSelection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductVariantValueId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("ProductVariantValueId");
+
+                    b.HasIndex("ProductVariantId", "ProductVariantValueId")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariantSelections", "business");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantValue", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -878,13 +1008,142 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<decimal>("PriceAdjustment")
+                    b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("GroupId");
+
+                    b.ToTable("ProductVariantValues", "business");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AllowMultiple")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("AllowQuantity")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DisplayOrder");
+
+                    b.HasIndex("IsActive");
+
+                    b.ToTable("ProductOptionGroups", "business");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroupMapping", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductId", "GroupId")
+                        .IsUnique();
+
+                    b.ToTable("ProductOptionGroupMappings", "business");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionValue", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("CostPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsInStock")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("GroupId", "DisplayOrder");
 
                     b.ToTable("ProductOptionValues", "business");
                 });
@@ -1466,6 +1725,15 @@ namespace Api.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Api.Core.Aggregates.OrderAggregate.OrderItemSelectedOption", b =>
+                {
+                    b.HasOne("Api.Core.Aggregates.OrderAggregate.OrderItem", null)
+                        .WithMany("SelectedOptionValues")
+                        .HasForeignKey("OrderItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Api.Core.Aggregates.OrderAggregate.OrderPromotion", b =>
                 {
                     b.HasOne("Api.Core.Aggregates.OrderAggregate.Order", null)
@@ -1480,24 +1748,77 @@ namespace Api.Infrastructure.Data.Migrations
                     b.HasOne("Api.Core.Aggregates.CategoryAggregate.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductOptionGroup", b =>
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariant", b =>
                 {
                     b.HasOne("Api.Core.Aggregates.ProductAggregate.Product", null)
-                        .WithMany("OptionGroups")
+                        .WithMany("Variants")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductOptionValue", b =>
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantGroup", b =>
                 {
-                    b.HasOne("Api.Core.Aggregates.ProductAggregate.ProductOptionGroup", null)
+                    b.HasOne("Api.Core.Aggregates.ProductAggregate.Product", null)
+                        .WithMany("VariantGroups")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantSelection", b =>
+                {
+                    b.HasOne("Api.Core.Aggregates.ProductAggregate.ProductVariant", "ProductVariant")
+                        .WithMany("Values")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Api.Core.Aggregates.ProductAggregate.ProductVariantValue", "Value")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("Value");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantValue", b =>
+                {
+                    b.HasOne("Api.Core.Aggregates.ProductAggregate.ProductVariantGroup", null)
+                        .WithMany("Values")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroupMapping", b =>
+                {
+                    b.HasOne("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroup", "Group")
+                        .WithMany("Mappings")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Api.Core.Aggregates.ProductAggregate.Product", null)
+                        .WithMany("OptionGroupMappings")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionValue", b =>
+                {
+                    b.HasOne("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroup", null)
                         .WithMany("Values")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1523,16 +1844,34 @@ namespace Api.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Api.Core.Aggregates.OrderAggregate.OrderItem", b =>
                 {
+                    b.Navigation("SelectedOptionValues");
+
                     b.Navigation("SelectedOptions");
                 });
 
             modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.Product", b =>
                 {
-                    b.Navigation("OptionGroups");
+                    b.Navigation("OptionGroupMappings");
+
+                    b.Navigation("VariantGroups");
+
+                    b.Navigation("Variants");
                 });
 
-            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductOptionGroup", b =>
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariant", b =>
                 {
+                    b.Navigation("Values");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductAggregate.ProductVariantGroup", b =>
+                {
+                    b.Navigation("Values");
+                });
+
+            modelBuilder.Entity("Api.Core.Aggregates.ProductOptionGroupAggregate.ProductOptionGroup", b =>
+                {
+                    b.Navigation("Mappings");
+
                     b.Navigation("Values");
                 });
 #pragma warning restore 612, 618

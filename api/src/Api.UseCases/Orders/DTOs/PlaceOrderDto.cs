@@ -1,4 +1,4 @@
-namespace Api.UseCases.Orders.DTOs;
+﻿namespace Api.UseCases.Orders.DTOs;
 
 public record PlaceOrderOptionValueInput(int OptionValueId, int Quantity = 1);
 
@@ -7,7 +7,7 @@ public record PlaceOrderItemDto(
   string ProductName,
   decimal UnitPrice,
   int Quantity,
-  List<int>? SelectedOptionValueIds = null,
+  List<int>? SelectedVariantValueIds = null,
   List<PlaceOrderOptionValueInput>? SelectedOptionValues = null,
   bool IsTakeaway = false,
   bool IsFreeGift = false,

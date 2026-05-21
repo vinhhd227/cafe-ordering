@@ -1,4 +1,4 @@
-using Api.Core.Aggregates.CategoryAggregate;
+﻿using Api.Core.Aggregates.CategoryAggregate;
 using Api.Core.Aggregates.CategoryAggregate.Specifications;
 using Api.Core.Aggregates.ProductAggregate;
 using Api.Core.Aggregates.ProductAggregate.Specifications;
@@ -36,17 +36,26 @@ public class GetMenuHandler(
             p.ImageUrl,
             p.IsAccompaniment,
             p.EstimatedPrepMinutes,
-            p.AttributeGroups
+            p.VariantGroups
               .OrderBy(g => g.DisplayOrder)
-              .Select(g => new MenuAttributeGroupDto(
+              .Select(g => new MenuVariantGroupDto(
                 g.Id,
                 g.Name,
                 g.IsRequired,
                 g.SelectionType.ToString(),
                 g.Values
                   .OrderBy(v => v.DisplayOrder)
-                  .Select(v => new MenuAttributeValueDto(v.Id, v.Label, v.PriceAdjustment, v.IsDefault))
+                  .Select(v => new MenuVariantValueDto(v.Id, v.Label, v.Price, v.IsDefault))
                   .ToList()))
+              .ToList(),
+            p.Variants
+              .Where(v => v.IsActive)
+              .OrderBy(v => v.DisplayOrder)
+              .Select(v => new MenuProductVariantDto(
+                v.Id,
+                v.Price,
+                v.IsActive,
+                v.Values.Select(vv => vv.ProductVariantValueId).OrderBy(id => id).ToList()))
               .ToList(),
             p.OptionGroupMappings
               .Where(m => m.Group is { IsActive: true, IsDeleted: false })

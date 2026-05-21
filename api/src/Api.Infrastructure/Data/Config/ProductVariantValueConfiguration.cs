@@ -2,11 +2,11 @@
 
 namespace Api.Infrastructure.Data.Config;
 
-public class ProductAttributeValueConfiguration : IEntityTypeConfiguration<ProductAttributeValue>
+public class ProductVariantValueConfiguration : IEntityTypeConfiguration<ProductVariantValue>
 {
-  public void Configure(EntityTypeBuilder<ProductAttributeValue> builder)
+  public void Configure(EntityTypeBuilder<ProductVariantValue> builder)
   {
-    builder.ToTable("ProductAttributeValues");
+    builder.ToTable("ProductVariantValues");
 
     builder.HasKey(v => v.Id);
 
@@ -14,7 +14,7 @@ public class ProductAttributeValueConfiguration : IEntityTypeConfiguration<Produ
       .HasMaxLength(100)
       .IsRequired();
 
-    builder.Property(v => v.PriceAdjustment)
+    builder.Property(v => v.Price)
       .HasPrecision(18, 2);
 
     builder.HasIndex(v => v.GroupId);

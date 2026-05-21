@@ -1,7 +1,7 @@
-namespace Api.Core.Aggregates.ProductAggregate.Specifications;
+﻿namespace Api.Core.Aggregates.ProductAggregate.Specifications;
 
-[Obsolete("Use ProductsByIdsWithAttributesSpec instead.")]
-public class ProductsByIdsWithOptionsSpec : ProductsByIdsWithAttributesSpec
+[Obsolete("Use ProductsByIdsWithVariantGroupsSpec instead.")]
+public class ProductsByIdsWithOptionsSpec : ProductsByIdsWithVariantGroupsSpec
 {
   public ProductsByIdsWithOptionsSpec(IEnumerable<int> ids) : base(ids) { }
 }

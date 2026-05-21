@@ -1,4 +1,4 @@
-using Api.UseCases.Orders.Create;
+﻿using Api.UseCases.Orders.Create;
 using Api.UseCases.Orders.DTOs;
 using Api.Web.Extensions;
 
@@ -24,7 +24,7 @@ public sealed class CreateOrderItemRequest
   public string ProductName { get; set; } = string.Empty;
   public decimal UnitPrice { get; set; }
   public int Quantity { get; set; }
-  public List<int>? SelectedOptionValueIds { get; set; }
+  public List<int>? SelectedVariantValueIds { get; set; }
   public List<CreateOrderItemOptionValueRequest>? SelectedOptionValues { get; set; }
   public bool IsTakeaway { get; set; }
   public bool IsFreeGift { get; set; }
@@ -47,7 +47,7 @@ public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrde
     var items = req.Items
       .Select(i => new PlaceOrderItemDto(
         i.ProductId, i.ProductName, i.UnitPrice, i.Quantity,
-        i.SelectedOptionValueIds,
+        i.SelectedVariantValueIds,
         i.SelectedOptionValues?.Select(v => new PlaceOrderOptionValueInput(v.OptionValueId, v.Quantity)).ToList(),
         i.IsTakeaway, i.IsFreeGift, i.Note))
       .ToList();

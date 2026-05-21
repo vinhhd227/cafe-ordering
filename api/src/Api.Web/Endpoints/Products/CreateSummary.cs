@@ -1,15 +1,15 @@
-namespace Api.Web.Endpoints.Products;
+﻿namespace Api.Web.Endpoints.Products;
 
 public class CreateSummary : Summary<Create>
 {
   public CreateSummary()
   {
-    Summary = "Tạo sản phẩm mới";
+    Summary = "Táº¡o sáº£n pháº©m má»›i";
     Description =
-      "Thêm sản phẩm mới vào danh mục. Có thể truyền kèm attributeGroups để tạo attribute " +
-      "(size, nhiệt độ, ...) trong cùng một request — backend dùng transaction đảm bảo rollback " +
-      "toàn bộ nếu có lỗi. Nếu không truyền attributeGroups (hoặc để null), dùng " +
-      "PUT /api/products/{id}/option-groups để cấu hình sau.";
+      "ThÃªm sáº£n pháº©m má»›i vÃ o danh má»¥c. CÃ³ thá»ƒ truyá»n kÃ¨m variantGroups Ä‘á»ƒ táº¡o variant " +
+      "(size, nhiá»‡t Ä‘á»™, ...) trong cÃ¹ng má»™t request â€” backend dÃ¹ng transaction Ä‘áº£m báº£o rollback " +
+      "toÃ n bá»™ náº¿u cÃ³ lá»—i. Náº¿u khÃ´ng truyá»n variantGroups (hoáº·c Ä‘á»ƒ null), dÃ¹ng " +
+      "PUT /api/products/{id}/variant-groups Ä‘á»ƒ cáº¥u hÃ¬nh sau.";
 
     ExampleRequest = new CreateProductRequest
     {
@@ -18,31 +18,31 @@ public class CreateSummary : Summary<Create>
       Price = 65000,
       Description = "Espresso layered with vanilla-flavoured syrup, steamed milk, and a caramel drizzle.",
       ImageUrl = "https://example.com/images/caramel-macchiato.jpg",
-      AttributeGroups =
+      VariantGroups =
       [
-        new CreateAttributeGroupRequest
+        new CreateVariantGroupRequest
         {
-          Name = "Nhiệt độ", IsRequired = true, SelectionType = "Single",
+          Name = "Nhiá»‡t Ä‘á»™", IsRequired = true, SelectionType = "Single",
           Values =
           [
-            new CreateAttributeValueRequest { Label = "Nóng", PriceAdjustment = 0, IsDefault = true },
-            new CreateAttributeValueRequest { Label = "Lạnh", PriceAdjustment = 0, IsDefault = false },
+            new CreateVariantValueRequest { Label = "NÃ³ng", Price = 0, IsDefault = true },
+            new CreateVariantValueRequest { Label = "Láº¡nh", Price = 0, IsDefault = false },
           ],
         },
-        new CreateAttributeGroupRequest
+        new CreateVariantGroupRequest
         {
           Name = "Size", IsRequired = false, SelectionType = "Single",
           Values =
           [
-            new CreateAttributeValueRequest { Label = "M", PriceAdjustment = 0,    IsDefault = true },
-            new CreateAttributeValueRequest { Label = "L", PriceAdjustment = 5000, IsDefault = false },
+            new CreateVariantValueRequest { Label = "M", Price = 0,    IsDefault = true },
+            new CreateVariantValueRequest { Label = "L", Price = 5000, IsDefault = false },
           ],
         },
       ],
     };
 
-    Response(201, "Sản phẩm được tạo thành công. Trả về Id của sản phẩm mới.");
-    Response(400, "Dữ liệu không hợp lệ.");
-    Response(404, "CategoryId không tồn tại.");
+    Response(201, "Sáº£n pháº©m Ä‘Æ°á»£c táº¡o thÃ nh cÃ´ng. Tráº£ vá» Id cá»§a sáº£n pháº©m má»›i.");
+    Response(400, "Dá»¯ liá»‡u khÃ´ng há»£p lá»‡.");
+    Response(404, "CategoryId khÃ´ng tá»“n táº¡i.");
   }
 }

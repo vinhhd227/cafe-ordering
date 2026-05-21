@@ -32,8 +32,10 @@ public class AppDbContext : DbContext
   }
 
   public DbSet<Product> Products => Set<Product>();
-  public DbSet<ProductAttributeGroup> ProductAttributeGroups => Set<ProductAttributeGroup>();
-  public DbSet<ProductAttributeValue> ProductAttributeValues => Set<ProductAttributeValue>();
+  public DbSet<ProductVariantGroup> ProductVariantGroups => Set<ProductVariantGroup>();
+  public DbSet<ProductVariantValue> ProductVariantValues => Set<ProductVariantValue>();
+  public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+  public DbSet<ProductVariantSelection> ProductVariantSelections => Set<ProductVariantSelection>();
   public DbSet<ProductOptionGroup> ProductOptionGroups => Set<ProductOptionGroup>();
   public DbSet<ProductOptionValue> ProductOptionValues => Set<ProductOptionValue>();
   public DbSet<ProductOptionGroupMapping> ProductOptionGroupMappings => Set<ProductOptionGroupMapping>();
@@ -58,7 +60,7 @@ public class AppDbContext : DbContext
   {
     base.OnModelCreating(modelBuilder);
 
-    // Tất cả business tables nằm trong schema "business"
+    // Táº¥t cáº£ business tables náº±m trong schema "business"
     modelBuilder.HasDefaultSchema("business");
 
     modelBuilder.ApplyConfigurationsFromAssembly(

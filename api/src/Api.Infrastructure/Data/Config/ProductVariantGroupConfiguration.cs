@@ -2,11 +2,11 @@
 
 namespace Api.Infrastructure.Data.Config;
 
-public class ProductAttributeGroupConfiguration : IEntityTypeConfiguration<ProductAttributeGroup>
+public class ProductVariantGroupConfiguration : IEntityTypeConfiguration<ProductVariantGroup>
 {
-  public void Configure(EntityTypeBuilder<ProductAttributeGroup> builder)
+  public void Configure(EntityTypeBuilder<ProductVariantGroup> builder)
   {
-    builder.ToTable("ProductAttributeGroups");
+    builder.ToTable("ProductVariantGroups");
 
     builder.HasKey(g => g.Id);
 

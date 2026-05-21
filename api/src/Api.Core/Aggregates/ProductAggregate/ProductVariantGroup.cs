@@ -2,11 +2,11 @@
 
 public enum OptionSelectionType { Single = 1, Multiple = 2 }
 
-public class ProductAttributeGroup : BaseEntity
+public class ProductVariantGroup : BaseEntity
 {
-  private readonly List<ProductAttributeValue> _values = new();
+  private readonly List<ProductVariantValue> _values = new();
 
-  private ProductAttributeGroup() { }
+  private ProductVariantGroup() { }
 
   public int ProductId { get; private set; }
   public string Name { get; private set; } = string.Empty;
@@ -14,16 +14,16 @@ public class ProductAttributeGroup : BaseEntity
   public OptionSelectionType SelectionType { get; private set; }
   public int DisplayOrder { get; private set; }
 
-  public IReadOnlyCollection<ProductAttributeValue> Values => _values.AsReadOnly();
+  public IReadOnlyCollection<ProductVariantValue> Values => _values.AsReadOnly();
 
-  internal static ProductAttributeGroup Create(
+  internal static ProductVariantGroup Create(
     int productId,
     string name,
     bool isRequired,
     OptionSelectionType selectionType,
     int displayOrder)
   {
-    return new ProductAttributeGroup
+    return new ProductVariantGroup
     {
       ProductId = productId,
       Name = Guard.Against.NullOrEmpty(name),
@@ -33,8 +33,8 @@ public class ProductAttributeGroup : BaseEntity
     };
   }
 
-  internal void AddValue(string label, decimal priceAdjustment, bool isDefault, int displayOrder)
+  internal void AddValue(string label, decimal price, bool isDefault, int displayOrder)
   {
-    _values.Add(ProductAttributeValue.Create(Id, label, priceAdjustment, isDefault, displayOrder));
+    _values.Add(ProductVariantValue.Create(Id, label, price, isDefault, displayOrder));
   }
 }

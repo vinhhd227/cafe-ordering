@@ -21,7 +21,7 @@ public class OrderItem : BaseEntity
   public int Quantity { get; private set; }
   public decimal Discount { get; private set; }
 
-  /// <summary>Tổng price adjustment từ các attribute option đã chọn (snapshot).</summary>
+  /// <summary>Tổng price adjustment từ các variant option đã chọn (snapshot).</summary>
   public decimal OptionAdjustment { get; private set; }
 
   /// <summary>Tổng giá topping (option values) per item — denormalized để tính nhanh.</summary>

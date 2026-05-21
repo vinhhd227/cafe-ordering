@@ -6,7 +6,8 @@ namespace Api.Core.Aggregates.ProductAggregate;
 
 public class Product : SoftDeletableEntity<int>, IAggregateRoot
 {
-  private readonly List<ProductAttributeGroup> _attributeGroups = new();
+  private readonly List<ProductVariantGroup> _variantGroups = new();
+  private readonly List<ProductVariant> _variants = new();
   private readonly List<ProductOptionGroupMapping> _optionGroupMappings = new();
 
   private Product() { }
@@ -24,7 +25,8 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
   public bool IsAccompaniment { get; private set; }
   public int? EstimatedPrepMinutes { get; private set; }
 
-  public IReadOnlyCollection<ProductAttributeGroup> AttributeGroups => _attributeGroups.AsReadOnly();
+  public IReadOnlyCollection<ProductVariantGroup> VariantGroups => _variantGroups.AsReadOnly();
+  public IReadOnlyCollection<ProductVariant> Variants => _variants.AsReadOnly();
   public IReadOnlyCollection<ProductOptionGroupMapping> OptionGroupMappings => _optionGroupMappings.AsReadOnly();
 
   // Navigation
@@ -89,25 +91,51 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
   }
 
   /// <summary>
-  ///   Xóa toàn bộ attribute groups hiện tại và thay bằng danh sách mới.
-  ///   Gọi từ handler khi admin lưu cấu hình attribute.
+  ///   XÃ³a toÃ n bá»™ variant option groups hiá»‡n táº¡i vÃ  thay báº±ng danh sÃ¡ch má»›i.
+  ///   Gá»i tá»« handler khi admin lÆ°u cáº¥u hÃ¬nh variant option.
   /// </summary>
-  public void ReplaceAttributeGroups(IReadOnlyList<ProductAttributeGroupData> groups)
+  public void ReplaceVariantGroups(IReadOnlyList<ProductVariantGroupData> groups)
   {
-    _attributeGroups.Clear();
+    _variantGroups.Clear();
+    _variants.Clear();
 
     for (var i = 0; i < groups.Count; i++)
     {
       var g = groups[i];
-      var group = ProductAttributeGroup.Create(Id, g.Name, g.IsRequired, g.SelectionType, i);
+      var group = ProductVariantGroup.Create(Id, g.Name, g.IsRequired, g.SelectionType, i);
 
       for (var j = 0; j < g.Values.Count; j++)
       {
         var v = g.Values[j];
-        group.AddValue(v.Label, v.PriceAdjustment, v.IsDefault, j);
+        group.AddValue(v.Label, v.Price, v.IsDefault, j);
       }
 
-      _attributeGroups.Add(group);
+      _variantGroups.Add(group);
+    }
+
+    RegisterDomainEvent(new ProductUpdatedEvent(this));
+  }
+
+  public void ReplaceVariants(IReadOnlyList<ProductVariantData> variants)
+  {
+    _variants.Clear();
+
+    for (var i = 0; i < variants.Count; i++)
+    {
+      var v = variants[i];
+      var variant = ProductVariant.Create(
+        Id,
+        v.Price,
+        v.CostPrice,
+        v.Sku,
+        v.Barcode,
+        v.IsActive,
+        i);
+
+      foreach (var valueId in v.ValueIds.Distinct().OrderBy(id => id))
+        variant.AddValue(valueId);
+
+      _variants.Add(variant);
     }
 
     RegisterDomainEvent(new ProductUpdatedEvent(this));
@@ -134,7 +162,7 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
     RegisterDomainEvent(new ProductDeactivatedEvent(Id));
   }
 
-  /// <summary>Gán một option group vào product. Bỏ qua nếu đã tồn tại.</summary>
+  /// <summary>GÃ¡n má»™t option group vÃ o product. Bá» qua náº¿u Ä‘Ã£ tá»“n táº¡i.</summary>
   public void AssignOptionGroup(int groupId, int displayOrder)
   {
     if (_optionGroupMappings.Any(m => m.GroupId == groupId)) return;
@@ -142,7 +170,7 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
     RegisterDomainEvent(new ProductUpdatedEvent(this));
   }
 
-  /// <summary>Bỏ gán option group khỏi product.</summary>
+  /// <summary>Bá» gÃ¡n option group khá»i product.</summary>
   public void UnassignOptionGroup(int groupId)
   {
     var mapping = _optionGroupMappings.FirstOrDefault(m => m.GroupId == groupId);
@@ -151,7 +179,7 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
     RegisterDomainEvent(new ProductUpdatedEvent(this));
   }
 
-  /// <summary>Thay toàn bộ option group mappings (clear + recreate).</summary>
+  /// <summary>Thay toÃ n bá»™ option group mappings (clear + recreate).</summary>
   public void ReplaceOptionGroupMappings(IReadOnlyList<int> groupIds)
   {
     _optionGroupMappings.Clear();
@@ -161,14 +189,22 @@ public class Product : SoftDeletableEntity<int>, IAggregateRoot
   }
 }
 
-/// <summary>Data transfer records cho ReplaceAttributeGroups.</summary>
-public record ProductAttributeGroupData(
+/// <summary>Data transfer records cho ReplaceVariantGroups.</summary>
+public record ProductVariantGroupData(
   string Name,
   bool IsRequired,
   OptionSelectionType SelectionType,
-  IReadOnlyList<ProductAttributeValueData> Values);
+  IReadOnlyList<ProductVariantValueData> Values);
 
-public record ProductAttributeValueData(
+public record ProductVariantValueData(
   string Label,
-  decimal PriceAdjustment,
+  decimal Price,
   bool IsDefault);
+
+public record ProductVariantData(
+  IReadOnlyList<int> ValueIds,
+  decimal Price,
+  decimal? CostPrice,
+  string? Sku,
+  string? Barcode,
+  bool IsActive);

@@ -1,4 +1,4 @@
-using Api.UseCases.Orders.CreateManual;
+﻿using Api.UseCases.Orders.CreateManual;
 using Api.UseCases.Orders.DTOs;
 using Api.Web.Extensions;
 
@@ -21,7 +21,7 @@ public sealed class ManualOrderItemRequest
 {
   public int ProductId { get; set; }
   public int Quantity { get; set; }
-  public List<int>? SelectedOptionValueIds { get; set; }
+  public List<int>? SelectedVariantValueIds { get; set; }
   public bool IsTakeaway { get; set; }
   public string? Note { get; set; }
 }
@@ -42,7 +42,7 @@ public class CreateManualOrder(IMediator mediator) : Endpoint<CreateManualOrderR
       req.TableId,
       req.Items.Select(i => new ManualOrderItemDto(
         i.ProductId, i.Quantity,
-        i.SelectedOptionValueIds,
+        i.SelectedVariantValueIds,
         i.IsTakeaway, i.Note)).ToList(),
       req.OrderedAt,
       req.GuestCount,

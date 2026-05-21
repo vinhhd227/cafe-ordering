@@ -35,7 +35,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
     builder.Property(p => p.ImageUrl)
       .HasMaxLength(500);
 
-    // Relationship: Product → Category (nullable — product can exist without category)
+    // Relationship: Product â†’ Category (nullable â€” product can exist without category)
     builder.HasOne(p => p.Category)
       .WithMany()
       .HasForeignKey(p => p.CategoryId)
@@ -48,9 +48,14 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
     builder.Property(p => p.EstimatedPrepMinutes);
 
-    builder.HasMany(p => p.AttributeGroups)
+    builder.HasMany(p => p.VariantGroups)
       .WithOne()
       .HasForeignKey(g => g.ProductId)
+      .OnDelete(DeleteBehavior.Cascade);
+
+    builder.HasMany(p => p.Variants)
+      .WithOne()
+      .HasForeignKey(v => v.ProductId)
       .OnDelete(DeleteBehavior.Cascade);
 
     builder.HasMany(p => p.OptionGroupMappings)

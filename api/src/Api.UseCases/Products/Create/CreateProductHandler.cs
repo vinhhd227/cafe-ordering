@@ -1,4 +1,6 @@
 using Api.Core.Aggregates.ProductAggregate;
+using Api.Core.Aggregates.ProductAggregate.Specifications;
+using Api.UseCases.Products.Variants;
 
 namespace Api.UseCases.Products.Create;
 
@@ -21,24 +23,36 @@ public class CreateProductHandler(IRepositoryBase<Product> repository)
 
     product.SetEstimatedPrepTime(request.EstimatedPrepMinutes);
 
-    // Gán attribute groups trước khi AddAsync để EF Core persist tất cả
-    // trong cùng một SaveChanges — tự động atomic, không cần transaction riêng.
-    if (request.AttributeGroups is { Count: > 0 })
+    if (request.VariantGroups is { Count: > 0 })
     {
-      var groupData = request.AttributeGroups
-        .Select(g => new ProductAttributeGroupData(
+      var groupData = request.VariantGroups
+        .Select(g => new ProductVariantGroupData(
           g.Name,
           g.IsRequired,
           g.SelectionType,
           g.Values
-            .Select(v => new ProductAttributeValueData(v.Label, v.PriceAdjustment, v.IsDefault))
+            .Select(v => new ProductVariantValueData(v.Label, v.Price, v.IsDefault))
             .ToList()))
         .ToList();
 
-      product.ReplaceAttributeGroups(groupData);
+      product.ReplaceVariantGroups(groupData);
     }
 
     await repository.AddAsync(product, ct);
+
+    if (request.Variants is { Count: > 0 })
+    {
+      var saved = await repository.FirstOrDefaultAsync(new ProductByIdWithCategorySpec(product.Id), ct);
+      if (saved is null)
+        return Result.NotFound($"Product {product.Id} not found");
+
+      var variantData = ProductVariantLabelResolver.Resolve(saved, request.Variants);
+      if (!variantData.IsSuccess)
+        return Result.Invalid(variantData.ValidationErrors);
+
+      saved.ReplaceVariants(variantData.Value);
+      await repository.UpdateAsync(saved, ct);
+    }
 
     return Result.Success(product.Id);
   }

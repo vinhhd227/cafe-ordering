@@ -1,4 +1,4 @@
-using Api.UseCases.Orders.Edit;
+﻿using Api.UseCases.Orders.Edit;
 using Api.Web.Extensions;
 
 namespace Api.Web.Endpoints.Orders;
@@ -14,7 +14,7 @@ public sealed class EditOrderItemRequestDto
 {
   public int ProductId { get; set; }
   public int Quantity { get; set; }
-  public List<int>? SelectedOptionValueIds { get; set; }
+  public List<int>? SelectedVariantValueIds { get; set; }
   public bool IsTakeaway { get; set; }
   public string? Note { get; set; }
 }
@@ -35,7 +35,7 @@ public class EditOrderItems(IMediator mediator) : Endpoint<EditOrderItemsRequest
       req.Id,
       req.Items.Select(i => new EditOrderItemDto(
         i.ProductId, i.Quantity,
-        i.SelectedOptionValueIds,
+        i.SelectedVariantValueIds,
         i.IsTakeaway, i.Note)).ToList(),
       req.GuestCount);
 

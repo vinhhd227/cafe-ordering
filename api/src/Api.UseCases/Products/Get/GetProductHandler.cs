@@ -33,9 +33,9 @@ public class GetProductHandler(IReadRepositoryBase<Product> repository)
     product.ImageUrl,
     product.IsAccompaniment,
     product.EstimatedPrepMinutes,
-    product.AttributeGroups
+    product.VariantGroups
       .OrderBy(g => g.DisplayOrder)
-      .Select(g => new ProductAttributeGroupDto(
+      .Select(g => new ProductVariantGroupDto(
         g.Id,
         g.Name,
         g.IsRequired,
@@ -43,7 +43,23 @@ public class GetProductHandler(IReadRepositoryBase<Product> repository)
         g.DisplayOrder,
         g.Values
           .OrderBy(v => v.DisplayOrder)
-          .Select(v => new ProductAttributeValueDto(v.Id, v.Label, v.PriceAdjustment, v.IsDefault, v.DisplayOrder))
+          .Select(v => new ProductVariantValueDto(v.Id, v.Label, v.Price, v.IsDefault, v.DisplayOrder))
+          .ToList()))
+      .ToList(),
+    product.Variants
+      .OrderBy(v => v.DisplayOrder)
+      .Select(v => new ProductVariantDto(
+        v.Id,
+        v.Price,
+        v.CostPrice,
+        v.Sku,
+        v.Barcode,
+        v.IsActive,
+        v.DisplayOrder,
+        v.Values
+          .OrderBy(vv => vv.Value?.GroupId)
+          .ThenBy(vv => vv.Value?.DisplayOrder)
+          .Select(vv => vv.ProductVariantValueId)
           .ToList()))
       .ToList(),
     product.OptionGroupMappings
