@@ -4,6 +4,8 @@
     "sectionAppearance": "Appearance",
     "darkMode": "Dark Mode",
     "language": "Language",
+    "accentColor": "Accent color",
+    "font": "Font",
     "sectionAccount": "Account"
   }
 }

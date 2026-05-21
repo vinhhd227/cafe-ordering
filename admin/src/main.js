@@ -34,6 +34,7 @@ const authStore = useAuthStore(pinia)
     await new Promise(r => setTimeout(r, 400)) // chờ Vue render + transition 100% xong
     const splash = document.getElementById('app-loading')
     if (splash) {
+        if (window._loadingMsgInterval) clearInterval(window._loadingMsgInterval)
         splash.classList.add('hidden')
         splash.addEventListener('transitionend', () => splash.remove(), { once: true })
     }

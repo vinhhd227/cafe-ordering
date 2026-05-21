@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="app-dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
@@ -16,7 +16,59 @@
     />
     <meta name="apple-mobile-web-app-title" content="Cafe Admin" />
     <!-- Theme color -->
-    <meta name="theme-color" content="#10b981" />
+    <meta name="theme-color" content="#10b981" id="app-theme-color" />
+    <!-- Preconnect to Google Fonts for faster font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Bootstrap theme + primary color + font from localStorage (must match stores/theme.js) -->
+    <script>
+      (function () {
+        var COLORS = {
+          emerald: { hex: "#10b981", darkBg: "#08110e", lightBg: "#f2f8f5" },
+          violet:  { hex: "#8b5cf6", darkBg: "#0c0917", lightBg: "#f3f0f9" },
+          blue:    { hex: "#3b82f6", darkBg: "#090c18", lightBg: "#f0f3f9" },
+          rose:    { hex: "#f43f5e", darkBg: "#17080b", lightBg: "#f9f0f2" },
+          amber:   { hex: "#f59e0b", darkBg: "#151008", lightBg: "#f8f5ee" },
+          sky:     { hex: "#0ea5e9", darkBg: "#080f17", lightBg: "#f0f5f9" },
+          orange:  { hex: "#f97316", darkBg: "#150d08", lightBg: "#f9f3ee" },
+        };
+        var FONTS = {
+          "Inter":             { family: "'Inter', system-ui, sans-serif",             url: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" },
+          "Plus Jakarta Sans": { family: "'Plus Jakarta Sans', system-ui, sans-serif", url: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" },
+          "Outfit":            { family: "'Outfit', system-ui, sans-serif",            url: "https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" },
+          "DM Sans":           { family: "'DM Sans', system-ui, sans-serif",           url: "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" },
+          "Be Vietnam Pro":    { family: "'Be Vietnam Pro', system-ui, sans-serif",    url: "https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" },
+          "Nunito":            { family: "'Nunito', system-ui, sans-serif",            url: "https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" },
+          "Manrope":           { family: "'Manrope', system-ui, sans-serif",           url: "https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" },
+        };
+        var savedTheme = localStorage.getItem("theme");
+        var isDark = savedTheme ? savedTheme === "dark" : true;
+        var name = localStorage.getItem("primaryColor");
+        var c = COLORS[name] || COLORS.emerald;
+        var hex = c.hex;
+        var r = parseInt(hex.slice(1, 3), 16);
+        var g = parseInt(hex.slice(3, 5), 16);
+        var b = parseInt(hex.slice(5, 7), 16);
+        var root = document.documentElement;
+        if (isDark) root.classList.add("app-dark");
+        root.style.setProperty("--app-loading-bg", isDark ? c.darkBg : c.lightBg);
+        root.style.setProperty("--app-loading-primary", hex);
+        root.style.setProperty("--app-loading-primary-soft", "rgba(" + r + "," + g + "," + b + ",0.15)");
+        root.style.setProperty("--app-loading-track", isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)");
+        root.style.setProperty("--app-loading-text", isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.4)");
+        var meta = document.getElementById("app-theme-color");
+        if (meta) meta.setAttribute("content", hex);
+
+        // Preload chosen font ASAP — before Vue starts
+        var fontName = localStorage.getItem("font");
+        var f = FONTS[fontName] || FONTS["Inter"];
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = f.url;
+        document.head.appendChild(link);
+        root.style.setProperty("--app-font", f.family);
+      })();
+    </script>
     <style>
       #app-loading {
         position: fixed;
@@ -26,7 +78,7 @@
         align-items: center;
         justify-content: center;
         gap: 20px;
-        background: #0b1119;
+        background: var(--app-loading-bg, #0b1119);
         z-index: 9999;
         transition:
           opacity 0.3s ease,
@@ -39,7 +91,7 @@
       .app-loading-logo {
         width: 48px;
         height: 48px;
-        background: rgba(16, 185, 129, 0.15);
+        background: var(--app-loading-primary-soft, rgba(16, 185, 129, 0.15));
         border-radius: 14px;
         display: flex;
         align-items: center;
@@ -48,7 +100,7 @@
       .app-loading-logo svg {
         width: 28px;
         height: 28px;
-        color: #10b981;
+        color: var(--app-loading-primary, #10b981);
       }
       .app-loading-squares {
         display: grid;
@@ -59,7 +111,7 @@
       }
       .app-loading-squares span {
         display: block;
-        background: #10b981;
+        background: var(--app-loading-primary, #10b981);
         border-radius: 3px;
         animation: sq-pulse 0.6s ease-in-out infinite;
         will-change: transform;
@@ -75,24 +127,38 @@
       .app-loading-bar {
         width: 120px;
         height: 2px;
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--app-loading-track, rgba(255, 255, 255, 0.08));
         border-radius: 999px;
         overflow: hidden;
       }
       .app-loading-fill {
         height: 100%;
         width: 0%;
-        background: #10b981;
+        background: var(--app-loading-primary, #10b981);
         border-radius: 999px;
         transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       }
       .app-loading-pct {
         font-family: ui-monospace, monospace;
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.3);
+        font-size: 13px;
+        color: var(--app-loading-text, rgba(255, 255, 255, 0.3));
         letter-spacing: 0.05em;
-        min-width: 36px;
+        min-width: 42px;
         text-align: right;
+      }
+      .app-loading-msg {
+        margin-top: 20px;
+        font-family: var(--app-font, "Inter", system-ui, sans-serif);
+        font-size: 15px;
+        color: var(--app-loading-text, rgba(255, 255, 255, 0.3));
+        text-align: center;
+        max-width: 80%;
+        min-height: 22px;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
+      .app-loading-msg.show {
+        opacity: 1;
       }
     </style>
   </head>
@@ -116,6 +182,7 @@
         </div>
         <span class="app-loading-pct" id="app-loading-pct">0%</span>
       </div>
+      <span class="app-loading-msg" id="app-loading-msg"></span>
     </div>
     <script>
       globalThis._setLoadPct = function (n) {
@@ -125,6 +192,74 @@
         if (pct) pct.textContent = n + "%";
       };
       globalThis._setLoadPct(10);
+
+      // Funny loading messages — rotate every 2.5s
+      (function () {
+        var MESSAGES_BY_LOCALE = {
+          vi: [
+            "Đang pha cà phê...",
+            "Đang xay hạt arabica...",
+            "Đang đánh thức barista...",
+            "Đang lau bàn lần thứ 3...",
+            "Đang đếm tiền tip...",
+            "Đang đuổi mèo khỏi quầy...",
+            "Cà phê chưa đủ caffeine...",
+            "Đang ủ thêm tinh thần...",
+            "Đang giả vờ bận rộn...",
+            "Đang sạc pin cho barista...",
+            "Đang giấu menu cũ...",
+            "Đang dụ khách quay lại...",
+            "Đang đợi khách trả tiền...",
+            "Đang hâm nóng máy pha...",
+            "Đang kiểm tra wifi quán...",
+            "Khoan đã, để tôi uống ngụm đã...",
+            "Đang nghĩ tên đồ uống mới...",
+            "Đang trộm công thức quán bên...",
+          ],
+          en: [
+            "Brewing coffee...",
+            "Grinding arabica beans...",
+            "Waking up the barista...",
+            "Wiping the table (3rd time)...",
+            "Counting the tips...",
+            "Shooing the cat off the counter...",
+            "Coffee needs more caffeine...",
+            "Brewing some motivation...",
+            "Pretending to be busy...",
+            "Recharging the barista...",
+            "Hiding the old menu...",
+            "Luring customers back...",
+            "Waiting for the customer to pay...",
+            "Warming up the espresso machine...",
+            "Checking the cafe wifi...",
+            "Hold on, let me take a sip...",
+            "Brainstorming a new drink name...",
+            "Stealing the neighbor's recipe...",
+          ],
+        };
+        var locale = localStorage.getItem("locale") || "en";
+        var MESSAGES = MESSAGES_BY_LOCALE[locale] || MESSAGES_BY_LOCALE.en;
+        var el = document.getElementById("app-loading-msg");
+        if (!el) return;
+        var used = [];
+        function pick() {
+          if (used.length >= MESSAGES.length) used = [];
+          var i;
+          do { i = Math.floor(Math.random() * MESSAGES.length); } while (used.indexOf(i) >= 0);
+          used.push(i);
+          return MESSAGES[i];
+        }
+        function rotate() {
+          el.classList.remove("show");
+          setTimeout(function () {
+            el.textContent = pick();
+            el.classList.add("show");
+          }, 400);
+        }
+        el.textContent = pick();
+        requestAnimationFrame(function () { el.classList.add("show"); });
+        globalThis._loadingMsgInterval = setInterval(rotate, 2500);
+      })();
     </script>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>

@@ -4,6 +4,8 @@
     "sectionAppearance": "Giao diện",
     "darkMode": "Chế độ tối",
     "language": "Ngôn ngữ",
+    "accentColor": "Màu chủ đạo",
+    "font": "Phông chữ",
     "sectionAccount": "Tài khoản"
   }
 }
