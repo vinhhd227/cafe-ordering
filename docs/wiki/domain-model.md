@@ -1,4 +1,4 @@
----
+﻿---
 title: Domain Model
 tags: [domain, aggregates, entities, ddd]
 updated: 2026-05-11
@@ -6,23 +6,23 @@ updated: 2026-05-11
 
 # Domain Model
 
-Tất cả aggregates nằm trong `api/src/Api.Core/Aggregates/`. Mỗi aggregate có thư mục riêng gồm entity, events, và specifications.
+Táº¥t cáº£ aggregates náº±m trong `api/src/Api.Core/Aggregates/`. Má»—i aggregate cÃ³ thÆ° má»¥c riÃªng gá»“m entity, events, vÃ  specifications.
 
 ---
 
-## Quy tắc chung
+## Quy táº¯c chung
 
-- **Tạo entity**: dùng static factory `Entity.Create(...)`, không dùng `new`
-- **Thay đổi state**: gọi behavior method (`Activate()`, `Close()`, `Process()`...), không set property trực tiếp (tất cả setter là `private`)
-- **Domain events**: đăng ký qua `RegisterDomainEvent(new SomeEvent(...))`
-- **Soft delete**: gọi `Delete()` / `Restore()`, không xóa vật lý — các entity kế thừa `SoftDeletableEntity<TId>` có `IsDeleted`, `DeletedAt`
+- **Táº¡o entity**: dÃ¹ng static factory `Entity.Create(...)`, khÃ´ng dÃ¹ng `new`
+- **Thay Ä‘á»•i state**: gá»i behavior method (`Activate()`, `Close()`, `Process()`...), khÃ´ng set property trá»±c tiáº¿p (táº¥t cáº£ setter lÃ  `private`)
+- **Domain events**: Ä‘Äƒng kÃ½ qua `RegisterDomainEvent(new SomeEvent(...))`
+- **Soft delete**: gá»i `Delete()` / `Restore()`, khÃ´ng xÃ³a váº­t lÃ½ â€” cÃ¡c entity káº¿ thá»«a `SoftDeletableEntity<TId>` cÃ³ `IsDeleted`, `DeletedAt`
 
 ### Hierarchy base classes
 
 ```
 EntityBase<TId>
-  └── AuditableEntity<TId>           ← CreatedAt, UpdatedAt, CreatedBy, UpdatedBy
-        └── SoftDeletableEntity<TId> ← + IsDeleted, DeletedAt, IsActive
+  â””â”€â”€ AuditableEntity<TId>           â† CreatedAt, UpdatedAt, CreatedBy, UpdatedBy
+        â””â”€â”€ SoftDeletableEntity<TId> â† + IsDeleted, DeletedAt, IsActive
 ```
 
 ---
@@ -32,14 +32,14 @@ EntityBase<TId>
 **File:** `TableAggregate/Table.cs`
 **Base:** `SoftDeletableEntity<int>`, `IAggregateRoot`
 
-| Property | Type | Mô tả |
+| Property | Type | MÃ´ táº£ |
 |----------|------|-------|
-| `Code` | string | Mã bàn (ví dụ: "A1", "B3") |
-| `IsActive` | bool | Bàn có đang hoạt động không |
+| `Code` | string | MÃ£ bÃ n (vÃ­ dá»¥: "A1", "B3") |
+| `IsActive` | bool | BÃ n cÃ³ Ä‘ang hoáº¡t Ä‘á»™ng khÃ´ng |
 | `Status` | `TableStatus` | `Available` / `Occupied` / `Cleaning` |
-| `ActiveSessionId` | `Guid?` | FK đến GuestSession đang mở |
-| `ZoneId` | `int?` | FK đến Zone |
-| `QrToken` | `Guid` | Token để tạo QR code |
+| `ActiveSessionId` | `Guid?` | FK Ä‘áº¿n GuestSession Ä‘ang má»Ÿ |
+| `ZoneId` | `int?` | FK Ä‘áº¿n Zone |
+| `QrToken` | `Guid` | Token Ä‘á»ƒ táº¡o QR code |
 
 **Behaviors:**
 ```csharp
@@ -47,9 +47,9 @@ Table.Create(code, zoneId?)     // factory
 table.UpdateCode(code)
 table.Activate() / Deactivate()
 table.AssignZone(zoneId?)
-table.OpenSession(sessionId)    // → Status = Occupied, đăng ký TableSessionOpenedEvent
-table.CloseSession()            // → Status = Cleaning, đăng ký TableSessionClosedEvent
-table.MarkAvailable()           // → Status = Available
+table.OpenSession(sessionId)    // â†’ Status = Occupied, Ä‘Äƒng kÃ½ TableSessionOpenedEvent
+table.CloseSession()            // â†’ Status = Cleaning, Ä‘Äƒng kÃ½ TableSessionClosedEvent
+table.MarkAvailable()           // â†’ Status = Available
 table.RegenerateQrToken()       // QrToken = Guid.NewGuid()
 ```
 
@@ -62,28 +62,28 @@ table.RegenerateQrToken()       // QrToken = Guid.NewGuid()
 **File:** `GuestSessionAggregate/GuestSession.cs`
 **Base:** `AuditableEntity<Guid>`, `IAggregateRoot`
 
-| Property | Type | Mô tả |
+| Property | Type | MÃ´ táº£ |
 |----------|------|-------|
-| `TableId` | `int?` | FK đến Table |
+| `TableId` | `int?` | FK Ä‘áº¿n Table |
 | `Status` | `GuestSessionStatus` | `Active` / `Closed` |
 | `Source` | `GuestSessionSource` | `QrCode` / `Manual` |
-| `OpenedAt` | `DateTime` | Thời điểm mở session |
-| `ClosedAt` | `DateTime?` | Thời điểm đóng session |
-| `CustomerId` | `string?` | Nếu khách đăng nhập, merge session với customer |
+| `OpenedAt` | `DateTime` | Thá»i Ä‘iá»ƒm má»Ÿ session |
+| `ClosedAt` | `DateTime?` | Thá»i Ä‘iá»ƒm Ä‘Ã³ng session |
+| `CustomerId` | `string?` | Náº¿u khÃ¡ch Ä‘Äƒng nháº­p, merge session vá»›i customer |
 
 **Behaviors:**
 ```csharp
-GuestSession.Create(tableId)         // → Status = Active, đăng ký SessionOpenedEvent → Table.OpenSession()
-GuestSession.CreateManual(tableId)   // → Status = Active, Source = Manual, KHÔNG đăng ký event
-session.Close()                      // → Status = Closed, đăng ký SessionClosedEvent → Table.CloseSession()
-session.MergeWithCustomer(customerId)// → CustomerId = ..., đăng ký SessionMergedWithCustomerEvent
+GuestSession.Create(tableId)         // â†’ Status = Active, Ä‘Äƒng kÃ½ SessionOpenedEvent â†’ Table.OpenSession()
+GuestSession.CreateManual(tableId)   // â†’ Status = Active, Source = Manual, KHÃ”NG Ä‘Äƒng kÃ½ event
+session.Close()                      // â†’ Status = Closed, Ä‘Äƒng kÃ½ SessionClosedEvent â†’ Table.CloseSession()
+session.MergeWithCustomer(customerId)// â†’ CustomerId = ..., Ä‘Äƒng kÃ½ SessionMergedWithCustomerEvent
 ```
 
 **Enums:**
 - `GuestSessionStatus`: `Active`, `Closed`
 - `GuestSessionSource`: `QrCode`, `Manual`
 
-Xem thêm: [[session-flow]]
+Xem thÃªm: [[session-flow]]
 
 ---
 
@@ -92,104 +92,104 @@ Xem thêm: [[session-flow]]
 **File:** `OrderAggregate/Order.cs`
 **Base:** `AuditableEntity<int>`, `IAggregateRoot`
 
-| Property | Type | Mô tả |
+| Property | Type | MÃ´ táº£ |
 |----------|------|-------|
-| `OrderNumber` | string | Số đơn (ví dụ: "ORD-001") |
-| `SessionId` | `Guid` | FK đến GuestSession |
-| `CustomerId` | `string?` | FK đến Customer (null nếu khách vãng lai) |
-| `DeviceToken` | `string?` | Anonymous device token từ client |
+| `OrderNumber` | string | Sá»‘ Ä‘Æ¡n (vÃ­ dá»¥: "ORD-001") |
+| `SessionId` | `Guid` | FK Ä‘áº¿n GuestSession |
+| `CustomerId` | `string?` | FK Ä‘áº¿n Customer (null náº¿u khÃ¡ch vÃ£ng lai) |
+| `DeviceToken` | `string?` | Anonymous device token tá»« client |
 | `Status` | `OrderStatus` | Pending / Processing / Completed / Cancelled |
 | `PaymentStatus` | `PaymentStatus` | Unpaid / Paid |
 | `PaymentMethod` | `PaymentMethod` | `Unknown` / `Cash` / `BankTransfer` |
-| `GuestCount` | `int?` | Số khách tại bàn |
-| `AmountReceived` | `decimal?` | Tiền khách đưa |
-| `TipAmount` | `decimal` | Tiền tip |
-| `OrderDate` | `DateTime` | Ngày giờ đặt hàng (có thể chỉnh bởi admin) |
-| `CompletedAt` | `DateTime?` | Thời điểm hoàn thành |
-| `PaidAt` | `DateTime?` | Thời điểm thanh toán |
-| `TotalAmount` | `decimal` | Tổng tiền (tính từ items) |
-| `TotalDiscount` | `decimal` | Tổng giảm giá (từ promotions) |
-| `FinalAmount` | `decimal` | Thực thu = Max(0, TotalAmount - TotalDiscount) |
-| `Items` | `IReadOnlyCollection<OrderItem>` | Danh sách món |
-| `Promotions` | `IReadOnlyCollection<OrderPromotion>` | Danh sách khuyến mãi đã áp |
+| `GuestCount` | `int?` | Sá»‘ khÃ¡ch táº¡i bÃ n |
+| `AmountReceived` | `decimal?` | Tiá»n khÃ¡ch Ä‘Æ°a |
+| `TipAmount` | `decimal` | Tiá»n tip |
+| `OrderDate` | `DateTime` | NgÃ y giá» Ä‘áº·t hÃ ng (cÃ³ thá»ƒ chá»‰nh bá»Ÿi admin) |
+| `CompletedAt` | `DateTime?` | Thá»i Ä‘iá»ƒm hoÃ n thÃ nh |
+| `PaidAt` | `DateTime?` | Thá»i Ä‘iá»ƒm thanh toÃ¡n |
+| `TotalAmount` | `decimal` | Tá»•ng tiá»n (tÃ­nh tá»« items) |
+| `TotalDiscount` | `decimal` | Tá»•ng giáº£m giÃ¡ (tá»« promotions) |
+| `FinalAmount` | `decimal` | Thá»±c thu = Max(0, TotalAmount - TotalDiscount) |
+| `Items` | `IReadOnlyCollection<OrderItem>` | Danh sÃ¡ch mÃ³n |
+| `Promotions` | `IReadOnlyCollection<OrderPromotion>` | Danh sÃ¡ch khuyáº¿n mÃ£i Ä‘Ã£ Ã¡p |
 
 **Behaviors (state machine):**
 ```
-Pending → Processing → Completed
-       ↘             ↗
+Pending â†’ Processing â†’ Completed
+       â†˜             â†—
          Cancelled
 ```
 ```csharp
 Order.Create(sessionId, orderNumber, deviceToken?, customerId?, guestCount?)
-order.NotifyCreated()           // đăng ký OrderCreatedEvent (gọi SAU khi add items)
-order.AddItem(productId, ...)   // thêm item, đăng ký OrderItemAddedEvent
-order.Process()                 // Pending → Processing
-order.Complete()                // Processing → Completed, đăng ký OrderCompletedEvent
-order.Cancel()                  // Pending/Processing → Cancelled
-order.UpdatePayment(...)        // cập nhật PaymentStatus, Method, AmountReceived
-order.ApplyPromotion(...)       // áp khuyến mãi (chỉ khi Pending)
-order.RemovePromotion(...)      // xóa khuyến mãi (chỉ khi Pending)
+order.NotifyCreated()           // Ä‘Äƒng kÃ½ OrderCreatedEvent (gá»i SAU khi add items)
+order.AddItem(productId, ...)   // thÃªm item, Ä‘Äƒng kÃ½ OrderItemAddedEvent
+order.Process()                 // Pending â†’ Processing
+order.Complete()                // Processing â†’ Completed, Ä‘Äƒng kÃ½ OrderCompletedEvent
+order.Cancel()                  // Pending/Processing â†’ Cancelled
+order.UpdatePayment(...)        // cáº­p nháº­t PaymentStatus, Method, AmountReceived
+order.ApplyPromotion(...)       // Ã¡p khuyáº¿n mÃ£i (chá»‰ khi Pending)
+order.RemovePromotion(...)      // xÃ³a khuyáº¿n mÃ£i (chá»‰ khi Pending)
 ```
 
 **Admin edit (bypass state machine):**
 ```csharp
-order.UpdateManually(orderedAt?, guestCount)  // xóa hết items + promotions, cập nhật metadata
-order.AddItemManual(...)                      // thêm item bỏ qua status guard
-order.ForceSetStatus(status)                  // set trực tiếp, không qua state machine
-order.SetItemQuantity(productId, ...)         // set số lượng (0 = xóa item)
-order.UpdateOrderDate(newDate)                // cập nhật ngày đặt (điều chỉnh doanh thu theo ngày)
-order.UpdateGuestCount(value)                 // cập nhật số khách
-order.ClearAllItems()                         // xóa toàn bộ items + promotions
-order.RemoveFreeGiftItems()                   // xóa tất cả free gift items (khi item thường bị xóa)
-order.ResetAllItemDiscounts()                 // reset item-level discounts về 0
+order.UpdateManually(orderedAt?, guestCount)  // xÃ³a háº¿t items + promotions, cáº­p nháº­t metadata
+order.AddItemManual(...)                      // thÃªm item bá» qua status guard
+order.ForceSetStatus(status)                  // set trá»±c tiáº¿p, khÃ´ng qua state machine
+order.SetItemQuantity(productId, ...)         // set sá»‘ lÆ°á»£ng (0 = xÃ³a item)
+order.UpdateOrderDate(newDate)                // cáº­p nháº­t ngÃ y Ä‘áº·t (Ä‘iá»u chá»‰nh doanh thu theo ngÃ y)
+order.UpdateGuestCount(value)                 // cáº­p nháº­t sá»‘ khÃ¡ch
+order.ClearAllItems()                         // xÃ³a toÃ n bá»™ items + promotions
+order.RemoveFreeGiftItems()                   // xÃ³a táº¥t cáº£ free gift items (khi item thÆ°á»ng bá»‹ xÃ³a)
+order.ResetAllItemDiscounts()                 // reset item-level discounts vá» 0
 ```
 
 **Merge/Split:**
 ```csharp
-order.AddItemForMerge(...)  // merge: thêm item, cộng dồn quantity nếu trùng productId
-order.RemoveItem(...)       // split: giảm/xóa item
-order.CancelAsMerged()      // đánh dấu cancelled khi bị merge vào order khác
-order.AddGuestCount(...)    // cộng GuestCount từ secondary order
+order.AddItemForMerge(...)  // merge: thÃªm item, cá»™ng dá»“n quantity náº¿u trÃ¹ng productId
+order.RemoveItem(...)       // split: giáº£m/xÃ³a item
+order.CancelAsMerged()      // Ä‘Ã¡nh dáº¥u cancelled khi bá»‹ merge vÃ o order khÃ¡c
+order.AddGuestCount(...)    // cá»™ng GuestCount tá»« secondary order
 ```
 
-Xem thêm: [[order-flow]], [[promotions]]
+Xem thÃªm: [[order-flow]], [[promotions]]
 
 ---
 
 ## OrderItem
 
 **File:** `OrderAggregate/OrderItem.cs`
-Không phải aggregate root — thuộc Order aggregate.
+KhÃ´ng pháº£i aggregate root â€” thuá»™c Order aggregate.
 
-| Property | Type | Mô tả |
+| Property | Type | MÃ´ táº£ |
 |----------|------|-------|
-| `ProductId` | int | FK đến Product |
-| `ProductName` | string | Snapshot tên sản phẩm tại thời điểm đặt |
-| `UnitPrice` | decimal | Snapshot giá gốc sản phẩm |
-| `OptionAdjustment` | decimal | Tổng price adjustment của tất cả options đã chọn (denormalized) |
-| `Quantity` | int | Số lượng |
-| `IsTakeaway` | bool | Mang về |
-| `IsFreeGift` | bool | Từ promotion BUY_X_GET_Y |
-| `Note` | string? | Ghi chú riêng |
-| `Discount` | decimal | Item-level discount (từ promotion) |
+| `ProductId` | int | FK Ä‘áº¿n Product |
+| `ProductName` | string | Snapshot tÃªn sáº£n pháº©m táº¡i thá»i Ä‘iá»ƒm Ä‘áº·t |
+| `UnitPrice` | decimal | Snapshot giÃ¡ bÃ¡n cá»§a sáº£n pháº©m/variant táº¡i thá»i Ä‘iá»ƒm Ä‘áº·t |
+| `OptionAdjustment` | decimal | Tá»•ng giÃ¡ cá»™ng thÃªm tá»« variants hoáº·c addon/topping (denormalized) |
+| `Quantity` | int | Sá»‘ lÆ°á»£ng |
+| `IsTakeaway` | bool | Mang vá» |
+| `IsFreeGift` | bool | Tá»« promotion BUY_X_GET_Y |
+| `Note` | string? | Ghi chÃº riÃªng |
+| `Discount` | decimal | Item-level discount (tá»« promotion) |
 | `TotalPrice` | decimal | `(UnitPrice + OptionAdjustment - Discount) * Quantity` |
-| `SelectedOptions` | `IReadOnlyCollection<OrderItemOption>` | Các option đã chọn (snapshot) |
+| `SelectedOptions` | `IReadOnlyCollection<OrderItemOption>` | CÃ¡c option Ä‘Ã£ chá»n (snapshot) |
 
-**`OrderItemOption`** — snapshot attribute tại thời điểm đặt hàng:
+**`OrderItemOption`** â€” snapshot variant táº¡i thá»i Ä‘iá»ƒm Ä‘áº·t hÃ ng:
 
-| Property | Mô tả |
+| Property | MÃ´ táº£ |
 |----------|-------|
-| `OptionValueId` | ID của `ProductAttributeValue` gốc (tham chiếu, không FK cứng) |
-| `GroupName` | Snapshot tên nhóm (ví dụ: "Nhiệt độ") |
-| `Label` | Snapshot tên giá trị (ví dụ: "Nóng") |
-| `PriceAdjustment` | Snapshot giá điều chỉnh tại thời điểm đặt |
+| `OptionValueId` | ID cá»§a `ProductVariantValue` gá»‘c (tham chiáº¿u, khÃ´ng FK cá»©ng) |
+| `GroupName` | Snapshot tÃªn nhÃ³m (vÃ­ dá»¥: "Nhiá»‡t Ä‘á»™") |
+| `Label` | Snapshot tÃªn giÃ¡ trá»‹ (vÃ­ dá»¥: "NÃ³ng") |
+| `PriceAdjustment` | Snapshot giÃ¡ Ä‘iá»u chá»‰nh táº¡i thá»i Ä‘iá»ƒm Ä‘áº·t; legacy cho cÆ¡ cháº¿ cá»™ng thÃªm |
 
-> **Lý do snapshot:** Thay đổi attribute sau này không ảnh hưởng đơn hàng cũ. `OptionAdjustment` trên `OrderItem` được cộng dồn mỗi khi `AddOption()` được gọi — tránh lazy-load khi tính `TotalPrice`.
+> **LÃ½ do snapshot:** Thay Ä‘á»•i variant/addon sau nÃ y khÃ´ng áº£nh hÆ°á»Ÿng Ä‘Æ¡n hÃ ng cÅ©. CÆ¡ cháº¿ hiá»‡n táº¡i váº«n cá»™ng `PriceAdjustment` vÃ o `OptionAdjustment`; náº¿u variant cáº§n giÃ¡ cá»©ng theo tá»• há»£p, handler nÃªn resolve variant vÃ  snapshot giÃ¡ cuá»‘i cÃ¹ng vÃ o `UnitPrice`.
 
 **Behaviors:**
 ```csharp
 OrderItem.Create(productId, productName, unitPrice, quantity, isTakeaway, isFreeGift, note)
-item.AddOption(optionValueId, groupName, label, priceAdjustment)  // cộng vào OptionAdjustment
+item.AddOption(optionValueId, groupName, label, priceAdjustment)  // cá»™ng vÃ o OptionAdjustment
 item.ApplyDiscount(amount)
 item.UpdateQuantity(qty)
 item.UpdateNote(note)
@@ -203,21 +203,21 @@ item.UpdateTakeaway(isTakeaway)
 **File:** `ProductAggregate/Product.cs`
 **Base:** `SoftDeletableEntity<int>`, `IAggregateRoot`
 
-| Property | Type | Mô tả |
+| Property | Type | MÃ´ táº£ |
 |----------|------|-------|
-| `Name` | string | Tên sản phẩm |
-| `Description` | string? | Mô tả |
-| `Price` | decimal | Giá bán gốc (cho phép = 0) |
-| `CostPrice` | decimal? | Giá vốn |
-| `DiscountPrice` | decimal? | Giá khuyến mãi |
-| `Sku` | string? | Mã SKU nội bộ |
-| `Barcode` | string? | Barcode sản phẩm |
-| `ImageUrl` | string? | URL ảnh |
-| `CategoryId` | int? | FK đến Category (nullable — sản phẩm có thể không thuộc danh mục) |
-| `IsActive` | bool | Đang bán hay không |
-| `IsAccompaniment` | bool | Món đi kèm (không tính vào doanh thu chính) |
-| `EstimatedPrepMinutes` | int? | Thời gian pha chế ước tính |
-| `AttributeGroups` | `IReadOnlyCollection<ProductAttributeGroup>` | Các nhóm attribute của sản phẩm |
+| `Name` | string | TÃªn sáº£n pháº©m |
+| `Description` | string? | MÃ´ táº£ |
+| `Price` | decimal | GiÃ¡ bÃ¡n gá»‘c (cho phÃ©p = 0) |
+| `CostPrice` | decimal? | GiÃ¡ vá»‘n |
+| `DiscountPrice` | decimal? | GiÃ¡ khuyáº¿n mÃ£i |
+| `Sku` | string? | MÃ£ SKU ná»™i bá»™ |
+| `Barcode` | string? | Barcode sáº£n pháº©m |
+| `ImageUrl` | string? | URL áº£nh |
+| `CategoryId` | int? | FK Ä‘áº¿n Category (nullable â€” sáº£n pháº©m cÃ³ thá»ƒ khÃ´ng thuá»™c danh má»¥c) |
+| `IsActive` | bool | Äang bÃ¡n hay khÃ´ng |
+| `IsAccompaniment` | bool | MÃ³n Ä‘i kÃ¨m (khÃ´ng tÃ­nh vÃ o doanh thu chÃ­nh) |
+| `EstimatedPrepMinutes` | int? | Thá»i gian pha cháº¿ Æ°á»›c tÃ­nh |
+| `VariantGroups` | `IReadOnlyCollection<ProductVariantGroup>` | CÃ¡c nhÃ³m variant cá»§a sáº£n pháº©m |
 
 **Behaviors:**
 ```csharp
@@ -230,68 +230,131 @@ product.UpdateAccompaniment(value)
 product.ChangeCategory(categoryId?)
 product.Activate() / Deactivate()
 product.Delete() / Restore()
-product.ReplaceAttributeGroups(groups)  // clear + recreate toàn bộ attribute groups
+product.ReplaceVariantGroups(groups)  // clear + recreate toÃ n bá»™ variant groups
 ```
 
 **Events:** `ProductCreatedEvent`, `ProductUpdatedEvent`, `ProductActivatedEvent`, `ProductDeactivatedEvent`
-→ Mọi sự kiện đều invalidate public menu cache qua `InvalidateMenuCacheHandler`.
+â†’ Má»i sá»± kiá»‡n Ä‘á»u invalidate public menu cache qua `InvalidateMenuCacheHandler`.
 
-### ProductAttributeGroup
+### ProductVariantGroup
 
-Nhóm attribute của sản phẩm (ví dụ: "Nhiệt độ", "Size", "Mức đường").
+NhÃ³m option **inline theo tá»«ng sáº£n pháº©m** dÃ¹ng Ä‘á»ƒ táº¡o biáº¿n thá»ƒ cá»§a mÃ³n (vÃ­ dá»¥: "Nhiá»‡t Ä‘á»™", "Size", "Má»©c Ä‘Æ°á»ng"). TÃªn nÃ y thay cho cÃ¡ch gá»i attribute cÅ© Ä‘á»ƒ trÃ¡nh hiá»ƒu nháº§m Ä‘Ã¢y lÃ  generic metadata; nÃ³ lÃ  option cáº¥u thÃ nh variant cá»§a product.
 
-**DB table:** `business.ProductAttributeGroups`
+> **Quy táº¯c Ä‘á»‹nh giÃ¡ khuyáº¿n nghá»‹:** Náº¿u má»™t sáº£n pháº©m cÃ³ nhiá»u `ProductVariantGroup`, sá»‘ tá»• há»£p giÃ¡ phÃ¡t sinh lÃ  tÃ­ch sá»‘ giÃ¡ trá»‹ cá»§a tá»«ng group (`v1 * v2 * ... * vN`). CÆ¡ cháº¿ `PriceAdjustment` chá»‰ há»£p lÃ½ khi giÃ¡ tháº­t sá»± lÃ  `base price + adjustment`. Náº¿u giÃ¡ phá»¥ thuá»™c vÃ o tá»• há»£p lá»±a chá»n, nÃªn thÃªm `ProductVariant`/`ProductVariantCombination` chá»©a táº­p `ProductVariantValueId` vÃ  `Price`, rá»“i snapshot `variant.Price` vÃ o `OrderItem.UnitPrice`.
 
-| Property | Type | Mô tả |
+VÃ­ dá»¥ CÃ  phÃª cÃ³ 2 group:
+
+| Group | Values |
+|-------|--------|
+| Size | M, L |
+| Nhiá»‡t Ä‘á»™ | NÃ³ng, ÄÃ¡ |
+
+Sáº½ cÃ³ 4 biáº¿n thá»ƒ giÃ¡ cáº§n quáº£n lÃ½: M/NÃ³ng, M/ÄÃ¡, L/NÃ³ng, L/ÄÃ¡. Náº¿u L/ÄÃ¡ khÃ´ng báº±ng `giÃ¡ M/NÃ³ng + phá»¥ thu L + phá»¥ thu ÄÃ¡`, khÃ´ng nÃªn dÃ¹ng cá»™ng thÃªm; nÃªn khai bÃ¡o giÃ¡ cá»©ng cho tá»«ng tá»• há»£p.
+
+**DB table:** `business.ProductVariantGroups`
+
+| Property | Type | MÃ´ táº£ |
 |----------|------|-------|
-| `ProductId` | int | FK đến Product |
-| `Name` | string | Tên nhóm |
-| `IsRequired` | bool | Bắt buộc chọn |
-| `SelectionType` | `OptionSelectionType` | `Single` (chọn 1) / `Multiple` (chọn nhiều) |
-| `DisplayOrder` | int | Thứ tự hiển thị |
-| `Values` | `IReadOnlyCollection<ProductAttributeValue>` | Các giá trị trong nhóm |
+| `ProductId` | int | FK Ä‘áº¿n Product |
+| `Name` | string | TÃªn nhÃ³m |
+| `IsRequired` | bool | Báº¯t buá»™c chá»n |
+| `SelectionType` | `OptionSelectionType` | `Single` (chá»n 1) / `Multiple` (chá»n nhiá»u) |
+| `DisplayOrder` | int | Thá»© tá»± hiá»ƒn thá»‹ |
+| `Values` | `IReadOnlyCollection<ProductVariantValue>` | CÃ¡c giÃ¡ trá»‹ trong nhÃ³m |
 
-### ProductAttributeValue
+### ProductVariantValue
 
-Một giá trị cụ thể trong nhóm attribute (ví dụ: "Nóng", "Size L").
+Má»™t giÃ¡ trá»‹ cá»¥ thá»ƒ trong nhÃ³m variant (vÃ­ dá»¥: "NÃ³ng", "Size L").
 
-**DB table:** `business.ProductAttributeValues`
+**DB table:** `business.ProductVariantValues`
 
-| Property | Type | Mô tả |
+| Property | Type | MÃ´ táº£ |
 |----------|------|-------|
-| `GroupId` | int | FK đến ProductAttributeGroup |
-| `Label` | string | Tên hiển thị |
-| `PriceAdjustment` | decimal | Thay đổi giá so với giá gốc (0 = không thêm) |
-| `IsDefault` | bool | Giá trị mặc định |
-| `DisplayOrder` | int | Thứ tự hiển thị |
+| `GroupId` | int | FK Ä‘áº¿n ProductVariantGroup |
+| `Label` | string | TÃªn hiá»ƒn thá»‹ |
+| `Price` | decimal | GiÃ¡ cá»§a giÃ¡ trá»‹ variant. Khi cÃ³ `ProductVariant`, giÃ¡ bÃ¡n cuá»‘i cÃ¹ng láº¥y tá»« `ProductVariant.Price` |
+| `IsDefault` | bool | GiÃ¡ trá»‹ máº·c Ä‘á»‹nh |
+| `DisplayOrder` | int | Thá»© tá»± hiá»ƒn thá»‹ |
 
-**API cấu hình attribute groups:** `PUT /api/products/{id}/option-groups` — thay toàn bộ attribute groups (clear + recreate).
+**API cáº¥u hÃ¬nh variant groups:** `PUT /api/products/{id}/variant-groups` â€” thay toÃ n bá»™ variant groups (clear + recreate).
 
 ```json
 {
   "groups": [
     {
-      "name": "Nhiệt độ", "isRequired": true, "selectionType": "Single",
+      "name": "Nhiá»‡t Ä‘á»™", "isRequired": true, "selectionType": "Single",
       "values": [
-        { "label": "Nóng", "priceAdjustment": 0, "isDefault": true },
-        { "label": "Lạnh", "priceAdjustment": 0, "isDefault": false }
+        { "label": "NÃ³ng", "price": 0, "isDefault": true },
+        { "label": "Láº¡nh", "price": 0, "isDefault": false }
       ]
     },
     {
       "name": "Size", "isRequired": false, "selectionType": "Single",
       "values": [
-        { "label": "M", "priceAdjustment": 0,    "isDefault": true },
-        { "label": "L", "priceAdjustment": 5000, "isDefault": false }
+        { "label": "M", "price": 0,    "isDefault": true },
+        { "label": "L", "price": 5000, "isDefault": false }
       ]
     }
   ]
 }
 ```
 
-**Luồng khi khách đặt món:**
-1. Client gửi `selectedOptionValueIds: [1, 3]` (ID của `ProductAttributeValue`)
-2. Handler validate: mỗi ID phải thuộc attribute group của sản phẩm đó
-3. `Order.AddItem(...)` nhận `List<OrderItemOptionData>` — mỗi item gọi `item.AddOption(...)` để ghi snapshot + cộng `OptionAdjustment`
+**Luá»“ng khi khÃ¡ch Ä‘áº·t mÃ³n:**
+1. Client gá»­i `selectedVariantValueIds: [1, 3]` (ID cá»§a `ProductVariantValue`)
+2. Handler validate: má»—i ID pháº£i thuá»™c variant group cá»§a sáº£n pháº©m Ä‘Ã³
+3. Handler resolve tá»• há»£p variant Ä‘Ã£ chá»n. Vá»›i cÆ¡ cháº¿ hiá»‡n táº¡i, `Order.AddItem(...)` nháº­n `List<OrderItemOptionData>` vÃ  má»—i item gá»i `item.AddOption(...)` Ä‘á»ƒ ghi snapshot + cá»™ng `OptionAdjustment`.
+4. Vá»›i cÆ¡ cháº¿ giÃ¡ cá»©ng khuyáº¿n nghá»‹, handler tÃ¬m variant/combination tÆ°Æ¡ng á»©ng vÃ  truyá»n giÃ¡ cuá»‘i cÃ¹ng vÃ o `OrderItem.UnitPrice`; selected variants váº«n Ä‘Æ°á»£c snapshot Ä‘á»ƒ in bill, bÃ¡o báº¿p vÃ  audit.
+
+---
+
+## ProductOptionGroup
+
+**File:** `ProductOptionGroupAggregate/ProductOptionGroup.cs`
+**Base:** `SoftDeletableEntity<int>`, `IAggregateRoot`
+
+NhÃ³m topping/addon **dÃ¹ng chung** (reusable) â€” tÃ¡ch biá»‡t vá»›i `ProductVariantGroup` (inline cá»§a tá»«ng sáº£n pháº©m). Gáº¯n vÃ o sáº£n pháº©m qua `ProductOptionGroupMapping`.
+
+> **PhÃ¢n biá»‡t hai loáº¡i option:**
+> - `ProductVariantGroup` â€” inline, chá»‰ thuá»™c 1 sáº£n pháº©m, dÃ¹ng Ä‘á»ƒ táº¡o biáº¿n thá»ƒ/combination cá»§a chÃ­nh sáº£n pháº©m Ä‘Ã³. NÃªn Ä‘á»‹nh giÃ¡ báº±ng giÃ¡ cá»©ng theo tá»• há»£p náº¿u nhiá»u group áº£nh hÆ°á»Ÿng giÃ¡.
+> - `ProductOptionGroup` â€” standalone, cÃ³ thá»ƒ gáº¯n vÃ o nhiá»u sáº£n pháº©m, dÃ¹ng cho addon/topping cá»™ng thÃªm Ä‘á»™c láº­p (vÃ­ dá»¥: "Topping trÃ¢n chÃ¢u" dÃ¹ng cho cáº£ TrÃ  sá»¯a láº«n Smoothie).
+
+| Property | Type | MÃ´ táº£ |
+|----------|------|-------|
+| `Name` | string | TÃªn nhÃ³m (vÃ­ dá»¥: "Topping", "ÄÃ¡") |
+| `IsRequired` | bool | Báº¯t buá»™c chá»n Ã­t nháº¥t 1 giÃ¡ trá»‹ |
+| `AllowMultiple` | bool | Cho phÃ©p chá»n nhiá»u giÃ¡ trá»‹ |
+| `AllowQuantity` | bool | Cho phÃ©p nháº­p sá»‘ lÆ°á»£ng cho tá»«ng giÃ¡ trá»‹ |
+| `IsActive` | bool | Äang hoáº¡t Ä‘á»™ng |
+| `DisplayOrder` | int | Thá»© tá»± hiá»ƒn thá»‹ |
+| `Values` | `IReadOnlyCollection<ProductOptionValue>` | Danh sÃ¡ch giÃ¡ trá»‹ |
+| `Mappings` | `IReadOnlyCollection<ProductOptionGroupMapping>` | Sáº£n pháº©m Ä‘ang dÃ¹ng nhÃ³m nÃ y |
+
+### ProductOptionValue
+
+Má»™t giÃ¡ trá»‹ trong nhÃ³m topping (vÃ­ dá»¥: "TrÃ¢n chÃ¢u tráº¯ng", "Tháº¡ch phÃ´ mai").
+
+**DB table:** `business.ProductOptionValues`
+
+| Property | Type | MÃ´ táº£ |
+|----------|------|-------|
+| `GroupId` | int | FK Ä‘áº¿n ProductOptionGroup |
+| `Name` | string | TÃªn hiá»ƒn thá»‹ |
+| `Price` | decimal | GiÃ¡ cá»™ng thÃªm (0 = miá»…n phÃ­) |
+| `CostPrice` | decimal? | GiÃ¡ vá»‘n |
+| `IsInStock` | bool | CÃ²n hÃ ng â€” náº¿u false thÃ¬ khÃ´ng cho chá»n |
+| `DisplayOrder` | int | Thá»© tá»± hiá»ƒn thá»‹ |
+
+### ProductOptionGroupMapping
+
+Junction entity liÃªn káº¿t Product â†” ProductOptionGroup (many-to-many tÆ°á»ng minh).
+
+**DB table:** `business.ProductOptionGroupMappings`
+
+| Property | Type | MÃ´ táº£ |
+|----------|------|-------|
+| `ProductId` | int | FK Ä‘áº¿n Product |
+| `GroupId` | int | FK Ä‘áº¿n ProductOptionGroup |
+| `DisplayOrder` | int | Thá»© tá»± hiá»ƒn thá»‹ nhÃ³m nÃ y trÃªn sáº£n pháº©m cá»¥ thá»ƒ Ä‘Ã³ |
 
 ---
 
@@ -300,12 +363,12 @@ Một giá trị cụ thể trong nhóm attribute (ví dụ: "Nóng", "Size L").
 **File:** `CategoryAggregate/Category.cs`
 **Base:** `SoftDeletableEntity<int>`, `IAggregateRoot`
 
-| Property | Mô tả |
+| Property | MÃ´ táº£ |
 |----------|-------|
-| `Name` | Tên danh mục |
-| `Description` | Mô tả |
-| `DisplayOrder` | Thứ tự hiển thị |
-| `IsActive` | Đang hiển thị hay không |
+| `Name` | TÃªn danh má»¥c |
+| `Description` | MÃ´ táº£ |
+| `DisplayOrder` | Thá»© tá»± hiá»ƒn thá»‹ |
+| `IsActive` | Äang hiá»ƒn thá»‹ hay khÃ´ng |
 
 **Events:** `CategoryCreatedEvent`, `CategoryActivatedEvent`, `CategoryDeactivatedEvent`, `CategoryUpdatedEvent`
 
@@ -314,16 +377,16 @@ Một giá trị cụ thể trong nhóm attribute (ví dụ: "Nóng", "Size L").
 ## Customer
 
 **File:** `CustomerAggregate/Customer.cs`
-**Base:** `AuditableEntity<string>` (Id là Guid dạng string)
+**Base:** `AuditableEntity<string>` (Id lÃ  Guid dáº¡ng string)
 
-| Property | Mô tả |
+| Property | MÃ´ táº£ |
 |----------|-------|
-| `Email` | Email khách hàng |
-| `FullName` | Họ tên |
-| `PhoneNumber` | Số điện thoại |
+| `Email` | Email khÃ¡ch hÃ ng |
+| `FullName` | Há» tÃªn |
+| `PhoneNumber` | Sá»‘ Ä‘iá»‡n thoáº¡i |
 | `Tier` | `CustomerTier` SmartEnum (Regular/Silver/Gold/Platinum) |
-| `TotalSpent` | Tổng tiền đã chi |
-| `LoyaltyPoints` | Điểm tích lũy |
+| `TotalSpent` | Tá»•ng tiá»n Ä‘Ã£ chi |
+| `LoyaltyPoints` | Äiá»ƒm tÃ­ch lÅ©y |
 
 **Events:** `CustomerCreatedEvent`, `CustomerEmailChangedEvent`, `CustomerTierUpgradedEvent`
 
@@ -332,7 +395,7 @@ Một giá trị cụ thể trong nhóm attribute (ví dụ: "Nóng", "Size L").
 ## Zone
 
 **File:** `ZoneAggregate/Zone.cs`
-Khu vực của quán (ví dụ: Tầng 1, Ngoài trời, VIP). Table thuộc về một Zone.
+Khu vá»±c cá»§a quÃ¡n (vÃ­ dá»¥: Táº§ng 1, NgoÃ i trá»i, VIP). Table thuá»™c vá» má»™t Zone.
 
 ---
 
@@ -340,26 +403,26 @@ Khu vực của quán (ví dụ: Tầng 1, Ngoài trời, VIP). Table thuộc v�
 
 **File:** `ExpenseAggregate/Expense.cs`
 **Base:** `AuditableEntity<int>`, `IAggregateRoot`
-Quản lý chi phí vận hành của quán.
+Quáº£n lÃ½ chi phÃ­ váº­n hÃ nh cá»§a quÃ¡n.
 
-| Property | Mô tả |
+| Property | MÃ´ táº£ |
 |----------|-------|
-| `ItemName` | Tên khoản chi |
-| `Amount` | Số tiền |
+| `ItemName` | TÃªn khoáº£n chi |
+| `Amount` | Sá»‘ tiá»n |
 | `Category` | `ExpenseCategory` SmartEnum |
-| `ExpenseDate` | Ngày chi |
-| `Note` | Ghi chú |
+| `ExpenseDate` | NgÃ y chi |
+| `Note` | Ghi chÃº |
 
 ---
 
 ## Notification
 
 **File:** `NotificationAggregate/Notification.cs`
-Xem chi tiết: [[notifications]]
+Xem chi tiáº¿t: [[notifications]]
 
 ---
 
 ## Promotion
 
 **File:** `PromotionAggregate/Promotion.cs`
-Xem chi tiết: [[promotions]]
+Xem chi tiáº¿t: [[promotions]]
