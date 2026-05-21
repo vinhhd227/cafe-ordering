@@ -165,7 +165,9 @@
         "addToCart": "Thêm vào giỏ",
         "note": "Ghi chú",
         "notePlaceholder": "Yêu cầu đặc biệt, vd: ít đường, không ống hút...",
-        "prepTime": "~{min} phút"
+        "prepTime": "~{min} phút",
+        "unavailable": "(Tạm hết)",
+        "multiSelect": "(chọn nhiều)"
       }
     },
     "detail": {

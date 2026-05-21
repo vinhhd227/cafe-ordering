@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { createOrder, applyPromotionAdmin } from '@/services/order.service'
 import FindPromosDialog from '@/components/orders/FindPromosDialog.vue'
 
@@ -6,7 +6,7 @@ const router = useRouter()
 const toast = useToast()
 const { t } = useI18n()
 
-// ── Composables ───────────────────────────────────────────────────
+// â”€â”€ Composables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const {
   tables, menuCategories, loadingMenu,
   selectedTableId, sessionId, sessionHadExisting, sessionLoading, sessionError,
@@ -30,18 +30,20 @@ const {
 
 const notificationStore = useNotificationStore()
 
-// ── Local state ───────────────────────────────────────────────────
+// â”€â”€ Local state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const guestCount = ref(null)
 const placing = ref(false)
 const errorMessage = ref('')
 const showCartDrawer = ref(false)
 const selectedCategoryId = ref(null) // null = all
 
-// ── Options drawer ────────────────────────────────────────────────
+// â”€â”€ Options drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const showOptionsDrawer = ref(false)
 const drawerProduct = ref(null)
 const drawerQuantity = ref(1)
-const drawerSelections = ref({}) // { [groupId]: valueId | valueId[] }
+const drawerSelections = ref({})      // variantGroups: { [groupId]: valueId | valueId[] }
+const drawerOptionSelections = ref({})  // { [groupId]: valueId | valueId[] } — non-quantity groups
+const drawerOptionQuantities = ref({})  // { [groupId]: { [valueId]: qty } } — allowQuantity groups
 const drawerTakeaway = ref(false)
 
 const openOptionsDrawer = (product) => {
@@ -49,7 +51,7 @@ const openOptionsDrawer = (product) => {
   drawerQuantity.value = 1
   drawerTakeaway.value = false
   const selections = {}
-  for (const group of product.optionGroups ?? []) {
+  for (const group of product.variantGroups ?? []) {
     const defaultVal = group.values?.find((v) => v.isDefault)
     if (group.selectionType === 'Single') {
       selections[group.id] = defaultVal?.id ?? null
@@ -58,6 +60,17 @@ const openOptionsDrawer = (product) => {
     }
   }
   drawerSelections.value = selections
+  const optionSels = {}
+  const optionQtys = {}
+  for (const group of product.optionGroups ?? []) {
+    if (group.allowQuantity) {
+      optionQtys[group.id] = {}
+    } else {
+      optionSels[group.id] = group.allowMultiple ? [] : null
+    }
+  }
+  drawerOptionSelections.value = optionSels
+  drawerOptionQuantities.value = optionQtys
   showOptionsDrawer.value = true
 }
 
@@ -78,45 +91,216 @@ const drawerIsSelected = (group, valueId) => {
   return Array.isArray(sel) && sel.includes(valueId)
 }
 
-const drawerCanConfirm = computed(() => {
-  if (!drawerProduct.value) return false
-  for (const group of drawerProduct.value.optionGroups ?? []) {
-    if (!group.isRequired) continue
-    const sel = drawerSelections.value[group.id]
-    if (group.selectionType === 'Single' && !sel) return false
-    if (group.selectionType !== 'Single' && (!sel || sel.length === 0)) return false
+// ── Option groups (shared ProductOptionGroup) ──────────────────
+const drawerOptionIsSelected = (group, valueId) => {
+  if (group.allowQuantity)
+    return (drawerOptionQuantities.value[group.id]?.[valueId] ?? 0) > 0
+  const sel = drawerOptionSelections.value[group.id]
+  if (!group.allowMultiple) return sel === valueId
+  return Array.isArray(sel) && sel.includes(valueId)
+}
+
+const drawerOptionToggle = (group, valueId) => {
+  if (group.allowQuantity) {
+    const qtys = drawerOptionQuantities.value[group.id] ?? {}
+    const cur = qtys[valueId] ?? 0
+    drawerOptionQuantities.value[group.id] = { ...qtys, [valueId]: cur > 0 ? 0 : 1 }
+    return
   }
-  return true
+  if (!group.allowMultiple) {
+    drawerOptionSelections.value[group.id] =
+      drawerOptionSelections.value[group.id] === valueId ? null : valueId
+  } else {
+    const current = drawerOptionSelections.value[group.id] ?? []
+    const idx = current.indexOf(valueId)
+    drawerOptionSelections.value[group.id] =
+      idx >= 0 ? current.filter((id) => id !== valueId) : [...current, valueId]
+  }
+}
+
+const drawerOptionGetQty = (group, valueId) =>
+  drawerOptionQuantities.value[group.id]?.[valueId] ?? 0
+
+const drawerOptionAdjustQty = (group, valueId, delta) => {
+  const qtys = drawerOptionQuantities.value[group.id] ?? {}
+  const newQty = Math.max(0, (qtys[valueId] ?? 0) + delta)
+  drawerOptionQuantities.value[group.id] = { ...qtys, [valueId]: newQty }
+}
+
+const drawerOptionAdjustment = computed(() => {
+  const product = drawerProduct.value
+  if (!product?.optionGroups?.length) return 0
+  let total = 0
+  for (const group of product.optionGroups) {
+    if (group.allowQuantity) {
+      const qtys = drawerOptionQuantities.value[group.id] ?? {}
+      for (const [idStr, qty] of Object.entries(qtys)) {
+        if (qty <= 0) continue
+        const val = group.values?.find((v) => v.id === Number(idStr))
+        if (val) total += (val.price ?? 0) * qty
+      }
+    } else {
+      const sel = drawerOptionSelections.value[group.id]
+      const ids = group.allowMultiple ? (sel ?? []) : (sel ? [sel] : [])
+      for (const id of ids) {
+        const val = group.values?.find((v) => v.id === id)
+        if (val) total += val.price ?? 0
+      }
+    }
+  }
+  return total
 })
 
-const confirmDrawerAdd = () => {
-  const product = drawerProduct.value
+const getSelectedVariantValueIds = (product, selections) => {
   const selectedIds = []
   const selectedLabels = []
-  let optionAdjustment = 0
 
-  for (const group of product.optionGroups ?? []) {
-    const sel = drawerSelections.value[group.id]
+  for (const group of product?.variantGroups ?? []) {
+    const sel = selections[group.id]
     const ids = group.selectionType === 'Single' ? (sel ? [sel] : []) : (sel ?? [])
     for (const id of ids) {
       const val = group.values?.find((v) => v.id === id)
       if (!val) continue
       selectedIds.push(id)
       selectedLabels.push(val.label)
-      optionAdjustment += val.priceAdjustment ?? 0
     }
   }
 
-  const key = `${product.id}|${[...selectedIds].sort().join(',')}|${drawerTakeaway.value ? '1' : '0'}`
+  return { selectedIds, selectedLabels }
+}
+
+const resolveSelectedProductVariant = (product, selectedIds) => {
+  if (!product?.variants?.length || selectedIds.length === 0) return null
+
+  const key = [...selectedIds].sort((a, b) => a - b).join(',')
+  return product.variants
+    .filter((variant) => variant.isActive !== false)
+    .find((variant) => [...(variant.valueIds ?? [])].sort((a, b) => a - b).join(',') === key) ?? null
+}
+
+const isDrawerValueDisabled = (group, valueId) => {
+  const product = drawerProduct.value
+  if (!product?.variants?.length) return false
+  const activeVariants = product.variants.filter((v) => v.isActive !== false)
+  const otherIds = []
+  for (const g of product.variantGroups ?? []) {
+    if (g.id === group.id) continue
+    const sel = drawerSelections.value[g.id]
+    const ids = g.selectionType === 'Single' ? (sel ? [sel] : []) : (sel ?? [])
+    otherIds.push(...ids)
+  }
+  return !activeVariants.some((v) => {
+    const vIds = v.valueIds ?? []
+    return vIds.includes(valueId) && otherIds.every((id) => vIds.includes(id))
+  })
+}
+
+const drawerUnitPrice = computed(() => {
+  if (!drawerProduct.value) return 0
+  const { selectedIds } = getSelectedVariantValueIds(drawerProduct.value, drawerSelections.value)
+  const basePrice = resolveSelectedProductVariant(drawerProduct.value, selectedIds)?.price ?? drawerProduct.value.price
+  const hasHardVariants = (drawerProduct.value.variants ?? []).length > 0
+
+  let variantAdj = 0
+  if (!hasHardVariants) {
+    for (const group of drawerProduct.value.variantGroups ?? []) {
+      const sel = drawerSelections.value[group.id]
+      const ids = group.selectionType === 'Single' ? (sel ? [sel] : []) : (sel ?? [])
+      for (const id of ids) {
+        const val = group.values?.find((v) => v.id === id)
+        if (!val) continue
+        variantAdj += val.price ?? 0
+      }
+    }
+  }
+  return basePrice + variantAdj + drawerOptionAdjustment.value
+})
+
+const drawerCanConfirm = computed(() => {
+  if (!drawerProduct.value) return false
+  for (const group of drawerProduct.value.variantGroups ?? []) {
+    if (!group.isRequired) continue
+    const sel = drawerSelections.value[group.id]
+    if (group.selectionType === 'Single' && !sel) return false
+    if (group.selectionType !== 'Single' && (!sel || sel.length === 0)) return false
+  }
+  const { selectedIds } = getSelectedVariantValueIds(drawerProduct.value, drawerSelections.value)
+  if ((drawerProduct.value.variants ?? []).length > 0 && !resolveSelectedProductVariant(drawerProduct.value, selectedIds)) {
+    return false
+  }
+  for (const group of drawerProduct.value.optionGroups ?? []) {
+    if (!group.isRequired) continue
+    if (group.allowQuantity) {
+      const hasAny = Object.values(drawerOptionQuantities.value[group.id] ?? {}).some((q) => q > 0)
+      if (!hasAny) return false
+    } else {
+      const sel = drawerOptionSelections.value[group.id]
+      if (!group.allowMultiple && !sel) return false
+      if (group.allowMultiple && (!sel || sel.length === 0)) return false
+    }
+  }
+  return true
+})
+
+const confirmDrawerAdd = () => {
+  const product = drawerProduct.value
+  const { selectedIds, selectedLabels } = getSelectedVariantValueIds(product, drawerSelections.value)
+  const selectedVariant = resolveSelectedProductVariant(product, selectedIds)
+  const hasHardVariants = (product.variants ?? []).length > 0
+  let optionAdjustment = 0
+
+  if (!hasHardVariants) {
+    for (const group of product.variantGroups ?? []) {
+      const sel = drawerSelections.value[group.id]
+      const ids = group.selectionType === 'Single' ? (sel ? [sel] : []) : (sel ?? [])
+      for (const id of ids) {
+        const val = group.values?.find((v) => v.id === id)
+        if (!val) continue
+        optionAdjustment += val.price ?? 0
+      }
+    }
+  }
+
+  // Collect selected option group values → [{optionValueId, quantity}]
+  const selectedOptionValues = []
+  const selectedOptionLabels = []
+  for (const group of product.optionGroups ?? []) {
+    if (group.allowQuantity) {
+      const qtys = drawerOptionQuantities.value[group.id] ?? {}
+      for (const [idStr, qty] of Object.entries(qtys)) {
+        if (qty <= 0) continue
+        const id = Number(idStr)
+        const val = group.values?.find((v) => v.id === id)
+        if (!val) continue
+        selectedOptionValues.push({ optionValueId: id, quantity: qty })
+        selectedOptionLabels.push(`${group.name}: ${val.name}${qty > 1 ? ` x${qty}` : ''}`)
+        optionAdjustment += (val.price ?? 0) * qty
+      }
+    } else {
+      const sel = drawerOptionSelections.value[group.id]
+      const ids = group.allowMultiple ? (sel ?? []) : (sel ? [sel] : [])
+      for (const id of ids) {
+        const val = group.values?.find((v) => v.id === id)
+        if (!val) continue
+        selectedOptionValues.push({ optionValueId: id, quantity: 1 })
+        selectedOptionLabels.push(`${group.name}: ${val.name}`)
+        optionAdjustment += val.price ?? 0
+      }
+    }
+  }
+
+  const optKey = selectedOptionValues.map((o) => `${o.optionValueId}x${o.quantity}`).sort().join(',')
+  const key = `${product.id}|${[...selectedIds].sort().join(',')}|${optKey}|${drawerTakeaway.value ? '1' : '0'}`
 
   addToCart({
     _key: key,
     productId: product.id,
     productName: product.name,
-    unitPrice: product.price,
+    unitPrice: selectedVariant?.price ?? product.price,
     optionAdjustment,
-    selectedOptionValueIds: selectedIds,
-    selectedValueLabels: selectedLabels,
+    selectedVariantValueIds: selectedIds,
+    selectedValueLabels: [...selectedLabels, ...selectedOptionLabels],
+    selectedOptionValues,
     quantity: drawerQuantity.value,
     isTakeaway: drawerTakeaway.value,
     isFreeGift: false,
@@ -125,7 +309,7 @@ const confirmDrawerAdd = () => {
   showOptionsDrawer.value = false
 }
 
-// ── Filtered products by category ────────────────────────────────
+// â”€â”€ Filtered products by category â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const allProducts = computed(() => {
   const products = []
   for (const cat of menuCategories.value) {
@@ -145,7 +329,24 @@ const displayProducts = computed(() => {
   return list
 })
 
-// ── Place order ───────────────────────────────────────────────────
+const productPriceText = (product) => {
+  const variantPrices = (product.variants ?? [])
+    .filter((variant) => variant.isActive !== false)
+    .map((variant) => Number(variant.price))
+    .filter((price) => Number.isFinite(price))
+
+  if (variantPrices.length === 0) {
+    return formatVnd(product.price)
+  }
+
+  const minPrice = Math.min(...variantPrices)
+  const maxPrice = Math.max(...variantPrices)
+  return minPrice === maxPrice
+    ? formatVnd(minPrice)
+    : `${formatVnd(minPrice)} - ${formatVnd(maxPrice)}`
+}
+
+// â”€â”€ Place order â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const canPlaceOrder = computed(
   () => !!sessionId.value && cart.value.length > 0 && !placing.value,
 )
@@ -163,7 +364,8 @@ const placeOrder = async () => {
         productName: item.productName,
         unitPrice: item.unitPrice,
         quantity: item.quantity,
-        selectedOptionValueIds: item.selectedOptionValueIds ?? [],
+        selectedVariantValueIds: item.selectedVariantValueIds ?? [],
+        selectedOptionValues: item.selectedOptionValues ?? [],
         isTakeaway: item.isTakeaway ?? false,
         isFreeGift: item.isFreeGift ?? false,
       })),
@@ -210,7 +412,7 @@ onMounted(() => loadData())
   <!-- Full-screen POS layout -->
   <div class="tw:flex tw:flex-col tw:flex-1 tw:min-h-0 tw:overflow-hidden">
 
-    <!-- ── Top bar ──────────────────────────────────────────────── -->
+    <!-- â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div
       class="tw:flex tw:items-center tw:gap-2 tw:px-3 tw:py-2 tw:shrink-0 tw:border-b"
       style="border-color: var(--app-border); background: var(--app-bg)"
@@ -247,7 +449,7 @@ onMounted(() => loadData())
       </prime-tag>
     </div>
 
-    <!-- ── Search bar ───────────────────────────────────────────── -->
+    <!-- â”€â”€ Search bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div
       class="tw:px-3 tw:py-2 tw:shrink-0 tw:border-b"
       style="border-color: var(--app-border); background: var(--app-bg)"
@@ -266,7 +468,7 @@ onMounted(() => loadData())
       </div>
     </div>
 
-    <!-- ── Middle: category sidebar + product grid ──────────────── -->
+    <!-- â”€â”€ Middle: category sidebar + product grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="tw:flex tw:flex-1 tw:overflow-hidden">
 
       <!-- Category sidebar -->
@@ -279,7 +481,7 @@ onMounted(() => loadData())
           class="tw:flex tw:flex-col tw:items-center tw:gap-1 tw:rounded-lg tw:px-1 tw:py-2 tw:text-center tw:text-xs tw:transition-colors tw:w-full"
           :class="
             selectedCategoryId === null
-              ? 'tw:bg-emerald-500/15 tw:text-emerald-400 tw:font-semibold'
+              ? 'tw:bg-primary-500/15 tw:text-primary-400 tw:font-semibold'
               : 'tw:text-muted tw:hover:bg-white/5'
           "
           @click="selectedCategoryId = null"
@@ -295,7 +497,7 @@ onMounted(() => loadData())
           class="tw:flex tw:flex-col tw:items-center tw:gap-1 tw:rounded-lg tw:px-1 tw:py-2 tw:text-center tw:text-xs tw:transition-colors tw:w-full"
           :class="
             selectedCategoryId === cat.id
-              ? 'tw:bg-emerald-500/15 tw:text-emerald-400 tw:font-semibold'
+              ? 'tw:bg-primary-500/15 tw:text-primary-400 tw:font-semibold'
               : 'tw:text-muted tw:hover:bg-white/5'
           "
           @click="selectedCategoryId = cat.id"
@@ -354,12 +556,12 @@ onMounted(() => loadData())
                 class="tw:h-24 tw:w-full tw:flex tw:items-center tw:justify-center"
                 style="background: var(--app-bg)"
               >
-                <iconify icon="ph:coffee-bold" class="tw:text-2xl tw:text-emerald-400/20" />
+                <iconify icon="ph:coffee-bold" class="tw:text-2xl tw:text-primary-400/20" />
               </div>
               <!-- Cart badge -->
               <div
                 v-if="cartQuantity(product.id) > 0"
-                class="tw:absolute tw:top-1.5 tw:right-1.5 tw:h-5 tw:min-w-5 tw:px-1 tw:rounded-full tw:bg-emerald-500 tw:flex tw:items-center tw:justify-center tw:text-xs tw:font-bold tw:text-white tw:shadow-lg"
+                class="tw:absolute tw:top-1.5 tw:right-1.5 tw:h-5 tw:min-w-5 tw:px-1 tw:rounded-full tw:bg-primary-500 tw:flex tw:items-center tw:justify-center tw:text-xs tw:font-bold tw:text-white tw:shadow-lg"
               >
                 {{ cartQuantity(product.id) }}
               </div>
@@ -367,12 +569,12 @@ onMounted(() => loadData())
             <!-- Info -->
             <div class="tw:flex tw:flex-col tw:flex-1 tw:p-2">
               <p class="tw:text-xs tw:font-semibold tw:line-clamp-2 tw:leading-snug">{{ product.name }}</p>
-              <p class="tw:text-xs tw:text-emerald-400 tw:font-semibold tw:mt-1">
-                {{ formatVnd(product.price) }}
+              <p class="tw:text-xs tw:text-primary-400 tw:font-semibold tw:mt-1">
+                {{ productPriceText(product) }}
               </p>
-              <div v-if="product.optionGroups?.length" class="tw:mt-1 tw:flex tw:flex-wrap tw:gap-0.5">
+              <div v-if="product.variantGroups?.length" class="tw:mt-1 tw:flex tw:flex-wrap tw:gap-0.5">
                 <span
-                  v-for="group in product.optionGroups"
+                  v-for="group in product.variantGroups"
                   :key="group.id"
                   class="tw:text-[10px] tw:rounded tw:px-1 tw:py-0.5 tw:bg-slate-500/10 tw:text-slate-400"
                 >{{ group.name }}</span>
@@ -383,12 +585,12 @@ onMounted(() => loadData())
       </div>
     </div>
 
-    <!-- ── Cart bar ─────────────────────────────────────────────── -->
+    <!-- â”€â”€ Cart bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <button
       class="tw:flex tw:items-center tw:justify-between tw:px-4 tw:py-4 tw:shrink-0 tw:border-t tw:w-full tw:transition-colors"
       :class="
         cartItemCount > 0
-          ? 'tw:bg-emerald-600 tw:hover:bg-emerald-700'
+          ? 'tw:bg-primary-600 tw:hover:bg-primary-700'
           : 'tw:cursor-default'
       "
       style="border-color: var(--app-border)"
@@ -404,7 +606,7 @@ onMounted(() => loadData())
           />
           <span
             v-if="cartItemCount > 0"
-            class="tw:absolute tw:-top-2 tw:-right-2 tw:h-4 tw:min-w-4 tw:px-0.5 tw:rounded-full tw:bg-white tw:text-emerald-700 tw:text-[10px] tw:font-bold tw:flex tw:items-center tw:justify-center"
+            class="tw:absolute tw:-top-2 tw:-right-2 tw:h-4 tw:min-w-4 tw:px-0.5 tw:rounded-full tw:bg-white tw:text-primary-700 tw:text-[10px] tw:font-bold tw:flex tw:items-center tw:justify-center"
           >{{ cartItemCount }}</span>
         </div>
         <span
@@ -421,7 +623,7 @@ onMounted(() => loadData())
     </button>
   </div>
 
-  <!-- ── Options Drawer ───────────────────────────────────────── -->
+  <!-- â”€â”€ Options Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <prime-drawer
     v-model:visible="showOptionsDrawer"
     position="bottom"
@@ -433,11 +635,11 @@ onMounted(() => loadData())
         <img
           v-if="drawerProduct?.imageUrl"
           :src="drawerProduct.imageUrl"
-          class="tw:h-10 tw:w-10 tw:rounded-lg tw:object-cover tw:shrink-0"
+          class="tw:h-12 tw:w-12 tw:rounded-xl tw:object-cover tw:shrink-0"
         />
         <div class="tw:min-w-0">
-          <p class="tw:font-semibold tw:text-sm tw:truncate">{{ drawerProduct?.name }}</p>
-          <p class="tw:text-xs tw:text-emerald-400">{{ drawerProduct ? formatVnd(drawerProduct.price) : '' }}</p>
+          <p class="tw:font-bold tw:text-base tw:truncate tw:text-xl">{{ drawerProduct?.name }}</p>
+          <p class="tw:text-lg tw:font-semibold tw:text-primary-400">{{ drawerProduct ? formatVnd(drawerUnitPrice) : '' }}</p>
         </div>
       </div>
     </template>
@@ -445,87 +647,193 @@ onMounted(() => loadData())
     <div class="tw:overflow-y-auto tw:space-y-4 tw:pb-2">
       <!-- Quantity -->
       <div>
-        <p class="tw:text-sm tw:font-semibold tw:mb-2">{{ t('orders.create.optionsDialog.quantity') }}</p>
+        <p class="tw:text-md tw:font-semibold tw:mb-2">{{ t('orders.create.optionsDialog.quantity') }}</p>
         <div class="tw:flex tw:items-center tw:gap-4">
-          <button
-            class="tw:h-10 tw:w-10 tw:rounded-xl tw:border tw:flex tw:items-center tw:justify-center tw:text-muted tw:transition tw:active:scale-90"
-            style="border-color: var(--app-border)"
+          <prime-button
+            severity="secondary"
+            variant="outlined"
+            :class="btnIcon"
             @click="drawerQuantity = Math.max(1, drawerQuantity - 1)"
           >
             <iconify icon="ph:minus-bold" />
-          </button>
+          </prime-button>
           <span class="tw:text-xl tw:font-bold tw:w-8 tw:text-center">{{ drawerQuantity }}</span>
-          <button
-            class="tw:h-10 tw:w-10 tw:rounded-xl tw:border tw:flex tw:items-center tw:justify-center tw:text-muted tw:transition tw:active:scale-90"
-            style="border-color: var(--app-border)"
+          <prime-button
+            severity="secondary"
+            variant="outlined"
+            :class="btnIcon"
             @click="drawerQuantity++"
           >
             <iconify icon="ph:plus-bold" />
-          </button>
+          </prime-button>
         </div>
       </div>
 
-      <!-- Dynamic option groups -->
-      <div v-for="group in drawerProduct?.optionGroups ?? []" :key="group.id">
+      <!-- Dynamic option groups (variantGroups) -->
+      <div v-for="group in drawerProduct?.variantGroups ?? []" :key="group.id">
         <p class="tw:text-sm tw:font-semibold tw:mb-2">
           {{ group.name }}
           <span v-if="group.isRequired" class="tw:text-red-400 tw:text-xs tw:ml-1">*</span>
         </p>
-        <div class="tw:grid tw:grid-cols-2 tw:gap-2">
-          <button
+        <!-- Single → RadioButtonGroup -->
+        <prime-radio-button-group
+          v-if="group.selectionType === 'Single'"
+          v-model="drawerSelections[group.id]"
+          class="tw:grid tw:grid-cols-2 tw:gap-2"
+        >
+          <label
             v-for="val in group.values"
             :key="val.id"
-            class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:text-sm tw:transition-colors tw:text-left"
-            :class="
-              drawerIsSelected(group, val.id)
-                ? 'tw:border-emerald-500 tw:bg-emerald-500/15 tw:text-emerald-300'
-                : 'tw:text-muted tw:hover:border-slate-400/40'
-            "
-            :style="drawerIsSelected(group, val.id) ? '' : 'border-color: var(--app-border)'"
-            @click="drawerToggleValue(group, val.id)"
+            :for="`vg-${group.id}-${val.id}`"
+            class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:text-sm tw:cursor-pointer tw:transition-colors"
+            :class="drawerSelections[group.id] === val.id ? 'tw:border-primary-500/60 tw:bg-primary-500/10' : ''"
+            :style="drawerSelections[group.id] === val.id ? '' : 'border-color: var(--app-border)'"
           >
-            <iconify
-              :icon="drawerIsSelected(group, val.id) ? 'ph:check-circle-fill' : 'ph:circle'"
-              class="tw:shrink-0"
+            <prime-radio-button
+              :input-id="`vg-${group.id}-${val.id}`"
+              :value="val.id"
+              :disabled="isDrawerValueDisabled(group, val.id)"
             />
             <span class="tw:flex-1 tw:truncate">{{ val.label }}</span>
-            <span v-if="val.priceAdjustment" class="tw:text-xs tw:shrink-0 tw:opacity-70">
-              +{{ formatVnd(val.priceAdjustment) }}
+            <span v-if="isDrawerValueDisabled(group, val.id)" class="tw:text-xs tw:shrink-0 tw:text-red-400/70">
+              {{ t('orders.create.optionsDialog.unavailable') }}
             </span>
-          </button>
+            <span v-else-if="val.price && !(drawerProduct?.variants?.length)" class="tw:text-xs tw:shrink-0 tw:opacity-70">
+              +{{ formatVnd(val.price) }}
+            </span>
+          </label>
+        </prime-radio-button-group>
+        <!-- Multiple → Checkbox -->
+        <div v-else class="tw:grid tw:grid-cols-2 tw:gap-2">
+          <label
+            v-for="val in group.values"
+            :key="val.id"
+            :for="`vg-${group.id}-${val.id}`"
+            class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:text-sm tw:cursor-pointer tw:transition-colors"
+            :class="(drawerSelections[group.id] ?? []).includes(val.id) ? 'tw:border-primary-500/60 tw:bg-primary-500/10' : ''"
+            :style="(drawerSelections[group.id] ?? []).includes(val.id) ? '' : 'border-color: var(--app-border)'"
+          >
+            <prime-checkbox
+              :input-id="`vg-${group.id}-${val.id}`"
+              v-model="drawerSelections[group.id]"
+              :value="val.id"
+              :disabled="isDrawerValueDisabled(group, val.id)"
+            />
+            <span class="tw:flex-1 tw:truncate">{{ val.label }}</span>
+            <span v-if="isDrawerValueDisabled(group, val.id)" class="tw:text-xs tw:shrink-0 tw:text-red-400/70">
+              {{ t('orders.create.optionsDialog.unavailable') }}
+            </span>
+            <span v-else-if="val.price && !(drawerProduct?.variants?.length)" class="tw:text-xs tw:shrink-0 tw:opacity-70">
+              +{{ formatVnd(val.price) }}
+            </span>
+          </label>
         </div>
+      </div>
+
+      <!-- Shared option groups (ProductOptionGroup) -->
+      <div v-for="group in drawerProduct?.optionGroups ?? []" :key="`og-${group.id}`">
+        <p class="tw:text-md tw:font-semibold tw:mb-2">
+          {{ group.name }}
+          <span v-if="group.isRequired" class="tw:text-red-400 tw:text-xs tw:ml-1">*</span>
+          <span v-if="group.allowMultiple && !group.allowQuantity" class="tw:text-muted tw:text-xs tw:ml-1 tw:font-normal">{{ t('orders.create.optionsDialog.multiSelect') }}</span>
+        </p>
+
+        <!-- allowQuantity: full-width list with stepper -->
+        <div v-if="group.allowQuantity" class="tw:space-y-2">
+          <div
+            v-for="val in group.values"
+            :key="val.id"
+            class="tw:flex tw:items-center tw:gap-3 tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:text-sm tw:transition-colors"
+            :class="drawerOptionIsSelected(group, val.id)
+              ? 'tw:border-primary-400/50 tw:bg-primary-500/5'
+              : ''"
+            :style="drawerOptionIsSelected(group, val.id) ? '' : 'border-color: var(--app-border)'"
+          >
+            <prime-checkbox
+              :model-value="drawerOptionIsSelected(group, val.id)"
+              :binary="true"
+              @change="drawerOptionToggle(group, val.id)"
+            />
+            <span class="tw:flex-1 tw:truncate tw:text-lg">{{ val.name }}</span>
+            <span v-if="val.price" class="tw:text-md tw:text-muted tw:shrink-0">+{{ formatVnd(val.price) }}</span>
+            <!-- qty stepper — visible only when selected -->
+            <div v-if="drawerOptionIsSelected(group, val.id)" class="tw:flex tw:items-center tw:gap-1.5 tw:shrink-0">
+              <prime-button size="small" severity="secondary" variant="outlined" :class="btnIcon" @click="drawerOptionAdjustQty(group, val.id, -1)">
+                <iconify icon="ph:minus-bold" />
+              </prime-button>
+              <span class="tw:w-5 tw:text-center tw:font-semibold tw:text-primary-400">{{ drawerOptionGetQty(group, val.id) }}</span>
+              <prime-button size="small" severity="secondary" variant="outlined" :class="btnIcon" @click="drawerOptionAdjustQty(group, val.id, 1)">
+                <iconify icon="ph:plus-bold" />
+              </prime-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- single/multi select (no qty) -->
+        <template v-else>
+          <!-- Single → RadioButtonGroup -->
+          <prime-radio-button-group
+            v-if="!group.allowMultiple"
+            v-model="drawerOptionSelections[group.id]"
+            class="tw:grid tw:grid-cols-2 tw:gap-2"
+          >
+            <label
+              v-for="val in group.values"
+              :key="val.id"
+              :for="`og-${group.id}-${val.id}`"
+              class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:text-sm tw:cursor-pointer tw:transition-colors"
+              :class="drawerOptionSelections[group.id] === val.id ? 'tw:border-primary-500/60 tw:bg-primary-500/10' : ''"
+              :style="drawerOptionSelections[group.id] === val.id ? '' : 'border-color: var(--app-border)'"
+            >
+              <prime-radio-button :input-id="`og-${group.id}-${val.id}`" :value="val.id" />
+              <span class="tw:flex-1 tw:truncate">{{ val.name }}</span>
+              <span v-if="val.price" class="tw:text-xs tw:shrink-0 tw:opacity-70">+{{ formatVnd(val.price) }}</span>
+            </label>
+          </prime-radio-button-group>
+          <!-- Multiple → Checkbox -->
+          <div v-else class="tw:grid tw:grid-cols-2 tw:gap-2">
+            <label
+              v-for="val in group.values"
+              :key="val.id"
+              :for="`og-${group.id}-${val.id}`"
+              class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:text-sm tw:cursor-pointer tw:transition-colors"
+              :class="(drawerOptionSelections[group.id] ?? []).includes(val.id) ? 'tw:border-primary-500/60 tw:bg-primary-500/10' : ''"
+              :style="(drawerOptionSelections[group.id] ?? []).includes(val.id) ? '' : 'border-color: var(--app-border)'"
+            >
+              <prime-checkbox
+                :input-id="`og-${group.id}-${val.id}`"
+                v-model="drawerOptionSelections[group.id]"
+                :value="val.id"
+              />
+              <span class="tw:flex-1 tw:truncate">{{ val.name }}</span>
+              <span v-if="val.price" class="tw:text-xs tw:shrink-0 tw:opacity-70">+{{ formatVnd(val.price) }}</span>
+            </label>
+          </div>
+        </template>
       </div>
 
       <!-- Serving -->
       <div>
-        <p class="tw:text-sm tw:font-semibold tw:mb-2">{{ t('orders.create.optionsDialog.serving') }}</p>
-        <div class="tw:grid tw:grid-cols-2 tw:gap-2">
-          <button
-            class="tw:flex tw:items-center tw:justify-center tw:gap-2 tw:rounded-xl tw:border tw:py-2.5 tw:text-sm tw:transition-colors"
-            :class="
-              !drawerTakeaway
-                ? 'tw:border-emerald-500 tw:bg-emerald-500/15 tw:text-emerald-300'
-                : 'tw:text-muted'
-            "
-            :style="!drawerTakeaway ? '' : 'border-color: var(--app-border)'"
+        <p class="tw:text-md tw:font-semibold tw:mb-2">{{ t('orders.create.optionsDialog.serving') }}</p>
+        <div class="tw:flex tw:gap-2">
+          <prime-button
+            variant="outlined"
+            class="tw:flex-1"
+            :severity="!drawerTakeaway ? 'primary' : 'secondary'"
             @click="drawerTakeaway = false"
           >
             <iconify icon="ph:coffee-bold" />
-            <span>{{ t('orders.serving.dineIn') }}</span>
-          </button>
-          <button
-            class="tw:flex tw:items-center tw:justify-center tw:gap-2 tw:rounded-xl tw:border tw:py-2.5 tw:text-sm tw:transition-colors"
-            :class="
-              drawerTakeaway
-                ? 'tw:border-emerald-500 tw:bg-emerald-500/15 tw:text-emerald-300'
-                : 'tw:text-muted'
-            "
-            :style="drawerTakeaway ? '' : 'border-color: var(--app-border)'"
+            <span class="tw:text-lg!">{{ t('orders.serving.dineIn') }}</span>
+          </prime-button>
+          <prime-button
+            variant="outlined"
+            class="tw:flex-1"
+            :severity="drawerTakeaway ? 'primary' : 'secondary'"
             @click="drawerTakeaway = true"
           >
             <iconify icon="ph:bag-bold" />
-            <span>{{ t('orders.serving.takeaway') }}</span>
-          </button>
+            <span class="tw:text-lg!">{{ t('orders.serving.takeaway') }}</span>
+          </prime-button>
         </div>
       </div>
 
@@ -537,12 +845,12 @@ onMounted(() => loadData())
         @click="confirmDrawerAdd"
       >
         <iconify icon="ph:shopping-cart-bold" />
-        <span>{{ t('orders.create.optionsDialog.addToCart') }}</span>
+        <span>{{ t('orders.create.optionsDialog.addToCart') }} - {{ formatVnd(drawerUnitPrice) }}</span>
       </prime-button>
     </div>
   </prime-drawer>
 
-  <!-- ── Cart Drawer ──────────────────────────────────────────── -->
+  <!-- â”€â”€ Cart Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <prime-drawer
     v-model:visible="showCartDrawer"
     position="bottom"
@@ -553,7 +861,7 @@ onMounted(() => loadData())
       <div class="tw:flex tw:items-center tw:justify-between tw:w-full">
         <h2 class="tw:font-semibold tw:flex tw:items-center tw:gap-2">
           {{ t('orders.create.cart') }}
-          <prime-badge v-if="cartItemCount > 0" :value="cartItemCount" severity="success" />
+          <prime-badge v-if="cartItemCount > 0" :value="cartItemCount" severity="primary" />
         </h2>
         <prime-button
           v-if="cart.length > 0"
@@ -601,7 +909,7 @@ onMounted(() => loadData())
             item.isFreeGift
               ? 'tw:border-amber-500/40 tw:bg-amber-500/5'
               : isItemDiscounted(item)
-                ? 'tw:border-emerald-500/60 tw:bg-emerald-500/5'
+                ? 'tw:border-primary-500/60 tw:bg-primary-500/5'
                 : ''
           "
           :style="item.isFreeGift || isItemDiscounted(item) ? '' : 'border-color: var(--app-border)'"
@@ -609,7 +917,7 @@ onMounted(() => loadData())
           <div class="tw:flex tw:items-start tw:gap-2">
             <div class="tw:flex-1 tw:min-w-0">
               <p class="tw:text-sm tw:font-medium tw:leading-snug">{{ item.productName }}</p>
-              <p class="tw:text-xs tw:mt-0.5" :class="item.isFreeGift ? 'tw:text-amber-400' : 'tw:text-emerald-400'">
+              <p class="tw:text-xs tw:mt-0.5" :class="item.isFreeGift ? 'tw:text-amber-400' : 'tw:text-primary-400'">
                 {{ item.isFreeGift ? '0 ₫' : formatVnd(item.unitPrice + (item.optionAdjustment ?? 0)) }}
               </p>
               <p v-if="optionsLabel(item)" class="tw:text-xs tw:text-amber-400 tw:mt-0.5">
@@ -642,12 +950,12 @@ onMounted(() => loadData())
             <span v-if="item.isFreeGift" class="tw:text-xs tw:text-amber-400 tw:font-semibold">
               {{ t('orders.create.freeBadge') }}
             </span>
-            <span v-else-if="isItemDiscounted(item)" class="tw:text-xs tw:text-emerald-400">
+            <span v-else-if="isItemDiscounted(item)" class="tw:text-xs tw:text-primary-400">
               {{ t('orders.create.promoBadge') }}
             </span>
             <span v-else />
             <span class="tw:text-sm tw:font-semibold"
-              :class="item.isFreeGift ? 'tw:text-amber-400' : 'tw:text-emerald-400'">
+              :class="item.isFreeGift ? 'tw:text-amber-400' : 'tw:text-primary-400'">
               {{ item.isFreeGift ? '0 ₫' : formatVnd((item.unitPrice + (item.optionAdjustment ?? 0)) * item.quantity) }}
             </span>
           </div>
@@ -662,19 +970,19 @@ onMounted(() => loadData())
         </div>
         <div v-if="promoInfo" class="tw:flex tw:justify-between tw:text-xs tw:mb-1">
           <span class="tw:flex tw:items-center tw:gap-1 tw:text-muted">
-            <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
+            <iconify icon="ph:tag-bold" class="tw:text-primary-400" />
             {{ promoInfo.code }}
           </span>
           <span v-if="freeItemSelection" class="tw:text-amber-400">
             {{ t('orders.create.freeItem') }}
           </span>
-          <span v-else-if="promoInfo.estimatedDiscount" class="tw:text-emerald-400">
+          <span v-else-if="promoInfo.estimatedDiscount" class="tw:text-primary-400">
             -{{ formatVnd(promoInfo.estimatedDiscount) }}
           </span>
         </div>
         <div class="tw:flex tw:justify-between tw:font-bold tw:border-t tw:pt-2" style="border-color: var(--app-border)">
           <span>{{ t('orders.create.total') }}</span>
-          <span class="tw:text-emerald-400 tw:text-base">{{ formatVnd(cartFinal) }}</span>
+          <span class="tw:text-primary-400 tw:text-base">{{ formatVnd(cartFinal) }}</span>
         </div>
       </div>
 
@@ -694,7 +1002,7 @@ onMounted(() => loadData())
       <div class="tw:space-y-2">
         <div class="tw:flex tw:items-center tw:justify-between">
           <span class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs tw:text-muted">
-            <iconify icon="ph:ticket-bold" class="tw:text-emerald-400" />
+            <iconify icon="ph:ticket-bold" class="tw:text-primary-400" />
             {{ t('orders.create.findPromotions') }}
           </span>
           <prime-button size="small" text severity="secondary" class="tw:text-xs tw:h-6! tw:px-2!"
@@ -707,11 +1015,11 @@ onMounted(() => loadData())
         <!-- Applied promo -->
         <div
           v-if="promoInfo"
-          class="tw:flex tw:items-center tw:justify-between tw:rounded-xl tw:border tw:border-emerald-500/30 tw:bg-emerald-500/10 tw:px-3 tw:py-2"
+          class="tw:flex tw:items-center tw:justify-between tw:rounded-xl tw:border tw:border-primary-500/30 tw:bg-primary-500/10 tw:px-3 tw:py-2"
         >
           <div class="tw:flex tw:items-center tw:gap-2 tw:min-w-0">
-            <iconify icon="ph:tag-bold" class="tw:text-emerald-400 tw:shrink-0" />
-            <span class="tw:font-medium tw:text-sm tw:text-emerald-300">{{ promoInfo.code }}</span>
+            <iconify icon="ph:tag-bold" class="tw:text-primary-400 tw:shrink-0" />
+            <span class="tw:font-medium tw:text-sm tw:text-primary-300">{{ promoInfo.code }}</span>
             <span class="tw:text-xs tw:text-muted tw:truncate">{{ promoInfo.name }}</span>
           </div>
           <prime-button size="small" text severity="secondary" :class="btnIcon" @click="clearPromo">
@@ -725,7 +1033,7 @@ onMounted(() => loadData())
           class="tw:rounded-xl tw:border tw:p-3"
           style="border-color: var(--app-border)"
         >
-          <p class="tw:text-xs tw:font-medium tw:mb-2 tw:flex tw:items-center tw:gap-1 tw:text-emerald-400">
+          <p class="tw:text-xs tw:font-medium tw:mb-2 tw:flex tw:items-center tw:gap-1 tw:text-primary-400">
             <iconify icon="ph:gift-bold" />
             {{ t('orders.create.selectFreeGift') }}
           </p>
@@ -736,7 +1044,7 @@ onMounted(() => loadData())
               class="tw:flex tw:items-center tw:justify-between tw:rounded-lg tw:border tw:px-3 tw:py-2 tw:text-left tw:text-sm tw:transition-colors tw:w-full"
               :class="
                 freeItemSelection?._key === item._key
-                  ? 'tw:border-emerald-500 tw:bg-emerald-500/10 tw:text-emerald-300'
+                  ? 'tw:border-primary-500 tw:bg-primary-500/10 tw:text-primary-300'
                   : 'tw:text-muted'
               "
               :style="freeItemSelection?._key === item._key ? '' : 'border-color: var(--app-border)'"
@@ -746,7 +1054,7 @@ onMounted(() => loadData())
                 <iconify :icon="freeItemSelection?._key === item._key ? 'ph:check-circle-fill' : 'ph:circle'" />
                 {{ item.productName }}
               </span>
-              <span class="tw:text-xs tw:font-semibold tw:text-emerald-400">{{ formatVnd(item.unitPrice) }}</span>
+              <span class="tw:text-xs tw:font-semibold tw:text-primary-400">{{ formatVnd(item.unitPrice) }}</span>
             </button>
           </div>
         </div>

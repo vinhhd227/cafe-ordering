@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 const props = defineProps({
   visible: Boolean,
   product: Object,
@@ -9,7 +9,9 @@ const emit = defineEmits(['update:visible', 'confirm'])
 const { t } = useI18n()
 
 const pendingQuantity = ref(1)
-const pendingSelections = ref({}) // { [groupId]: valueId (Single) | valueId[] (Multiple) }
+const pendingSelections = ref({})        // variantGroups
+const pendingOptionSelections = ref({})  // optionGroups — non-quantity
+const pendingOptionQuantities = ref({})  // optionGroups — allowQuantity
 const isTakeaway = ref(false)
 
 watch(
@@ -19,7 +21,7 @@ watch(
     pendingQuantity.value = 1
     isTakeaway.value = false
     const selections = {}
-    for (const group of product.optionGroups ?? []) {
+    for (const group of product.variantGroups ?? []) {
       const defaultVal = group.values?.find((v) => v.isDefault)
       if (group.selectionType === 'Single') {
         selections[group.id] = defaultVal?.id ?? null
@@ -28,6 +30,17 @@ watch(
       }
     }
     pendingSelections.value = selections
+    const optionSels = {}
+    const optionQtys = {}
+    for (const group of product.optionGroups ?? []) {
+      if (group.allowQuantity) {
+        optionQtys[group.id] = {}
+      } else {
+        optionSels[group.id] = group.allowMultiple ? [] : null
+      }
+    }
+    pendingOptionSelections.value = optionSels
+    pendingOptionQuantities.value = optionQtys
   },
   { immediate: true },
 )
@@ -64,13 +77,76 @@ const isSelected = (group, valueId) => {
   return Array.isArray(sel) && sel.includes(valueId)
 }
 
+const isOptionSelected = (group, valueId) => {
+  if (group.allowQuantity)
+    return (pendingOptionQuantities.value[group.id]?.[valueId] ?? 0) > 0
+  const sel = pendingOptionSelections.value[group.id]
+  if (!group.allowMultiple) return sel === valueId
+  return Array.isArray(sel) && sel.includes(valueId)
+}
+
+const toggleOptionValue = (group, valueId) => {
+  if (group.allowQuantity) {
+    const qtys = pendingOptionQuantities.value[group.id] ?? {}
+    const cur = qtys[valueId] ?? 0
+    pendingOptionQuantities.value[group.id] = { ...qtys, [valueId]: cur > 0 ? 0 : 1 }
+    return
+  }
+  if (!group.allowMultiple) {
+    pendingOptionSelections.value[group.id] =
+      pendingOptionSelections.value[group.id] === valueId ? null : valueId
+  } else {
+    const current = pendingOptionSelections.value[group.id] ?? []
+    const idx = current.indexOf(valueId)
+    pendingOptionSelections.value[group.id] =
+      idx >= 0 ? current.filter((id) => id !== valueId) : [...current, valueId]
+  }
+}
+
+const getOptionQty = (group, valueId) =>
+  pendingOptionQuantities.value[group.id]?.[valueId] ?? 0
+
+const adjustOptionQty = (group, valueId, delta) => {
+  const qtys = pendingOptionQuantities.value[group.id] ?? {}
+  const newQty = Math.max(0, (qtys[valueId] ?? 0) + delta)
+  pendingOptionQuantities.value[group.id] = { ...qtys, [valueId]: newQty }
+}
+
+const isValueDisabled = (group, valueId) => {
+  if (!props.product?.variants?.length) return false
+  const activeVariants = props.product.variants.filter((v) => v.isActive !== false)
+  // collect selected ids from OTHER groups
+  const otherIds = []
+  for (const g of props.product.variantGroups ?? []) {
+    if (g.id === group.id) continue
+    const sel = pendingSelections.value[g.id]
+    const ids = g.selectionType === 'Single' ? (sel ? [sel] : []) : (sel ?? [])
+    otherIds.push(...ids)
+  }
+  return !activeVariants.some((v) => {
+    const vIds = v.valueIds ?? []
+    return vIds.includes(valueId) && otherIds.every((id) => vIds.includes(id))
+  })
+}
+
 const canConfirm = computed(() => {
   if (!props.product) return false
-  for (const group of props.product.optionGroups ?? []) {
+  for (const group of props.product.variantGroups ?? []) {
     if (!group.isRequired) continue
     const sel = pendingSelections.value[group.id]
     if (group.selectionType === 'Single' && !sel) return false
     if (group.selectionType !== 'Single' && (!sel || sel.length === 0)) return false
+  }
+  for (const group of props.product.optionGroups ?? []) {
+    if (!group.isRequired) continue
+    if (group.allowQuantity) {
+      const hasAny = Object.values(pendingOptionQuantities.value[group.id] ?? {}).some((q) => q > 0)
+      if (!hasAny) return false
+    } else {
+      const sel = pendingOptionSelections.value[group.id]
+      if (!group.allowMultiple && !sel) return false
+      if (group.allowMultiple && (!sel || sel.length === 0)) return false
+    }
   }
   return true
 })
@@ -80,7 +156,7 @@ const handleConfirm = () => {
   const selectedLabels = []
   let optionAdjustment = 0
 
-  for (const group of props.product.optionGroups ?? []) {
+  for (const group of props.product.variantGroups ?? []) {
     const sel = pendingSelections.value[group.id]
     const ids = group.selectionType === 'Single' ? (sel ? [sel] : []) : (sel ?? [])
     for (const id of ids) {
@@ -88,11 +164,38 @@ const handleConfirm = () => {
       if (!val) continue
       selectedIds.push(id)
       selectedLabels.push(val.label)
-      optionAdjustment += val.priceAdjustment ?? 0
+      optionAdjustment += val.price ?? 0
     }
   }
 
-  const key = `${props.product.id}|${[...selectedIds].sort().join(',')}|${isTakeaway.value ? '1' : '0'}`
+  const selectedOptionValues = []
+  for (const group of props.product.optionGroups ?? []) {
+    if (group.allowQuantity) {
+      const qtys = pendingOptionQuantities.value[group.id] ?? {}
+      for (const [idStr, qty] of Object.entries(qtys)) {
+        if (qty <= 0) continue
+        const id = Number(idStr)
+        const val = group.values?.find((v) => v.id === id)
+        if (!val) continue
+        selectedOptionValues.push({ optionValueId: id, quantity: qty })
+        selectedLabels.push(`${group.name}: ${val.name}${qty > 1 ? ` x${qty}` : ''}`)
+        optionAdjustment += (val.price ?? 0) * qty
+      }
+    } else {
+      const sel = pendingOptionSelections.value[group.id]
+      const ids = group.allowMultiple ? (sel ?? []) : (sel ? [sel] : [])
+      for (const id of ids) {
+        const val = group.values?.find((v) => v.id === id)
+        if (!val) continue
+        selectedOptionValues.push({ optionValueId: id, quantity: 1 })
+        selectedLabels.push(`${group.name}: ${val.name}`)
+        optionAdjustment += val.price ?? 0
+      }
+    }
+  }
+
+  const optKey = selectedOptionValues.map((o) => `${o.optionValueId}x${o.quantity}`).sort().join(',')
+  const key = `${props.product.id}|${[...selectedIds].sort().join(',')}|${optKey}|${isTakeaway.value ? '1' : '0'}`
 
   emit('confirm', {
     _key: key,
@@ -100,7 +203,8 @@ const handleConfirm = () => {
     productName: props.product.name,
     unitPrice: props.product.price,
     optionAdjustment,
-    selectedOptionValueIds: selectedIds,
+    selectedVariantValueIds: selectedIds,
+    selectedOptionValues,
     selectedValueLabels: selectedLabels,
     quantity: pendingQuantity.value,
     isTakeaway: isTakeaway.value,
@@ -140,13 +244,13 @@ const handleConfirm = () => {
             v-else
             class="tw:flex tw:h-full tw:w-full tw:items-center tw:justify-center"
           >
-            <iconify icon="ph:coffee-bold" class="tw:text-6xl tw:text-emerald-400/20" />
+            <iconify icon="ph:coffee-bold" class="tw:text-6xl tw:text-primary-400/20" />
           </div>
         </div>
 
         <div class="tw:flex tw:flex-1 tw:flex-col tw:gap-2 tw:p-4">
           <h3 class="tw:text-lg tw:font-bold tw:leading-snug">{{ product?.name }}</h3>
-          <p class="tw:text-xl tw:font-semibold tw:text-emerald-500">
+          <p class="tw:text-xl tw:font-semibold tw:text-primary-500">
             {{ product ? formatVnd(product.price) : '' }}
           </p>
           <p v-if="product?.description" class="tw:text-sm tw:leading-relaxed tw:text-muted">
@@ -173,54 +277,160 @@ const handleConfirm = () => {
               {{ t('orders.create.optionsDialog.quantity') }}
             </p>
             <div class="tw:flex tw:items-center tw:gap-3">
-              <button
-                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition tw:hover:border-emerald-400 tw:text-muted"
-                style="border-color: var(--app-border)"
+              <prime-button
+                severity="secondary"
+                variant="outlined"
+                :class="btnIcon"
                 @click="pendingQuantity = Math.max(1, pendingQuantity - 1)"
               >
-                <iconify icon="ph:minus-bold" class="tw:h-4 tw:w-4" />
-              </button>
+                <iconify icon="ph:minus-bold" />
+              </prime-button>
               <span class="tw:min-w-10 tw:text-center tw:text-xl tw:font-bold">{{
                 pendingQuantity
               }}</span>
-              <button
-                class="tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-xl tw:border tw:transition tw:hover:border-emerald-400 tw:text-muted"
-                style="border-color: var(--app-border)"
+              <prime-button
+                severity="secondary"
+                variant="outlined"
+                :class="btnIcon"
                 @click="pendingQuantity++"
               >
-                <iconify icon="ph:plus-bold" class="tw:h-4 tw:w-4" />
-              </button>
+                <iconify icon="ph:plus-bold" />
+              </prime-button>
             </div>
           </div>
 
-          <!-- Dynamic option groups -->
-          <div v-for="group in product?.optionGroups ?? []" :key="group.id">
+          <!-- Dynamic option groups (variantGroups) -->
+          <div v-for="group in product?.variantGroups ?? []" :key="group.id">
             <p class="tw:mb-2 tw:text-sm tw:font-semibold">
               {{ group.name }}
               <span v-if="group.isRequired" class="tw:text-red-400 tw:text-xs tw:ml-1">*</span>
             </p>
-            <div class="tw:grid tw:grid-cols-2 tw:gap-2">
-              <prime-button
+            <!-- Single → RadioButtonGroup -->
+            <prime-radio-button-group
+              v-if="group.selectionType === 'Single'"
+              v-model="pendingSelections[group.id]"
+              class="tw:grid tw:grid-cols-2 tw:gap-2"
+            >
+              <label
                 v-for="val in group.values"
                 :key="val.id"
-                variant="outlined"
-                class="tw:w-full tw:justify-start"
-                :severity="isSelected(group, val.id) ? 'primary' : 'secondary'"
-                @click="toggleValue(group, val.id)"
+                :for="`vg-${group.id}-${val.id}`"
+                class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:text-sm tw:cursor-pointer tw:transition-colors"
+                :class="pendingSelections[group.id] === val.id ? 'tw:border-primary-500/60 tw:bg-primary-500/10' : ''"
+                :style="pendingSelections[group.id] === val.id ? '' : 'border-color: var(--app-border)'"
               >
-                <iconify
-                  :icon="isSelected(group, val.id) ? 'ph:check-circle-fill' : 'ph:circle'"
-                  class="tw:shrink-0"
+                <prime-radio-button
+                  :input-id="`vg-${group.id}-${val.id}`"
+                  :value="val.id"
+                  :disabled="isValueDisabled(group, val.id)"
                 />
                 <span class="tw:flex-1 tw:truncate">{{ val.label }}</span>
-                <span
-                  v-if="val.priceAdjustment && val.priceAdjustment !== 0"
-                  class="tw:text-xs tw:opacity-70 tw:shrink-0"
-                >
-                  +{{ formatVnd(val.priceAdjustment) }}
+                <span v-if="val.price && val.price !== 0" class="tw:text-xs tw:opacity-70 tw:shrink-0">
+                  +{{ formatVnd(val.price) }}
                 </span>
-              </prime-button>
+              </label>
+            </prime-radio-button-group>
+            <!-- Multiple → Checkbox -->
+            <div v-else class="tw:grid tw:grid-cols-2 tw:gap-2">
+              <label
+                v-for="val in group.values"
+                :key="val.id"
+                :for="`vg-${group.id}-${val.id}`"
+                class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:text-sm tw:cursor-pointer tw:transition-colors"
+                :class="(pendingSelections[group.id] ?? []).includes(val.id) ? 'tw:border-primary-500/60 tw:bg-primary-500/10' : ''"
+                :style="(pendingSelections[group.id] ?? []).includes(val.id) ? '' : 'border-color: var(--app-border)'"
+              >
+                <prime-checkbox
+                  :input-id="`vg-${group.id}-${val.id}`"
+                  v-model="pendingSelections[group.id]"
+                  :value="val.id"
+                  :disabled="isValueDisabled(group, val.id)"
+                />
+                <span class="tw:flex-1 tw:truncate">{{ val.label }}</span>
+                <span v-if="val.price && val.price !== 0" class="tw:text-xs tw:opacity-70 tw:shrink-0">
+                  +{{ formatVnd(val.price) }}
+                </span>
+              </label>
             </div>
+          </div>
+
+          <!-- Shared option groups (ProductOptionGroup) -->
+          <div v-for="group in product?.optionGroups ?? []" :key="`og-${group.id}`">
+            <p class="tw:mb-2 tw:text-sm tw:font-semibold">
+              {{ group.name }}
+              <span v-if="group.isRequired" class="tw:text-red-400 tw:text-xs tw:ml-1">*</span>
+              <span v-if="group.allowMultiple && !group.allowQuantity" class="tw:text-muted tw:text-xs tw:ml-1 tw:font-normal">({{ t('orders.create.optionsDialog.multiSelect') }})</span>
+            </p>
+
+            <!-- allowQuantity: full-width list with inline stepper -->
+            <div v-if="group.allowQuantity" class="tw:space-y-2">
+              <div
+                v-for="val in group.values"
+                :key="val.id"
+                class="tw:flex tw:items-center tw:gap-3 tw:rounded-xl tw:border tw:px-3 tw:py-2 tw:text-sm tw:transition-colors"
+                :class="isOptionSelected(group, val.id) ? 'tw:border-primary-400/50 tw:bg-primary-500/5' : ''"
+                :style="isOptionSelected(group, val.id) ? '' : 'border-color: var(--app-border)'"
+              >
+                <prime-checkbox
+                  :model-value="isOptionSelected(group, val.id)"
+                  :binary="true"
+                  @change="toggleOptionValue(group, val.id)"
+                />
+                <span class="tw:flex-1">{{ val.name }}</span>
+                <span v-if="val.price" class="tw:text-xs tw:text-muted tw:shrink-0">+{{ formatVnd(val.price) }}</span>
+                <div v-if="isOptionSelected(group, val.id)" class="tw:flex tw:items-center tw:gap-1.5 tw:shrink-0">
+                  <prime-button size="small" severity="secondary" variant="outlined" :class="btnIcon" @click="adjustOptionQty(group, val.id, -1)">
+                    <iconify icon="ph:minus-bold" />
+                  </prime-button>
+                  <span class="tw:w-5 tw:text-center tw:font-semibold tw:text-primary-400">{{ getOptionQty(group, val.id) }}</span>
+                  <prime-button size="small" severity="secondary" variant="outlined" :class="btnIcon" @click="adjustOptionQty(group, val.id, 1)">
+                    <iconify icon="ph:plus-bold" />
+                  </prime-button>
+                </div>
+              </div>
+            </div>
+
+            <!-- single / multi select (no qty) -->
+            <template v-else>
+              <!-- Single → RadioButtonGroup -->
+              <prime-radio-button-group
+                v-if="!group.allowMultiple"
+                v-model="pendingOptionSelections[group.id]"
+                class="tw:grid tw:grid-cols-2 tw:gap-2"
+              >
+                <label
+                  v-for="val in group.values"
+                  :key="val.id"
+                  :for="`og-${group.id}-${val.id}`"
+                  class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:text-sm tw:cursor-pointer tw:transition-colors"
+                  :class="pendingOptionSelections[group.id] === val.id ? 'tw:border-primary-500/60 tw:bg-primary-500/10' : ''"
+                  :style="pendingOptionSelections[group.id] === val.id ? '' : 'border-color: var(--app-border)'"
+                >
+                  <prime-radio-button :input-id="`og-${group.id}-${val.id}`" :value="val.id" />
+                  <span class="tw:flex-1 tw:truncate">{{ val.name }}</span>
+                  <span v-if="val.price" class="tw:text-xs tw:opacity-70 tw:shrink-0">+{{ formatVnd(val.price) }}</span>
+                </label>
+              </prime-radio-button-group>
+              <!-- Multiple → Checkbox -->
+              <div v-else class="tw:grid tw:grid-cols-2 tw:gap-2">
+                <label
+                  v-for="val in group.values"
+                  :key="val.id"
+                  :for="`og-${group.id}-${val.id}`"
+                  class="tw:flex tw:items-center tw:gap-2 tw:rounded-xl tw:border tw:px-3 tw:py-2.5 tw:text-sm tw:cursor-pointer tw:transition-colors"
+                  :class="(pendingOptionSelections[group.id] ?? []).includes(val.id) ? 'tw:border-primary-500/60 tw:bg-primary-500/10' : ''"
+                  :style="(pendingOptionSelections[group.id] ?? []).includes(val.id) ? '' : 'border-color: var(--app-border)'"
+                >
+                  <prime-checkbox
+                    :input-id="`og-${group.id}-${val.id}`"
+                    v-model="pendingOptionSelections[group.id]"
+                    :value="val.id"
+                  />
+                  <span class="tw:flex-1 tw:truncate">{{ val.name }}</span>
+                  <span v-if="val.price" class="tw:text-xs tw:opacity-70 tw:shrink-0">+{{ formatVnd(val.price) }}</span>
+                </label>
+              </div>
+            </template>
           </div>
 
           <!-- Serving -->

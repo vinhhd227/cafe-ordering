@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { createOrder, applyPromotionAdmin } from '@/services/order.service'
 import { appCard, cardRing } from '../../layout/ui'
 import OrderOptionsDialog from '@/components/orders/OrderOptionsDialog.vue'
@@ -8,7 +8,7 @@ const router = useRouter()
 const toast = useToast()
 const { t } = useI18n()
 
-// ── Composables ───────────────────────────────────────────────────
+// â”€â”€ Composables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const {
   tables, menuCategories, loadingMenu, loadingTables,
   selectedTableId, sessionId, sessionHadExisting, sessionLoading, sessionError,
@@ -31,7 +31,7 @@ const {
   applyPromoCode, clearPromo, openFindPromosDialog, selectPromo,
 } = useOrderPromotion(cart, cartTotal, productCategoryMap, menuCategories)
 
-// ── Local state ───────────────────────────────────────────────────
+// â”€â”€ Local state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const notificationStore = useNotificationStore()
 const guestCount = ref(null)
 const placing = ref(false)
@@ -41,7 +41,7 @@ const canPlaceOrder = computed(
   () => !!sessionId.value && cart.value.length > 0 && !placing.value,
 )
 
-// ── Place order ───────────────────────────────────────────────────
+// â”€â”€ Place order â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const placeOrder = async () => {
   if (!canPlaceOrder.value) return
   errorMessage.value = ''
@@ -55,7 +55,8 @@ const placeOrder = async () => {
         productName: item.productName,
         unitPrice: item.unitPrice,
         quantity: item.quantity,
-        selectedOptionValueIds: item.selectedOptionValueIds ?? [],
+        selectedVariantValueIds: item.selectedVariantValueIds ?? [],
+        selectedOptionValues: item.selectedOptionValues ?? [],
         isTakeaway: item.isTakeaway ?? false,
         isFreeGift: item.isFreeGift ?? false,
       })),
@@ -106,7 +107,7 @@ onMounted(() => loadData())
         <iconify icon="ph:arrow-left-bold" />
       </prime-button>
       <div>
-        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-emerald-300">
+        <p class="tw:text-xs tw:uppercase tw:tracking-[0.3em] tw:text-primary-300">
           {{ t('orders.breadcrumb') }}
         </p>
         <h1 class="tw:text-2xl tw:font-semibold">{{ t('orders.create.title') }}</h1>
@@ -175,7 +176,7 @@ onMounted(() => loadData())
 
     <!-- Main grid -->
     <div class="tw:grid tw:gap-5 tw:lg:grid-cols-12">
-      <!-- ── LEFT: Menu ──────────────────────────────────────── -->
+      <!-- â”€â”€ LEFT: Menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <section class="tw:lg:col-span-8 tw:space-y-4">
         <!-- Loading skeleton -->
         <div v-if="loadingMenu" class="tw:space-y-6">
@@ -222,7 +223,7 @@ onMounted(() => loadData())
             <article
               v-for="product in category.filteredProducts"
               :key="product.id"
-              class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all tw:hover:-translate-y-0.5 tw:hover:border-emerald-500/50"
+              class="tw:group tw:flex tw:h-full tw:flex-col tw:overflow-hidden tw:rounded-xl tw:border tw:cursor-pointer tw:transition-all tw:hover:-translate-y-0.5 tw:hover:border-primary-500/50"
               style="border-color: var(--app-border); background: var(--app-bg-subtle)"
               @click="handleAddToCart(product)"
             >
@@ -238,11 +239,11 @@ onMounted(() => loadData())
                   class="tw:h-32 tw:w-full tw:flex tw:items-center tw:justify-center"
                   style="background: var(--app-bg)"
                 >
-                  <iconify icon="ph:coffee-bold" class="tw:text-3xl tw:text-emerald-400/20" />
+                  <iconify icon="ph:coffee-bold" class="tw:text-3xl tw:text-primary-400/20" />
                 </div>
                 <div
                   v-if="cartQuantity(product.id) > 0"
-                  class="tw:absolute tw:top-2 tw:right-2 tw:h-5 tw:min-w-5 tw:px-1 tw:rounded-full tw:bg-emerald-500 tw:flex tw:items-center tw:justify-center tw:text-xs tw:font-bold tw:text-white tw:shadow-lg"
+                  class="tw:absolute tw:top-2 tw:right-2 tw:h-5 tw:min-w-5 tw:px-1 tw:rounded-full tw:bg-primary-500 tw:flex tw:items-center tw:justify-center tw:text-xs tw:font-bold tw:text-white tw:shadow-lg"
                 >
                   {{ cartQuantity(product.id) }}
                 </div>
@@ -252,16 +253,16 @@ onMounted(() => loadData())
                 <h3 class="tw:text-xs tw:font-semibold tw:line-clamp-2 tw:leading-snug">
                   {{ product.name }}
                 </h3>
-                <p class="tw:mt-1 tw:text-xs tw:font-semibold tw:text-emerald-400">
+                <p class="tw:mt-1 tw:text-xs tw:font-semibold tw:text-primary-400">
                   {{ formatVnd(product.price) }}
                 </p>
                 <!-- Option group badges -->
                 <div
-                  v-if="product.optionGroups?.length"
+                  v-if="product.variantGroups?.length"
                   class="tw:mt-1.5 tw:flex tw:flex-wrap tw:gap-1"
                 >
                   <span
-                    v-for="group in product.optionGroups"
+                    v-for="group in product.variantGroups"
                     :key="group.id"
                     class="tw:rounded tw:px-1 tw:py-0.5 tw:text-xs tw:bg-slate-500/10 tw:text-slate-400"
                   >{{ group.name }}</span>
@@ -285,7 +286,7 @@ onMounted(() => loadData())
         </prime-panel>
       </section>
 
-      <!-- ── RIGHT: Cart ────────────────────────────────────── -->
+      <!-- â”€â”€ RIGHT: Cart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <aside class="tw:lg:col-span-4 tw:lg:self-start tw:lg:sticky tw:lg:top-6">
         <div :class="[appCard, cardRing, 'tw:p-5 tw:rounded-md']">
           <!-- Cart header -->
@@ -333,7 +334,7 @@ onMounted(() => loadData())
                 item.isFreeGift
                   ? 'tw:border-amber-500/40 tw:bg-amber-500/5'
                   : isItemDiscounted(item)
-                    ? 'tw:border-emerald-500/60 tw:bg-emerald-500/5'
+                    ? 'tw:border-primary-500/60 tw:bg-primary-500/5'
                     : ''
               "
               :style="item.isFreeGift || isItemDiscounted(item) ? '' : 'border-color: var(--app-border)'"
@@ -351,7 +352,7 @@ onMounted(() => loadData())
                     </span>
                     <span
                       v-else-if="isItemDiscounted(item)"
-                      class="tw:inline-flex tw:items-center tw:gap-0.5 tw:text-xs tw:px-1.5 tw:py-0.5 tw:rounded tw:bg-emerald-500/15 tw:text-emerald-400 tw:font-medium"
+                      class="tw:inline-flex tw:items-center tw:gap-0.5 tw:text-xs tw:px-1.5 tw:py-0.5 tw:rounded tw:bg-primary-500/15 tw:text-primary-400 tw:font-medium"
                     >
                       <iconify icon="ph:tag-simple-fill" class="tw:text-[10px]" />
                       {{ t('orders.create.promoBadge') }}
@@ -362,7 +363,7 @@ onMounted(() => loadData())
                     :class="
                       item.isFreeGift
                         ? 'tw:text-amber-400 tw:line-through tw:opacity-60'
-                        : 'tw:text-emerald-400'
+                        : 'tw:text-primary-400'
                     "
                   >
                     {{
@@ -415,9 +416,9 @@ onMounted(() => loadData())
               <div class="tw:flex tw:justify-end tw:mt-1.5">
                 <span
                   class="tw:text-sm tw:font-semibold"
-                  :class="item.isFreeGift ? 'tw:text-amber-400' : 'tw:text-emerald-400'"
+                  :class="item.isFreeGift ? 'tw:text-amber-400' : 'tw:text-primary-400'"
                 >
-                  {{ item.isFreeGift ? '0 ₫' : formatVnd((item.unitPrice + (item.optionAdjustment ?? 0)) * item.quantity) }}
+                  {{ item.isFreeGift ? '0 â‚«' : formatVnd((item.unitPrice + (item.optionAdjustment ?? 0)) * item.quantity) }}
                 </span>
               </div>
             </div>
@@ -439,7 +440,7 @@ onMounted(() => loadData())
                   class="tw:flex tw:items-center tw:justify-between tw:text-xs tw:mb-1.5"
                 >
                   <span class="tw:flex tw:items-center tw:gap-1 tw:text-muted">
-                    <iconify icon="ph:tag-bold" class="tw:text-emerald-400" />
+                    <iconify icon="ph:tag-bold" class="tw:text-primary-400" />
                     {{ promoInfo.code }}
                   </span>
                   <span
@@ -451,7 +452,7 @@ onMounted(() => loadData())
                   </span>
                   <span
                     v-else-if="promoInfo.estimatedDiscount"
-                    class="tw:text-emerald-400 tw:font-medium"
+                    class="tw:text-primary-400 tw:font-medium"
                   >
                     -{{ formatVnd(promoInfo.estimatedDiscount) }}
                   </span>
@@ -467,7 +468,7 @@ onMounted(() => loadData())
                       class="tw:text-muted tw:line-through tw:text-xs tw:font-normal tw:mr-1"
                       >{{ formatVnd(cartTotal) }}</span
                     >
-                    <span class="tw:text-emerald-400 tw:text-base">{{ formatVnd(cartFinal) }}</span>
+                    <span class="tw:text-primary-400 tw:text-base">{{ formatVnd(cartFinal) }}</span>
                   </div>
                 </div>
               </div>
@@ -477,7 +478,7 @@ onMounted(() => loadData())
           <!-- Find promotions -->
           <div class="tw:flex tw:items-center tw:justify-between tw:mt-4 tw:mb-1">
             <span class="tw:flex tw:items-center tw:gap-1.5 tw:text-xs tw:text-muted">
-              <iconify icon="ph:ticket-bold" class="tw:text-emerald-400" />
+              <iconify icon="ph:ticket-bold" class="tw:text-primary-400" />
               {{ t('orders.create.findPromotions') }}
             </span>
             <prime-button
@@ -494,11 +495,11 @@ onMounted(() => loadData())
             <!-- Applied promo tag -->
             <div
               v-if="promoInfo"
-              class="tw:flex tw:items-center tw:justify-between tw:rounded-xl tw:border tw:border-emerald-500/30 tw:bg-emerald-500/10 tw:px-3 tw:py-2"
+              class="tw:flex tw:items-center tw:justify-between tw:rounded-xl tw:border tw:border-primary-500/30 tw:bg-primary-500/10 tw:px-3 tw:py-2"
             >
               <div class="tw:flex tw:items-center tw:gap-2 tw:min-w-0">
-                <iconify icon="ph:tag-bold" class="tw:text-emerald-400 tw:shrink-0" />
-                <span class="tw:font-medium tw:text-sm tw:text-emerald-300">{{ promoInfo.code }}</span>
+                <iconify icon="ph:tag-bold" class="tw:text-primary-400 tw:shrink-0" />
+                <span class="tw:font-medium tw:text-sm tw:text-primary-300">{{ promoInfo.code }}</span>
                 <span class="tw:text-xs tw:text-muted tw:truncate">{{ promoInfo.name }}</span>
               </div>
               <prime-button size="small" text severity="secondary" :class="btnIcon" @click="clearPromo">
@@ -512,7 +513,7 @@ onMounted(() => loadData())
               class="tw:mt-2 tw:rounded-xl tw:border tw:p-3"
               style="border-color: var(--app-border)"
             >
-              <p class="tw:text-xs tw:font-medium tw:mb-2 tw:flex tw:items-center tw:gap-1 tw:text-emerald-400">
+              <p class="tw:text-xs tw:font-medium tw:mb-2 tw:flex tw:items-center tw:gap-1 tw:text-primary-400">
                 <iconify icon="ph:gift-bold" />
                 {{ t('orders.create.selectFreeGift') }}
               </p>
@@ -523,8 +524,8 @@ onMounted(() => loadData())
                   class="tw:flex tw:items-center tw:justify-between tw:rounded-lg tw:border tw:px-3 tw:py-2 tw:text-left tw:text-sm tw:transition-colors tw:w-full"
                   :class="
                     freeItemSelection?._key === item._key
-                      ? 'tw:border-emerald-500 tw:bg-emerald-500/10 tw:text-emerald-300'
-                      : 'tw:hover:border-emerald-500/40 tw:text-muted'
+                      ? 'tw:border-primary-500 tw:bg-primary-500/10 tw:text-primary-300'
+                      : 'tw:hover:border-primary-500/40 tw:text-muted'
                   "
                   :style="freeItemSelection?._key === item._key ? '' : 'border-color: var(--app-border)'"
                   @click="freeItemSelection = freeItemSelection?._key === item._key ? null : item"
@@ -533,12 +534,12 @@ onMounted(() => loadData())
                     <iconify
                       v-if="freeItemSelection?._key === item._key"
                       icon="ph:check-circle-fill"
-                      class="tw:text-emerald-400 tw:shrink-0"
+                      class="tw:text-primary-400 tw:shrink-0"
                     />
                     <iconify v-else icon="ph:circle" class="tw:shrink-0" />
                     {{ item.productName }}
                   </span>
-                  <span class="tw:text-xs tw:font-semibold tw:text-emerald-400 tw:shrink-0">
+                  <span class="tw:text-xs tw:font-semibold tw:text-primary-400 tw:shrink-0">
                     {{ formatVnd(item.unitPrice) }}
                   </span>
                 </button>
