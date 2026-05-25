@@ -27,6 +27,8 @@ const toast = useToast();
 const confirm = useConfirm();
 const { can } = usePermission();
 const orderId = computed(() => Number(route.params.id));
+const { isMobile } = useBreakpoint()
+const MobileDetail = defineAsyncComponent(() => import('./Detail.mobile.vue'))
 
 // ── State ──────────────────────────────────────────────────────────
 const order = ref(null);
@@ -68,14 +70,19 @@ const paymentTag = (status, method) => {
   return { ...meta, label: t(`orders.paymentStatus.${status}`, meta.label ?? status) };
 };
 
-const NEXT_STATUS = {
-  [ORDER_STATUS.PENDING]: ORDER_STATUS.PROCESSING,
-  [ORDER_STATUS.PROCESSING]: ORDER_STATUS.COMPLETED,
-};
+const NEXT_STATUS = computed(() => {
+  const isDelivery = order.value?.orderType === 'DELIVERY'
+  return {
+    [ORDER_STATUS.PENDING]:    ORDER_STATUS.PROCESSING,
+    [ORDER_STATUS.PROCESSING]: isDelivery ? ORDER_STATUS.SHIPPING : ORDER_STATUS.COMPLETED,
+    [ORDER_STATUS.SHIPPING]:   ORDER_STATUS.COMPLETED,
+  }
+});
 
 const NEXT_LABEL = computed(() => ({
-  [ORDER_STATUS.PENDING]: t("orders.detail.actions.startPreparing"),
-  [ORDER_STATUS.PROCESSING]: t("orders.detail.actions.markComplete"),
+  [ORDER_STATUS.PENDING]:    t("orders.detail.actions.startPreparing"),
+  [ORDER_STATUS.PROCESSING]: order.value?.orderType === 'DELIVERY' ? t("orders.kanban.markShipping") : t("orders.detail.actions.markComplete"),
+  [ORDER_STATUS.SHIPPING]:   t("orders.detail.actions.markComplete"),
 }));
 
 const canSplit = computed(() => {
@@ -456,6 +463,8 @@ const confirmSplit = async () => {
 </script>
 
 <template>
+  <MobileDetail v-if="isMobile" />
+  <template v-else>
   <prime-confirm-popup />
   <prime-confirm-dialog />
 
@@ -967,22 +976,59 @@ const confirmSplit = async () => {
                     :severity="statusTag(order.status).severity"
                   />
                 </div>
+                <!-- Order type -->
                 <div class="tw:flex tw:justify-between tw:text-sm tw:items-center">
+                  <span class="tw:text-muted">{{ t('orders.detail.info.orderType') }}</span>
+                  <prime-tag
+                    :severity="order.orderType === 'DINE_IN' ? 'secondary' : order.orderType === 'TAKEAWAY' ? 'warn' : 'info'"
+                    class="tw:text-xs!"
+                  >
+                    <iconify
+                      :icon="order.orderType === 'DINE_IN' ? 'ph:fork-knife-bold' : order.orderType === 'TAKEAWAY' ? 'ph:bag-bold' : 'ph:motorcycle-bold'"
+                      class="tw:mr-1"
+                    />
+                    {{ t(`orders.create.orderType.${order.orderType ?? 'DINE_IN'}`) }}
+                  </prime-tag>
+                </div>
+
+                <!-- Table (DineIn) -->
+                <div v-if="order.orderType === 'DINE_IN' || order.tableCode" class="tw:flex tw:justify-between tw:text-sm tw:items-center">
                   <span class="tw:text-muted">{{ t('orders.detail.info.table') }}</span>
-                  <span v-if="order.tableCode" class="tw:font-semibold tw:font-mono">
-                    {{ order.tableCode }}
-                  </span>
+                  <span v-if="order.tableCode" class="tw:font-semibold tw:font-mono">{{ order.tableCode }}</span>
                   <span v-else class="tw:text-muted tw:italic tw:text-xs">—</span>
                 </div>
-                <div
-                  class="tw:flex tw:justify-between tw:text-sm tw:items-center"
-                >
+
+                <!-- Session (DineIn) -->
+                <div v-if="order.sessionId" class="tw:flex tw:justify-between tw:text-sm tw:items-center">
                   <span class="tw:text-muted">{{ t('orders.detail.info.session') }}</span>
                   <span
                     class="tw:font-mono tw:text-xs tw:text-muted tw:max-w-28 tw:truncate"
                     :title="String(order.sessionId)"
-                    >{{ String(order.sessionId).slice(0, 8) }}…</span
-                  >
+                  >{{ String(order.sessionId).slice(0, 8) }}…</span>
+                </div>
+
+                <!-- Customer info (Takeaway / Delivery) -->
+                <div v-if="order.customerName || order.customerPhone" class="tw:flex tw:justify-between tw:text-sm tw:items-center">
+                  <span class="tw:text-muted tw:flex tw:items-center tw:gap-1">
+                    <iconify icon="ph:user-bold" class="tw:text-sm" />
+                    {{ t('orders.detail.info.customer') }}
+                  </span>
+                  <span class="tw:font-medium tw:text-right">
+                    <span v-if="order.customerName">{{ order.customerName }}</span>
+                    <span v-if="order.customerName && order.customerPhone"> · </span>
+                    <span v-if="order.customerPhone" class="tw:font-mono">{{ order.customerPhone }}</span>
+                  </span>
+                </div>
+                <div v-if="order.deliveryAddress" class="tw:flex tw:justify-between tw:text-sm tw:items-start tw:gap-4">
+                  <span class="tw:text-muted tw:flex tw:items-center tw:gap-1 tw:shrink-0">
+                    <iconify icon="ph:map-pin-bold" class="tw:text-sm" />
+                    {{ t('orders.detail.info.deliveryAddress') }}
+                  </span>
+                  <span class="tw:font-medium tw:text-right tw:break-words">{{ order.deliveryAddress }}</span>
+                </div>
+                <div v-if="order.deliveryNote" class="tw:flex tw:justify-between tw:text-sm tw:items-start tw:gap-4">
+                  <span class="tw:text-muted tw:shrink-0">{{ t('orders.detail.info.deliveryNote') }}</span>
+                  <span class="tw:text-right tw:text-muted tw:italic">{{ order.deliveryNote }}</span>
                 </div>
                 <div v-if="order.guestCount" class="tw:flex tw:justify-between tw:text-sm tw:items-center">
                   <span class="tw:text-muted tw:flex tw:items-center tw:gap-1">
@@ -1516,4 +1562,5 @@ const confirmSplit = async () => {
       </template>
     </prime-card>
   </section>
+  </template>
 </template>

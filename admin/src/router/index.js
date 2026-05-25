@@ -75,6 +75,7 @@ const routes = [
             path: ":id",
             name: "ordersDetail",
             component: () => import("@/views/orders/Detail.vue"),
+            meta: { hideBottomNav: true },
           },
           {
             path: ":id/edit",

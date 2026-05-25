@@ -155,6 +155,13 @@ const STATUSES = [
     dot: "tw:bg-blue-400",
   },
   {
+    key: ORDER_STATUS.SHIPPING,
+    icon: "ph:motorcycle-bold",
+    color: "tw:text-purple-400",
+    bg: "tw:bg-purple-400/10 tw:border-purple-400/20",
+    dot: "tw:bg-purple-400",
+  },
+  {
     key: ORDER_STATUS.COMPLETED,
     icon: "ph:check-circle-bold",
     color: "tw:text-primary-400",
@@ -171,14 +178,33 @@ const STATUSES = [
 ];
 
 const NEXT_STATUS = {
-  [ORDER_STATUS.PENDING]: ORDER_STATUS.PROCESSING,
-  [ORDER_STATUS.PROCESSING]: ORDER_STATUS.COMPLETED,
+  [ORDER_STATUS.PENDING]:    ORDER_STATUS.PROCESSING,
+  [ORDER_STATUS.PROCESSING]: ORDER_STATUS.COMPLETED,  // default; delivery orders go via SHIPPING
+  [ORDER_STATUS.SHIPPING]:   ORDER_STATUS.COMPLETED,
 };
 
 const NEXT_LABEL = computed(() => ({
-  [ORDER_STATUS.PENDING]: t("orders.kanban.startPreparing"),
+  [ORDER_STATUS.PENDING]:    t("orders.kanban.startPreparing"),
   [ORDER_STATUS.PROCESSING]: t("orders.kanban.markComplete"),
+  [ORDER_STATUS.SHIPPING]:   t("orders.kanban.markComplete"),
 }));
+
+// Per-order helpers — DELIVERY goes PROCESSING → SHIPPING → COMPLETED
+const nextStatusFor = (order) => {
+  if (order.status === ORDER_STATUS.PENDING) return ORDER_STATUS.PROCESSING
+  if (order.status === ORDER_STATUS.PROCESSING)
+    return order.orderType === 'DELIVERY' ? ORDER_STATUS.SHIPPING : ORDER_STATUS.COMPLETED
+  if (order.status === ORDER_STATUS.SHIPPING) return ORDER_STATUS.COMPLETED
+  return null
+}
+
+const nextLabelFor = (order) => {
+  if (order.status === ORDER_STATUS.PENDING) return t('orders.kanban.startPreparing')
+  if (order.status === ORDER_STATUS.PROCESSING)
+    return order.orderType === 'DELIVERY' ? t('orders.kanban.markShipping') : t('orders.kanban.markComplete')
+  if (order.status === ORDER_STATUS.SHIPPING) return t('orders.kanban.markComplete')
+  return ''
+}
 
 const activeTab = ref(ORDER_STATUS.PENDING);
 
@@ -195,6 +221,7 @@ const summary = computed(() => ({
   total: orders.value.length,
   pending: ordersByStatus.value[ORDER_STATUS.PENDING].length,
   processing: ordersByStatus.value[ORDER_STATUS.PROCESSING].length,
+  shipping: ordersByStatus.value[ORDER_STATUS.SHIPPING].length,
   completed: ordersByStatus.value[ORDER_STATUS.COMPLETED].length,
   cancelled: ordersByStatus.value[ORDER_STATUS.CANCELLED].length,
   cash: cashTotal.value,
@@ -330,10 +357,14 @@ const cancelOrder = async (order) => {
 const isValidDrop = (fromStatus, toStatus) => {
   if (!fromStatus || fromStatus === toStatus) return false;
   if (NEXT_STATUS[fromStatus] === toStatus) return true;
+  // Allow PROCESSING → SHIPPING (for delivery) and PROCESSING → COMPLETED (for non-delivery)
+  if (fromStatus === ORDER_STATUS.PROCESSING &&
+      (toStatus === ORDER_STATUS.SHIPPING || toStatus === ORDER_STATUS.COMPLETED)) return true;
   if (
     toStatus === ORDER_STATUS.CANCELLED &&
     (fromStatus === ORDER_STATUS.PENDING ||
-      fromStatus === ORDER_STATUS.PROCESSING)
+      fromStatus === ORDER_STATUS.PROCESSING ||
+      fromStatus === ORDER_STATUS.SHIPPING)
   )
     return true;
   return false;
@@ -641,6 +672,7 @@ onUnmounted(() => {
       <div class="tw:flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
         <span v-if="summary.pending > 0"    class="tw:text-amber-400  tw:text-xs tw:font-medium">{{ summary.pending }}  {{ t('orders.status.PENDING').toLowerCase() }}</span>
         <span v-if="summary.processing > 0" class="tw:text-blue-400   tw:text-xs tw:font-medium">{{ summary.processing }} {{ t('orders.status.PROCESSING').toLowerCase() }}</span>
+        <span v-if="summary.shipping > 0"   class="tw:text-purple-400 tw:text-xs tw:font-medium">{{ summary.shipping }} {{ t('orders.status.SHIPPING').toLowerCase() }}</span>
         <span v-if="summary.completed > 0"  class="tw:text-primary-400 tw:text-xs tw:font-medium">{{ summary.completed }} {{ t('orders.status.COMPLETED').toLowerCase() }}</span>
         <span v-if="summary.cancelled > 0"  class="tw:text-red-400    tw:text-xs tw:font-medium">{{ summary.cancelled }} {{ t('orders.status.CANCELLED').toLowerCase() }}</span>
       </div>
@@ -851,24 +883,25 @@ onUnmounted(() => {
               <div class="tw:flex tw:flex-col tw:gap-2 tw:pt-1">
                 <div class="tw:flex tw:gap-2">
                   <prime-button
-                    v-if="NEXT_STATUS[col.key]"
-                    :label="NEXT_LABEL[col.key]"
+                    v-if="nextStatusFor(order)"
+                    :label="nextLabelFor(order)"
                     severity="success"
                     size="small"
                     class="tw:flex-1"
                     :loading="updatingId === order.id"
-                    @click="moveOrder(order, NEXT_STATUS[col.key])"
+                    @click="moveOrder(order, nextStatusFor(order))"
                   />
                   <prime-button
                     v-if="
                       col.key === ORDER_STATUS.PENDING ||
-                      col.key === ORDER_STATUS.PROCESSING
+                      col.key === ORDER_STATUS.PROCESSING ||
+                      col.key === ORDER_STATUS.SHIPPING
                     "
                     severity="danger"
                     size="small"
                     outlined
-                    :class="NEXT_STATUS[col.key] ? btnIcon : 'tw:flex-1'"
-                    v-tooltip.top="NEXT_STATUS[col.key] ? t('orders.cancel') : ''"
+                    :class="nextStatusFor(order) ? btnIcon : 'tw:flex-1'"
+                    v-tooltip.top="nextStatusFor(order) ? t('orders.cancel') : ''"
                     :loading="updatingId === order.id"
                     @click="
                       (e) =>
@@ -894,7 +927,7 @@ onUnmounted(() => {
                     "
                   >
                     <iconify icon="ph:x-circle" />
-                    <span v-if="!NEXT_STATUS[col.key]">{{ t("orders.cancel") }}</span>
+                    <span v-if="!nextStatusFor(order)">{{ t("orders.cancel") }}</span>
                   </prime-button>
                 </div>
                 <prime-button
