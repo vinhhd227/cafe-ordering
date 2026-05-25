@@ -35,6 +35,11 @@ public sealed class ListProductsRequest
 
   /// <summary>Optional maximum price filter (inclusive).</summary>
   [QueryParam] public decimal? MaxPrice { get; set; }
+
+  /// <summary>
+  /// If <c>true</c>, return only products with no category assigned.
+  /// </summary>
+  [QueryParam] public bool? Unassigned { get; set; }
 }
 
 public class List(IMediator mediator) : Ep.Req<ListProductsRequest>.Res<PagedResult<ProductSummaryDto>>
@@ -53,7 +58,8 @@ public class List(IMediator mediator) : Ep.Req<ListProductsRequest>.Res<PagedRes
       new ListProductsQuery(
         req.Page, req.PageSize,
         req.SearchTerm, req.IsActive,
-        req.CategoryId, req.MinPrice, req.MaxPrice),
+        req.CategoryId, req.MinPrice, req.MaxPrice,
+        req.Unassigned),
       ct);
 
     await this.SendResultAsync(result, ct);

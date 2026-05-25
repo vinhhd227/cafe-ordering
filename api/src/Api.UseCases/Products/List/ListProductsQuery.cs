@@ -12,5 +12,6 @@ public record ListProductsQuery(
   bool? IsActive = null,
   int? CategoryId = null,
   decimal? MinPrice = null,
-  decimal? MaxPrice = null
+  decimal? MaxPrice = null,
+  bool? Unassigned = null
 ) : IQuery<Result<PagedResult<List<ProductSummaryDto>>>>;

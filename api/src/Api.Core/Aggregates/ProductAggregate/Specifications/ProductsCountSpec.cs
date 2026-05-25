@@ -11,12 +11,13 @@ public class ProductsCountSpec : Specification<Product>
     bool? isActive = null,
     int? categoryId = null,
     decimal? minPrice = null,
-    decimal? maxPrice = null)
+    decimal? maxPrice = null,
+    bool? unassigned = null)
   {
     Query.Where(p => !p.IsDeleted);
 
     if (!string.IsNullOrWhiteSpace(searchTerm))
-      Query.Where(p => p.Name.Contains(searchTerm));
+      Query.Where(p => p.Name.ToLower().Contains(searchTerm.ToLower()));
 
     if (isActive.HasValue)
       Query.Where(p => p.IsActive == isActive.Value);
@@ -29,5 +30,8 @@ public class ProductsCountSpec : Specification<Product>
 
     if (maxPrice.HasValue)
       Query.Where(p => p.Price <= maxPrice.Value);
+
+    if (unassigned == true)
+      Query.Where(p => !p.CategoryId.HasValue);
   }
 }

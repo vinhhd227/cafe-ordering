@@ -17,12 +17,14 @@ public class ListProductsHandler(IReadRepositoryBase<Product> repository)
     var spec = new ProductsPagedSpec(
       request.Page, request.PageSize,
       request.SearchTerm, request.IsActive,
-      request.CategoryId, request.MinPrice, request.MaxPrice);
+      request.CategoryId, request.MinPrice, request.MaxPrice,
+      request.Unassigned);
     var products = await repository.ListAsync(spec, ct);
 
     var countSpec = new ProductsCountSpec(
       request.SearchTerm, request.IsActive,
-      request.CategoryId, request.MinPrice, request.MaxPrice);
+      request.CategoryId, request.MinPrice, request.MaxPrice,
+      request.Unassigned);
     var totalCount = await repository.CountAsync(countSpec, ct);
 
     var dtos = products

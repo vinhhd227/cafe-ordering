@@ -10,6 +10,7 @@ public record CategoryDto(
   string? ImageUrl,
   int SortOrder,
   bool IsActive,
+  int ProductCount,
   DateTime CreatedAt,
   DateTime? UpdatedAt
 );

@@ -27,6 +27,7 @@ public class GetCategoryHandler(IReadRepositoryBase<Category> repository)
       category.ImageUrl,
       category.SortOrder,
       category.IsActive,
+      ProductCount: 0,
       category.CreatedAt,
       category.UpdatedAt);
   }

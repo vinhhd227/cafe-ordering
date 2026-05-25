@@ -21,6 +21,7 @@ public class GetSummary : Summary<Get>
       ImageUrl: null,
       SortOrder: 1,
       IsActive: true,
+      ProductCount: 0,
       CreatedAt: new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
       UpdatedAt: null);
 
