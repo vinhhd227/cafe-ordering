@@ -22,7 +22,7 @@ export const passwordCustom = {
 
 export const btnIcon = 'tw:w-9 tw:h-9 tw:p-0! tw:flex tw:items-center tw:justify-center'
 
-export const bgGlass = 'tw:bg-white tw:dark:bg-white/3 tw:dark:backdrop-blur-md'
+export const bgGlass = 'tw:bg-white! tw:dark:bg-white/3! tw:dark:backdrop-blur-md!'
 export const borderGlass = 'tw:border! tw:border-slate-200! tw:shadow-sm! tw:dark:border-white/15! tw:dark:shadow-xl!'
 export const appCard = `${bgGlass} ${borderGlass}`
 export const cardRing = 'tw:dark:ring-1! tw:dark:ring-white/10!'

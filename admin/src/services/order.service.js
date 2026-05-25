@@ -28,8 +28,26 @@ export const splitOrder = (orderId, items) =>
 export const updateOrderItem = (orderId, productId, quantity) =>
   api.put(`/admin/orders/${orderId}/items/${productId}`, { quantity })
 
+// Session-based DineIn order (guest tablet / public)
 export const createOrder = (sessionId, items, guestCount = null) =>
   api.post('/orders', { sessionId, items, ...(guestCount != null && { guestCount }) })
+
+// Admin wizard order — supports DineIn (sessionId required), Takeaway, Delivery
+export const createAdminOrder = ({
+  orderType, sessionId, items, guestCount,
+  promoCode, customerName, customerPhone, deliveryAddress, deliveryNote,
+}) =>
+  api.post('/admin/orders/create', {
+    orderType,
+    ...(sessionId != null && { sessionId }),
+    items,
+    ...(guestCount != null && { guestCount }),
+    ...(promoCode && { promoCode }),
+    ...(customerName && { customerName }),
+    ...(customerPhone && { customerPhone }),
+    ...(deliveryAddress && { deliveryAddress }),
+    ...(deliveryNote && { deliveryNote }),
+  })
 
 export const applyPromotionAdmin = (orderId, code) =>
   api.post(`/admin/orders/${orderId}/promotions`, { code })

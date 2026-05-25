@@ -9,6 +9,7 @@
     "status": {
       "PENDING": "Pending",
       "PROCESSING": "Processing",
+      "SHIPPING": "Shipping",
       "COMPLETED": "Completed",
       "CANCELLED": "Cancelled"
     },
@@ -111,6 +112,7 @@
       "connecting": "Connecting...",
       "noOrders": "No orders",
       "startPreparing": "Start preparing",
+      "markShipping": "Start shipping",
       "markComplete": "Mark complete",
       "keepOrder": "Keep",
       "confirmCancel": "Yes, cancel",
@@ -122,6 +124,7 @@
     "create": {
       "title": "Create order",
       "selectTable": "Select a table",
+      "noTables": "No tables available",
       "connecting": "Connecting...",
       "existingSession": "Table has an existing session. Order will be added to it.",
       "sessionReady": "Session ready",
@@ -168,6 +171,37 @@
         "prepTime": "~{min} min",
         "unavailable": "(Unavailable)",
         "multiSelect": "(choose multiple)"
+      },
+      "wizard": {
+        "step1": "Order type",
+        "step2": "Details",
+        "step3": "Menu",
+        "step4": "Confirm",
+        "next": "Next",
+        "back": "Back",
+        "confirm": "Place order"
+      },
+      "orderType": {
+        "label": "Order type",
+        "DINE_IN": "Dine in",
+        "TAKEAWAY": "Takeaway",
+        "DELIVERY": "Delivery",
+        "DINE_IN_desc": "Customer sits in, linked to a table",
+        "TAKEAWAY_desc": "Customer takes the order away, no table needed",
+        "DELIVERY_desc": "Deliver to customer's address"
+      },
+      "customer": {
+        "name": "Customer name",
+        "namePlaceholder": "Customer name (optional)",
+        "phone": "Phone number",
+        "phonePlaceholder": "Customer phone (optional)"
+      },
+      "delivery": {
+        "address": "Delivery address",
+        "addressPlaceholder": "Street number, road, ward/district...",
+        "note": "Delivery note",
+        "notePlaceholder": "Gate 2, call before arrival...",
+        "addressRequired": "Please enter a delivery address"
       }
     },
     "detail": {
@@ -179,10 +213,14 @@
         "editOrderDate": "Edit order date",
         "editOrderDateTooltip": "Edit date to adjust revenue reporting",
         "orderDateUpdated": "Order date updated",
+        "orderType": "Order type",
         "status": "Status",
         "table": "Table",
         "session": "Session",
         "guestCount": "Guests",
+        "customer": "Customer",
+        "deliveryAddress": "Address",
+        "deliveryNote": "Note",
         "completedAt": "Completed at",
         "paidAt": "Paid at",
         "discount": "Discount",
@@ -191,6 +229,7 @@
       "actions": {
         "title": "Actions",
         "startPreparing": "Start preparing",
+        "markShipping": "Ship order",
         "markComplete": "Mark complete",
         "cancel": "Cancel order"
       },

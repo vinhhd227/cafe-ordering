@@ -1,6 +1,8 @@
 ﻿<script setup>
-import { createOrder, applyPromotionAdmin } from '@/services/order.service'
+import { createAdminOrder } from '@/services/order.service'
 import FindPromosDialog from '@/components/orders/FindPromosDialog.vue'
+import OrderTypeStep from '@/components/orders/wizard/OrderTypeStep.vue'
+import OrderContextStep from '@/components/orders/wizard/OrderContextStep.vue'
 
 const router = useRouter()
 const toast = useToast()
@@ -31,6 +33,25 @@ const {
 const notificationStore = useNotificationStore()
 
 // â”€â”€ Local state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const setupVisible    = ref(true)
+const setupStep       = ref(1)
+const contextStepRef  = ref(null)
+const orderType       = ref('DINE_IN')
+const customerName    = ref('')
+const customerPhone   = ref('')
+const deliveryAddress = ref('')
+const deliveryNote    = ref('')
+
+const onTypeSelected = () => { setupStep.value = 2 }
+const confirmSetup = () => {
+  if (setupStep.value === 2) {
+    const valid = contextStepRef.value?.validateDelivery?.() ?? true
+    if (!valid) return
+    if (orderType.value === 'DINE_IN' && !sessionId.value && !sessionLoading.value) return
+  }
+  setupVisible.value = false
+}
+
 const guestCount = ref(null)
 const placing = ref(false)
 const errorMessage = ref('')
@@ -49,7 +70,7 @@ const drawerTakeaway = ref(false)
 const openOptionsDrawer = (product) => {
   drawerProduct.value = product
   drawerQuantity.value = 1
-  drawerTakeaway.value = false
+  drawerTakeaway.value = orderType.value !== 'DINE_IN'
   const selections = {}
   for (const group of product.variantGroups ?? []) {
     const defaultVal = group.values?.find((v) => v.isDefault)
@@ -348,7 +369,7 @@ const productPriceText = (product) => {
 
 // â”€â”€ Place order â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const canPlaceOrder = computed(
-  () => !!sessionId.value && cart.value.length > 0 && !placing.value,
+  () => (orderType.value !== 'DINE_IN' || !!sessionId.value) && cart.value.length > 0 && !placing.value,
 )
 
 const placeOrder = async () => {
@@ -357,9 +378,10 @@ const placeOrder = async () => {
   placing.value = true
   notificationStore.creatingOrder = true
   try {
-    const res = await createOrder(
-      sessionId.value,
-      cart.value.map((item) => ({
+    const res = await createAdminOrder({
+      orderType: orderType.value,
+      sessionId: orderType.value === 'DINE_IN' ? sessionId.value : null,
+      items: cart.value.map((item) => ({
         productId: item.productId,
         productName: item.productName,
         unitPrice: item.unitPrice,
@@ -369,24 +391,16 @@ const placeOrder = async () => {
         isTakeaway: item.isTakeaway ?? false,
         isFreeGift: item.isFreeGift ?? false,
       })),
-      guestCount.value != null
+      guestCount: guestCount.value != null
         ? Number(guestCount.value)
         : defaultGuestCount.value || null,
-    )
+      promoCode: promoCode.value.trim() || undefined,
+      customerName: customerName.value || undefined,
+      customerPhone: customerPhone.value || undefined,
+      deliveryAddress: deliveryAddress.value || undefined,
+      deliveryNote: deliveryNote.value || undefined,
+    })
     const { orderId } = res.data
-
-    if (promoCode.value.trim()) {
-      try {
-        await applyPromotionAdmin(orderId, promoCode.value.trim())
-      } catch (promoErr) {
-        const msg =
-          promoErr?.response?.data?.errors?.map((e) => e.errorMessage ?? e).join('; ') ||
-          promoErr?.response?.data?.message ||
-          'Could not apply promotion.'
-        toast.add({ severity: 'warn', summary: t('orders.create.promoBadge'), detail: msg, life: 5000 })
-      }
-    }
-
     toast.add({
       severity: 'success',
       summary: t('orders.create.submit'),
@@ -420,33 +434,37 @@ onMounted(() => loadData())
       <prime-button :class="btnIcon" severity="secondary" text @click="router.push({ name: 'orders' })">
         <iconify icon="ph:arrow-left-bold" />
       </prime-button>
-      <span class="tw:font-semibold tw:text-sm tw:flex-1 tw:truncate">
+      <span class="tw:font-semibold tw:flex-1 tw:truncate">
         {{ t('orders.create.title') }}
       </span>
 
-      <!-- Table select -->
-      <prime-select
-        v-model="selectedTableId"
-        :options="tables"
-        optionLabel="code"
-        optionValue="id"
-        :placeholder="t('orders.create.selectTable')"
-        :disabled="sessionLoading"
-        class="tw:w-28"
-        size="small"
-        @change="(e) => onTableSelect(e.value)"
-      />
+      <!-- Order type / table badge -->
+      <prime-tag
+        :severity="orderType === 'DINE_IN' ? 'secondary' : orderType === 'TAKEAWAY' ? 'warn' : 'info'"
+        class="tw:shrink-0 tw:cursor-pointer"
+        @click="setupVisible = true"
+      >
+        <iconify
+          :icon="orderType === 'DINE_IN' ? 'ph:fork-knife-bold' : orderType === 'TAKEAWAY' ? 'ph:bag-bold' : 'ph:motorcycle-bold'"
+          class="tw:mr-1"
+        />
+        <span>{{ orderType === 'DINE_IN' && selectedTableId
+          ? tables.find(tb => tb.id === selectedTableId)?.code
+          : t(`orders.create.orderType.${orderType}`) }}</span>
+      </prime-tag>
 
-      <!-- Session status chip -->
-      <prime-tag v-if="sessionLoading" severity="secondary" class="tw:shrink-0">
-        <iconify icon="prime:spinner" class="tw:animate-spin" />
-      </prime-tag>
-      <prime-tag v-else-if="sessionId && sessionHadExisting" severity="info" class="tw:shrink-0">
-        <iconify icon="prime:info-circle" />
-      </prime-tag>
-      <prime-tag v-else-if="sessionId" severity="success" class="tw:shrink-0">
-        <iconify icon="prime:check" />
-      </prime-tag>
+      <!-- Session status (DineIn only) -->
+      <template v-if="orderType === 'DINE_IN'">
+        <prime-tag v-if="sessionLoading" severity="secondary" class="tw:shrink-0">
+          <iconify icon="prime:spinner" class="tw:animate-spin" />
+        </prime-tag>
+        <prime-tag v-else-if="sessionId && sessionHadExisting" severity="info" class="tw:shrink-0">
+          <iconify icon="prime:info-circle" />
+        </prime-tag>
+        <prime-tag v-else-if="sessionId" severity="success" class="tw:shrink-0">
+          <iconify icon="prime:check" />
+        </prime-tag>
+      </template>
     </div>
 
     <!-- â”€â”€ Search bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
@@ -812,8 +830,8 @@ onMounted(() => loadData())
         </template>
       </div>
 
-      <!-- Serving -->
-      <div>
+      <!-- Serving (only for DINE_IN — per-item serving choice) -->
+      <div v-if="orderType === 'DINE_IN'">
         <p class="tw:text-md tw:font-semibold tw:mb-2">{{ t('orders.create.optionsDialog.serving') }}</p>
         <div class="tw:flex tw:gap-2">
           <prime-button
@@ -986,8 +1004,8 @@ onMounted(() => loadData())
         </div>
       </div>
 
-      <!-- Guest count -->
-      <div class="tw:flex tw:items-center tw:gap-2">
+      <!-- Guest count (DineIn only) -->
+      <div v-if="orderType === 'DINE_IN'" class="tw:flex tw:items-center tw:gap-2">
         <iconify icon="ph:users" class="tw:opacity-60" />
         <prime-input-number
           v-model="guestCount"
@@ -1093,9 +1111,77 @@ onMounted(() => loadData())
         <span>{{ t('orders.create.submit') }}</span>
       </prime-button>
 
-      <p v-if="!sessionId && !sessionLoading" class="tw:text-xs tw:text-muted tw:text-center">
+      <p v-if="orderType === 'DINE_IN' && !sessionId && !sessionLoading" class="tw:text-xs tw:text-muted tw:text-center">
         {{ t('orders.create.tableHint') }}
       </p>
+    </div>
+  </prime-drawer>
+
+  <!-- Setup Drawer (wizard: step 1 type, step 2 context) -->
+  <prime-drawer
+    v-model:visible="setupVisible"
+    position="bottom"
+    :closable="false"
+    :style="{ height: 'auto', maxHeight: '90dvh' }"
+    :pt="{ root: { class: 'tw:rounded-t-2xl' } }"
+  >
+    <template #header>
+      <div class="tw:flex tw:items-center tw:justify-between tw:w-full">
+        <h2 class="tw:font-semibold tw:text-lg">{{ t(`orders.create.wizard.step${setupStep}`) }}</h2>
+        <div class="tw:flex tw:gap-1.5 tw:items-center">
+          <span
+            v-for="s in 2" :key="s"
+            class="tw:h-2 tw:rounded-full tw:transition-all"
+            :class="s === setupStep ? 'tw:w-6 tw:bg-primary-400' : 'tw:w-2 tw:bg-white/20'"
+          />
+        </div>
+      </div>
+    </template>
+
+    <div class="tw:pb-4 tw:space-y-4">
+      <!-- Step 1: order type -->
+      <OrderTypeStep
+        v-if="setupStep === 1"
+        v-model="orderType"
+        @next="onTypeSelected"
+      />
+
+      <!-- Step 2: context -->
+      <template v-else-if="setupStep === 2">
+        <OrderContextStep
+          ref="contextStepRef"
+          :orderType="orderType"
+          :tables="tables"
+          :selectedTableId="selectedTableId"
+          :sessionId="sessionId"
+          :sessionLoading="sessionLoading"
+          :sessionError="sessionError"
+          :sessionHadExisting="sessionHadExisting"
+          :guestCount="guestCount"
+          :customerName="customerName"
+          :customerPhone="customerPhone"
+          :deliveryAddress="deliveryAddress"
+          :deliveryNote="deliveryNote"
+          @update:selectedTableId="v => { selectedTableId = v }"
+          @update:guestCount="v => guestCount = v"
+          @update:customerName="v => customerName = v"
+          @update:customerPhone="v => customerPhone = v"
+          @update:deliveryAddress="v => deliveryAddress = v"
+          @update:deliveryNote="v => deliveryNote = v"
+          @tableSelect="onTableSelect"
+        />
+
+        <div class="tw:flex tw:gap-2">
+          <prime-button severity="secondary" outlined fluid @click="setupStep = 1">
+            <iconify icon="ph:arrow-left-bold" />
+            <span>{{ t('orders.create.wizard.back') }}</span>
+          </prime-button>
+          <prime-button fluid @click="confirmSetup">
+            <span>{{ t('orders.create.wizard.confirm') }}</span>
+            <iconify icon="ph:check-bold" />
+          </prime-button>
+        </div>
+      </template>
     </div>
   </prime-drawer>
 

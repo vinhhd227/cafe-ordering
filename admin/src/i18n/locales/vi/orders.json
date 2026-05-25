@@ -9,6 +9,7 @@
     "status": {
       "PENDING": "Chờ xử lý",
       "PROCESSING": "Đang pha",
+      "SHIPPING": "Đang giao",
       "COMPLETED": "Hoàn thành",
       "CANCELLED": "Đã huỷ"
     },
@@ -111,6 +112,7 @@
       "connecting": "Đang kết nối...",
       "noOrders": "Không có đơn",
       "startPreparing": "Bắt đầu pha",
+      "markShipping": "Bắt đầu giao",
       "markComplete": "Hoàn thành",
       "keepOrder": "Giữ lại",
       "confirmCancel": "Xác nhận huỷ",
@@ -122,6 +124,7 @@
     "create": {
       "title": "Tạo đơn hàng",
       "selectTable": "Chọn bàn",
+      "noTables": "Không có bàn nào",
       "connecting": "Đang kết nối...",
       "existingSession": "Bàn đang có phiên. Đơn sẽ được thêm vào phiên đó.",
       "sessionReady": "Sẵn sàng",
@@ -168,6 +171,37 @@
         "prepTime": "~{min} phút",
         "unavailable": "(Tạm hết)",
         "multiSelect": "(chọn nhiều)"
+      },
+      "wizard": {
+        "step1": "Loại đơn",
+        "step2": "Thông tin",
+        "step3": "Chọn món",
+        "step4": "Xác nhận",
+        "next": "Tiếp theo",
+        "back": "Quay lại",
+        "confirm": "Tạo đơn"
+      },
+      "orderType": {
+        "label": "Loại đơn hàng",
+        "DINE_IN": "Tại quán",
+        "TAKEAWAY": "Mang về",
+        "DELIVERY": "Giao hàng",
+        "DINE_IN_desc": "Khách ngồi tại quán, liên kết với bàn",
+        "TAKEAWAY_desc": "Khách mang đơn về, không cần bàn",
+        "DELIVERY_desc": "Giao hàng đến địa chỉ khách"
+      },
+      "customer": {
+        "name": "Tên khách",
+        "namePlaceholder": "Tên khách (tuỳ chọn)",
+        "phone": "Số điện thoại",
+        "phonePlaceholder": "SĐT khách (tuỳ chọn)"
+      },
+      "delivery": {
+        "address": "Địa chỉ giao hàng",
+        "addressPlaceholder": "Số nhà, đường, phường/xã...",
+        "note": "Ghi chú giao hàng",
+        "notePlaceholder": "Cổng số 2, gọi trước khi đến...",
+        "addressRequired": "Vui lòng nhập địa chỉ giao hàng"
       }
     },
     "detail": {
@@ -179,10 +213,14 @@
         "editOrderDate": "Sửa ngày đặt",
         "editOrderDateTooltip": "Sửa ngày để điều chỉnh doanh thu",
         "orderDateUpdated": "Đã cập nhật ngày đặt",
+        "orderType": "Loại đơn",
         "status": "Trạng thái",
         "table": "Bàn",
         "session": "Phiên",
         "guestCount": "Số khách",
+        "customer": "Khách hàng",
+        "deliveryAddress": "Địa chỉ",
+        "deliveryNote": "Ghi chú",
         "completedAt": "Hoàn thành lúc",
         "paidAt": "Thanh toán lúc",
         "discount": "Giảm giá",
@@ -191,6 +229,7 @@
       "actions": {
         "title": "Thao tác",
         "startPreparing": "Bắt đầu pha",
+        "markShipping": "Giao hàng",
         "markComplete": "Hoàn thành",
         "cancel": "Huỷ đơn"
       },
