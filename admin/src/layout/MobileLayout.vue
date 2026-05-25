@@ -7,6 +7,7 @@ import { navGroups } from '@/layout/nav'
 const { t } = useI18n()
 const route = useRoute()
 const auth = useAuthStore()
+const notificationStore = useNotificationStore()
 
 const moreVisible = ref(false)
 
@@ -39,7 +40,7 @@ const bottomTabs = [
   { labelKey: 'nav.dashboard',       icon: 'ph:squares-four-bold',  to: { name: 'dashboard' } },
   { more: true, labelKey: 'nav.more', icon: 'ph:grid-nine-bold' },
   { cta: true, labelKey: 'nav.newOrder', icon: 'ph:plus-bold',      to: { name: 'ordersCreate' } },
-  { bell: true, labelKey: 'nav.notifications' },
+  { bell: true, labelKey: 'nav.notifications', icon: 'ph:bell-bold', to: { name: 'notifications' } },
   { labelKey: 'nav.profile',         icon: 'ph:user-circle-bold',   to: { name: 'mobileProfile' } },
 ]
 
@@ -136,14 +137,31 @@ const roleLabel = computed(() => auth.user?.roles?.[0] || 'Staff')
             <span class="tw:text-sm tw:font-medium tw:leading-none">{{ t(tab.labelKey) }}</span>
           </button>
 
-          <!-- Notification bell tab -->
-          <div
+          <!-- Notification bell tab — navigates to notifications list -->
+          <router-link
             v-else-if="tab.bell"
-            class="tw:flex-1 tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-1 tw:py-2.5 tw:min-h-14"
+            :to="tab.to"
+            class="tw:flex-1 tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-1 tw:py-2.5 tw:no-underline tw:transition-colors tw:min-h-14"
+            :class="isTabActive(tab) ? 'tw:text-primary-400' : 'tw:text-muted'"
           >
-            <notification-bell />
-            <span class="tw:text-sm tw:font-medium tw:leading-none tw:text-muted">{{ t(tab.labelKey) }}</span>
-          </div>
+            <div class="tw:relative tw:flex tw:items-center tw:justify-center">
+              <iconify
+                :icon="notificationStore.unreadCount > 0 ? 'ph:bell-ringing-bold' : 'ph:bell-bold'"
+                class="tw:text-[22px]"
+              />
+              <span
+                v-if="notificationStore.unreadCount > 0"
+                class="tw:absolute tw:-top-1.5 tw:-right-2 tw:min-w-4 tw:h-4 tw:rounded-full tw:bg-red-500 tw:text-white tw:text-[9px] tw:font-bold tw:flex tw:items-center tw:justify-center tw:px-0.5 tw:leading-none"
+              >
+                {{ notificationStore.unreadCount > 99 ? '99+' : notificationStore.unreadCount }}
+              </span>
+              <span
+                v-if="isTabActive(tab)"
+                class="tw:absolute tw:-bottom-1.5 tw:left-1/2 tw:-translate-x-1/2 tw:w-1 tw:h-1 tw:rounded-full tw:bg-primary-400"
+              />
+            </div>
+            <span class="tw:text-sm tw:font-medium tw:leading-none tw:truncate tw:max-w-full tw:px-0.5">{{ t(tab.labelKey) }}</span>
+          </router-link>
 
           <!-- Regular tab -->
           <router-link
