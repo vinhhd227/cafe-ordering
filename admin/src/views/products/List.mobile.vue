@@ -31,8 +31,11 @@ const tabComponents = {
 
 const currentTab = computed(() => tabComponents[activeTab.value])
 
-watch(activeTab, () => {
+watch(activeTab, (val) => {
   search.value = ''
+  if (route.query.tab !== val) {
+    router.replace({ query: { ...route.query, tab: val } })
+  }
 })
 
 // ── Search (shared, owned by shell, passed to active tab) ─────────────
@@ -53,7 +56,7 @@ const viewMode = ref('list')
   <section class="tw:flex tw:flex-col tw:h-full">
 
     <!-- ── Sticky top bar ────────────────────────────────────────── -->
-    <div class="tw:shrink-0 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-200 tw:dark:border-white/10">
+    <div class="tw:shrink-0 tw:border-b tw:border-slate-200 tw:dark:border-white/10" :class="bgGlass">
 
       <!-- Row 1: back + search + sort + view -->
       <div class="tw:flex tw:items-center tw:gap-2 tw:px-4 tw:pt-3 tw:pb-2">
@@ -75,6 +78,7 @@ const viewMode = ref('list')
             :placeholder="searchPlaceholders[activeTab]"
             class="app-input tw:w-full tw:pl-8! tw:text-sm!"
             :class="activeTab !== 'categories' ? 'tw:pr-9!' : ''"
+            size="large"
           />
           <button
             v-if="activeTab === 'products' || activeTab === 'inventory'"
@@ -111,7 +115,7 @@ const viewMode = ref('list')
 
       <!-- Row 2: Tabs -->
       <prime-tabs v-model:value="activeTab">
-        <prime-tab-list>
+        <prime-tab-list :pt="{ root: { class: 'tw:bg-transparent!' } }">
           <prime-tab
             v-for="tab in tabs"
             :key="tab.key"

@@ -379,7 +379,7 @@ const formatVnd = (value) =>
 </script>
 
 <template>
-  <div class="tw:flex tw:flex-col tw:min-h-full tw:bg-slate-50 tw:dark:bg-neutral-950">
+  <div class="tw:flex tw:flex-col tw:min-h-full">
 
     <!-- ── Delete confirmation drawer ───────────────────────────────── -->
     <prime-drawer
@@ -460,12 +460,12 @@ const formatVnd = (value) =>
               <!-- Stats -->
               <div class="tw:flex-1 tw:flex tw:divide-x tw:divide-slate-100 tw:dark:divide-white/5">
                 <div class="tw:flex-1 tw:flex tw:items-center tw:gap-1 tw:px-3 tw:py-2">
-                  <span class="tw:text tw:text-blue-500 tw:dark:text-blue-400 tw:font-medium">
+                  <span class="tw:text tw:text-blue-500 tw:dark:text-primary-400 tw:font-medium">
                     {{ t('products.mobile.addons.valueCount', { n: group.valueCount }) }}
                   </span>
                 </div>
                 <div class="tw:flex-1 tw:flex tw:items-center tw:gap-1 tw:px-3 tw:py-2">
-                  <span class="tw:text tw:text-blue-500 tw:dark:text-blue-400 tw:font-medium">
+                  <span class="tw:text tw:text-blue-500 tw:dark:text-primary-400 tw:font-medium">
                     {{ t('products.mobile.addons.linkedProductCount', { n: group.linkedProductCount ?? 0 }) }}
                   </span>
                 </div>
@@ -475,7 +475,7 @@ const formatVnd = (value) =>
               <div class="tw:flex tw:divide-x tw:divide-slate-100 tw:dark:divide-white/5 tw:border-l tw:border-slate-100 tw:dark:border-white/5">
                 <button
                   type="button"
-                  class="tw:w-11 tw:flex tw:items-center tw:justify-center tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-blue-500 tw:dark:text-blue-400 tw:active:bg-blue-50 tw:dark:active:bg-blue-900/20"
+                  class="tw:w-11 tw:flex tw:items-center tw:justify-center tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-primary-500 tw:dark:text-primary-400 tw:active:bg-blue-50 tw:dark:active:bg-blue-900/20"
                   @click="openEdit(group)"
                 >
                   <iconify icon="ph:pencil-simple-bold" class="tw:text-base" />

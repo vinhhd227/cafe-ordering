@@ -12,8 +12,14 @@ export const createProduct = (payload) => api.post('/products', payload)
 // PUT /api/products/:id  â†’ 204 No Content
 export const updateProduct = (id, payload) => api.put(`/products/${id}`, payload)
 
-// PATCH /api/products/:id/toggle-active  â†’ 204 No Content
+// PATCH /api/products/:id/toggle-active  → 204 No Content
 export const toggleProductActive = (id) => api.patch(`/products/${id}/toggle-active`, {})
+
+// PATCH /api/products/:id/unassign-category  → 204 No Content
+export const unassignCategory = (id) => api.patch(`/products/${id}/unassign-category`, {})
+
+// PATCH /api/products/:id/assign-category  → 204 No Content
+export const assignCategory = (id, categoryId) => api.patch(`/products/${id}/assign-category`, { categoryId })
 
 // PUT /api/products/:id/variant-groups  â†’ 204 No Content
 export const replaceVariantGroups = (id, payload) => api.put(`/products/${id}/variant-groups`, payload)

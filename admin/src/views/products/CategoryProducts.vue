@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { getCategoryById, deleteCategory, updateCategory } from '@/services/category.service'
 import { uploadImage } from '@/services/upload.service'
-import { getProducts, toggleProductActive } from '@/services/product.service'
+import { getProducts, unassignCategory, assignCategory } from '@/services/product.service'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -76,7 +76,10 @@ watch(search, () => {
   searchTimer.value = setTimeout(() => loadProducts(true), 400)
 })
 
-onBeforeUnmount(() => clearTimeout(searchTimer.value))
+onBeforeUnmount(() => {
+  clearTimeout(searchTimer.value)
+  clearTimeout(addSearchTimer.value)
+})
 
 // ── Helpers ───────────────────────────────────────────────────────────
 const formatVnd = (value) =>
@@ -140,12 +143,94 @@ const handleDeleteProduct = () => {
     t('products.mobile.deleteProductTitle'),
     t('products.mobile.deleteProductMessage'),
     async () => {
-      await Promise.all([...selectedIds.value].map(id => toggleProductActive(id)))
+      await Promise.all([...selectedIds.value].map(id => unassignCategory(id)))
       selectedIds.value = new Set()
       await loadProducts(true)
       toast.add({ severity: 'success', summary: t('products.detail.updateSuccess'), life: 2000 })
     },
   )
+}
+
+// ── Add products drawer ───────────────────────────────────────────────
+const addDrawerVisible = ref(false)
+const addLoading = ref(false)
+const addSubmitting = ref(false)
+const addProducts = ref([])
+const addPage = ref(1)
+const addTotalRecords = ref(0)
+const addHasMore = computed(() => addProducts.value.length < addTotalRecords.value)
+const addSearch = ref('')
+const addSearchTimer = ref(null)
+const addSelectedIds = ref(new Set())
+
+const loadUncategorized = async (reset = true) => {
+  if (reset) { addPage.value = 1; addProducts.value = [] }
+  addLoading.value = true
+  try {
+    const res = await getProducts({
+      page: addPage.value,
+      pageSize: PAGE_SIZE,
+      searchTerm: addSearch.value.trim() || undefined,
+      unassigned: true,
+    })
+    const paged = res?.data ?? {}
+    const items = (paged.value ?? []).map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      imageUrl: p.imageUrl,
+      description: p.description,
+    }))
+    if (reset) addProducts.value = items
+    else addProducts.value = [...addProducts.value, ...items]
+    addTotalRecords.value = paged.pagedInfo?.totalRecords ?? 0
+  } finally {
+    addLoading.value = false
+  }
+}
+
+const loadMoreUncategorized = () => {
+  if (!addHasMore.value || addLoading.value) return
+  addPage.value++
+  loadUncategorized(false)
+}
+
+watch(addSearch, () => {
+  clearTimeout(addSearchTimer.value)
+  addSearchTimer.value = setTimeout(() => loadUncategorized(true), 400)
+})
+
+const openAddDrawer = () => {
+  addSelectedIds.value = new Set()
+  addSearch.value = ''
+  addDrawerVisible.value = true
+  loadUncategorized(true)
+}
+
+const handleAddProducts = async () => {
+  if (!addSelectedIds.value.size || addSubmitting.value) return
+  addSubmitting.value = true
+  try {
+    await Promise.all([...addSelectedIds.value].map(id => assignCategory(id, categoryId.value)))
+    addDrawerVisible.value = false
+    await Promise.all([loadCategory(), loadProducts(true)])
+    toast.add({ severity: 'success', summary: t('products.detail.updateSuccess'), life: 2000 })
+  } catch (err) {
+    toast.add({
+      severity: 'error',
+      summary: err?.response?.data?.message || t('products.list.error'),
+      life: 3000,
+    })
+  } finally {
+    addSubmitting.value = false
+  }
+}
+
+const toggleAddSelect = (id) => {
+  const s = new Set(addSelectedIds.value)
+  if (s.has(id)) s.delete(id)
+  else s.add(id)
+  addSelectedIds.value = s
 }
 
 // ── Edit drawer ───────────────────────────────────────────────────────
@@ -205,10 +290,10 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
 </script>
 
 <template>
-  <section class="tw:flex tw:flex-col tw:-mx-4 tw:-mt-5 tw:min-h-[calc(100dvh-3.5rem)] tw:bg-slate-50 tw:dark:bg-neutral-950">
+  <section class="tw:flex tw:flex-col">
 
     <!-- ── Sticky header ────────────────────────────────────────── -->
-    <div class="tw:sticky tw:top-0 tw:z-10 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-200 tw:dark:border-white/10">
+    <div class="tw:sticky tw:top-0 tw:z-10 tw:border-b tw:border-slate-200 tw:dark:border-white/10" :class="bgGlass">
 
       <!-- Row 1: back + category info + actions -->
       <div class="tw:flex tw:items-center tw:gap-2 tw:px-3 tw:pt-3 tw:pb-2.5">
@@ -217,7 +302,7 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
         <button
           type="button"
           class="tw:shrink-0 tw:w-8 tw:h-8 tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-slate-600 tw:dark:text-white tw:active:bg-black/5"
-          @click="router.push({ name: 'products', query: { tab: 'categories' } })"
+          @click="router.back()"
         >
           <iconify icon="ph:arrow-left-bold" class="tw:text-lg" />
         </button>
@@ -236,7 +321,7 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
             </div>
           </div>
           <div class="tw:min-w-0">
-            <p class="tw:font-semibold tw:text-sm tw:truncate tw:leading-tight tw:text-slate-800 tw:dark:text-white">
+            <p class="tw:font-semibold tw:text-lg tw:truncate tw:leading-tight tw:text-slate-800 tw:dark:text-white">
               {{ category?.name ?? '…' }}
             </p>
             <p class="tw:text-xs tw:text-slate-500 tw:dark:text-slate-400">
@@ -328,10 +413,10 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
         <div
           v-for="product in products"
           :key="product.id"
-          class="tw:flex tw:items-center tw:gap-3 tw:px-3 tw:py-3 tw:bg-white tw:dark:bg-neutral-900 tw:rounded-xl tw:cursor-pointer tw:transition-all tw:select-none"
-          :class="selectedIds.has(product.id)
-            ? 'tw:ring-2 tw:ring-blue-500 tw:ring-inset'
-            : 'tw:active:bg-slate-50 tw:dark:active:bg-white/5'"
+          class="tw:flex tw:items-center tw:gap-3 tw:px-3 tw:py-3 tw:rounded-xl tw:cursor-pointer tw:transition-all tw:select-none"
+          :class="[bgGlass, borderGlass, selectedIds.has(product.id)
+            ? 'tw:ring-2 tw:ring-primary-500 tw:ring-inset'
+            : 'tw:active:bg-slate-50 tw:dark:active:bg-white/5']"
           @click="toggleSelect(product.id)"
         >
           <!-- Checkbox indicator -->
@@ -362,7 +447,7 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
             <p class="tw:text-xs tw:text-slate-500 tw:dark:text-slate-400 tw:mt-0.5 tw:truncate">
               {{ product.description || '—' }}
             </p>
-            <p class="tw:text-sm tw:font-semibold tw:text-amber-600 tw:dark:text-amber-400 tw:mt-1">
+            <p class="tw:text-sm tw:font-semibold tw:text-primary-600 tw:dark:text-primary-400 tw:mt-1">
               {{ formatVnd(product.price) }}
             </p>
           </div>
@@ -422,7 +507,7 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
       <button
         type="button"
         class="tw:flex-1 tw:py-3.5 tw:rounded-2xl tw:bg-primary-500 tw:text-white tw:text-sm tw:font-semibold tw:border-0 tw:cursor-pointer tw:active:bg-primary-600"
-        @click="router.push({ name: 'productsCreate', query: { categoryId } })"
+        @click="openAddDrawer"
       >
         {{ t('products.mobile.addProduct') }}
       </button>
@@ -568,6 +653,150 @@ onMounted(() => Promise.all([loadCategory(), loadProducts(true)]))
         />
         <span v-else>{{ t('products.mobile.saveChanges') }}</span>
       </button>
+    </prime-drawer>
+
+    <!-- ── Add products drawer ──────────────────────────────────────── -->
+    <prime-drawer
+      v-model:visible="addDrawerVisible"
+      position="bottom"
+      :style="{ height: '85dvh' }"
+      :show-close-icon="false"
+      :pt="{
+        root: { class: 'tw:rounded-t-2xl tw:flex tw:flex-col' },
+        header: { class: 'tw:pt-3 tw:pb-0 tw:px-4 tw:shrink-0' },
+        content: { class: 'tw:px-4 tw:pb-0 tw:flex tw:flex-col tw:flex-1 tw:overflow-hidden' },
+      }"
+    >
+      <template #header>
+        <div class="tw:flex tw:flex-col tw:w-full tw:gap-3">
+          <!-- Handle -->
+          <div class="tw:flex tw:justify-center">
+            <div class="tw:w-10 tw:h-1 tw:rounded-full tw:bg-slate-300 tw:dark:bg-white/20" />
+          </div>
+          <!-- Title row -->
+          <div class="tw:flex tw:items-center tw:justify-between tw:pb-1">
+            <h3 class="tw:text-base tw:font-bold tw:text-slate-800 tw:dark:text-white">
+              {{ t('products.mobile.addProductDrawerTitle') }}
+            </h3>
+            <button
+              type="button"
+              class="tw:w-8 tw:h-8 tw:flex tw:items-center tw:justify-center tw:rounded-full tw:bg-transparent tw:border-0 tw:cursor-pointer tw:text-slate-400 tw:active:bg-slate-100 tw:dark:active:bg-white/10"
+              @click="addDrawerVisible = false"
+            >
+              <iconify icon="ph:x-bold" class="tw:text-base" />
+            </button>
+          </div>
+          <!-- Search -->
+          <div class="tw:relative">
+            <iconify
+              icon="ph:magnifying-glass-bold"
+              class="tw:absolute tw:left-2.5 tw:top-1/2 tw:-translate-y-1/2 tw:text-slate-400 tw:text-sm tw:pointer-events-none"
+            />
+            <prime-input-text
+              v-model="addSearch"
+              :placeholder="t('products.mobile.addProductSearchPlaceholder')"
+              class="app-input tw:w-full tw:pl-8!"
+            />
+          </div>
+        </div>
+      </template>
+
+      <!-- List -->
+      <div class="tw:flex tw:flex-col tw:gap-1 tw:py-3 tw:overflow-y-auto tw:flex-1">
+        <!-- Skeleton -->
+        <template v-if="addLoading && addProducts.length === 0">
+          <div
+            v-for="n in 5"
+            :key="n"
+            class="tw:flex tw:items-center tw:gap-3 tw:px-3 tw:py-3 tw:rounded-xl"
+            :class="[bgGlass, borderGlass]"
+          >
+            <prime-skeleton width="3.5rem" height="3.5rem" border-radius="12px" class="tw:shrink-0" />
+            <div class="tw:flex-1 tw:space-y-2">
+              <prime-skeleton width="60%" height="0.85rem" />
+              <prime-skeleton width="35%" height="0.75rem" />
+            </div>
+          </div>
+        </template>
+
+        <template v-else>
+          <!-- Product cards -->
+          <div
+            v-for="product in addProducts"
+            :key="product.id"
+            class="tw:flex tw:items-center tw:gap-3 tw:px-3 tw:py-3 tw:rounded-xl tw:cursor-pointer tw:select-none tw:transition-all"
+            :class="[bgGlass, borderGlass, addSelectedIds.has(product.id)
+              ? 'tw:ring-2 tw:ring-primary-500 tw:ring-inset'
+              : 'tw:active:bg-slate-50 tw:dark:active:bg-white/5']"
+            @click="toggleAddSelect(product.id)"
+          >
+            <prime-checkbox
+              :model-value="addSelectedIds.has(product.id)"
+              :binary="true"
+              class="tw:shrink-0 tw:pointer-events-none"
+            />
+            <div class="tw:shrink-0 tw:w-12 tw:h-12 tw:rounded-xl tw:overflow-hidden tw:bg-slate-100 tw:dark:bg-white/10">
+              <img
+                v-if="product.imageUrl"
+                :src="product.imageUrl"
+                :alt="product.name"
+                class="tw:w-full tw:h-full tw:object-cover"
+              />
+              <div v-else class="tw:w-full tw:h-full tw:flex tw:items-center tw:justify-center">
+                <iconify icon="ph:coffee-bold" class="tw:text-lg tw:text-slate-400" />
+              </div>
+            </div>
+            <div class="tw:flex-1 tw:min-w-0">
+              <p class="tw:font-semibold tw:text-sm tw:truncate tw:text-slate-800 tw:dark:text-white tw:uppercase tw:tracking-wide tw:leading-tight">
+                {{ product.name }}
+              </p>
+              <p class="tw:text-sm tw:font-semibold tw:text-primary-600 tw:dark:text-primary-400 tw:mt-0.5">
+                {{ formatVnd(product.price) }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Load more -->
+          <button
+            v-if="addHasMore"
+            type="button"
+            class="tw:w-full tw:py-3 tw:text-sm tw:text-slate-500 tw:bg-transparent tw:border-0 tw:cursor-pointer tw:active:bg-black/5"
+            :disabled="addLoading"
+            @click="loadMoreUncategorized"
+          >
+            <iconify v-if="addLoading" icon="ph:spinner-bold" class="tw:animate-spin tw:mr-1" />
+            {{ t('products.mobile.loadMore') }}
+          </button>
+
+          <!-- Empty -->
+          <div
+            v-if="addProducts.length === 0 && !addLoading"
+            class="tw:flex tw:flex-col tw:items-center tw:justify-center tw:py-16 tw:gap-3"
+          >
+            <iconify icon="ph:coffee-bold" class="tw:text-5xl tw:text-slate-300 tw:dark:text-white/20" />
+            <p class="tw:text-sm tw:text-slate-400 tw:dark:text-slate-500">{{ t('products.mobile.addProductEmpty') }}</p>
+          </div>
+        </template>
+      </div>
+
+      <!-- Confirm button -->
+      <div class="tw:shrink-0 tw:pt-3 tw:pb-6">
+        <button
+          type="button"
+          class="tw:w-full tw:py-3.5 tw:rounded-2xl tw:text-sm tw:font-semibold tw:border-0 tw:cursor-pointer tw:transition-colors"
+          :class="addSelectedIds.size
+            ? 'tw:bg-primary-500 tw:text-white tw:active:bg-primary-600'
+            : 'tw:bg-slate-100 tw:dark:bg-white/5 tw:text-slate-400 tw:dark:text-white/30 tw:cursor-not-allowed'"
+          :disabled="!addSelectedIds.size || addSubmitting"
+          @click="handleAddProducts"
+        >
+          <iconify v-if="addSubmitting" icon="ph:spinner-bold" class="tw:animate-spin" />
+          <span v-else>
+            {{ t('products.mobile.addProductConfirm') }}
+            <span v-if="addSelectedIds.size">({{ addSelectedIds.size }})</span>
+          </span>
+        </button>
+      </div>
     </prime-drawer>
 
     <!-- ── Confirm dialog ─────────────────────────────────────────── -->

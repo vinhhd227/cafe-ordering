@@ -106,7 +106,8 @@ const openCreateDrawer = () => { drawerVisible.value = true }
           v-for="cat in allCategories"
           v-show="!props.search || cat.name.toLowerCase().includes(props.search.trim().toLowerCase())"
           :key="cat.id"
-          class="tw:flex tw:items-center tw:gap-3 tw:px-4 tw:py-3 tw:bg-white tw:dark:bg-neutral-900 tw:rounded-xl tw:select-none tw:cursor-pointer tw:active:bg-slate-50 tw:dark:active:bg-white/5"
+          class="tw:flex tw:items-center tw:gap-3 tw:px-4 tw:py-3 tw:rounded-xl tw:select-none tw:cursor-pointer tw:active:bg-slate-50 tw:dark:active:bg-white/5"
+          :class="[bgGlass, borderGlass]"
           @click="router.push({ name: 'categoryProducts', params: { id: cat.id } })"
         >
           <!-- Drag handle -->
@@ -121,7 +122,7 @@ const openCreateDrawer = () => { drawerVisible.value = true }
           </div>
 
           <!-- Thumbnail -->
-          <div class="tw:shrink-0 tw:w-14 tw:h-14 tw:rounded-xl tw:overflow-hidden tw:bg-slate-100 tw:dark:bg-white/10">
+          <div class="tw:shrink-0 tw:w-14 tw:h-14 tw:rounded-xl tw:overflow-hidden tw:bg-primary-50 tw:dark:bg-primary/10">
             <img
               v-if="cat.imageUrl"
               :src="cat.imageUrl"
@@ -129,30 +130,21 @@ const openCreateDrawer = () => { drawerVisible.value = true }
               class="tw:w-full tw:h-full tw:object-cover"
             />
             <div v-else class="tw:w-full tw:h-full tw:flex tw:items-center tw:justify-center">
-              <iconify icon="ph:tag-bold" class="tw:text-xl tw:text-slate-400" />
+              <iconify icon="ph:tag-bold" class="tw:text-xl tw:text-primary-400" />
             </div>
           </div>
 
           <!-- Info -->
           <div class="tw:flex-1 tw:min-w-0">
-            <p class="tw:font-semibold tw:text-sm tw:leading-tight tw:text-slate-800 tw:dark:text-white">
+            <p class="tw:font-semibold tw:text-lg tw:leading-tight tw:text-slate-800 tw:dark:text-white">
               {{ cat.name }}
             </p>
-            <p class="tw:text-xs tw:text-slate-500 tw:dark:text-slate-400 tw:mt-0.5">
+            <p class="tw:text-xs tw:text-primary-500 tw:dark:text-primary-400 tw:mt-0.5">
               {{ cat.productCount != null
                 ? `${cat.productCount} ${t('products.mobile.productCount')}`
                 : cat.description || '' }}
             </p>
           </div>
-
-          <!-- Edit button -->
-          <button
-            type="button"
-            class="tw:shrink-0 tw:w-11 tw:h-11 tw:rounded-xl tw:border tw:border-slate-300 tw:dark:border-white/20 tw:bg-transparent tw:flex tw:items-center tw:justify-center tw:cursor-pointer tw:transition-colors tw:active:bg-slate-100 tw:dark:active:bg-white/10"
-            @click.stop="router.push({ name: 'categoriesDetail', params: { id: cat.id } })"
-          >
-            <iconify icon="ph:pencil-bold" class="tw:text-lg tw:text-slate-500 tw:dark:text-slate-400" />
-          </button>
         </div>
       </VueDraggable>
 

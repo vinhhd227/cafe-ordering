@@ -27,6 +27,35 @@ const categoryFilter = ref(null)
 const categories = ref([])
 const searchTimer = ref(null)
 
+// ── Category drawer ───────────────────────────────────────────────────
+const categoryDrawerVisible = ref(false)
+const catDrawerSearch = ref('')
+
+const filteredDrawerCategories = computed(() => {
+  const q = catDrawerSearch.value.trim().toLowerCase()
+  if (!q) return categories.value
+  return categories.value.filter(c => c.name.toLowerCase().includes(q))
+})
+
+const selectCategory = (id) => {
+  categoryFilter.value = id
+  categoryDrawerVisible.value = false
+  catDrawerSearch.value = ''
+}
+
+// ── Lazy load (IntersectionObserver) ─────────────────────────────────
+const sentinelRef = ref(null)
+let observer = null
+
+const setupObserver = () => {
+  observer?.disconnect()
+  if (!sentinelRef.value) return
+  observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting && hasMore.value && !loading.value) loadMore()
+  }, { threshold: 0.1 })
+  observer.observe(sentinelRef.value)
+}
+
 // ── Drag-to-scroll (pills) ────────────────────────────────────────────
 const pillsRef = ref(null)
 let dragState = null
@@ -115,14 +144,19 @@ watch(() => props.search, () => {
 
 watch(categoryFilter, () => loadProducts(true))
 
-onBeforeUnmount(() => clearTimeout(searchTimer.value))
+watch(sentinelRef, setupObserver)
+
+onBeforeUnmount(() => {
+  clearTimeout(searchTimer.value)
+  observer?.disconnect()
+})
 </script>
 
 <template>
   <div class="tw:flex tw:flex-col">
 
     <!-- ── Category pills ─────────────────────────────────────────── -->
-    <div class="tw:flex tw:items-center tw:gap-2 tw:px-5 tw:py-2.5 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-100 tw:dark:border-white/5">
+    <div class="tw:sticky tw:top-0 tw:z-10 tw:flex tw:items-center tw:gap-2 tw:px-5 tw:py-2.5 tw:border-b tw:border-slate-100 tw:dark:border-white/5" :class="bgGlass">
       <div
         ref="pillsRef"
         class="tw:flex tw:gap-2 tw:overflow-x-auto tw:flex-1 tw:select-none tw:cursor-grab"
@@ -135,9 +169,8 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
       >
         <prime-button
           size="small"
-          rounded
           outlined
-          :severity="categoryFilter === null ? 'info' : 'secondary'"
+          :severity="categoryFilter === null ? 'primary' : 'secondary'"
           class="tw:shrink-0 tw:whitespace-nowrap"
           @click="categoryFilter = null"
         >
@@ -147,17 +180,16 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
           v-for="cat in categories"
           :key="cat.id"
           size="small"
-          rounded
           outlined
-          :severity="categoryFilter === cat.id ? 'success' : 'secondary'"
+          :severity="categoryFilter === cat.id ? 'primary' : 'secondary'"
           class="tw:shrink-0 tw:whitespace-nowrap"
           @click="categoryFilter = cat.id"
         >
           {{ cat.name }}
         </prime-button>
       </div>
-      <prime-button severity="secondary" text :class="btnIcon">
-        <iconify icon="ph:grid-four-bold" class="tw:text-blue-500" />
+      <prime-button severity="secondary" text :class="btnIcon" @click="categoryDrawerVisible = true">
+        <iconify icon="ph:grid-four-bold" class="tw:text-primary-500" />
       </prime-button>
     </div>
 
@@ -174,14 +206,15 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
     </prime-alert>
 
     <!-- ── Content ────────────────────────────────────────────────── -->
-    <div class="tw:bg-slate-50 tw:dark:bg-neutral-950 tw:pb-24">
+    <div class="tw:flex tw:flex-col tw:gap-2 tw:px-4 tw:pt-3 tw:pb-24">
 
       <!-- Skeleton -->
       <template v-if="loading && products.length === 0">
         <div
           v-for="n in 6"
           :key="n"
-          class="tw:flex tw:items-center tw:gap-3 tw:px-5 tw:py-3 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-100 tw:dark:border-white/5"
+          class="tw:flex tw:items-center tw:gap-3 tw:px-4 tw:py-3 tw:rounded-xl"
+          :class="[bgGlass, borderGlass]"
         >
           <prime-skeleton width="3.5rem" height="3.5rem" border-radius="12px" class="tw:shrink-0" />
           <div class="tw:flex-1 tw:space-y-2">
@@ -198,7 +231,9 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
         <div
           v-for="product in products"
           :key="product.id"
-          class="tw:flex tw:items-center tw:gap-3 tw:px-5 tw:py-3 tw:bg-white tw:dark:bg-neutral-900 tw:border-b tw:border-slate-100 tw:dark:border-white/5"
+          class="tw:flex tw:items-center tw:gap-3 tw:px-4 tw:py-3 tw:rounded-xl tw:cursor-pointer tw:active:opacity-70"
+          :class="[bgGlass, borderGlass]"
+          @click="router.push({ name: 'productsDetail', params: { id: product.id } })"
         >
           <div class="tw:shrink-0 tw:w-14 tw:h-14 tw:rounded-xl tw:overflow-hidden tw:bg-slate-100 tw:dark:bg-white/10">
             <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="tw:w-full tw:h-full tw:object-cover" />
@@ -209,31 +244,20 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
           <div class="tw:flex-1 tw:min-w-0">
             <p class="tw:font-semibold tw:text-sm tw:uppercase tw:tracking-wide tw:leading-tight tw:line-clamp-1 tw:text-slate-800 tw:dark:text-white">{{ product.name }}</p>
             <p class="tw:text-xs tw:text-slate-500 tw:dark:text-slate-400 tw:mt-0.5">{{ product.category }}</p>
-            <p class="tw:text-sm tw:font-semibold tw:text-amber-500 tw:mt-1">{{ formatVnd(product.price) }}</p>
+            <p class="tw:text-sm tw:font-semibold tw:text-primary-500 tw:mt-1">{{ formatVnd(product.price) }}</p>
           </div>
-          <prime-button
-            severity="info"
-            outlined
-            :class="btnIcon"
-            @click="router.push({ name: 'productsDetail', params: { id: product.id } })"
-          >
-            <iconify icon="ph:arrow-square-out-bold" />
-          </prime-button>
+          <iconify icon="ph:caret-right-bold" class="tw:shrink-0 tw:text-slate-300 tw:dark:text-white/20 tw:text-base" />
         </div>
 
-        <div v-if="hasMore" class="tw:flex tw:justify-center tw:py-5 tw:bg-white tw:dark:bg-neutral-900">
-          <prime-button severity="secondary" text size="small" :loading="loading" @click="loadMore">
-            {{ t('products.mobile.loadMore') }}
-          </prime-button>
-        </div>
       </template>
 
       <!-- Grid view -->
-      <div v-else class="tw:grid tw:grid-cols-2 tw:gap-px tw:bg-slate-200 tw:dark:bg-white/10">
+      <div v-else class="tw:grid tw:grid-cols-2 tw:gap-2">
         <div
           v-for="product in products"
           :key="product.id"
-          class="tw:bg-white tw:dark:bg-neutral-900 tw:cursor-pointer tw:active:bg-slate-50 tw:dark:active:bg-white/5"
+          class="tw:rounded-xl tw:overflow-hidden tw:cursor-pointer tw:active:opacity-80"
+          :class="[bgGlass, borderGlass]"
           @click="router.push({ name: 'productsDetail', params: { id: product.id } })"
         >
           <div class="tw:aspect-square tw:bg-slate-100 tw:dark:bg-white/10">
@@ -245,14 +269,14 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
           <div class="tw:p-3">
             <p class="tw:font-semibold tw:text-xs tw:uppercase tw:tracking-wide tw:line-clamp-2 tw:leading-tight tw:text-slate-800 tw:dark:text-white">{{ product.name }}</p>
             <p class="tw:text-xs tw:text-slate-500 tw:dark:text-slate-400 tw:mt-0.5 tw:truncate">{{ product.category }}</p>
-            <p class="tw:text-sm tw:font-semibold tw:text-amber-500 tw:mt-1">{{ formatVnd(product.price) }}</p>
+            <p class="tw:text-sm tw:font-semibold tw:text-primary-500 tw:mt-1">{{ formatVnd(product.price) }}</p>
           </div>
         </div>
-        <div v-if="hasMore" class="tw:col-span-2 tw:flex tw:justify-center tw:py-5 tw:bg-white tw:dark:bg-neutral-900">
-          <prime-button severity="secondary" text size="small" :loading="loading" @click="loadMore">
-            {{ t('products.mobile.loadMore') }}
-          </prime-button>
-        </div>
+      </div>
+
+      <!-- Lazy load sentinel -->
+      <div v-if="hasMore" ref="sentinelRef" class="tw:flex tw:justify-center tw:py-4">
+        <iconify icon="ph:spinner-bold" class="tw:animate-spin tw:text-slate-400 tw:text-xl" />
       </div>
 
       <!-- Empty -->
@@ -261,6 +285,81 @@ onBeforeUnmount(() => clearTimeout(searchTimer.value))
         <p class="tw:text-sm tw:text-slate-400 tw:dark:text-slate-500">{{ t('products.mobile.empty') }}</p>
       </div>
     </div>
+
+    <!-- ── Category drawer ──────────────────────────────────────────── -->
+    <prime-drawer
+      v-model:visible="categoryDrawerVisible"
+      position="bottom"
+      :style="{ height: '72dvh' }"
+      :show-close-icon="false"
+      :pt="{
+        root: { class: 'tw:rounded-t-2xl tw:flex tw:flex-col' },
+        header: { class: 'tw:pt-3 tw:pb-0 tw:px-4 tw:shrink-0' },
+        content: { class: 'tw:px-4 tw:pb-6 tw:overflow-y-auto' },
+      }"
+    >
+      <template #header>
+        <div class="tw:flex tw:flex-col tw:w-full tw:gap-4">
+          <div class="tw:flex tw:justify-center">
+            <div class="tw:w-10 tw:h-1 tw:rounded-full tw:bg-slate-300 tw:dark:bg-white/20" />
+          </div>
+          <p class="tw:text-lg tw:font-bold tw:text-slate-800 tw:dark:text-white">
+            {{ t('products.mobile.tabs.categories') }}
+          </p>
+          <div class="tw:relative tw:pb-1">
+            <iconify
+              icon="ph:magnifying-glass-bold"
+              class="tw:absolute tw:left-2.5 tw:top-1/2 tw:-translate-y-1/2 tw:text-slate-400 tw:text-sm tw:pointer-events-none"
+            />
+            <prime-input-text
+              v-model="catDrawerSearch"
+              :placeholder="t('products.mobile.categorySearchPlaceholder')"
+              class="app-input tw:w-full tw:pl-8!"
+            />
+          </div>
+        </div>
+      </template>
+
+      <div class="tw:grid tw:grid-cols-3 tw:gap-3 tw:pt-3">
+        <!-- All -->
+        <button
+          v-if="!catDrawerSearch"
+          type="button"
+          class="tw:flex tw:flex-col tw:items-center tw:gap-2.5 tw:p-3.5 tw:rounded-2xl tw:border tw:cursor-pointer tw:transition-all tw:bg-transparent"
+          :class="categoryFilter === null
+            ? 'tw:border-primary-500 tw:bg-primary-50! tw:dark:bg-primary-500/10!'
+            : 'tw:border-slate-200 tw:dark:border-white/10 tw:active:bg-slate-50 tw:dark:active:bg-white/5'"
+          @click="selectCategory(null)"
+        >
+          <div class="tw:w-12 tw:h-12 tw:rounded-xl tw:flex tw:items-center tw:justify-center tw:bg-slate-100 tw:dark:bg-white/10">
+            <iconify icon="ph:squares-four-bold" class="tw:text-xl tw:text-slate-400" />
+          </div>
+          <p class="tw:text-xs tw:font-semibold tw:text-center tw:leading-tight tw:line-clamp-2 tw:text-slate-700 tw:dark:text-slate-200">
+            {{ t('products.mobile.allCategories') }}
+          </p>
+        </button>
+
+        <!-- Each category -->
+        <button
+          v-for="cat in filteredDrawerCategories"
+          :key="cat.id"
+          type="button"
+          class="tw:flex tw:flex-col tw:items-center tw:gap-2.5 tw:p-3.5 tw:rounded-2xl tw:border tw:cursor-pointer tw:transition-all tw:bg-transparent"
+          :class="categoryFilter === cat.id
+            ? 'tw:border-primary-500 tw:bg-primary-50! tw:dark:bg-primary-500/10!'
+            : 'tw:border-slate-200 tw:dark:border-white/10 tw:active:bg-slate-50 tw:dark:active:bg-white/5'"
+          @click="selectCategory(cat.id)"
+        >
+          <div class="tw:w-12 tw:h-12 tw:rounded-xl tw:overflow-hidden tw:bg-primary-50 tw:dark:bg-primary-500/10 tw:flex tw:items-center tw:justify-center tw:shrink-0">
+            <img v-if="cat.imageUrl" :src="cat.imageUrl" :alt="cat.name" class="tw:w-full tw:h-full tw:object-cover" />
+            <iconify v-else icon="ph:tag-bold" class="tw:text-xl tw:text-primary-400" />
+          </div>
+          <p class="tw:text-xs tw:font-semibold tw:text-center tw:leading-tight tw:line-clamp-2 tw:text-slate-700 tw:dark:text-slate-200">
+            {{ cat.name }}
+          </p>
+        </button>
+      </div>
+    </prime-drawer>
 
   </div>
 </template>
