@@ -81,7 +81,7 @@ public class ListOrdersHandler(
     var tipAmounts     = await repository.ListAsync(tipSpec, ct);
 
     // Build sessionId → tableId/source map (chỉ load sessions cho trang hiện tại)
-    var sessionIds   = orders.Select(o => o.SessionId).Distinct().ToList();
+    var sessionIds   = orders.Where(o => o.SessionId.HasValue).Select(o => o.SessionId!.Value).Distinct().ToList();
     var sessions     = await sessionRepository.ListAsync(new SessionsByIdsSpec(sessionIds), ct);
     var sessionMap   = sessions.ToDictionary(s => s.Id, s => s.TableId);
     var sessionSource = sessions.ToDictionary(s => s.Id, s => s.Source);
@@ -94,10 +94,12 @@ public class ListOrdersHandler(
     var dtos = orders.Select(o =>
     {
       string? tableCode = null;
-      if (sessionMap.TryGetValue(o.SessionId, out var tableId) && tableId.HasValue)
+      if (o.SessionId.HasValue
+          && sessionMap.TryGetValue(o.SessionId.Value, out var tableId) && tableId.HasValue)
         tableMap.TryGetValue(tableId.Value, out tableCode);
 
-      var isManual = sessionSource.TryGetValue(o.SessionId, out var src)
+      var isManual = o.SessionId.HasValue
+        && sessionSource.TryGetValue(o.SessionId.Value, out var src)
         && src == GuestSessionSource.Manual;
 
       return o.ToOrderDto(tableCode, isManual);

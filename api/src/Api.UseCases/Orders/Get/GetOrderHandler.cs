@@ -23,11 +23,15 @@ public class GetOrderHandler(
       return Result.NotFound($"Order {request.OrderId} not found.");
 
     string? tableCode = null;
-    var session = await sessionRepository.FirstOrDefaultAsync(new SessionByIdSpec(order.SessionId), ct);
-    if (session?.TableId.HasValue == true)
+    GuestSession? session = null;
+    if (order.SessionId.HasValue)
     {
-      var table = await tableRepository.FirstOrDefaultAsync(new TableByIdSpec(session.TableId.Value), ct);
-      tableCode = table?.Code;
+      session = await sessionRepository.FirstOrDefaultAsync(new SessionByIdSpec(order.SessionId.Value), ct);
+      if (session?.TableId.HasValue == true)
+      {
+        var table = await tableRepository.FirstOrDefaultAsync(new TableByIdSpec(session.TableId.Value), ct);
+        tableCode = table?.Code;
+      }
     }
 
     var isManual = session?.Source == GuestSessionSource.Manual;

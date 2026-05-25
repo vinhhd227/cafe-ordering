@@ -70,14 +70,17 @@ public class UpdateManualOrderHandler(
 
     string? tableCode = null;
     bool isManual = false;
-    var session = await sessionRepository.FirstOrDefaultAsync(new SessionByIdSpec(order.SessionId), ct);
-    if (session is not null)
+    if (order.SessionId.HasValue)
     {
-      isManual = session.Source == GuestSessionSource.Manual;
-      if (session.TableId.HasValue)
+      var session = await sessionRepository.FirstOrDefaultAsync(new SessionByIdSpec(order.SessionId.Value), ct);
+      if (session is not null)
       {
-        var table = await tableRepository.FirstOrDefaultAsync(new TableByIdSpec(session.TableId.Value), ct);
-        tableCode = table?.Code;
+        isManual = session.Source == GuestSessionSource.Manual;
+        if (session.TableId.HasValue)
+        {
+          var table = await tableRepository.FirstOrDefaultAsync(new TableByIdSpec(session.TableId.Value), ct);
+          tableCode = table?.Code;
+        }
       }
     }
 

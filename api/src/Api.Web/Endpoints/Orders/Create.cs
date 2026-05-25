@@ -54,7 +54,8 @@ public class Create(IMediator mediator) : Endpoint<CreateOrderRequest, PlaceOrde
 
     var bypassCooldown = User.HasClaim("permission", "admin.access");
     var result = await mediator.Send(
-      new PlaceOrderCommand(req.SessionId, items, req.GuestCount, bypassCooldown, req.PromoCode), ct);
+      new PlaceOrderCommand(req.SessionId, items, req.GuestCount, bypassCooldown, req.PromoCode,
+        OrderType: "DINE_IN"), ct);
     await this.SendResultAsync(result, ct);
   }
 }

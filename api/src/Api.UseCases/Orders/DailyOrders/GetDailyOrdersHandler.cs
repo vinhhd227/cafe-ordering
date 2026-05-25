@@ -28,7 +28,7 @@ public class GetDailyOrdersHandler(
       return Result.Success(new DailyOrdersResponseDto([]));
 
     // ── Resolve table numbers via Session → Table ─────────────────────────
-    var sessionIds = orders.Select(o => o.SessionId).Distinct().ToList();
+    var sessionIds = orders.Where(o => o.SessionId.HasValue).Select(o => o.SessionId!.Value).Distinct().ToList();
     var sessions   = await sessionRepository.ListAsync(new SessionsByIdsSpec(sessionIds), ct);
     var sessionMap = sessions.ToDictionary(s => s.Id, s => s.TableId);
 
@@ -44,8 +44,9 @@ public class GetDailyOrdersHandler(
     var dtos = orders.Select(o =>
     {
       int? tableNumber = null;
-      if (sessionMap.TryGetValue(o.SessionId, out var tid) && tid.HasValue &&
-          tableNumberMap.TryGetValue(tid.Value, out var tNum))
+      if (o.SessionId.HasValue
+          && sessionMap.TryGetValue(o.SessionId.Value, out var tid) && tid.HasValue
+          && tableNumberMap.TryGetValue(tid.Value, out var tNum))
         tableNumber = tNum;
 
       var items = o.Items

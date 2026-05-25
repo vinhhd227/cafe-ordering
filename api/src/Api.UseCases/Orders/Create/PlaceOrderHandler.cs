@@ -1,4 +1,4 @@
-﻿using Api.Core.Aggregates.GuestSessionAggregate;
+using Api.Core.Aggregates.GuestSessionAggregate;
 using Api.Core.Aggregates.GuestSessionAggregate.Specifications;
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
@@ -12,9 +12,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace Api.UseCases.Orders.Create;
 
-/// <summary>
-///   Táº¡o order má»›i trong má»™t session Ä‘ang active
-/// </summary>
 public class PlaceOrderHandler(
   IRepositoryBase<Order> orderRepository,
   IReadRepositoryBase<GuestSession> sessionRepository,
@@ -26,54 +23,77 @@ public class PlaceOrderHandler(
   public async ValueTask<Result<PlaceOrderResponseDto>> Handle(
     PlaceOrderCommand request, CancellationToken ct)
   {
-    // 1. Kiá»ƒm tra session tá»“n táº¡i vÃ  cÃ²n active
-    var sessionSpec = new SessionByIdSpec(request.SessionId);
-    var session = await sessionRepository.FirstOrDefaultAsync(sessionSpec, ct);
+    // 1. Parse order type
+    if (!OrderType.TryFromName(request.OrderType, true, out var orderType))
+      return Result.Invalid(new ValidationError("OrderType", $"Invalid order type: {request.OrderType}"));
 
-    if (session is null)
-      return Result.NotFound($"Session {request.SessionId} not found.");
-
-    if (session.Status == GuestSessionStatus.Closed)
-      return Result.Conflict("Cannot place order on a closed session.");
-
-    // 2. Order cooldown â€” bá» qua cho admin/staff (BypassCooldown = true)
-    if (!request.BypassCooldown)
+    // 2. DineIn requires a valid active session; Takeaway/Delivery does not
+    if (orderType == OrderType.DineIn)
     {
-      var cooldownSeconds = configuration.GetValue<int>("OrderCooldown:Seconds", 30);
-      if (cooldownSeconds > 0)
-      {
-        var lastOrder = await orderRepository.FirstOrDefaultAsync(
-          new LatestOrderBySessionIdSpec(request.SessionId), ct);
+      if (request.SessionId is null)
+        return Result.Invalid(new ValidationError("SessionId", "SessionId is required for DineIn orders."));
 
-        if (lastOrder is not null)
+      var session = await sessionRepository.FirstOrDefaultAsync(new SessionByIdSpec(request.SessionId.Value), ct);
+      if (session is null)
+        return Result.NotFound($"Session {request.SessionId} not found.");
+      if (session.Status == GuestSessionStatus.Closed)
+        return Result.Conflict("Cannot place order on a closed session.");
+
+      // Order cooldown -- bypass for admin/staff
+      if (!request.BypassCooldown)
+      {
+        var cooldownSeconds = configuration.GetValue<int>("OrderCooldown:Seconds", 30);
+        if (cooldownSeconds > 0)
         {
-          var elapsed = DateTime.UtcNow - lastOrder.OrderDate;
-          if (elapsed.TotalSeconds < cooldownSeconds)
+          var lastOrder = await orderRepository.FirstOrDefaultAsync(
+            new LatestOrderBySessionIdSpec(request.SessionId.Value), ct);
+          if (lastOrder is not null)
           {
-            var remaining = (int)(cooldownSeconds - elapsed.TotalSeconds) + 1;
-            return Result.Invalid(new ValidationError("SessionId",
-              $"Vui lÃ²ng chá» {remaining} giÃ¢y trÆ°á»›c khi Ä‘áº·t thÃªm."));
+            var elapsed = DateTime.UtcNow - lastOrder.OrderDate;
+            if (elapsed.TotalSeconds < cooldownSeconds)
+            {
+              var remaining = (int)(cooldownSeconds - elapsed.TotalSeconds) + 1;
+              return Result.Invalid(new ValidationError("SessionId",
+                $"Vui long cho {remaining} giay truoc khi dat them."));
+            }
           }
         }
       }
+    }
+    else if (orderType == OrderType.Delivery)
+    {
+      if (string.IsNullOrWhiteSpace(request.DeliveryAddress))
+        return Result.Invalid(new ValidationError("DeliveryAddress",
+          "Delivery address is required for Delivery orders."));
     }
 
     // 3. Validate items
     if (request.Items is null || request.Items.Count == 0)
       return Result.Invalid(new ValidationError("Items", "Order must contain at least one item."));
 
-    // 4. Load products kÃ¨m option groups/values Ä‘á»ƒ validate vÃ  build snapshots
+    // 4. Load products with option groups for validation and price snapshots
     var productIds = request.Items.Select(i => i.ProductId).Distinct().ToList();
     var products = await productRepository.ListAsync(new ProductsByIdsWithVariantGroupsSpec(productIds), ct);
     var productMap = products.ToDictionary(p => p.Id);
 
-    // 5. Táº¡o order â€” chÆ°a cÃ³ items, save Ä‘á»ƒ EF sinh Id
+    // 5. Create order entity
     var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}";
-    var order = Order.Create(request.SessionId, orderNumber, guestCount: request.GuestCount);
+    Order order;
+    if (orderType == OrderType.DineIn)
+    {
+      order = Order.Create(request.SessionId!.Value, orderNumber, guestCount: request.GuestCount);
+    }
+    else
+    {
+      order = Order.CreateStandalone(orderType, orderNumber,
+        request.CustomerName, request.CustomerPhone,
+        request.DeliveryAddress, request.DeliveryNote,
+        request.GuestCount);
+    }
 
     await orderRepository.AddAsync(order, ct);
 
-    // 6. ThÃªm items vá»›i option snapshots
+    // 6. Add items with option snapshots
     foreach (var item in request.Items)
     {
       if (!productMap.TryGetValue(item.ProductId, out var product))
@@ -98,20 +118,17 @@ public class PlaceOrderHandler(
 
           var optValue = mapping.Group.Values.First(v => v.Id == sel.OptionValueId);
           orderItem.AddSelectedOptionValue(
-            optValue.Id,
-            mapping.Group.Name,
-            optValue.Name,
-            optValue.Price,
+            optValue.Id, mapping.Group.Name, optValue.Name, optValue.Price,
             sel.Quantity > 0 ? sel.Quantity : 1);
         }
       }
     }
 
-    // 7. ÄÄƒng kÃ½ OrderCreatedEvent sau khi items Ä‘Ã£ Ä‘Æ°á»£c thÃªm
+    // 7. Raise OrderCreatedEvent after items are added
     order.NotifyCreated();
     await orderRepository.UpdateAsync(order, ct);
 
-    // 8. Ãp dá»¥ng promo náº¿u cÃ³ (best-effort)
+    // 8. Apply promo if provided (best-effort)
     if (!string.IsNullOrWhiteSpace(request.PromoCode))
       await TryApplyPromoAsync(order, request.PromoCode, ct);
 
@@ -158,7 +175,7 @@ public class PlaceOrderHandler(
     }
     catch
     {
-      // Promo lá»—i khÃ´ng Ä‘Æ°á»£c fail order â€” bá» qua
+      // Promo error must not fail the order -- silently ignored
     }
   }
 }

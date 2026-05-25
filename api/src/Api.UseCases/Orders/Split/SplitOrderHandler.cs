@@ -52,7 +52,10 @@ public class SplitOrderHandler(IRepositoryBase<Order> repository)
 
     // 4. Create new order (same session, same device token)
     var newOrderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}-S";
-    var newOrder = Order.Create(source.SessionId, newOrderNumber, source.DeviceToken);
+    if (!source.SessionId.HasValue)
+      return Result.Invalid(new ValidationError("SessionId", "Cannot split an order without a session."));
+
+    var newOrder = Order.Create(source.SessionId.Value, newOrderNumber, source.DeviceToken);
     await repository.AddAsync(newOrder, ct); // get ID first
 
     // 5. Move items to new order & remove from source

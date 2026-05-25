@@ -32,7 +32,8 @@ public class UpdatePaymentHandler(IRepositoryBase<Order> repository, IMediator m
     }
 
     await repository.UpdateAsync(order, ct);
-    await mediator.Send(new TryAutoCloseSessionCommand(order.SessionId), ct);
+    if (order.SessionId.HasValue)
+      await mediator.Send(new TryAutoCloseSessionCommand(order.SessionId.Value), ct);
     return Result.Success();
   }
 }

@@ -46,5 +46,10 @@ public static class OrderDtoMapper
     order.PaidAt,
     order.Items.Select(i => i.ToDto()).ToList(),
     order.Promotions.Select(p => new AppliedPromotionDto(p.PromotionId, p.PromoCode, p.DiscountAmount)).ToList(),
-    isManual);
+    isManual,
+    order.Type.Name.ToUpperInvariant(),
+    order.CustomerName,
+    order.CustomerPhone,
+    order.DeliveryAddress,
+    order.DeliveryNote);
 }

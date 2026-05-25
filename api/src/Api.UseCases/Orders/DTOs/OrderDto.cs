@@ -49,14 +49,19 @@ public record OrderDto(
   decimal TotalDiscount,
   decimal FinalAmount,
   DateTime OrderDate,
-  Guid SessionId,
+  Guid? SessionId,
   string? TableCode,
   int? GuestCount,
   DateTime? CompletedAt,
   DateTime? PaidAt,
   List<OrderItemDto> Items,
   List<AppliedPromotionDto> Promotions,
-  bool IsManual
+  bool IsManual,
+  string OrderType       = "DINE_IN",
+  string? CustomerName   = null,
+  string? CustomerPhone  = null,
+  string? DeliveryAddress = null,
+  string? DeliveryNote   = null
 );
 
 public record PagedOrdersDto(

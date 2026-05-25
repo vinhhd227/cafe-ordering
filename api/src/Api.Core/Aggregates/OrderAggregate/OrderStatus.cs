@@ -4,6 +4,7 @@ public class OrderStatus : SmartEnum<OrderStatus>
 {
   public static readonly OrderStatus Pending = new PendingStatus();
   public static readonly OrderStatus Processing = new ProcessingStatus();
+  public static readonly OrderStatus Shipping = new ShippingStatus();
   public static readonly OrderStatus Completed = new CompletedStatus();
   public static readonly OrderStatus Cancelled = new CancelledStatus();
 
@@ -31,6 +32,17 @@ public class OrderStatus : SmartEnum<OrderStatus>
   }
 
   private class ProcessingStatus() : OrderStatus(nameof(Processing), 2)
+  {
+    public override bool CanAddItems => false;
+    public override bool CanCancel => true;
+
+    public override bool CanTransitionTo(OrderStatus nextStatus)
+    {
+      return nextStatus == Shipping || nextStatus == Completed || nextStatus == Cancelled;
+    }
+  }
+
+  private class ShippingStatus() : OrderStatus(nameof(Shipping), 5)
   {
     public override bool CanAddItems => false;
     public override bool CanCancel => true;

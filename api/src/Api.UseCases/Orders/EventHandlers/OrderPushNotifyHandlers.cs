@@ -22,7 +22,9 @@ public class PushOnOrderCreated(
         try
         {
             var order = notification.Order;
-            var tableCode = await ResolveTableCodeAsync(order.SessionId, ct);
+            var tableCode = order.SessionId.HasValue
+              ? await ResolveTableCodeAsync(order.SessionId.Value, ct)
+              : null;
 
             var body = tableCode is not null
                 ? $"Bàn {tableCode} · {order.Items.Count} món"

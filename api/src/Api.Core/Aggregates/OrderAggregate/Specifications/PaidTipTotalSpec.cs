@@ -50,6 +50,9 @@ public class PaidTipTotalSpec : Specification<Order, decimal>
       Query.Where(o => o.OrderDate < dateTo.Value.AddDays(1));
 
     if (sessionIds is not null)
-      Query.Where(o => sessionIds.Contains(o.SessionId));
+    {
+      var nullableIds = sessionIds.Select(id => (Guid?)id).ToList();
+      Query.Where(o => nullableIds.Contains(o.SessionId));
+    }
   }
 }

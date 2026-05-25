@@ -25,11 +25,14 @@ file static class OrderSseMapper
     CancellationToken ct)
   {
     string? tableCode = null;
-    var session = await sessionRepo.FirstOrDefaultAsync(new SessionByIdSpec(order.SessionId), ct);
-    if (session?.TableId.HasValue == true)
+    if (order.SessionId.HasValue)
     {
-      var table = await tableRepo.GetByIdAsync(session.TableId.Value, ct);
-      tableCode = table?.Code;
+      var session = await sessionRepo.FirstOrDefaultAsync(new SessionByIdSpec(order.SessionId.Value), ct);
+      if (session?.TableId.HasValue == true)
+      {
+        var table = await tableRepo.GetByIdAsync(session.TableId.Value, ct);
+        tableCode = table?.Code;
+      }
     }
 
     var dto = order.ToOrderDto(tableCode, isManual: false);

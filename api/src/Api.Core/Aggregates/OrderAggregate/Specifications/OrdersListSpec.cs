@@ -56,7 +56,10 @@ public class OrdersListSpec : Specification<Order>
       Query.Where(o => o.OrderDate < dateTo.Value.AddDays(1));
 
     if (sessionIds is not null)
-      Query.Where(o => sessionIds.Contains(o.SessionId));
+    {
+      var nullableIds = sessionIds.Select(id => (Guid?)id).ToList();
+      Query.Where(o => nullableIds.Contains(o.SessionId));
+    }
 
     Query.Skip((page - 1) * pageSize).Take(pageSize);
   }

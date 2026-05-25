@@ -15,11 +15,24 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
       .HasMaxLength(50)
       .IsRequired();
 
-    builder.Property(o => o.SessionId).IsRequired();
+    builder.Property(o => o.SessionId);  // nullable — Takeaway/Delivery orders have no session
 
     builder.Property(o => o.CustomerId).HasMaxLength(36);
 
     builder.Property(o => o.DeviceToken).HasMaxLength(200);
+
+    builder.Property(o => o.Type)
+      .IsRequired()
+      .HasMaxLength(20)
+      .HasDefaultValueSql("'DINE_IN'")
+      .HasConversion(
+        v => v.Name.ToUpperInvariant(),
+        v => OrderType.FromName(v, true));
+
+    builder.Property(o => o.CustomerName).HasMaxLength(150);
+    builder.Property(o => o.CustomerPhone).HasMaxLength(20);
+    builder.Property(o => o.DeliveryAddress).HasMaxLength(500);
+    builder.Property(o => o.DeliveryNote).HasMaxLength(500);
 
     // OrderStatus is a SmartEnum — store as UPPERCASE string for readability and correct EF Core translation
     builder.Property(o => o.Status)
@@ -53,14 +66,18 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
     builder.Property(o => o.CompletedAt);
     builder.Property(o => o.PaidAt);
 
-    // FK: Order → GuestSession
+    // FK: Order → GuestSession (optional — null for Takeaway/Delivery)
     builder.HasOne<GuestSession>()
       .WithMany()
       .HasForeignKey(o => o.SessionId)
+      .IsRequired(false)
       .OnDelete(DeleteBehavior.Restrict);
 
     builder.HasIndex(o => o.SessionId)
       .HasDatabaseName("IX_Orders_SessionId");
+
+    builder.HasIndex(o => o.Type)
+      .HasDatabaseName("IX_Orders_Type");
 
     builder.HasIndex(o => o.CustomerId)
       .HasDatabaseName("IX_Orders_CustomerId");

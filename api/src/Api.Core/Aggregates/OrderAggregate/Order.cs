@@ -24,8 +24,9 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   // Properties
   public string OrderNumber { get; private set; } = string.Empty;
   public string? CustomerId { get; private set; }  // FK to Customer.Id (nullable — guest orders have no customer)
-  public Guid SessionId { get; private set; }       // FK to GuestSession.Id (required)
+  public Guid? SessionId { get; private set; }      // FK to GuestSession.Id (nullable — Takeaway/Delivery orders have no session)
   public string? DeviceToken { get; private set; }  // Anonymous device token from client
+  public OrderType Type { get; private set; } = OrderType.DineIn;
   public OrderStatus Status { get; private set; }
   public PaymentStatus PaymentStatus { get; private set; } = PaymentStatus.Unpaid;
   public PaymentMethod PaymentMethod { get; private set; } = PaymentMethod.Unknown;
@@ -35,6 +36,11 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   public DateTime OrderDate { get; private set; }
   public DateTime? CompletedAt { get; private set; }
   public DateTime? PaidAt { get; private set; }
+  // Customer info for Takeaway / Delivery
+  public string? CustomerName { get; private set; }
+  public string? CustomerPhone { get; private set; }
+  public string? DeliveryAddress { get; private set; }
+  public string? DeliveryNote { get; private set; }
   public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
   public IReadOnlyCollection<OrderPromotion> Promotions => _promotions.AsReadOnly();
 
@@ -44,7 +50,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   public decimal FinalAmount   => Math.Max(0, TotalAmount - TotalDiscount);
 
   /// <summary>
-  ///   Factory method for session-based orders (guest or authenticated).
+  ///   Factory method for DineIn session-based orders.
   /// </summary>
   public static Order Create(Guid sessionId, string orderNumber, string? deviceToken = null,
     string? customerId = null, int? guestCount = null, DateTime? orderedAt = null)
@@ -52,18 +58,60 @@ public class Order : AuditableEntity<int>, IAggregateRoot
     Guard.Against.Default(sessionId, nameof(sessionId));
     Guard.Against.NullOrEmpty(orderNumber, nameof(orderNumber));
 
-    var order = new Order
+    return new Order
     {
       SessionId   = sessionId,
       OrderNumber = orderNumber,
       DeviceToken = deviceToken,
       CustomerId  = customerId,
       GuestCount  = guestCount,
+      Type        = OrderType.DineIn,
       Status      = OrderStatus.Pending,
       OrderDate   = orderedAt?.ToUniversalTime() ?? DateTime.UtcNow
     };
+  }
 
-    return order;
+  /// <summary>
+  ///   Factory method for Takeaway / Delivery orders (no session required).
+  /// </summary>
+  public static Order CreateStandalone(
+    OrderType type,
+    string orderNumber,
+    string? customerName  = null,
+    string? customerPhone = null,
+    string? deliveryAddress = null,
+    string? deliveryNote  = null,
+    int? guestCount       = null,
+    DateTime? orderedAt   = null)
+  {
+    Guard.Against.NullOrEmpty(orderNumber, nameof(orderNumber));
+    if (type == OrderType.DineIn)
+      throw new ArgumentException("DineIn orders must use Order.Create() with a SessionId.");
+
+    return new Order
+    {
+      OrderNumber     = orderNumber,
+      SessionId       = null,
+      Type            = type,
+      CustomerName    = customerName,
+      CustomerPhone   = customerPhone,
+      DeliveryAddress = deliveryAddress,
+      DeliveryNote    = deliveryNote,
+      GuestCount      = guestCount,
+      Status          = OrderStatus.Pending,
+      OrderDate       = orderedAt?.ToUniversalTime() ?? DateTime.UtcNow
+    };
+  }
+
+  /// <summary>
+  ///   Cập nhật thông tin khách hàng (Takeaway / Delivery).
+  /// </summary>
+  public void UpdateCustomerInfo(string? name, string? phone, string? address, string? note)
+  {
+    CustomerName    = name;
+    CustomerPhone   = phone;
+    DeliveryAddress = address;
+    DeliveryNote    = note;
   }
 
   /// <summary>
@@ -104,6 +152,15 @@ public class Order : AuditableEntity<int>, IAggregateRoot
       throw new InvalidOperationException($"Cannot process order in {Status} status");
 
     Status = OrderStatus.Processing;
+    RegisterDomainEvent(new OrderStatusChangedEvent(this));
+  }
+
+  public void Ship()
+  {
+    if (!Status.CanTransitionTo(OrderStatus.Shipping))
+      throw new InvalidOperationException($"Cannot ship order in {Status} status");
+
+    Status = OrderStatus.Shipping;
     RegisterDomainEvent(new OrderStatusChangedEvent(this));
   }
 

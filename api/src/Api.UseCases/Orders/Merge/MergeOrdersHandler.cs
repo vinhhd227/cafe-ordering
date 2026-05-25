@@ -46,13 +46,18 @@ public class MergeOrdersHandler(
     // Chặn merge order của khách cũ (session đã Closed) vào bill khách hiện tại,
     // dù khác bàn hay cùng bàn — tránh tính nhầm bill.
     // Merge khác bàn vẫn được phép miễn là session còn Active (nhóm khách ngồi nhiều bàn).
-    var allSessionIds = secondaries.Select(o => o.SessionId).Distinct().ToList();
+    var allSessionIds = secondaries
+      .Where(o => o.SessionId.HasValue)
+      .Select(o => o.SessionId!.Value)
+      .Distinct()
+      .ToList();
     var sessions = await sessionRepository.ListAsync(new SessionsByIdsSpec(allSessionIds), ct);
     var sessionMap = sessions.ToDictionary(s => s.Id);
 
     foreach (var secondary in secondaries)
     {
-      if (!sessionMap.TryGetValue(secondary.SessionId, out var session))
+      if (!secondary.SessionId.HasValue
+          || !sessionMap.TryGetValue(secondary.SessionId.Value, out var session))
         return Result.Error($"Session for order {secondary.OrderNumber} not found.");
 
       if (session.Status == GuestSessionStatus.Closed)

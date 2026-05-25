@@ -23,6 +23,8 @@ public class UpdateOrderStatusHandler(IRepositoryBase<Order> repository, IMediat
     {
       if (target == OrderStatus.Processing)
         order.Process();
+      else if (target == OrderStatus.Shipping)
+        order.Ship();
       else if (target == OrderStatus.Completed)
         order.Complete();
       else if (target == OrderStatus.Cancelled)
@@ -37,8 +39,8 @@ public class UpdateOrderStatusHandler(IRepositoryBase<Order> repository, IMediat
 
     await repository.UpdateAsync(order, ct);
 
-    if (target == OrderStatus.Cancelled)
-      await mediator.Send(new TryAutoCloseSessionCommand(order.SessionId), ct);
+    if (target == OrderStatus.Cancelled && order.SessionId.HasValue)
+      await mediator.Send(new TryAutoCloseSessionCommand(order.SessionId.Value), ct);
 
     return Result.Success();
   }

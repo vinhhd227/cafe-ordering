@@ -29,11 +29,14 @@ public class PrintBillHandler(
 
     // Resolve table code via session
     string? tableCode = null;
-    var session = await sessionRepo.FirstOrDefaultAsync(new SessionByIdSpec(order.SessionId), ct);
-    if (session?.TableId is { } tableId)
+    if (order.SessionId.HasValue)
     {
-      var table = await tableRepo.FirstOrDefaultAsync(new TableByIdSpec(tableId), ct);
-      tableCode = table?.Code;
+      var session = await sessionRepo.FirstOrDefaultAsync(new SessionByIdSpec(order.SessionId.Value), ct);
+      if (session?.TableId is { } tableId)
+      {
+        var table = await tableRepo.FirstOrDefaultAsync(new TableByIdSpec(tableId), ct);
+        tableCode = table?.Code;
+      }
     }
 
     // Resolve printer
