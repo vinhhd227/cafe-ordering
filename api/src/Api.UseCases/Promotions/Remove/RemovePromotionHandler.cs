@@ -1,13 +1,11 @@
 using Api.Core.Aggregates.OrderAggregate;
 using Api.Core.Aggregates.OrderAggregate.Specifications;
-using Api.Core.Aggregates.PromotionAggregate;
 using Api.UseCases.Orders.DTOs;
 
 namespace Api.UseCases.Promotions.Remove;
 
 public class RemovePromotionHandler(
-  IRepositoryBase<Order> orderRepo,
-  IReadRepositoryBase<Promotion> promoRepo)
+  IRepositoryBase<Order> orderRepo)
   : ICommandHandler<RemovePromotionCommand, Result<OrderDto>>
 {
   public async ValueTask<Result<OrderDto>> Handle(RemovePromotionCommand cmd, CancellationToken ct)

@@ -313,8 +313,8 @@ watch(
     class="tw:flex tw:items-center tw:gap-2 tw:py-4 tw:border-b tw:border-slate-100 tw:dark:border-white/5 tw:cursor-pointer tw:active:bg-slate-50 tw:dark:active:bg-white/3 tw:-mx-4 tw:px-4"
     @click="openAttrDrawer"
   >
-    <iconify icon="ph:plus-circle-bold" class="tw:text-lg tw:text-blue-500 tw:shrink-0" />
-    <span class="tw:text-blue-500 tw:font-medium tw:text-sm">{{ t('products.create.mobile.addAttribute') }}</span>
+    <iconify icon="ph:plus-circle-bold" class="tw:text-lg tw:text-primary-500 tw:shrink-0" />
+    <span class="tw:text-primary-500 tw:font-medium tw:text-sm">{{ t('products.create.mobile.addAttribute') }}</span>
     <span class="tw:text-sm tw:text-slate-400">{{ t('products.create.mobile.addAttributeHint') }}</span>
   </div>
 
@@ -325,17 +325,18 @@ watch(
     :pt="{ root: { class: 'tw:rounded-t-2xl' } }"
   >
     <template #header>
-      <span class="tw:font-semibold tw:text-base">
+      <span class="tw:font-semibold tw:text-lg">
         {{ attrEditIndex >= 0 ? t('products.create.mobile.attrDrawerEditTitle') : t('products.create.mobile.attrDrawerTitle') }}
       </span>
     </template>
 
     <div class="tw:flex tw:flex-col tw:gap-0 tw:pb-4">
-      <div class="tw:pb-4 tw:border-b tw:border-slate-100 tw:dark:border-white/5">
-        <label class="tw:block tw:text-xs tw:text-slate-500 tw:dark:text-slate-400 tw:mb-2">
+      <div class="tw:pb-4 tw:border-slate-100 tw:dark:border-white/5">
+        <p class="tw:block tw:text-slate-500 tw:dark:text-slate-400 tw:mb-2">
           {{ t('products.create.mobile.attrNameLabel') }}<span class="tw:text-red-400 tw:ml-0.5">*</span>
-        </label>
+        </p>
         <input
+        id="attributeName"
           ref="attrNameInput"
           v-model="attrName"
           type="text"
@@ -345,7 +346,7 @@ watch(
         />
       </div>
 
-      <p class="tw:text-[10px] tw:font-semibold tw:uppercase tw:tracking-widest tw:text-slate-400 tw:dark:text-slate-500 tw:mt-4 tw:mb-2">
+      <p class=" tw:text-xs tw:font-semibold tw:uppercase tw:tracking-widest tw:text-slate-400 tw:dark:text-slate-500 tw:mt-4 tw:mb-2">
         {{ t('products.create.mobile.attrValuesHeader') }}
       </p>
 

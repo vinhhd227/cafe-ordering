@@ -90,16 +90,17 @@ const selectTable = (id) => {
           {{ group.zoneName }}
         </p>
 
-        <!-- Table cards grid -->
-        <div class="tw:grid tw:grid-cols-4 tw:gap-2 sm:tw:grid-cols-5">
+        <!-- Table cards scroll row -->
+        <div class="tw:flex tw:gap-1.5 tw:overflow-x-auto tw:pb-1 tw:snap-x tw:snap-mandatory" style="scrollbar-width: none;">
           <button
             v-for="table in group.tables"
             :key="table.id"
-            class="tw:relative tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-1 tw:rounded-xl tw:border tw:p-2 tw:text-center tw:transition-all tw:cursor-pointer tw:aspect-square"
+            class="tw:relative tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-0.5 tw:rounded-lg tw:border tw:p-1.5 tw:text-center tw:transition-all tw:cursor-pointer tw:aspect-square tw:snap-start tw:shrink-0"
+            style="width: calc(25% - 0.28rem)"
             :class="selectedTableId === table.id
               ? 'tw:border-primary-500 tw:bg-primary-500/15 tw:text-primary-300'
               : 'tw:hover:border-primary-500/40'"
-            :style="selectedTableId === table.id ? '' : 'border-color: var(--app-border); background: var(--app-bg-subtle)'"
+            :style="selectedTableId === table.id ? 'width: calc(25% - 0.28rem)' : 'width: calc(25% - 0.28rem); border-color: var(--app-border); background: var(--app-bg-subtle)'"
             :disabled="sessionLoading"
             @click="selectTable(table.id)"
           >

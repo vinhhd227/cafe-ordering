@@ -12,7 +12,7 @@ public class AllProductsSpec : Specification<Product>
         .ThenInclude(v => v.Values)
       .Include(p => p.OptionGroupMappings)
         .ThenInclude(m => m.Group)
-          .ThenInclude(g => g.Values)
+          .ThenInclude(g => g!.Values)
       .OrderBy(p => p.Name);
   }
 }

@@ -426,7 +426,7 @@ onMounted(() => {
 
         <!-- More info toggle -->
         <prime-button
-          severity="info"
+          severity="primary"
           text
           fluid
           size="small"
@@ -488,8 +488,8 @@ onMounted(() => {
               <prime-button
                 v-for="cat in sortedCategories"
                 :key="cat.id"
-                :severity="form.categoryId === cat.id ? 'success' : 'secondary'"
-                :outlined="form.categoryId !== cat.id"
+                :severity="form.categoryId === cat.id ? 'primary' : 'secondary'"
+                outlined
                 size="small"
                 class="tw:shrink-0 tw:whitespace-nowrap"
                 @click="form.categoryId = form.categoryId === cat.id ? null : cat.id"
@@ -522,7 +522,7 @@ onMounted(() => {
               </p>
               <div class="tw:flex tw:rounded-lg tw:overflow-hidden tw:border tw:border-slate-200 tw:dark:border-white/10">
                 <prime-button
-                  :severity="form.isActive ? 'success' : 'secondary'"
+                  :severity="form.isActive ? 'primary' : 'secondary'"
                   :text="!form.isActive"
                   :outlined="!form.isActive"
                   size="small"
@@ -695,7 +695,7 @@ onMounted(() => {
     <div class="tw:flex tw:gap-3 tw:px-4 tw:py-3 tw:border-t tw:border-slate-100 tw:dark:border-white/5 tw:bg-white tw:dark:bg-neutral-900 tw:shrink-0">
       <prime-button
         v-if="can('product.update')"
-        :severity="isValid ? 'success' : 'secondary'"
+        :severity="isValid ? 'primary' : 'secondary'"
         fluid
         :disabled="!isValid || loading"
         :loading="saving"

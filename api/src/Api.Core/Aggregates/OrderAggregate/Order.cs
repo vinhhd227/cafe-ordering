@@ -27,7 +27,7 @@ public class Order : AuditableEntity<int>, IAggregateRoot
   public Guid? SessionId { get; private set; }      // FK to GuestSession.Id (nullable — Takeaway/Delivery orders have no session)
   public string? DeviceToken { get; private set; }  // Anonymous device token from client
   public OrderType Type { get; private set; } = OrderType.DineIn;
-  public OrderStatus Status { get; private set; }
+  public OrderStatus Status { get; private set; } = OrderStatus.Pending;
   public PaymentStatus PaymentStatus { get; private set; } = PaymentStatus.Unpaid;
   public PaymentMethod PaymentMethod { get; private set; } = PaymentMethod.Unknown;
   public int? GuestCount { get; private set; }
