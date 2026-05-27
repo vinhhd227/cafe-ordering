@@ -69,15 +69,28 @@ log "═════════════════════════
 
 ERRORS=0
 
-# ── 1. Backup Database ────────────────────────────────────────────────────────
+# ── 1. Backup Database (custom format — nhanh, nén tốt) ─────────────────────
 DB_FILE="$BACKUP_DATE_DIR/db_${TIMESTAMP}.dump"
-log "Đang dump database..."
+log "Đang dump database (custom format)..."
 if docker exec "$DB_CONTAINER" pg_dump -U "$DB_USER" "$DB_NAME" -F c > "$DB_FILE"; then
   DB_SIZE=$(du -sh "$DB_FILE" | cut -f1)
   log_ok "DB backup: $(basename "$DB_FILE") ($DB_SIZE)"
 else
-  log_err "Dump database thất bại"
+  log_err "Dump database (custom) thất bại"
   rm -f "$DB_FILE"
+  ERRORS=$((ERRORS + 1))
+fi
+
+# ── 1b. Backup Database (plain SQL — tương thích cross-version) ─────────────
+DB_PLAIN_FILE="$BACKUP_DATE_DIR/db_${TIMESTAMP}.sql"
+log "Đang dump database (plain SQL)..."
+if docker exec "$DB_CONTAINER" pg_dump -U "$DB_USER" -d "$DB_NAME" \
+    --format=plain --no-owner --no-acl --clean --if-exists > "$DB_PLAIN_FILE"; then
+  DB_PLAIN_SIZE=$(du -sh "$DB_PLAIN_FILE" | cut -f1)
+  log_ok "DB backup: $(basename "$DB_PLAIN_FILE") ($DB_PLAIN_SIZE)"
+else
+  log_err "Dump database (plain) thất bại"
+  rm -f "$DB_PLAIN_FILE"
   ERRORS=$((ERRORS + 1))
 fi
 
