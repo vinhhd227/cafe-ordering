@@ -637,8 +637,9 @@ namespace Api.Infrastructure.Data.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     OrderNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     CustomerId = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
-                    SessionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SessionId = table.Column<Guid>(type: "uuid", nullable: true),
                     DeviceToken = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValueSql: "'DINE_IN'"),
                     Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     PaymentStatus = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValueSql: "'UNPAID'"),
                     PaymentMethod = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValueSql: "'UNKNOWN'"),
@@ -648,6 +649,10 @@ namespace Api.Infrastructure.Data.Migrations
                     OrderDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     PaidAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CustomerName = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    CustomerPhone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    DeliveryAddress = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    DeliveryNote = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -949,6 +954,12 @@ namespace Api.Infrastructure.Data.Migrations
                 schema: "business",
                 table: "Orders",
                 column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_Type",
+                schema: "business",
+                table: "Orders",
+                column: "Type");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PrinterConfigs_Role_IsDefault",

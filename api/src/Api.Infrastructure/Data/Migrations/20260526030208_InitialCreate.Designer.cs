@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260518054801_InitialCreate")]
+    [Migration("20260526030208_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -472,6 +472,22 @@ namespace Api.Infrastructure.Data.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("character varying(36)");
 
+                    b.Property<string>("CustomerName")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("CustomerPhone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("DeliveryAddress")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("DeliveryNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<string>("DeviceToken")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -509,7 +525,7 @@ namespace Api.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("bytea");
 
-                    b.Property<Guid>("SessionId")
+                    b.Property<Guid?>("SessionId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Status")
@@ -521,6 +537,13 @@ namespace Api.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("numeric")
                         .HasDefaultValue(0m);
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValueSql("'DINE_IN'");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -545,6 +568,9 @@ namespace Api.Infrastructure.Data.Migrations
 
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Orders_Status");
+
+                    b.HasIndex("Type")
+                        .HasDatabaseName("IX_Orders_Type");
 
                     b.ToTable("Orders", "business");
                 });
@@ -1703,8 +1729,7 @@ namespace Api.Infrastructure.Data.Migrations
                     b.HasOne("Api.Core.Aggregates.GuestSessionAggregate.GuestSession", null)
                         .WithMany()
                         .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Api.Core.Aggregates.OrderAggregate.OrderItem", b =>
